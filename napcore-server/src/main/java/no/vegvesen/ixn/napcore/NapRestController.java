@@ -646,7 +646,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
     @Operation(summary = "Does service provider have access to biconsumer")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETBICONSUMERACCESS)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
     public ServiceProviderBiAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
@@ -659,7 +659,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
     @Operation(summary = "Add access to biconsumer")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "")))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
     public ServiceProviderBiAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiAccessRequest BiconsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());

@@ -300,7 +300,7 @@ public class ExampleApiObjects {
                 }
                 """;
 
-    static final String GETBICONSUMERACCESS = """
+    static final String BICONSUMERACCESS = """
                 {
                     "name": "king_olav.bouvetinterchange.eu,
                     "access": true

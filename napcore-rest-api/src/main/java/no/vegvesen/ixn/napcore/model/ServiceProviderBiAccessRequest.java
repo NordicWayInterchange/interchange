@@ -23,7 +23,7 @@ public class ServiceProviderBiAccessRequest {
 
     @Override
     public String toString() {
-        return "ServiceProvider {" +
+        return "ServiceProviderBiAccessRequest {" +
                 "access=" + access +
                 '}';
     }

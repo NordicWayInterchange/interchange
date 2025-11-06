@@ -34,7 +34,7 @@ public class ServiceProviderBiAccessResponse {
 
     @Override
     public String toString() {
-        return "ServiceProvider {" +
+        return "ServiceProviderBiAccessResponse {" +
                 "name='" + name + '\'' +
                 ", access=" + access +
                 '}';
