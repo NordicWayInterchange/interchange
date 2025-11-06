@@ -13,7 +13,6 @@ public class ServiceProviderBiAccessResponse {
                                            Boolean biconsumer) {
         this.name = name;
         this.access = biconsumer;
-
     }
 
     public String getName() {

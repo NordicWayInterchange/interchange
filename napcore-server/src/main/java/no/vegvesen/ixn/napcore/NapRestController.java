@@ -666,8 +666,10 @@ public class NapRestController {
         logger.info("Adds or removes access to biconsumer in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProviderBiAccessResponse biAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
+        serviceProvider.setBiconsumer(biAccessResponse.isAccess());
         serviceProviderRepository.save(serviceProvider);
-        return typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
+        return biAccessResponse;
     }
 
     private void validatePathVariable(String pathVariable){
