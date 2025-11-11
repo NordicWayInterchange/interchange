@@ -5,6 +5,7 @@ import { CertificateSignRequest } from "@/types/napcore/certificate";
 import { DeliveryRequest } from "@/types/napcore/delivery";
 import { CapabilityRequest } from "@/types/napcore/capability";
 import { PrivateChannelRequest } from "@/types/napcore/privateChannel";
+import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
 
 const headers = {
   Accept: "application/json",
@@ -43,6 +44,19 @@ const postIXN: (
   });
 };
 
+const putIXN: (
+  actorCommonName: string,
+  path: string,
+  body: BiQueueRequest | {}
+) => Promise<any> = async (actorCommonName, path, body) => {
+  const uri = process.env.INTERCHANGE_URI || "";
+  const uriPath = `${actorCommonName}${path}`;
+  return await axios.put(uri + uriPath, body, {
+    headers,
+    httpsAgent: tlsAgent,
+  });
+};
+
 const patchIXN: (
   actorCommonName: string,
   path: string,
@@ -73,14 +87,21 @@ export type basicGetParams = {
   actorCommonName: string;
   selector?: string;
 };
+
 export type extendedGetParams = {
   actorCommonName: string;
   pathParam?: string;
   selector?: string;
 };
+
 export type basicPostParams = {
   actorCommonName: string;
   body?: SubscriptionRequest | CertificateSignRequest | DeliveryRequest | CapabilityRequest | PrivateChannelRequest;
+};
+
+export type basicPutParams = {
+  actorCommonName: string;
+  body?: BiQueueRequest;
 };
 
 export type basicPatchParams = {
@@ -99,6 +120,7 @@ export type basicDeleteParams = {
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
 export type extendedGetFunction = (params: extendedGetParams) => Promise<any>;
 export type basicPostFunction = (params: basicPostParams) => Promise<any>;
+export type basicPutFunction = (params: basicPutParams) => Promise<any>;
 export type basicPatchFunction = (params: basicPatchParams) => Promise<any>;
 export type basicDeleteFunction = (params: basicDeleteParams) => Promise<any>;
 
@@ -234,5 +256,10 @@ export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
   params
 ) => {
   const { actorCommonName } = params;
-  return await fetchIXN(actorCommonName, `/bi-consumer`);
+  return await fetchIXN(actorCommonName, `/biconsumer`);
+};
+
+export const addNapcoreAccessToBiQueue: basicPutFunction = async (params) => {
+  const { actorCommonName, body = {} } = params;
+  return await putIXN(actorCommonName, "/biconsumer", body);
 };
