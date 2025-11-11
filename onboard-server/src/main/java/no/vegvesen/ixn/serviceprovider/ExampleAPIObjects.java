@@ -505,4 +505,10 @@ public class ExampleAPIObjects {
                     "access": true
                 }
                 """;
+
+    public static final String ADDBICONSUMERACCESSRESPONSE = """
+                {
+                    "access": true
+                }
+                """;
 }

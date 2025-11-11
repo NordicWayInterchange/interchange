@@ -306,4 +306,10 @@ public class ExampleApiObjects {
                     "access": true
                 }
                 """;
+
+    static final String ADDBICONSUMERACCESS = """
+                {
+                    "access": true
+                }
+                """;
 }

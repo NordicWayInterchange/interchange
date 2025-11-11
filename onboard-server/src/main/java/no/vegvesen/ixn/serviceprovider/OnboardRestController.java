@@ -697,8 +697,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Biconsumer")
-	@Operation(summary = "Get delivery")
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BICONSUMERACCESSRESPONSE)))})
+	@Operation(summary = "Check if service provider have access to biconsumer")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDBICONSUMERACCESSRESPONSE)))})
 	public GetBiQueueAccessResponse getBiconsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("get biconsumer access for service provider {}", serviceProviderName);
