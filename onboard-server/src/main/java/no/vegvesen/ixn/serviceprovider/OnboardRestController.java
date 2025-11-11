@@ -699,7 +699,7 @@ public class OnboardRestController {
 	@Tag(name = "Biconsumer")
 	@Operation(summary = "Check if service provider have access to biconsumer")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDBICONSUMERACCESSRESPONSE)))})
-	public GetBiQueueAccessResponse getBiconsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName) {
+	public BiQueueAccessResponse getBiconsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("get biconsumer access for service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
@@ -709,6 +709,26 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 		return typeTransformer.transformBiQueueToGetBiQueueResponse(serviceProvider);
 	}
+
+	@RequestMapping(method = RequestMethod.POST, path = {"/{serviceProviderName}/privatechannels"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Add private channels")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleAPIObjects.ADDBICONSUMERACCESSRESPONSE)}))
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.ADDPRIVATECHANNELSRESPONSE)))})
+	public BiQueueAccessResponse addBiConsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddBiQueueAccessRequest addBiQueueAccess) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Add or remove access to biconsumer in service provider {}", serviceProviderName);
+		validatePathVariable(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+		OnboardMDCUtil.removeLogVariables();
+		BiQueueAccessResponse accessRequest = typeTransformer.transformAddBiQueueToAddBiQueueResponse(serviceProvider, addBiQueueAccess);
+		serviceProvider.setBiconsumer(addBiQueueAccess.isAccess());
+		serviceProviderRepository.save(serviceProvider);
+		return accessRequest;
+	}
+
 
 	private void validatePathVariable(String pathVariable){
 		Matcher matcher = pattern.matcher(pathVariable);

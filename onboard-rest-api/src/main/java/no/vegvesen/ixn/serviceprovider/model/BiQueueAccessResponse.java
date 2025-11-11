@@ -1,15 +1,15 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-public class GetBiQueueAccessResponse {
+public class BiQueueAccessResponse {
     private String name;
 
     private boolean access = false;
 
-    public GetBiQueueAccessResponse() {
+    public BiQueueAccessResponse() {
     }
 
-    public GetBiQueueAccessResponse(String name,
-                                           boolean biconsumer) {
+    public BiQueueAccessResponse(String name,
+                                 boolean biconsumer) {
         this.name = name;
         this.access = biconsumer;
     }

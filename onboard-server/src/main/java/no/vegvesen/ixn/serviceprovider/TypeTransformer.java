@@ -329,10 +329,18 @@ public class TypeTransformer {
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
 
-    public GetBiQueueAccessResponse transformBiQueueToGetBiQueueResponse(ServiceProvider serviceProvider) {
-        return new GetBiQueueAccessResponse(
+    public BiQueueAccessResponse transformBiQueueToGetBiQueueResponse(ServiceProvider serviceProvider) {
+        return new BiQueueAccessResponse(
                 serviceProvider.getName(),
                 serviceProvider.isBiconsumer()
+        );
+    }
+
+
+    public BiQueueAccessResponse transformAddBiQueueToAddBiQueueResponse(ServiceProvider serviceProvider, AddBiQueueAccessRequest addBiQueueAccess) {
+        return new BiQueueAccessResponse(
+                serviceProvider.getName(),
+                addBiQueueAccess.isAccess()
         );
     }
 }
