@@ -506,7 +506,7 @@ public class ExampleAPIObjects {
                 }
                 """;
 
-    public static final String ADDBICONSUMERACCESSRESPONSE = """
+    public static final String ADDBICONSUMERACCESSREQUEST = """
                 {
                     "access": true
                 }

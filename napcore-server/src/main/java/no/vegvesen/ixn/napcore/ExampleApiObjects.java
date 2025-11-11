@@ -307,7 +307,7 @@ public class ExampleApiObjects {
                 }
                 """;
 
-    static final String ADDBICONSUMERACCESS = """
+    static final String ADDBICONSUMERACCESSREQUEST = """
                 {
                     "access": true
                 }

@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -1324,6 +1326,34 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThrows(NotFoundException.class, () -> {
             restController.getDelivery(serviceProviderName, "999");
         });
+    }
+
+    @Test
+    public void testGettingHasAccessToBiConsumer() throws JsonProcessingException {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(mapper.writeValueAsString(restController.getBiconsumerAccess(serviceProviderName))).isEqualTo("{\"name\":\"my-provider\",\"access\":true}");
+    }
+
+    @Test
+    public void testPutAndGetHasAccessToBiconsumer() throws JsonProcessingException {
+        String serviceProviderName = "my-provider";
+        ObjectMapper mapper = new ObjectMapper();
+        AddBiQueueAccessRequest withBiQueueAccess = new AddBiQueueAccessRequest(true);
+        assertThat(mapper.writeValueAsString(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess))).isEqualTo("{\"name\":\"my-provider\",\"access\":true}");
+        assertThat(mapper.writeValueAsString(restController.getBiconsumerAccess(serviceProviderName))).isEqualTo("{\"name\":\"my-provider\",\"access\":true}");
+    }
+
+    @Test
+    public void testPutHasAccessToBiconsumer() throws JsonProcessingException {
+        String serviceProviderName = "my-provider";
+        ObjectMapper mapper = new ObjectMapper();
+        AddBiQueueAccessRequest withBiQueueAccess = new AddBiQueueAccessRequest(true);
+        AddBiQueueAccessRequest withoutBiQueueAccess = new AddBiQueueAccessRequest(false);
+        assertThat(mapper.writeValueAsString(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess))).isEqualTo("{\"name\":\"my-provider\",\"access\":true}");
+        assertThat(mapper.writeValueAsString(restController.addBiConsumerAccess(serviceProviderName, withoutBiQueueAccess))).isEqualTo("{\"name\":\"my-provider\",\"access\":false}");
     }
 
     @Test
