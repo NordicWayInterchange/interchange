@@ -498,4 +498,11 @@ public class ExampleAPIObjects {
               }
             }
             """;
+
+    public static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
 }

@@ -201,6 +201,7 @@ public class TypeTransformer {
                 localDelivery.getDescription()
         );
     }
+
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalEndpoint localEndpoint : localEndpoints) {
@@ -326,5 +327,12 @@ public class TypeTransformer {
             }
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
+    }
+
+    public GetBiQueueAccessResponse transformBiQueueToGetBiQueueResponse(ServiceProvider serviceProvider) {
+        return new GetBiQueueAccessResponse(
+                serviceProvider.getName(),
+                serviceProvider.isBiconsumer()
+        );
     }
 }
