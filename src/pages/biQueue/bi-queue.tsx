@@ -23,6 +23,7 @@ const BiQueue = () => {
   const { data: biQueueAccess, isLoading} = useAccessToBiQueue(
     session?.user?.commonName as string
   );
+  console.log("biQueueAccess:", biQueueAccess);
   const [hasAccess, setHasAccess] = useState(false);
 
 
@@ -33,11 +34,11 @@ const BiQueue = () => {
   return (
     <Box>
       <Card sx={frontPageCardStyle}>
-        {(biQueueAccess === undefined || biQueueAccess === null || isLoading) ? (
+        {(biQueueAccess === undefined || biQueueAccess === null || !biQueueAccess.access || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
-          {hasAccess ? (
+          {biQueueAccess.access ? (
             <>
               <CheckCircleOutlineIcon
                 color="success"
@@ -85,11 +86,11 @@ const BiQueue = () => {
           >
             <StyledButton
               variant="contained"
-              color={isLoading ? "grayLight" : hasAccess  ? "redLight" : "buttonThemeColor"}
+              color={isLoading ? "grayLight" : biQueueAccess.access  ? "redLight" : "buttonThemeColor"}
               disabled={isLoading}
               onClick={handleToggleAccess}
             >
-              {hasAccess ? "Revoke Access" : "Grant Access"}
+              {biQueueAccess.access ? "Revoke Access" : "Grant Access"}
             </StyledButton>
           </Stack>
         </CardContent>
