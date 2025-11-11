@@ -20,8 +20,8 @@ public class ServiceProvider {
 	@Column(length = 320)
 	private String name;
 
-	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private Boolean biconsumer = false;
+	@Column(nullable = false)
+	private boolean biconsumer = false;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
@@ -107,11 +107,11 @@ public class ServiceProvider {
 		this.id = id;
 	}
 
-	public Boolean isBiconsumer() {
+	public boolean isBiconsumer() {
 		return biconsumer;
 	}
 
-	public void setBiconsumer(Boolean biconsumer) {
+	public void setBiconsumer(boolean biconsumer) {
 		this.biconsumer = biconsumer;
 	}
 

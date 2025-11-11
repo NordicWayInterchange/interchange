@@ -2,21 +2,21 @@ package no.vegvesen.ixn.napcore.model;
 
 public class ServiceProviderBiAccessRequest {
 
-    private Boolean access = false;
+    private boolean access = false;
 
     public ServiceProviderBiAccessRequest() {
     }
 
-    public ServiceProviderBiAccessRequest(Boolean biconsumer) {
+    public ServiceProviderBiAccessRequest(boolean biconsumer) {
         this.access = biconsumer;
 
     }
 
-    public Boolean isAccess() {
+    public boolean isAccess() {
         return access;
     }
 
-    public void setAccess(Boolean access) {
+    public void setAccess(boolean access) {
         this.access = access;
     }
 
