@@ -20,7 +20,6 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -817,8 +816,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testPutServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ObjectMapper mapper = new ObjectMapper();
-        ServiceProviderBiAccessRequest withBiQueueAccess = new ServiceProviderBiAccessRequest(true);
-        ServiceProviderBiAccessRequest withoutBiQueueAccess = new ServiceProviderBiAccessRequest(false);
+        ServiceProviderBiQueueAccessRequest withBiQueueAccess = new ServiceProviderBiQueueAccessRequest(true);
+        ServiceProviderBiQueueAccessRequest withoutBiQueueAccess = new ServiceProviderBiQueueAccessRequest(false);
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withoutBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
     }
@@ -827,7 +826,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testPutAndGetServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ObjectMapper mapper = new ObjectMapper();
-        ServiceProviderBiAccessRequest withBiQueueAccess = new ServiceProviderBiAccessRequest(true);
+        ServiceProviderBiQueueAccessRequest withBiQueueAccess = new ServiceProviderBiQueueAccessRequest(true);
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
         assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiconsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
     }

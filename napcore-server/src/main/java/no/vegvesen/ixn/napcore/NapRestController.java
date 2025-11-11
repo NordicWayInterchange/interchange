@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -647,7 +646,7 @@ public class NapRestController {
     @Tag(name = "Biconsumer")
     @Operation(summary = "Does service provider have access to biconsumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
-    public ServiceProviderBiAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+    public ServiceProviderBiQueueAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get service provider {} have access to biconsumer", actorCommonName);
@@ -660,13 +659,13 @@ public class NapRestController {
     @Tag(name = "Biconsumer")
     @Operation(summary = "Add access to biconsumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
-    public ServiceProviderBiAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiAccessRequest BiconsumerAccess) {
+    public ServiceProviderBiQueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiQueueAccessRequest BiconsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Adds or removes access to biconsumer in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        ServiceProviderBiAccessResponse biAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
+        ServiceProviderBiQueueAccessResponse biAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
         serviceProvider.setBiconsumer(biAccessResponse.isAccess());
         serviceProviderRepository.save(serviceProvider);
         return biAccessResponse;

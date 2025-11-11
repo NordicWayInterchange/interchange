@@ -178,15 +178,15 @@ public class TypeTransformer {
         );
     }
 
-    public ServiceProviderBiAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
-        return new ServiceProviderBiAccessResponse(
+    public ServiceProviderBiQueueAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
+        return new ServiceProviderBiQueueAccessResponse(
                 serviceProvider.getName(),
                 serviceProvider.isBiconsumer()
         );
     }
 
-    public ServiceProviderBiAccessResponse transformAddBiconsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiAccessRequest access) {
-        return new ServiceProviderBiAccessResponse(
+    public ServiceProviderBiQueueAccessResponse transformAddBiconsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiQueueAccessRequest access) {
+        return new ServiceProviderBiQueueAccessResponse(
                 serviceProvider.getName(),
                 access.isAccess()
         );
