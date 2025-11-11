@@ -6,7 +6,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { tooltipFontStyle } from "@/components/shared/styles/TooltipFontStyle";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -16,6 +16,9 @@ import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 import { useSession } from "next-auth/react";
 import { useAccessToBiQueue } from "@/hooks/useAccessToBiQueue";
 import Loading from "@/components/shared/actions/Loading";
+import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
+import { IFeedback } from "@/interface/IFeedback";
+import Snackbar from "@/components/shared/feedback/Snackbar";
 
 const BiQueue = () => {
 
@@ -23,22 +26,68 @@ const BiQueue = () => {
   const { data: biQueueAccess, isLoading} = useAccessToBiQueue(
     session?.user?.commonName as string
   );
-  console.log("biQueueAccess:", biQueueAccess);
   const [hasAccess, setHasAccess] = useState(false);
 
+  const [feedback, setFeedback] = useState<IFeedback>({
+    feedback: false,
+    message: "",
+    severity: "success"
+  });
 
-  const handleToggleAccess = () => {
-    setHasAccess((prev) => !prev);
+  useEffect(() => {
+    if (biQueueAccess?.access !== undefined) {
+      setHasAccess(biQueueAccess.access);
+    }
+  }, [biQueueAccess]);
+
+  const handleSnackClose = (
+    _event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setFeedback({ feedback: false, message: "", severity: "success" });
+  };
+
+  const handleToggleAccess = async () => {
+    const response = await addBiqueueAccess(
+      session?.user.commonName as string,
+      { access: !hasAccess }
+    );
+
+    if (response.ok) {
+      setFeedback({
+        feedback: true,
+        message:  `Bi queue access successfully ${hasAccess ? "revoked" : "granted"}!`,
+        severity: "success"
+      });
+    } else {
+      const errorData = await response.json();
+      const errorMessage = errorData.message || "Bi queue access could not be granted, try again!";
+
+      setFeedback({
+        feedback: true,
+        message: errorMessage,
+        severity: "warning"
+      });
+    }
+    const result = await response.json();
+
+    if (typeof result.access === "boolean") {
+      setHasAccess(result.access);
+    }
   };
 
   return (
     <Box>
       <Card sx={frontPageCardStyle}>
-        {(biQueueAccess === undefined || biQueueAccess === null || !biQueueAccess.access || isLoading) ? (
+        {(biQueueAccess === undefined || biQueueAccess === null || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
-          {biQueueAccess.access ? (
+          {hasAccess ? (
             <>
               <CheckCircleOutlineIcon
                 color="success"
@@ -86,16 +135,24 @@ const BiQueue = () => {
           >
             <StyledButton
               variant="contained"
-              color={isLoading ? "grayLight" : biQueueAccess.access  ? "redLight" : "buttonThemeColor"}
+              color={isLoading ? "grayLight" : hasAccess  ? "redLight" : "buttonThemeColor"}
               disabled={isLoading}
               onClick={handleToggleAccess}
             >
-              {biQueueAccess.access ? "Revoke Access" : "Grant Access"}
+              {hasAccess ? "Revoke Access" : "Grant Access"}
             </StyledButton>
           </Stack>
         </CardContent>
           )}
       </Card>
+      {feedback.feedback && (
+        <Snackbar
+          message={feedback.message}
+          severity={feedback.severity}
+          open={feedback.feedback}
+          handleClose={handleSnackClose}
+        />
+      )}
     </Box>
   );
 };
