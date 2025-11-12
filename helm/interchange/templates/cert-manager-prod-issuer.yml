@@ -1,4 +1,4 @@
-{{ if .Values.napcore_frontend.enabled }}
+{{ if and .Values.napcore_frontend.enabled  .Values.napcore_frontend.certmanager_enabled }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
