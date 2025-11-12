@@ -142,6 +142,11 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
 
+    public BiQueueAccessResponse getServiceProviderBiconsumerAccess() {
+        return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiQueueAccessResponse.class).getBody();
+    }
+
+
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
         String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         HttpHeaders headers = new HttpHeaders();
