@@ -1,12 +1,13 @@
-package no.vegvesen.ixn.serviceprovider.model;
+package no.vegvesen.ixn.napcore.model;
 
-public class AddBiQueueAccessRequest {
+public class ServiceProviderBiqueueAccessRequest {
+
     private boolean access = false;
 
-    public AddBiQueueAccessRequest() {
+    public ServiceProviderBiqueueAccessRequest() {
     }
 
-    public AddBiQueueAccessRequest(boolean biconsumer) {
+    public ServiceProviderBiqueueAccessRequest(boolean biconsumer) {
         this.access = biconsumer;
 
     }
@@ -22,7 +23,7 @@ public class AddBiQueueAccessRequest {
 
     @Override
     public String toString() {
-        return "AddBiQueueAccessRequest {" +
+        return "ServiceProviderBiqueueAccessRequest {" +
                 "access=" + access +
                 '}';
     }

@@ -699,7 +699,7 @@ public class OnboardRestController {
 	@Tag(name = "Biconsumer")
 	@Operation(summary = "Check if service provider have access to biconsumer")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BICONSUMERACCESSRESPONSE)))})
-	public BiQueueAccessResponse getBiconsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName) {
+	public BiqueueAccessResponse getBiconsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("get biconsumer access for service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
@@ -707,7 +707,7 @@ public class OnboardRestController {
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformBiQueueToGetBiQueueResponse(serviceProvider);
+		return typeTransformer.transformBiQueueToGetBiqueueResponse(serviceProvider);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, path = {"/{serviceProviderName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -715,7 +715,7 @@ public class OnboardRestController {
 	@Operation(summary = "Add/Remove access to biconsume")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleAPIObjects.ADDBICONSUMERACCESSREQUEST)}))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BICONSUMERACCESSRESPONSE)))})
-	public BiQueueAccessResponse addBiConsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddBiQueueAccessRequest addBiQueueAccess) {
+	public BiqueueAccessResponse addBiConsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddBiqueueAccessRequest addBiqueueAccess) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add or remove access to biconsumer in service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
@@ -723,8 +723,8 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		OnboardMDCUtil.removeLogVariables();
-		BiQueueAccessResponse accessRequest = typeTransformer.transformAddBiQueueToAddBiQueueResponse(serviceProvider, addBiQueueAccess);
-		serviceProvider.setBiconsumer(addBiQueueAccess.isAccess());
+		BiqueueAccessResponse accessRequest = typeTransformer.transformAddBiqueueToAddBiQueueResponse(serviceProvider, addBiqueueAccess);
+		serviceProvider.setBiconsumer(addBiqueueAccess.isAccess());
 		serviceProviderRepository.save(serviceProvider);
 		return accessRequest;
 	}

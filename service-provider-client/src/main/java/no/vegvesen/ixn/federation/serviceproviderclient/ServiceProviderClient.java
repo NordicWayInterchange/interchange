@@ -144,20 +144,19 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
 
-    public BiQueueAccessResponse getServiceProviderBiconsumerAccess() {
-        return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiQueueAccessResponse.class).getBody();
+    public BiqueueAccessResponse getServiceProviderBiconsumerAccess() {
+        return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiqueueAccessResponse.class).getBody();
     }
 
-    public BiQueueAccessResponse addServiceProviderBiconsumerAccess(AddBiQueueAccessRequest withBiQueueAccess) throws JsonProcessingException {
+    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(AddBiqueueAccessRequest withBiQueueAccess) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddBiQueueAccessRequest> entity = new HttpEntity<>(withBiQueueAccess,headers);
+        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(withBiQueueAccess,headers);
         String url = String.format("/%s/biconsumer", user) ;
-
         ObjectMapper mapper = new ObjectMapper();
         System.out.println("Sending JSON: " + mapper.writeValueAsString(entity));
 
-        return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiQueueAccessResponse.class).getBody();
+        return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){

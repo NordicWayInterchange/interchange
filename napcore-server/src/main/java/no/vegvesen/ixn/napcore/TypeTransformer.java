@@ -178,17 +178,17 @@ public class TypeTransformer {
         );
     }
 
-    public ServiceProviderBiQueueAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
-        return new ServiceProviderBiQueueAccessResponse(
+    public ServiceProviderBiqueueAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
+        return new ServiceProviderBiqueueAccessResponse(
                 serviceProvider.getName(),
                 serviceProvider.isBiconsumer()
         );
     }
 
-    public ServiceProviderBiQueueAccessResponse transformAddBiconsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiQueueAccessRequest access) {
-        return new ServiceProviderBiQueueAccessResponse(
+    public ServiceProviderBiqueueAccessResponse transformAddBiconsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiqueueAccessRequest serviceProviderBiqueueAccessRequest) {
+        return new ServiceProviderBiqueueAccessResponse(
                 serviceProvider.getName(),
-                access.isAccess()
+                serviceProviderBiqueueAccessRequest.isAccess()
         );
     }
 

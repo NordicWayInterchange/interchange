@@ -646,7 +646,7 @@ public class NapRestController {
     @Tag(name = "Biconsumer")
     @Operation(summary = "Check if service provider have access to biconsumer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
-    public ServiceProviderBiQueueAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+    public ServiceProviderBiqueueAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get service provider {} have access to biconsumer", actorCommonName);
@@ -660,13 +660,13 @@ public class NapRestController {
     @Operation(summary = "Add/Remove access to biconsumer")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleApiObjects.ADDBICONSUMERACCESSREQUEST)}))
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
-    public ServiceProviderBiQueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiQueueAccessRequest BiconsumerAccess) {
+    public ServiceProviderBiqueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiqueueAccessRequest biconsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Add or remove access to biconsumer in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        ServiceProviderBiQueueAccessResponse biQueueAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, BiconsumerAccess);
+        ServiceProviderBiqueueAccessResponse biQueueAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, biconsumerAccess);
         serviceProvider.setBiconsumer(biQueueAccessResponse.isAccess());
         serviceProviderRepository.save(serviceProvider);
         return biQueueAccessResponse;

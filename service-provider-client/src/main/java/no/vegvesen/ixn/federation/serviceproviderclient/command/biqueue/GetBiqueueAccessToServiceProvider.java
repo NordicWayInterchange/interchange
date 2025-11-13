@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.BiQueueAccessResponse;
+import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -28,7 +28,7 @@ public class GetBiqueueAccessToServiceProvider implements Callable<Integer> {
     @Override
     public Integer call() throws JsonProcessingException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        BiQueueAccessResponse biQueueAccess = client.getServiceProviderBiconsumerAccess();
+        BiqueueAccessResponse biQueueAccess = client.getServiceProviderBiconsumerAccess();
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(biQueueAccess));
         return 0;

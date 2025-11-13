@@ -816,8 +816,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testPutServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ObjectMapper mapper = new ObjectMapper();
-        ServiceProviderBiQueueAccessRequest withBiQueueAccess = new ServiceProviderBiQueueAccessRequest(true);
-        ServiceProviderBiQueueAccessRequest withoutBiQueueAccess = new ServiceProviderBiQueueAccessRequest(false);
+        ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
+        ServiceProviderBiqueueAccessRequest withoutBiQueueAccess = new ServiceProviderBiqueueAccessRequest(false);
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withoutBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
     }
@@ -826,7 +826,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testPutAndGetServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
         String actorCommonName = "actor";
         ObjectMapper mapper = new ObjectMapper();
-        ServiceProviderBiQueueAccessRequest withBiQueueAccess = new ServiceProviderBiQueueAccessRequest(true);
+        ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
         assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiconsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
     }
