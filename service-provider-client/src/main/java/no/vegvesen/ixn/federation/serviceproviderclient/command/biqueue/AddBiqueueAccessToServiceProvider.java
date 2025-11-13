@@ -2,8 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.AddBiqueueAccessRequest;
-import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
+import no.vegvesen.ixn.serviceprovider.model.*;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -32,9 +31,10 @@ public class AddBiqueueAccessToServiceProvider implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
         ObjectMapper mapper = new ObjectMapper();
-        AddBiqueueAccessRequest request = new AddBiqueueAccessRequest(true);
-        request.setAccess(true);
-        BiqueueAccessResponse withAccess = client.addServiceProviderBiconsumerAccess(request);
+        BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), new AddBiqueueAccessRequest(true).isAccess());
+        BiqueueAccessResponse withAccess = client.addServiceProviderBiconsumerAccess(response);
+
+
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(withAccess));
         return 0;
     }

@@ -15,6 +15,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.util.Objects;
 
 public class ServiceProviderClient {
 
@@ -148,13 +149,11 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiqueueAccessResponse.class).getBody();
     }
 
-    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(AddBiqueueAccessRequest withBiQueueAccess) throws JsonProcessingException {
+    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(BiqueueAccessResponse withBiQueueAccess) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(withBiQueueAccess,headers);
+        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(new AddBiqueueAccessRequest(true),headers);
         String url = String.format("/%s/biconsumer", user) ;
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println("Sending JSON: " + mapper.writeValueAsString(entity));
 
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
