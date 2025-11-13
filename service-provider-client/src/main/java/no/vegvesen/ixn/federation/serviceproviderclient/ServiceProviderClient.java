@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -146,6 +148,17 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiQueueAccessResponse.class).getBody();
     }
 
+    public BiQueueAccessResponse addServiceProviderBiconsumerAccess(AddBiQueueAccessRequest withBiQueueAccess) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddBiQueueAccessRequest> entity = new HttpEntity<>(withBiQueueAccess,headers);
+        String url = String.format("/%s/biconsumer", user) ;
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println("Sending JSON: " + mapper.writeValueAsString(entity));
+
+        return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiQueueAccessResponse.class).getBody();
+    }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
         String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);

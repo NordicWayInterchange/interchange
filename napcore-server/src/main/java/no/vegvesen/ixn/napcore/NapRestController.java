@@ -657,7 +657,7 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
-    @Operation(summary = "Add/Remmove access to biconsumer")
+    @Operation(summary = "Add/Remove access to biconsumer")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleApiObjects.ADDBICONSUMERACCESSREQUEST)}))
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESS)))})
     public ServiceProviderBiQueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiQueueAccessRequest BiconsumerAccess) {

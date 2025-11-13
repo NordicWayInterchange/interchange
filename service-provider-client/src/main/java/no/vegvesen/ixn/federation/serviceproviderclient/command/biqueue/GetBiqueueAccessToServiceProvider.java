@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
                         """
         }
 )
-public class GetServiceProviderAccessToBiqueue implements Callable<Integer> {
+public class GetBiqueueAccessToServiceProvider implements Callable<Integer> {
     @CommandLine.ParentCommand
     BiqueueCommand parentCommand;
 

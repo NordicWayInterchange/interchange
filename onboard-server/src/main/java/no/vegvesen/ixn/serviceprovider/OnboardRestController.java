@@ -712,7 +712,7 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.PUT, path = {"/{serviceProviderName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Biconsumer")
-	@Operation(summary = "Add/Remmove access to biconsume")
+	@Operation(summary = "Add/Remove access to biconsume")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleAPIObjects.ADDBICONSUMERACCESSREQUEST)}))
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BICONSUMERACCESSRESPONSE)))})
 	public BiQueueAccessResponse addBiConsumerAccess(@PathVariable("serviceProviderName") String serviceProviderName, @RequestBody AddBiQueueAccessRequest addBiQueueAccess) {

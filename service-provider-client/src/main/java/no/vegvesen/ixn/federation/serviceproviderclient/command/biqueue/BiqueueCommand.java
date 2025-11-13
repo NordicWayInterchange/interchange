@@ -8,7 +8,8 @@ import picocli.CommandLine;
         name = "bi-queue",
         description = "Show, add, or revoke service provider's access to bi queue",
         subcommands = {
-                GetServiceProviderAccessToBiqueue.class
+                GetBiqueueAccessToServiceProvider.class,
+                AddBiqueueAccessToServiceProvider.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
