@@ -645,7 +645,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
     @Operation(summary = "Check if service provider have access to biconsumer")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSResponse)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
     public ServiceProviderBiqueueAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
@@ -659,7 +659,7 @@ public class NapRestController {
     @Tag(name = "Biconsumer")
     @Operation(summary = "Add/Remove access to biconsumer")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleApiObjects.ADDBICONSUMERACCESSREQUEST)}))
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSResponse)))})
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
     public ServiceProviderBiqueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiqueueAccessRequest biconsumerAccess) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
