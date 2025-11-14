@@ -7,7 +7,7 @@ public class ServiceProviderBiqueueAccessRequest {
     public ServiceProviderBiqueueAccessRequest() {
     }
 
-    public ServiceProviderBiqueueAccessRequest(boolean biconsumer) {
+    public ServiceProviderBiqueueAccessRequest(Boolean biconsumer) {
         this.access = biconsumer;
 
     }

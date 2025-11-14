@@ -6,7 +6,7 @@ public class AddBiqueueAccessRequest {
     public AddBiqueueAccessRequest() {
     }
 
-    public AddBiqueueAccessRequest(boolean biconsumer) {
+    public AddBiqueueAccessRequest(Boolean biconsumer) {
         this.access = biconsumer;
 
     }
@@ -15,7 +15,7 @@ public class AddBiqueueAccessRequest {
         return access;
     }
 
-    public void setAccess(boolean access) {
+    public void setAccess(Boolean access) {
         this.access = access;
     }
 

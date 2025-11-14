@@ -9,7 +9,7 @@ public class BiqueueAccessResponse {
     }
 
     public BiqueueAccessResponse(String name,
-                                 boolean biconsumer) {
+                                 Boolean biconsumer) {
         this.name = name;
         this.access = biconsumer;
     }
@@ -22,14 +22,13 @@ public class BiqueueAccessResponse {
         this.name = name;
     }
 
-    public boolean isAccess() {
+  public boolean isAccess() {
         return access;
-    }
+  }
 
-    public void setAccess(boolean access) {
+  public void setAccess(boolean access) {
         this.access = access;
-    }
-
+  }
 
     @Override
     public String toString() {
