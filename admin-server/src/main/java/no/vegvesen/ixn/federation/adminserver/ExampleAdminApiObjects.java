@@ -44,6 +44,7 @@ public class ExampleAdminApiObjects {
                    {
                        "id": 1,
                        "name": "king_olav.bouvetinterchange.eu",
+                       "biconsumer": true,
                        "subscriptions": [
                            {
                                "id": "1",
