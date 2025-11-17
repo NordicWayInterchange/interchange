@@ -68,6 +68,7 @@ public class TypeTransformer {
             serviceProviderApiList.add(new ServiceProviderApi(
                     serviceProvider.getId(),
                     serviceProvider.getName(),
+                    serviceProvider.isBiconsumer(),
                     localSubscriptionSetToSubscriptionApiList(serviceProvider.getSubscriptions()),
                     capabilitiesSetToCapabilitiesApiList(serviceProvider.getCapabilities().getCapabilities()),
                     localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))
