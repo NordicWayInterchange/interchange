@@ -32,7 +32,7 @@ public class RemoveBiqueueAccessToServiceProvider implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
         ObjectMapper mapper = new ObjectMapper();
-        BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), new AddBiqueueAccessRequest(false).isAccess());
+        BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), false);
         BiqueueAccessResponse withAccess = client.addServiceProviderBiconsumerAccess(response);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(withAccess));
         return 0;

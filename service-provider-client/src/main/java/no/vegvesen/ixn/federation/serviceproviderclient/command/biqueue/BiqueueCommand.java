@@ -6,7 +6,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "bi-queue",
-        description = "Show, add, or revoke service provider's access to bi queue",
+        description = "Show, add, or remove service provider's access to bi queue",
         subcommands = {
                 GetBiqueueAccessToServiceProvider.class,
                 AddBiqueueAccessToServiceProvider.class,

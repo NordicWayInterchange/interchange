@@ -149,7 +149,7 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiqueueAccessResponse.class).getBody();
     }
 
-    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(BiqueueAccessResponse withBiQueueAccess) throws JsonProcessingException {
+    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(BiqueueAccessResponse withBiQueueAccess) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(new AddBiqueueAccessRequest(withBiQueueAccess.isAccess()),headers);

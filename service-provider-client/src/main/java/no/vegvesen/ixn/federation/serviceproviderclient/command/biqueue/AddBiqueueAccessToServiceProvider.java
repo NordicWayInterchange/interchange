@@ -31,7 +31,7 @@ public class AddBiqueueAccessToServiceProvider implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
         ObjectMapper mapper = new ObjectMapper();
-        BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), new AddBiqueueAccessRequest(true).isAccess());
+        BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), true);
         BiqueueAccessResponse withAccess = client.addServiceProviderBiconsumerAccess(response);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(withAccess));
         return 0;
