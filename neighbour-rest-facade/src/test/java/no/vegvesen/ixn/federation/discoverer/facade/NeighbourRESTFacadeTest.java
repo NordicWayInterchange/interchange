@@ -6,6 +6,9 @@ import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
@@ -27,6 +30,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -158,12 +162,14 @@ public class NeighbourRESTFacadeTest {
 		subscription.setId(1);
 		subscription.setPath("/bouvet/subscriptions/" + uuid);
 
-		SubscriptionPollResponseApi subscriptionPollResponseApi = new SubscriptionPollResponseApi(
+		SubscriptionPollResponseApi subscriptionPollResponseApi = new SubscriptionPollResponseApiV1(
 				uuid,
 				"originatingCountry = 'NO'",
 				"/bouvet/subscriptions/" + uuid,
 				SubscriptionStatusApi.REQUESTED,
-				""
+				"",
+                Set.of(),
+                Instant.now().toEpochMilli()
 		);
 
 		String remoteServerJson = new ObjectMapper().writeValueAsString(subscriptionPollResponseApi);

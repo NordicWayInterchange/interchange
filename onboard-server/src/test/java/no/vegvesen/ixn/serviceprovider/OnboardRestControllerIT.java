@@ -1291,6 +1291,37 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingDeliveryWithDlq() {
+        String serviceProviderName = "my-service-provider";
+        String queueName = "dlqueue";
+
+        GetDeliveryResponse response = new GetDeliveryResponse(
+                UUID.randomUUID().toString(),
+                Collections.singleton(new DeliveryEndpoint(
+                        "amqps://sp-1",
+                        5671,
+                        "sp1-1",
+                        0,
+                        0,
+                        queueName
+                )),
+                "/sp-1/deliveries/1",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                DeliveryStatus.CREATED,
+                null
+        );
+
+
+        System.out.println(response);
+        assertThat(response).isNotNull();
+        assertThat(response.getEndpoints().stream().findFirst().orElse(null).getDlqName()).isEqualTo(queueName);
+        assertThrows(NotFoundException.class, () -> {
+            restController.getDelivery(serviceProviderName, "999");
+        });
+    }
+
+    @Test
     public void testGettingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(

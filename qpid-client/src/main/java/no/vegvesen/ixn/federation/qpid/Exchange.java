@@ -22,29 +22,28 @@ public class Exchange {
 
     List<Binding> bindings;
 
+    private AlternateBinding alternateBinding;
+
     public Exchange() {
-        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
+        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(),null);
     }
 
-    public Exchange(String name, String id, boolean durable, String type, List<Binding> bindings) {
+    public Exchange(String name, String id, boolean durable, String type, List<Binding> bindings, AlternateBinding alternateBinding) {
         this.name = name;
         this.id = id;
         this.durable = durable;
         this.type = type;
         this.bindings = new ArrayList<>();
         this.bindings.addAll(bindings);
+        this.alternateBinding = alternateBinding;
     }
 
     public Exchange(String name) {
-        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
-    }
-
-    public Exchange(String name, String type) {
-        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>());
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(),null);
     }
 
     public Exchange(String name, List<Binding> bindings) {
-        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,bindings);
+        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,bindings,null);
     }
 
     public String getName() {
@@ -78,6 +77,10 @@ public class Exchange {
         return id;
     }
 
+    public AlternateBinding getAlternateBinding() {
+        return alternateBinding;
+    }
+
     @Override
     public String toString() {
         return "Exchange{" +
@@ -86,6 +89,7 @@ public class Exchange {
                 ", durable=" + durable +
                 ", type='" + type + '\'' +
                 ", bindings=" + bindings +
+                ", alternateBinding=" + (alternateBinding != null ? alternateBinding.destination() : "null") +
                 '}';
     }
 }

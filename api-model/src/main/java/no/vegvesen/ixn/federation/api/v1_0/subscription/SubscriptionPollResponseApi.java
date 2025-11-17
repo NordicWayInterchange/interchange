@@ -1,14 +1,30 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.federation.api.v1_0.subscription;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import no.vegvesen.ixn.federation.api.v1_0.ApiVersion;
+import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
 
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        visible = true,
+        property = "version"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = SubscriptionPollResponseApiV1.class, name = ApiVersion.VERSION_1_2),
+        @JsonSubTypes.Type(value = SubscriptionPollResponseApiV2.class, name = ApiVersion.VERSION_2_0)
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SubscriptionPollResponseApi {
+public abstract class SubscriptionPollResponseApi {
+
+    private String version;
+
     private String id;
 
     private String selector;
@@ -23,35 +39,23 @@ public class SubscriptionPollResponseApi {
     private long lastUpdatedTimestamp;
 
 
-    private Set<EndpointApi> endpoints = Collections.emptySet();
-
     public SubscriptionPollResponseApi() {
     }
 
-    public SubscriptionPollResponseApi(String id,
-                                       String selector,
-                                       String path,
-                                       SubscriptionStatusApi status,
-                                       String consumerCommonName) {
-        this.id = id;
-        this.selector = selector;
-        this.consumerCommonName = consumerCommonName;
-        this.path = path;
-        this.status = status;
-    }
-
-    public SubscriptionPollResponseApi(String id,
+    public SubscriptionPollResponseApi(String version,
+                                       String id,
                                        String selector,
                                        String path,
                                        SubscriptionStatusApi status,
                                        String consumerCommonName,
-                                       Set<EndpointApi> endpoints) {
+                                       long lastUpdatedTimestamp) {
+        this.version = version;
         this.id = id;
         this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
         this.path = path;
         this.status = status;
-        this.consumerCommonName = consumerCommonName;
-        this.endpoints = endpoints;
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
     public String getId() {
@@ -102,13 +106,6 @@ public class SubscriptionPollResponseApi {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     }
 
-    public Set<EndpointApi> getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(Set<EndpointApi> endpoints) {
-        this.endpoints = endpoints;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -120,8 +117,7 @@ public class SubscriptionPollResponseApi {
                 consumerCommonName.equals(that.consumerCommonName) &&
                 path.equals(that.path) &&
                 status == that.status &&
-                Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp) &&
-                Objects.equals(endpoints, that.endpoints);
+                Objects.equals(lastUpdatedTimestamp, that.lastUpdatedTimestamp);
     }
 
     @Override
@@ -131,8 +127,7 @@ public class SubscriptionPollResponseApi {
                 consumerCommonName,
                 path,
                 status,
-                lastUpdatedTimestamp,
-                endpoints);
+                lastUpdatedTimestamp);
     }
 
     @Override
@@ -144,7 +139,14 @@ public class SubscriptionPollResponseApi {
                 ", path='" + path + '\'' +
                 ", status=" + status +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
-                ", endpoints=" + endpoints +
                 '}';
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

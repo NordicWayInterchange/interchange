@@ -17,6 +17,7 @@ public class Endpoint {
     private Integer port;
     private Integer maxBandwidth;
     private Integer maxMessageRate;
+    private String dynamicFilter;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "subshard_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_sub_shard"))
@@ -26,30 +27,38 @@ public class Endpoint {
 
     }
 
-    public Endpoint(Integer id, String source, String host, Integer port, Integer maxMessageRate, Integer maxBandwidth) {
+    public Endpoint(Integer id, String source, String host, Integer port, Integer maxMessageRate, Integer maxBandwidth,  String dynamicFilter) {
         this.id = id;
         this.source = source;
         this.host = host;
         this.port = port;
         this.maxMessageRate = maxMessageRate;
         this.maxBandwidth = maxBandwidth;
+        this.dynamicFilter = dynamicFilter;
+    }
+    public Endpoint(String source, String host, Integer port, Integer maxMessageRate, Integer maxBandwidth,  String dynamicFilter) {
+        this(null,source,host,port,maxMessageRate,maxBandwidth,dynamicFilter);
     }
 
     public Endpoint(String source, String host, Integer port) {
-        this(null,source,host,port,null,null);
+        this(null,source,host,port,null,null,null);
+    }
+
+    public Endpoint(String source, String host, Integer port, String dynamicFilter) {
+        this(null,source,host,port,null,null, dynamicFilter);
     }
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
-        this(null,source,host,port,maxMessageRate,maxBandwidth);
+        this(null,source,host,port,maxMessageRate,maxBandwidth,null);
     }
 
     public Endpoint(String source, String host, Integer port, SubscriptionShard shard) {
-        this(null,source,host,port,null,null);
+        this(null,source,host,port,null,null,null);
         this.setShard(shard);
     }
 
     public Endpoint(Integer id, String source, String host, Integer port) {
-        this(id,source,host,port,null,null);
+        this(id,source,host,port,null,null,null);
     }
 
     public String getSource() {
@@ -100,6 +109,14 @@ public class Endpoint {
         this.shard = null;
     }
 
+    public String getDynamicFilter() {
+        return dynamicFilter;
+    }
+
+    public void setDynamicFilter(String dynamicFilter) {
+        this.dynamicFilter = dynamicFilter;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,12 +124,13 @@ public class Endpoint {
         Endpoint endpoint = (Endpoint) o;
         return source.equals(endpoint.source) &&
                 host.equals(endpoint.host) &&
-                port.equals(endpoint.port);
+                port.equals(endpoint.port) &&
+                Objects.equals(dynamicFilter, endpoint.dynamicFilter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source, host, port);
+        return Objects.hash(source, host, port, dynamicFilter);
     }
 
     @Override
@@ -124,6 +142,7 @@ public class Endpoint {
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dynamicFilter=" + dynamicFilter +
                 '}';
     }
 }

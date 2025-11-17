@@ -54,7 +54,8 @@ public class QpidService {
                     new LocalDeliveryEndpointApi(
                             endpoint.getHost(),
                             endpoint.getPort(),
-                            endpoint.getTarget()
+                            endpoint.getTarget(),
+                            endpoint.getDlqName()
                     ),
                     exchange != null
                     )

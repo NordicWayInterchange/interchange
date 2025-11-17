@@ -153,7 +153,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExist(){
         ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description", false);
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         repository.save(serviceProvider);
 
@@ -265,7 +265,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     public void deliveryWithErrorGetsRemovedFromServiceProvider(){
         String serviceProviderName = "my-service-provider";
         ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description");
+        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description", false);
         serviceProvider.addDeliveries(Set.of(delivery));
 
         repository.save(serviceProvider);

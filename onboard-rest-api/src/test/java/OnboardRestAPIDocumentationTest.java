@@ -304,7 +304,6 @@ public class OnboardRestAPIDocumentationTest {
                         DeliveryStatus.CREATED,
                         null,
                         null
-
                 ))
         );
         ObjectMapper mapper = new ObjectMapper();

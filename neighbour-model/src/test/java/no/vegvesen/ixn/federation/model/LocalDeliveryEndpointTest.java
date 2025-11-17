@@ -21,7 +21,8 @@ public class LocalDeliveryEndpointTest {
                 123,
                 "target",
                 2,
-                3
+                3,
+                null
         );
         //NOTE endpoints are considered equal even when messageRate and bandwidth are not equal.
         LocalDeliveryEndpoint endpoint3 = new LocalDeliveryEndpoint(

@@ -454,7 +454,8 @@ public class OnboardRestControllerTest {
 		LocalDelivery localDelivery = new LocalDelivery(
 		"originatingCountry='NO'",
 		LocalDeliveryStatus.REQUESTED,
-				"delivery"
+				"delivery",
+				false
 		);
 		localDelivery.setUuid(uuid.toString());
 

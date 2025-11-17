@@ -293,7 +293,8 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		LocalDelivery delivery = new LocalDelivery(
 				"originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
 				LocalDeliveryStatus.CREATED,
-				"DENM Delivery"
+				"DENM Delivery",
+				false
 		);
 		String deliveryExchangeName = "del-ex10";
 
@@ -619,6 +620,28 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists(end1.getShard().getExchangeName())).isTrue();
 		assertThat(client.exchangeExists(end2.getShard().getExchangeName())).isTrue();
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
+	}
+
+	@Test
+	public void createNeighbourWithSubscriptionEndpointContainsDynamicFilter() {
+		String selector = "a=b";
+		String exchangeName = "subscription-exchange";
+		String dynamicFilter = "originatingCountry='NO'";
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED);
+		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671, dynamicFilter)));
+		subscription.setConsumerCommonName("my-node");
+
+		client.createHeadersExchange(exchangeName);
+
+		Neighbour myNeighbour = new Neighbour("neighbour",new NeighbourCapabilities(),new NeighbourSubscriptionRequest(),new SubscriptionRequest(singleton(subscription)));
+
+		when(neighbourService.findAllNeighboursByIgnoreIs(false)).thenReturn(List.of(myNeighbour));
+		when(interchangeNodeProperties.getName()).thenReturn("my-node");
+		when(listenerEndpointRepository.save(any())).thenReturn(new ListenerEndpoint("one", "my-source", "my-host", 5671, new Connection(), exchangeName, dynamicFilter));
+		routingConfigurer.setUpSubscriptionExchanges();
+
+		assertThat(subscription.getEndpoints()).hasSize(1);
+		verify(listenerEndpointRepository, times(1)).save(any(ListenerEndpoint.class));
 	}
 
 	@Test

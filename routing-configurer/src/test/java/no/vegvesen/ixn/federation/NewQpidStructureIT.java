@@ -164,7 +164,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12004%' and causeCode = 6",
                 LocalDeliveryStatus.CREATED,
-                "DENM delivery"
+                "DENM delivery",
+                false
         );
 
         qpidClient.createDirectExchange(inQueueName);
@@ -307,7 +308,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
-                "NO Delivery"
+                "NO Delivery",
+                false
         );
 
         qpidClient.createDirectExchange(deliveryExchange);
@@ -375,6 +377,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void consumeFromQueueWithNonDestructiveConsumers() throws Exception{
+        System.out.println(qpidContainer.getHttpUrl());
         String consumeQueue = "bi-queue";
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
@@ -394,7 +397,8 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         LocalDelivery delivery = new LocalDelivery(
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6",
                 LocalDeliveryStatus.CREATED,
-                "DENM delivery"
+                "DENM delivery",
+                false
         );
 
         qpidClient.createDirectExchange(deliveryExchange);
@@ -438,11 +442,16 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                         .shardCount(1)
                         .timestamp(System.currentTimeMillis())
                         .build());
-                System.out.println();
             }
-            System.out.println();
+            /*
+               NOTE:
+               Closing and reopening the sink here is a way to test that we get the same message delivered
+               twice, ie that it isn't removed from the queue after it is read once when it is a non-destructive queue.
+               This also documents that a client that reconnects will get duplicate messages, and are required to deal
+               with this on the reader side.
+             */
             sink.close();
-            sink.start();
+            sink.start(); //We get the message delivered again here
             Thread.sleep(200);
         }
         assertThat(numMessages.get()).isEqualTo(2);

@@ -176,6 +176,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testAddingDeliveryWithDlqAndValidSelectorGivesRequestedDelivery(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery", true);
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+        assertThat(response.getDlqueue()).isEqualTo(true);
+    }
+
+    @Test
     public void testAddingDeliveryThatAlreadyExistsThrowsException(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
@@ -196,6 +205,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
         napRestController.addDelivery(actorCommonName, deliveryRequest);
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
+    }
+
+    @Test
+    public void testAddingDeliveryWithoutDescriptionAndWithDlqueue(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", true);
+        napRestController.addDelivery(actorCommonName, deliveryRequest);
+        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
+        assertThat(napRestController.getDeliveries(actorCommonName).getFirst().getDlqueue()).isEqualTo(true);
     }
 
     @Test

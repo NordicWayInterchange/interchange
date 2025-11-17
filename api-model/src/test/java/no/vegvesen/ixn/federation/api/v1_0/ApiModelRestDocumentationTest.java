@@ -7,6 +7,8 @@ import no.vegvesen.ixn.shared.Constants;
 import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class ApiModelRestDocumentationTest {
@@ -177,22 +179,41 @@ public class ApiModelRestDocumentationTest {
 
     @Test
     public void subscriptionPollResponse() throws JsonProcessingException {
-        SubscriptionPollResponseApi response = new SubscriptionPollResponseApi(
+        SubscriptionPollResponseApi response = new SubscriptionPollResponseApiV1(
                 UUID.randomUUID().toString(),
                 "originatingCountry = 'NO' and messageType = 'DENM'",
                 "/subscription/1",
                 SubscriptionStatusApi.CREATED,
                 "node-1",
-                Collections.singleton(
-                        new EndpointApi(
+                Set.of(
+                        new EndpointApiV1(
                                 "source-1",
                                 "endpoint-1",
                                 5671
                         )
-                )
+                ),
+                Instant.now().toEpochMilli()
         );
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+        SubscriptionPollResponseApi response2 = new SubscriptionPollResponseApiV2(
+                UUID.randomUUID().toString(),
+                "a = b",
+                "/subscriptions/2",
+                SubscriptionStatusApi.CREATED,
+                "node-1",
+                Set.of(
+                        new EndpointApiV2(
+                                "source-1",
+                                "host-1",
+                                5671,
+                                true
+                        )
+                ),
+                Instant.now().toEpochMilli()
+        );
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response2));
     }
 
     @Test

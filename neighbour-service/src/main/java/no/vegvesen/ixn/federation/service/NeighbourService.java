@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
@@ -177,7 +177,7 @@ public class NeighbourService {
 			logger.info("Neighbour {} polled for status of subscription {}.", neighbour.getName(), subscriptionId);
 			logger.info("Returning: {}", subscription.toString());
 
-			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApi(subscription);
+			SubscriptionPollResponseApi subscriptionApi = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
 			NeighbourMDCUtil.removeLogVariables();
 			return subscriptionApi;
 		}
