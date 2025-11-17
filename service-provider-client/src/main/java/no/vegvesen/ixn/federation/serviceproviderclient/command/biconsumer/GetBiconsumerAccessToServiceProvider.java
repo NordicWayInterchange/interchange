@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,20 +10,20 @@ import java.util.concurrent.Callable;
 
 @CommandLine.Command(
         name = "show",
-        description = "show if the service provider has access to bi queue",
+        description = "show if the service provider has access to bi-consumer",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0",
         customSynopsis = {
                 """ 
                         Example:\n
-                        serviceproviderclient bi-queue show
+                        serviceproviderclient bi-consumer show
                         """
         }
 )
-public class GetBiqueueAccessToServiceProvider implements Callable<Integer> {
+public class GetBiconsumerAccessToServiceProvider implements Callable<Integer> {
     @CommandLine.ParentCommand
-    BiqueueCommand parentCommand;
+    BiconsumerCommand parentCommand;
 
     @Override
     public Integer call() throws JsonProcessingException {

@@ -1,22 +1,22 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue;
+package no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer;
 
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication;
 import picocli.CommandLine;
 
 
 @CommandLine.Command(
-        name = "bi-queue",
-        description = "Show, add, or remove service provider's access to bi queue",
+        name = "bi-consumer",
+        description = "Show, add, or remove service provider's access to bi-consumer",
         subcommands = {
-                GetBiqueueAccessToServiceProvider.class,
-                AddBiqueueAccessToServiceProvider.class,
-                RemoveBiqueueAccessToServiceProvider.class
+                GetBiconsumerAccessToServiceProvider.class,
+                AddBiconsumerAccessToServiceProvider.class,
+                RemoveBiconsumerAccessToServiceProvider.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0"
 )
-public class BiqueueCommand {
+public class BiconsumerCommand {
 
     @CommandLine.ParentCommand
     ServiceProviderClientApplication parentCommand;

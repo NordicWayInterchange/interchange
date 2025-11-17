@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
-import no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue.BiqueueCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer.BiconsumerCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
@@ -22,7 +22,7 @@ import static picocli.CommandLine.*;
         showAtFileInUsageHelp = true,
         defaultValueProvider = PropertiesDefaultProvider.class,
         subcommands = {
-                BiqueueCommand.class,
+                BiconsumerCommand.class,
                 CapabilitiesCommand.class,
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
