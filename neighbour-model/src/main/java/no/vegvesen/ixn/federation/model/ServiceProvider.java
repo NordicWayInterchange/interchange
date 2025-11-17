@@ -91,6 +91,16 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+	public ServiceProvider(String name, Boolean biconsumer, Capabilities capabilities, Set<LocalSubscription> localSubscriptions,
+			Set<LocalDelivery> localDeliveries, LocalDateTime subscriptionUpdated) {
+		this.name = name;
+		this.biconsumer = biconsumer;
+		this.capabilities = capabilities;
+		this.subscriptions.addAll(localSubscriptions);
+		this.deliveries.addAll(localDeliveries);
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}
