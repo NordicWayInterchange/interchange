@@ -115,3 +115,14 @@ export const deleteUserCapability = (
     method: "delete",
   });
 };
+
+export const addBiqueueAccess = (actorCommonName: string, body: Object) => {
+  return fetch(`/api/${actorCommonName}/biconsumer`, {
+    method: "put",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+};
+

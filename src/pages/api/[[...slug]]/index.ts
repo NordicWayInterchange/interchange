@@ -29,7 +29,11 @@ import {
   basicPatchFunction,
   deleteNapcoreMyselfFromSubscribedPrivateChannel,
   deleteNapcorePeerFromExistingPrivateChannel,
-  deleteNapcorePrivateChannels, addNapcorePeerToExistingPrivateChannel
+  deleteNapcorePrivateChannels,
+  addNapcorePeerToExistingPrivateChannel,
+  fetchNapcoreAccessToBiQueue,
+  basicPutFunction,
+  addNapcoreAccessToBiQueue, basicPutParams
 } from "@/lib/fetchers/interchangeConnector";
 import { ExtendedCapability } from "@/types/capability";
 import { Capability, Publicationids } from "@/types/napcore/capability";
@@ -41,6 +45,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { DeliveriesDelivery } from "@/types/napcore/delivery";
 import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
+import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
 const logger = require("../../../lib/logger");
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
@@ -132,6 +137,12 @@ const fetchPeers = async (params: extendedGetParams) => {
   return [res.status, privateChannelsPeers];
 };
 
+const fetchAccessToBiQueue = async (params: extendedGetParams) => {
+  const res = await fetchNapcoreAccessToBiQueue(params);
+  const accessToBiQueue: BiQueueRequest = await res.data;
+  return [res.status, accessToBiQueue];
+}
+
 export const addPrivateChannels: basicPostFunction = async (
   params: basicPostParams
 ) => {
@@ -139,6 +150,14 @@ export const addPrivateChannels: basicPostFunction = async (
   const privateChannels: PrivateChannel = await res.data;
   return [res.status, privateChannels];
 };
+
+export const addAccessToBiQueue: basicPutFunction = async (
+  params: basicPutParams
+) => {
+  const res = await addNapcoreAccessToBiQueue(params);
+  const accessToBiQueue: BiQueueRequest = await res.data;
+  return [res.status, accessToBiQueue];
+}
 
 export const removePrivateChannel: basicDeleteFunction = async (
   params: basicDeleteParams
@@ -251,6 +270,7 @@ const getPaths: {
   "capabilities/publicationids": fetchPublicationIds,
   "private-channels": fetchPrivateChannels,
   "private-channels/peer": fetchPeers,
+  "biconsumer": fetchAccessToBiQueue,
 };
 
 const patchPaths: {
@@ -267,6 +287,13 @@ const postPaths: {
   "x509/csr": addCerticates,
   capabilities: addUserCapabilities,
   privatechannels: addPrivateChannels,
+};
+
+// all put methods on path
+const putPaths: {
+  [key: string]: basicPutFunction;
+} = {
+  "biconsumer": addAccessToBiQueue
 };
 
 // all delete methods on path
@@ -322,6 +349,10 @@ const findHandler: (params: any) =>
     case "POST":
       if (Object.keys(postPaths).includes(urlPath)) {
         return { fn: postPaths[urlPath], params: { actorCommonName, body } };
+      }
+    case "PUT":
+      if (Object.keys(putPaths).includes(urlPath)) {
+        return { fn: putPaths[urlPath], params: { actorCommonName, body } };
       }
     case "PATCH": {
       const aliasMatch = path[0];
