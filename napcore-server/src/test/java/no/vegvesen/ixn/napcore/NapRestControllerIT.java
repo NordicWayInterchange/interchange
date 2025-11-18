@@ -20,6 +20,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -829,6 +830,15 @@ public class NapRestControllerIT extends PostgresContainerBase {
         ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
         assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
         assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiconsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
+    }
+
+    @Test
+    public void testNullBiconsumer() {
+        String actorCommonName = "actor-1";
+        ServiceProvider sp = new ServiceProvider(actorCommonName);
+        sp = serviceProviderRepository.save(sp);
+        sp.setBiconsumer(null);
+        Assertions.assertNull(sp.isBiconsumer());
     }
 
     @Autowired
