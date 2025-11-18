@@ -4,7 +4,7 @@ public class ServiceProviderBiqueueAccessResponse {
 
     private String name;
 
-    private boolean access = false;
+    private Boolean access = false;
 
     public ServiceProviderBiqueueAccessResponse() {
     }
@@ -23,11 +23,11 @@ public class ServiceProviderBiqueueAccessResponse {
         this.name = name;
     }
 
-    public boolean isAccess() {
+    public Boolean isAccess() {
         return access;
     }
 
-    public void setAccess(boolean access) {
+    public void setAccess(Boolean access) {
         this.access = access;
     }
 

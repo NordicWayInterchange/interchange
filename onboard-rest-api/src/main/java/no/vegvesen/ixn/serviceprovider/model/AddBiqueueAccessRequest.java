@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
 public class AddBiqueueAccessRequest {
-    private boolean access = false;
+    private Boolean access = false;
 
     public AddBiqueueAccessRequest() {
     }
@@ -11,7 +11,7 @@ public class AddBiqueueAccessRequest {
 
     }
 
-    public boolean isAccess() {
+    public Boolean isAccess() {
         return access;
     }
 

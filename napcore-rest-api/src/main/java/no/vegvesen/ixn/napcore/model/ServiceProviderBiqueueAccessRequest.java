@@ -2,7 +2,7 @@ package no.vegvesen.ixn.napcore.model;
 
 public class ServiceProviderBiqueueAccessRequest {
 
-    private boolean access = false;
+    private Boolean access = false;
 
     public ServiceProviderBiqueueAccessRequest() {
     }
@@ -12,11 +12,11 @@ public class ServiceProviderBiqueueAccessRequest {
 
     }
 
-    public boolean isAccess() {
+    public Boolean isAccess() {
         return access;
     }
 
-    public void setAccess(boolean access) {
+    public void setAccess(Boolean access) {
         this.access = access;
     }
 
