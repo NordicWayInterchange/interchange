@@ -17,6 +17,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
+import BiQueue from "@/pages/biQueue/bi-queue";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -77,6 +78,7 @@ export default function Home() {
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
       <Divider sx={{ marginY: 3 }} />
+      <BiQueue></BiQueue>
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box
