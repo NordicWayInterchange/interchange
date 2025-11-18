@@ -78,6 +78,8 @@ export default function Home() {
     const deliveriesCount = serviceProvidersData?.map((item: { deliveries: any; }) => (item.deliveries || [])).reduce((sum: any, deliveries: string | any[]) => (sum + deliveries.length), 0);
     const privateChannelsCount = serviceProvidersData?.map((item: { privatechannels: any; }) => (item.privatechannels || [])).reduce((sum: any, privatechannels: string | any[]) => (sum + privatechannels.length), 0);
     const privateChannelsPeerCount = serviceProvidersData?.map((item: { privatechannelsPeer: any; }) => (item.privatechannelsPeer || [])).reduce((sum: any, privatechannelsPeer: string | any[]) => (sum + privatechannelsPeer.length), 0);
+    const biconsumerCount = serviceProvidersData?.reduce((sum: number, item: { biconsumer: any; }) => {const array =Array.isArray(item.biconsumer) ? item.biconsumer : [item.biconsumer];
+        return sum + array.filter(value => value === true).length;} , 0) ?? 0;
 
     const neighbourCapabilitiesCount = neighbourData?.reduce((sum, item) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -101,6 +103,8 @@ export default function Home() {
             thirdSubValueHeader: 'Deliveries',
             fourthSubValueHeader: 'Private channels',
             fifthSubValueHeader: 'Private channel peers',
+            sixthSubValueHeader: 'Bi-consumer',
+            seventhSubValueHeader: 'Dead letter queues(DLQ)',
             url: "/serviceProviders",
             count: serviceProvidersData?.length,
             firstSubValueCount: capabilitiesCount,
@@ -108,6 +112,8 @@ export default function Home() {
             thirdSubValueCount: deliveriesCount,
             fourthSubValueCount: privateChannelsCount,
             fifthSubValueCount: privateChannelsPeerCount,
+            sixthSubValueCount: biconsumerCount,
+            seventhSubValueCount: dlqCount,
         },
         {
             icon: <Groups2Icon />,
@@ -134,8 +140,6 @@ export default function Home() {
             header: 'QUEUES',
             url: "/queues",
             count: queuesData?.length,
-            firstSubValueHeader: 'Dead letter queues(DLQ)',
-            firstSubValueCount: dlqCount,
             secondSubValueHeader: 'Local subscription queues',
             secondSubValueCount: locSubqCount,
         },
@@ -183,13 +187,13 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 280,
+                                        width: 320,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 280,
+                                        height: 350,
                                         boxShadow: 1
                                     }}
                                 >
@@ -213,6 +217,16 @@ export default function Home() {
                                         </Box>
                                         <Box sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 1}}>
                                             {[{ header: shortcut.fourthSubValueHeader, count: shortcut.fourthSubValueCount }, { header: shortcut.fifthSubValueHeader, count: shortcut.fifthSubValueCount}].map(
+                                                (entry, i) => (
+                                                    <Box key={i}>
+                                                        <Typography noWrap={true} sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
+                                                        <Typography sx={{ fontWeight: 'bold' }}>{entry.count}</Typography>
+                                                    </Box>
+                                                )
+                                            )}
+                                        </Box>
+                                        <Box sx={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 1}}>
+                                            {[{header: shortcut.sixthSubValueHeader, count: shortcut.sixthSubValueCount}, {header: shortcut.seventhSubValueHeader, count: shortcut.seventhSubValueCount}].map(
                                                 (entry, i) => (
                                                     <Box key={i}>
                                                         <Typography noWrap={true} sx={{ textDecoration: "underline" }} variant="subtitle2">{entry.header}</Typography>
