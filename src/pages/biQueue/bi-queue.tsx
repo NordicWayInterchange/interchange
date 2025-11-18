@@ -36,7 +36,7 @@ const BiQueue = () => {
 
   useEffect(() => {
     if (biQueueAccess?.access !== undefined) {
-      setHasAccess(biQueueAccess.access);
+        setHasAccess(biQueueAccess.access ?? false);
     }
   }, [biQueueAccess]);
 
@@ -83,7 +83,7 @@ const BiQueue = () => {
   return (
     <Box>
       <Card sx={frontPageCardStyle}>
-        {(biQueueAccess === undefined || biQueueAccess === null || isLoading) ? (
+        {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
