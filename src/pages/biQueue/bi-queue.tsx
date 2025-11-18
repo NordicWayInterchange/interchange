@@ -97,7 +97,7 @@ const BiQueue = () => {
                 Bi Queue Access Granted
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You currently have permission Bi queue.
+                You currently have permission to Bi queue.
               </Typography>
             </>
           ) : (
@@ -114,7 +114,7 @@ const BiQueue = () => {
                       sx: tooltipFontStyle,
                     },
                   }}
-                  title="Bi queue is an unfiltered queue without any subscriptions. You can give access to the bi-consumer's group"
+                  title="Bi queue is an unfiltered queue without any subscriptions. You can allow or revoke access to the bi-consumer's group"
                 >
                   <IconButton size="small">
                     <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
