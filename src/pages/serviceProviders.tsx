@@ -182,7 +182,12 @@ export default function ServiceProviders() {
                     </Box>
                 );
             },
-        }
+        },
+        {
+            ...dataGridTemplate,
+            field: "biconsumer",
+            headerName: "Bi-consumer"
+        },
     ];
 
     return (
