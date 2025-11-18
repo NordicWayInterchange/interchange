@@ -18,6 +18,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import BiQueue from "@/pages/biQueue/bi-queue";
+import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -67,7 +68,16 @@ export default function Home() {
   return (
     <Box flex={1}>
       <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
-      <Box sx={commonNameStyle}>
+      <Box
+        sx={{
+          ...frontPageCardStyle,
+          maxWidth: "fit-content",
+          "@media (min-width:600px)": {
+            ...frontPageCardStyle["@media (min-width:600px)"],
+            maxWidth: "fit-content",
+          },
+        }}
+      >
         <Typography
           sx={{ fontSize: "0.85rem", fontWeight: 600}}>
           Your common name:
@@ -77,8 +87,9 @@ export default function Home() {
         </Typography>
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
-      <Divider sx={{ marginY: 3 }} />
+      <Divider sx={{ marginY: 3, visibility: 'hidden' }} />
       <BiQueue></BiQueue>
+      <Divider sx={{ marginY: 3 }} />
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box
@@ -131,24 +142,3 @@ export default function Home() {
     </Box>
   );
 }
-
-const commonNameStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "row",
-  padding: 1,
-  borderRadius: 2,
-  borderBottom: "2px solid #dd7100",
-  boxShadow: 3,
-  maxWidth: "fit-content",
-  margin: "left",
-  gap: 0.5,
-  mt: 1.5,
-  wordBreak: "break-word",
-  flexShrink: 0,
-  "@media (min-width:600px)": {
-    flexDirection: "row",
-    maxWidth: "fit-content"
-  }
-};
