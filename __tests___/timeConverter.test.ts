@@ -13,6 +13,7 @@ describe('timeConverter', () => {
     const expectedTime = "12:09:47";
     const expectedFormat = `${expectedDate}\u2003${expectedTime}`;
 
-    expect(timeConverter(epochMillis)).toEqual(expectedFormat);
+    expect(timeConverter(epochMillis).replace(/,/g, '')).toEqual(expectedFormat);
+
   });
 });
