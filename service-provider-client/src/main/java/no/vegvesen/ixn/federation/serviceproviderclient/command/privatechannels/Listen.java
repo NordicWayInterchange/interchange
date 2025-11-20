@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@CommandLine.Command(name = "listen", description = "Receive messages",
+@CommandLine.Command(name = "listen", description = "Listen to messages on a private channel",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0",
@@ -29,11 +29,11 @@ public class Listen implements Callable<Integer> {
     @CommandLine.ParentCommand
     PrivateChannelsCommand parentCommand;
 
-    @CommandLine.ArgGroup(multiplicity = "1")
-    PrivateChannelsOption option;
-
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
+
+    @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The private channel id")
+    String id;
 
     private final CountDownLatch counter = new CountDownLatch(1);
 
@@ -41,17 +41,15 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        String id;
-        if (option.id != null) {
-            id = option.id;
-        } else {
-            throw new RuntimeException("Need to specify either id");
-        }
-
         GetPrivateChannelResponse privateChannel = client.getPrivateChannel(id);
-        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED)) {
+
+        int maxRetries = 10;
+        int retries = 0;
+
+        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
+            TimeUnit.SECONDS.sleep(3);
             privateChannel = client.getPrivateChannel(privateChannel.getId());
-            TimeUnit.SECONDS.sleep(2);
+            retries++;
         }
 
         if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
@@ -82,8 +80,4 @@ public class Listen implements Callable<Integer> {
         return 0;
     }
 
-    private static class PrivateChannelsOption {
-        @CommandLine.Option(names = {"-i", "--id"}, description = "The private channel Id")
-        String id;
-    }
 }
