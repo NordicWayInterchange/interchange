@@ -88,7 +88,7 @@ export default function QuadtreeGenerator({
           bounds={bounds}
           pathOptions={rectangleStyleSelect}
         >
-        <Tooltip permanent>{hash}</Tooltip>
+        <Tooltip sticky>{hash}</Tooltip>
         </Rectangle>
       );
     });
