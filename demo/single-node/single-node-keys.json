@@ -9,6 +9,8 @@
       "name" : "a.interchangedomain.com"
     },{
       "name": "a.qpid.interchangedomain.com"
+    }, {
+        "name": "a_qpid"
     } ],
     "clientRequests" : [ {
       "name" : "king_olav.interchangedomain.com",
