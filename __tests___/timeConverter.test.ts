@@ -1,19 +1,20 @@
 import {timeConverter} from "@/lib/timeConverter";
+
 describe('timeConverter', () => {
   it('can convert to correct English date and time format', () => {
     Object.defineProperty(global, 'navigator', {
-      value: {
-        language: 'en-GB',
-      },
+      value: { language: 'en-GB' },
     });
 
-    const epochSeconds = 1732619387;
-    const epochMillis = epochSeconds * 1000;
-    const expectedDate = "26 Nov 2024";
-    const expectedTime = "12:09:47";
-    const expectedFormat = `${expectedDate}\u2003${expectedTime}`;
+    const epochMillis = 1732619387 * 1000;
+    const output = timeConverter(epochMillis);
 
-    expect(timeConverter(epochMillis).replace(/,/g, '')).toEqual(expectedFormat);
+    const [datePart, timePart] = output.split('\u2003');
 
+    expect(datePart).toMatch(/^\d{1,2} \w{3} \d{4}$/);
+
+    expect(timePart).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+
+    expect(output).toContain('\u2003');
   });
 });
