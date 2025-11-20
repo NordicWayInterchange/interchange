@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BiconsumerMember {
+public class BiConsumerMember {
     private String name;
 
-    public BiconsumerMember() {}
+    public BiConsumerMember() {}
 
-    public BiconsumerMember(String name) {
+    public BiConsumerMember(String name) {
         this.name = name;
     }
 
@@ -24,7 +24,7 @@ public class BiconsumerMember {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (BiconsumerMember) obj;
+        var that = (BiConsumerMember) obj;
         return Objects.equals(this.name, that.name);
     }
 

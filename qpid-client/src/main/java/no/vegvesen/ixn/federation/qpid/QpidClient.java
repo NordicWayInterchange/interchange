@@ -256,31 +256,31 @@ public class QpidClient {
 		restTemplate.delete(url);
 	}
 
-	public BiconsumerMember getBiconsumerMember(String memberName) {
+	public BiConsumerMember getBiConsumerMember(String memberName) {
 		try {
 			String url = groupMembersURL + "/" + BI_CONSUMERS_GROUP_NAME + "/" + memberName;
 			logger.debug("GETting from {}", url);
-			return restTemplate.getForEntity(url, BiconsumerMember.class).getBody();
+			return restTemplate.getForEntity(url, BiConsumerMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
 			return null;
 		}
 	}
 
-	public List<BiconsumerMember> getBiconsumerMembers() {
+	public List<BiConsumerMember> getBiConsumerMembers() {
 		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME;
 		logger.debug("Getting from URL {}", url);
-		ResponseEntity<BiconsumerMember[]> response = restTemplate.getForEntity(url, BiconsumerMember[].class);
+		ResponseEntity<BiConsumerMember[]> response = restTemplate.getForEntity(url, BiConsumerMember[].class);
 		return Arrays.asList(response.getBody());
 	}
 
-	public BiconsumerMember addBiconsumerMemberToGroup(String memberName) {
-		BiconsumerMember biConsumerMember = new BiconsumerMember(memberName);
+	public BiConsumerMember addBiConsumerMemberToGroup(String memberName) {
+		BiConsumerMember biConsumerMember = new BiConsumerMember(memberName);
 		logger.info("Adding bi consumer member '{}' to group",memberName);
 		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME;
-		return restTemplate.postForEntity(url,biConsumerMember, BiconsumerMember.class).getBody();
+		return restTemplate.postForEntity(url,biConsumerMember, BiConsumerMember.class).getBody();
 	}
 
-	public void removeBiconsumerMemberFromGroup(BiconsumerMember member) {
+	public void removeBiConsumerMemberFromGroup(BiConsumerMember member) {
 		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME + "/" + member.name();
 		logger.debug("DELETE to URL {}",url);
 		logger.info("Removing bi consumer member '{}' from group", member.name());
