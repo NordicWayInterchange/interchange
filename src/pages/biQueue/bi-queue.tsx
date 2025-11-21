@@ -82,7 +82,7 @@ const BiQueue = () => {
 
   return (
     <>
-      <Card sx={{...frontPageCardStyle}}>
+      <Card sx={{...frontPageCardStyle, padding: "0px"}}>
         {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
