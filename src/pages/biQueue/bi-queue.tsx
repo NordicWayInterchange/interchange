@@ -87,14 +87,16 @@ const BiQueue = () => {
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
-          <Stack direction="row" alignItems="left" spacing={1}
+          <Stack direction="row" alignItems="left" spacing={2}
            sx={{
             flexWrap: "wrap",
             rowGap: 1,
           }}>
           {hasAccess ? (
             <Stack direction="row" alignItems="left" spacing={1}>
+              <IconButton size="small">
               <CheckCircleOutlineIcon color="success" />
+              </IconButton>
               <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
                 I currently have permission to bi-queue.
                 <Tooltip
@@ -113,7 +115,9 @@ const BiQueue = () => {
             </Stack>
           ) : (
             <Stack direction="row" alignItems="left" spacing={1}>
+              <IconButton size="small" >
               <LockOutlinedIcon color="action" />
+                </IconButton>
               <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
                 I currently do not have permission to bi-queue.
                 <Tooltip
