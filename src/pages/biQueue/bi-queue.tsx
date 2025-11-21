@@ -81,33 +81,18 @@ const BiQueue = () => {
   };
 
   return (
-    <Box>
+    <>
       <Card sx={frontPageCardStyle}>
         {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
+          <Stack direction="row" alignItems="left" spacing={1}>
           {hasAccess ? (
-            <>
-              <CheckCircleOutlineIcon
-                color="success"
-                sx={{ fontSize: 50, mb: 2 }}
-              />
-              <Typography variant="h6" gutterBottom>
-                Bi Queue Access Granted
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You currently have permission to Bi queue.
-              </Typography>
-            </>
-          ) : (
-            <>
-              <LockOutlinedIcon color="action" sx={{ fontSize: 50, mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                No Access to Bi Queue
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You currently do not have permission to Bi queue.
+            <Stack direction="row" alignItems="left" spacing={1}>
+              <CheckCircleOutlineIcon color="success" />
+              <Typography variant="body2" color="text.secondary" sx={{  mb: 0, width: 350 }} >
+                You currently have permission to bi-queue.
                 <Tooltip
                   slotProps={{
                     tooltip: {
@@ -121,18 +106,28 @@ const BiQueue = () => {
                   </IconButton>
                 </Tooltip>
               </Typography>
-            </>
+            </Stack>
+          ) : (
+            <Stack direction="row" alignItems="left" spacing={1}>
+              <LockOutlinedIcon color="action" />
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0, width: 350 }} >
+                You currently do not have permission to bi-queue.
+                <Tooltip
+                  slotProps={{
+                    tooltip: {
+                      sx: tooltipFontStyle,
+                    },
+                  }}
+                  title="Bi queue is an unfiltered queue without any subscriptions. You can allow or revoke access to the bi-consumer's group"
+                >
+                  <IconButton size="small">
+                    <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                  </IconButton>
+                </Tooltip>
+              </Typography>
+            </Stack>
           )}
 
-          <Stack
-            spacing={2}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "center",
-              justifyContent: "center",
-            }}
-          >
             <StyledButton
               variant="contained"
               color={isLoading ? "grayLight" : hasAccess  ? "redLight" : "buttonThemeColor"}
@@ -153,7 +148,7 @@ const BiQueue = () => {
           handleClose={handleSnackClose}
         />
       )}
-    </Box>
+    </>
   );
 };
 
