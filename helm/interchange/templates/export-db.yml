@@ -10,11 +10,12 @@ metadata:
 spec:
   template:
     spec:
-      restartPolicy: Never
       containers:
-        - name: export-db
+        - name: import-export-service-container
           image: "{{ .Values.export_service.image.repository}}:{{ .Values.export_service.image.tag }}"
-          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /output
+              name: datadump-pvc
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
@@ -22,3 +23,7 @@ spec:
               value: "{{ .Values.postgres_user}}"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "{{ .Values.postgres_password }}"
+      volumes:
+        - name: datadump-pvc
+          persistentVolumeClaim:
+            claimName: {{.Release.Name}}-datadump-pvc
