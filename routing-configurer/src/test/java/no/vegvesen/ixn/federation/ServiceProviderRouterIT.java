@@ -1476,7 +1476,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerisFalse() {
+	public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsFalse() {
 
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"serviceProvider",
@@ -1494,7 +1494,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
-	public void testRemovingServiceProviderFromBiConsumerGroup() {
+	public void testServiceProviderAddedToBiConsumerGroup() {
 
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"serviceProvider",
@@ -1507,6 +1507,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		assertThat(serviceProvider.isBiconsumer()).isTrue();
 		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName()).name()).isEqualTo(serviceProvider.getName());
 	}
 
 
