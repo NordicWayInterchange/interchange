@@ -69,7 +69,7 @@ export default function Home() {
     <Box flex={1}>
       <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
       <Divider sx={{ marginY: 2 }} />
-      <Subheading>Your common name</Subheading>
+      <Subheading>My common name</Subheading>
       <Box
         sx={{
           ...frontPageCardStyle,
@@ -123,9 +123,9 @@ export default function Home() {
             </Link>
           ))}
         </Box>
-        <Subheading>Your bi-queue access</Subheading>
+        <Subheading>My bi-queue access</Subheading>
         <BiQueue></BiQueue>
-        <Subheading>Your latest subscriptions</Subheading>
+        <Subheading>My latest subscriptions</Subheading>
         <DataGrid
           columns={SubscriptionDatagrid}
           rows={data?.slice(0, 4) || []}
