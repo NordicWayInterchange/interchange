@@ -82,11 +82,11 @@ const BiQueue = () => {
 
   return (
     <>
-      <Card sx={{...frontPageCardStyle, width: "100%"}}>
+      <Card sx={{...frontPageCardStyle}}>
         {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
-        <CardContent sx={{ p: 2 }}>
+        <CardContent>
           <Stack direction="row" alignItems="left" spacing={1}
            sx={{
             flexWrap: "wrap",
@@ -95,7 +95,7 @@ const BiQueue = () => {
           {hasAccess ? (
             <Stack direction="row" alignItems="left" spacing={1}>
               <CheckCircleOutlineIcon color="success" />
-              <Typography variant="body2" color="text.secondary" sx={{ width: 340 }} >
+              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
                 I currently have permission to bi-queue.
                 <Tooltip
                   slotProps={{
@@ -114,7 +114,7 @@ const BiQueue = () => {
           ) : (
             <Stack direction="row" alignItems="left" spacing={1}>
               <LockOutlinedIcon color="action" />
-              <Typography variant="body2" color="text.secondary" sx={{ width: 340 }} >
+              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
                 I currently do not have permission to bi-queue.
                 <Tooltip
                   slotProps={{
