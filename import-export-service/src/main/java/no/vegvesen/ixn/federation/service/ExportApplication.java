@@ -3,17 +3,14 @@ package no.vegvesen.ixn.federation.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 public class ExportApplication {
@@ -40,8 +37,9 @@ public class ExportApplication {
                 privateChannelRepository.findAll().stream().map(exportTransformer::transformPrivateChannelToPrivateChannelExportApi).collect(Collectors.toSet())
         );
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+        LocalDateTime now = LocalDateTime.now();
         String localPath = "/output";
-        Path path = Paths.get(localPath, "dump.json");
+        Path path = Paths.get(localPath, now.toString(),"-dump.json");
         writer.writeValue(path.toFile(), exportModel);
     }
 }
