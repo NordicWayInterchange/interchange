@@ -10,6 +10,7 @@ public class CreateExchangeRequest {
 
     private String type;
 
+    private AlternateBinding alternateBinding;
 
     public CreateExchangeRequest() {
 
@@ -18,6 +19,12 @@ public class CreateExchangeRequest {
     public CreateExchangeRequest(String name, String type) {
         this.name = name;
         this.type = type;
+    }
+
+    public CreateExchangeRequest(String name, String type, AlternateBinding alternateBinding) {
+        this.name = name;
+        this.type = type;
+        this.alternateBinding = alternateBinding;
     }
 
     public String getName() {
@@ -29,12 +36,16 @@ public class CreateExchangeRequest {
         return type;
     }
 
+    public AlternateBinding getAlternateBinding() {
+        return alternateBinding;
+    }
 
     @Override
     public String toString() {
         return "CreateExchangeRequest{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
+                ", alternateBinding=" + (alternateBinding != null ? alternateBinding.destination() : "null") +
                 '}';
     }
 }

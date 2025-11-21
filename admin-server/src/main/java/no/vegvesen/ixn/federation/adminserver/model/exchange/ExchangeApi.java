@@ -19,17 +19,20 @@ public class ExchangeApi {
 
     List<Binding> bindings;
 
+    private AlternateBinding alternateBinding;
+
     public ExchangeApi() {
-        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>());
+        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(), null);
     }
 
-    public ExchangeApi(String name, String id, boolean durable, String type, List<Binding> bindings) {
+    public ExchangeApi(String name, String id, boolean durable, String type, List<Binding> bindings, AlternateBinding alternateBinding) {
         this.name = name;
         this.id = id;
         this.durable = durable;
         this.type = type;
         this.bindings = new ArrayList<>();
         this.bindings.addAll(bindings);
+        this.alternateBinding = alternateBinding;
     }
 
     public String getName() {
@@ -63,6 +66,10 @@ public class ExchangeApi {
         return id;
     }
 
+    public AlternateBinding getAlternateBinding() {
+        return alternateBinding;
+    }
+
     @Override
     public String toString() {
         return "Exchange{" +
@@ -71,6 +78,7 @@ public class ExchangeApi {
                 ", durable=" + durable +
                 ", type='" + type + '\'' +
                 ", bindings=" + bindings +
+                ", alternateBinding=" + (alternateBinding != null ? alternateBinding.destination() : "null") +
                 '}';
     }
 }

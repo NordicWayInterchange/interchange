@@ -25,6 +25,7 @@ public class ListenerEndpoint {
     private int maxMessageRate;
 
     private String target;
+    private String dynamicFilter;
 
 
     public ListenerEndpoint() {
@@ -38,6 +39,16 @@ public class ListenerEndpoint {
         this.port = port;
         this.messageConnection = messageConnection;
         this.target = target;
+    }
+
+    public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String target, String dynamicFilter) {
+        this.neighbourName = neighbourName;
+        this.source = source;
+        this.host = host;
+        this.port = port;
+        this.messageConnection = messageConnection;
+        this.target = target;
+        this.dynamicFilter = dynamicFilter;
     }
 
     public ListenerEndpoint(String neighbourName, String source, String host, Integer port, Connection messageConnection, String target, int maxBandwidth, int maxMessageRate) {
@@ -77,6 +88,14 @@ public class ListenerEndpoint {
         return target;
     }
 
+    public String getDynamicFilter() {
+        return dynamicFilter;
+    }
+
+    public void setDynamicFilter(String dynamicFilter) {
+        this.dynamicFilter = dynamicFilter;
+    }
+
     @Override
     public String toString() {
         return "ListenerEndpoint{" +
@@ -89,6 +108,7 @@ public class ListenerEndpoint {
                 ", target=" + target +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dynamicFilter=" + dynamicFilter +
                 '}';
     }
 
