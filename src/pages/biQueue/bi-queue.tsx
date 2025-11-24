@@ -1,4 +1,4 @@
-import { Box, Stack } from "@mui/system";
+import { Stack } from "@mui/system";
 import {
   Card,
   CardContent,
@@ -81,65 +81,68 @@ const BiQueue = () => {
   };
 
   return (
-    <Box>
-      <Card sx={frontPageCardStyle}>
+    <>
+      <Card sx={{...frontPageCardStyle, padding: "0px"}}>
         {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
         <CardContent>
+          <Stack direction="row" alignItems="left" spacing={2}
+           sx={{
+            flexWrap: "wrap",
+            rowGap: 1,
+          }}>
           {hasAccess ? (
-            <>
-              <CheckCircleOutlineIcon
-                color="success"
-                sx={{ fontSize: 50, mb: 2 }}
-              />
-              <Typography variant="h6" gutterBottom>
-                Bi Queue Access Granted
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You currently have permission to Bi queue.
-              </Typography>
-            </>
-          ) : (
-            <>
-              <LockOutlinedIcon color="action" sx={{ fontSize: 50, mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                No Access to Bi Queue
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You currently do not have permission to Bi queue.
+            <Stack direction="row" alignItems="left" spacing={1}>
+              <IconButton size="small">
+              <CheckCircleOutlineIcon color="success" />
+              </IconButton>
+              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
+                I currently have permission to bi-queue.
                 <Tooltip
                   slotProps={{
                     tooltip: {
                       sx: tooltipFontStyle,
                     },
                   }}
-                  title="Bi queue is an unfiltered queue without any subscriptions. You can allow or revoke access to the bi-consumer's group"
+                  title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
                 >
                   <IconButton size="small">
                     <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
                   </IconButton>
                 </Tooltip>
               </Typography>
-            </>
+            </Stack>
+          ) : (
+            <Stack direction="row" alignItems="left" spacing={1}>
+              <IconButton size="small" >
+              <LockOutlinedIcon color="action" />
+                </IconButton>
+              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
+                I currently do not have permission to bi-queue.
+                <Tooltip
+                  slotProps={{
+                    tooltip: {
+                      sx: tooltipFontStyle,
+                    },
+                  }}
+                  title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                >
+                  <IconButton size="small">
+                    <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                  </IconButton>
+                </Tooltip>
+              </Typography>
+            </Stack>
           )}
 
-          <Stack
-            spacing={2}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "center",
-              justifyContent: "center",
-            }}
-          >
             <StyledButton
               variant="contained"
               color={isLoading ? "grayLight" : hasAccess  ? "redLight" : "buttonThemeColor"}
               disabled={isLoading}
               onClick={handleToggleAccess}
             >
-              {hasAccess ? "Revoke Access" : "Grant Access"}
+              {hasAccess ? "Remove my access" : "Give me access"}
             </StyledButton>
           </Stack>
         </CardContent>
@@ -153,7 +156,7 @@ const BiQueue = () => {
           handleClose={handleSnackClose}
         />
       )}
-    </Box>
+    </>
   );
 };
 

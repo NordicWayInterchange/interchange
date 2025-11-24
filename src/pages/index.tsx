@@ -68,6 +68,8 @@ export default function Home() {
   return (
     <Box flex={1}>
       <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
+      <Divider sx={{ marginY: 2 }} />
+      <Subheading>My common name</Subheading>
       <Box
         sx={{
           ...frontPageCardStyle,
@@ -78,18 +80,12 @@ export default function Home() {
           },
         }}
       >
-        <Typography
-          sx={{ fontSize: "0.85rem", fontWeight: 600}}>
-          Your common name:
-        </Typography>
         <Typography variant="h6" sx={{ fontSize: "0.85rem", textAlign: "center" }}>
           {session?.user?.commonName}
         </Typography>
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
       <Divider sx={{ marginY: 2, visibility: 'hidden' }} />
-      <BiQueue></BiQueue>
-      <Divider sx={{ marginY: 3 }} />
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box
@@ -127,7 +123,10 @@ export default function Home() {
             </Link>
           ))}
         </Box>
-        <Subheading>Your latest subscriptions</Subheading>
+        <Subheading>My bi-queue access</Subheading>
+        <Divider sx={{ marginY: -3, visibility: 'hidden' }} />
+        <BiQueue></BiQueue>
+        <Subheading>My latest subscriptions</Subheading>
         <DataGrid
           columns={SubscriptionDatagrid}
           rows={data?.slice(0, 4) || []}
