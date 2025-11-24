@@ -849,7 +849,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         sp.setBiconsumer(true);
         ObjectMapper mapper = new ObjectMapper();
         assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiqueueEndPoint(actorCommonName))).
-                isEqualTo("{\"brokerExternalName\":\"blomst.itsinterchange.eu\",\"messageChannelPort\":5671,\"queueName\":bi-queue-c089aeca-8d6a-4b26-9826-f7cd307957ec}");
+                isEqualTo("{\"brokerExternalName\":\"interchangenode\",\"messageChannelPort\":\"5671\",\"queueName\":\"bi-queue-760b5be1-0f06-4f4c-869b-fbbc7d946af2\"}");
     }
 
     @Autowired
