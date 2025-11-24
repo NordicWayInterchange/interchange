@@ -56,7 +56,7 @@ neighbour_discoverer:                                               # Java appli
 database:                                                           # Database of neighbouring interchanges
   image:
     repository: postgres
-    tag: 15.1
+    tag: 18.1
   postgres_db: federation                                           # Database name
   persistence:                                                      # Persistence settings for the database.
     enabled: true
