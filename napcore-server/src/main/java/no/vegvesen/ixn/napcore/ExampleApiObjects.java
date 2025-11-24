@@ -312,4 +312,12 @@ public class ExampleApiObjects {
                     "access": true
                 }
                 """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "blomst.itsinterchange.eu",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-consumer-c089aeca-8d6a-4b26-9826-f7cd307957ec"
+                }
+                """;
 }

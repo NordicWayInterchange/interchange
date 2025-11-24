@@ -842,14 +842,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetServiceProviderBiconsumerEndPoint() throws JsonProcessingException {
+    public void testGetBiqueueEndPoint() throws JsonProcessingException {
         String actorCommonName = "actor";
         ServiceProvider sp = new ServiceProvider(actorCommonName);
         sp = serviceProviderRepository.save(sp);
         sp.setBiconsumer(true);
         ObjectMapper mapper = new ObjectMapper();
-        assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiqueueEndPoint(actorCommonName))).
-                isEqualTo("{\"brokerExternalName\":\"interchangenode\",\"messageChannelPort\":\"5671\",\"queueName\":\"bi-queue-760b5be1-0f06-4f4c-869b-fbbc7d946af2\"}");
+        assertThat(mapper.writeValueAsString(napRestController.getBiqueueEndPoint(actorCommonName))).
+                isEqualTo("{\"brokerExternalName\":\"interchangenode\",\"messageChannelPort\":5671,\"queueName\":\"bi-queue-760b5be1-0f06-4f4c-869b-fbbc7d946af2\"}");
     }
 
     @Autowired

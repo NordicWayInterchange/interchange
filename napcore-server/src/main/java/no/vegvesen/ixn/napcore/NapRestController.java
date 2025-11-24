@@ -675,12 +675,12 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biqueueEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
-    @Operation(summary = "Get biconsumer endpoint")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
-    public BiqueueEndpointResponse getServiceProviderBiqueueEndPoint(@PathVariable("actorCommonName") String actorCommonName) {
+    @Operation(summary = "Get bi-queue endpoint")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
+    public BiqueueEndpointResponse getBiqueueEndPoint(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Get service provider {} have access to biconsumer", actorCommonName);
+        logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
         String queueName = "bi-queue-" + UUID.randomUUID();
         BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);

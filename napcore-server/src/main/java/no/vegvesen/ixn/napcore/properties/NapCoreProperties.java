@@ -15,7 +15,7 @@ public class NapCoreProperties {
 
     private String queueName;
 
-    String brokerExternalName;
+    private String brokerExternalName;
 
     public NapCoreProperties() {
 
