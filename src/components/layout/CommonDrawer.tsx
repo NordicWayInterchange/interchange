@@ -17,7 +17,7 @@ import { statusChips } from "@/lib/statusChips";
 import { timeConverter } from "@/lib/timeConverter";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { styled } from "@mui/material/styles";
-import { StyledButton , drawerStyle } from "@/components/shared/styles/StyledSelectorBuilder";
+import { StyledButton, drawerStyle, StyledHeaderBox } from "@/components/shared/styles/StyledSelectorBuilder";
 
 type Props = {
   item: ExtendedSubscription | ExtendedDelivery;
@@ -246,13 +246,6 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
 
 const StyledCard = styled(Card)(({}) => ({
   padding: "16px",
-  width: "100%",
-}));
-
-const StyledHeaderBox = styled(Box)(({}) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
   width: "100%",
 }));
 

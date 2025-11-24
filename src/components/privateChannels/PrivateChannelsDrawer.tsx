@@ -19,7 +19,7 @@ import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { styled } from "@mui/material/styles";
 import { timeConverter } from "@/lib/timeConverter";
 import CollapsiblePeer from "@/components/shared/display/CollapsiblePeer";
-import { StyledButton, drawerStyle } from "@/components/shared/styles/StyledSelectorBuilder";
+import { StyledButton, drawerStyle, StyledHeaderBox } from "@/components/shared/styles/StyledSelectorBuilder";
 
 type Props = {
   privateChannel: PrivateChannel;
@@ -230,14 +230,5 @@ const StyledCard = styled(Card)(({}) => ({
   padding: "16px",
   width: "100%"
 }));
-
-
-const StyledHeaderBox = styled(Box)(({}) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  width: "100%",
-}));
-
 
 export default PrivateChannelsDrawer;

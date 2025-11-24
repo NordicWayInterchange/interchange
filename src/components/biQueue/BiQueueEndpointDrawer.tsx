@@ -10,7 +10,7 @@ import {
   Toolbar,
   Typography
 } from "@mui/material";
-import { drawerStyle, StyledCard } from "@/components/shared/styles/StyledSelectorBuilder";
+import { drawerStyle, StyledCard, StyledHeaderBox } from "@/components/shared/styles/StyledSelectorBuilder";
 import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
@@ -105,11 +105,5 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open, handleMoreClose }: Props)
   );
 };
 
-const StyledHeaderBox = styled(Box)(({}) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  width: "100%",
-}));
 export default BiQueueEndpointDrawer;
 
