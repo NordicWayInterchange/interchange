@@ -21,7 +21,7 @@ services:
 
 
   a_db:
-    image: postgres:15.1
+    image: postgres:18.1
     container_name: a_db
     depends_on:
       - mock-dns-server
