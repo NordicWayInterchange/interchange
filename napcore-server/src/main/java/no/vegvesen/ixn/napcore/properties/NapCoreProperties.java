@@ -13,6 +13,10 @@ public class NapCoreProperties {
 
     private String messageChannelPort = "5671";
 
+    private String queueName;
+
+    String brokerExternalName;
+
     public NapCoreProperties() {
 
     }
@@ -45,4 +49,21 @@ public class NapCoreProperties {
     public void setMessageChannelPort(String messageChannelPort) {
         this.messageChannelPort = messageChannelPort;
     }
+
+    public String getQueueName() {
+        return queueName;
+    }
+
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
+    }
+
+   public String getBrokerExternalName() {
+        return brokerExternalName;
+   }
+
+   public void setBrokerExternalName(String brokerExternalName) {
+        this.brokerExternalName = brokerExternalName;
+   }
+
 }
