@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class BiqueueEndpointResponse {
 
-    private String  brokerExternalName;
+    private String brokerExternalName;
 
     private Integer messageChannelPort;
 

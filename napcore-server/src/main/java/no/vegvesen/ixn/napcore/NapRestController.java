@@ -669,6 +669,15 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         ServiceProviderBiqueueAccessResponse biQueueAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, biconsumerAccess);
         serviceProvider.setBiconsumer(biQueueAccessResponse.isAccess());
+        if (serviceProvider.isBiconsumer()) {
+            if (serviceProvider.getBiqueueEndpoint() == null) {
+                String queueName = "bi-queue-" + UUID.randomUUID();
+                BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
+                serviceProvider.setBiqueueEndpoint(endpoint);
+            }
+        } else {
+            serviceProvider.setBiqueueEndpoint(null);
+        }
         serviceProviderRepository.save(serviceProvider);
         return biQueueAccessResponse;
     }
@@ -683,11 +692,7 @@ public class NapRestController {
         logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        String queueName = "bi-queue-" + UUID.randomUUID();
-        BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
-        serviceProvider.setBiqueueEndpoint(endpoint);
-        ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
-        return typeTransformer.transformBiqueueEndpoint(savedServiceProvider.getBiqueueEndpoint());
+        return typeTransformer.transformBiqueueEndpoint(serviceProvider.getBiqueueEndpoint());
     }
 
     private void validatePathVariable(String pathVariable){
