@@ -1,27 +1,41 @@
-package no.vegvesen.ixn.napcore.model;
+package no.vegvesen.ixn.federation.model;
+
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
-public class BiconsumerEndpointResponse {
+@Entity
+@Table(name="bi_consumer_endpoint")
+public class BiqueueEndpoint {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "biconsumer_endpoint_seq")
+    @Column
+    private Integer id;
 
-    private String  brokerExternalName;
+    @Column
+    private String brokerExternalName;
 
+    @Column
     private Integer messageChannelPort;
 
+    @Column
     private String queueName;
 
-    public BiconsumerEndpointResponse(String brokerExternalName, Integer messageChannelPort, String queueName) {
+    public BiqueueEndpoint(String brokerExternalName, Integer messageChannelPort, String queueName) {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
         this.queueName = queueName;
     }
 
-    public String getQueueName() {
-        return queueName;
+    public BiqueueEndpoint() {
     }
 
-    public void setQueueName(String queueName) {
-        this.queueName = queueName;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getBrokerExternalName() {
@@ -40,11 +54,20 @@ public class BiconsumerEndpointResponse {
         this.messageChannelPort = messageChannelPort;
     }
 
+    public String getQueueName() {
+        return queueName;
+    }
+
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BiconsumerEndpointResponse that = (BiconsumerEndpointResponse) o;
+        BiqueueEndpoint that = (BiqueueEndpoint) o;
         return brokerExternalName.equals(that.brokerExternalName) &&
                 messageChannelPort.equals(that.messageChannelPort) &&
                 queueName.equals(that.queueName);
@@ -57,7 +80,7 @@ public class BiconsumerEndpointResponse {
 
     @Override
     public String toString() {
-        return "BiconsumerEndpointResponse{" +
+        return "BiqueueEndpoint{" +
                 ", brokerExternalName='" + brokerExternalName + '\'' +
                 ", messageChannelPort=" + messageChannelPort +
                 ", queueName=" + queueName +

@@ -12,7 +12,7 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.BiconsumerEndpoint;
+import no.vegvesen.ixn.federation.model.BiqueueEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.*;
@@ -673,19 +673,19 @@ public class NapRestController {
         return biQueueAccessResponse;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biconsumerEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biqueueEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
     @Operation(summary = "Get biconsumer endpoint")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
-    public BiconsumerEndpointResponse getServiceProviderBiconsumerEndPoint(@PathVariable("actorCommonName") String actorCommonName) {
+    public BiqueueEndpointResponse getServiceProviderBiqueueEndPoint(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get service provider {} have access to biconsumer", actorCommonName);
 
-        String queueName = "bi-consumer-" + UUID.randomUUID();
-        BiconsumerEndpoint endpoint = new BiconsumerEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
+        String queueName = "bi-queue-" + UUID.randomUUID();
+        BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
 
-        return typeTransformer.transformBiconsumerEndpoint(endpoint);
+        return typeTransformer.transformBiqueueEndpoint(endpoint);
     }
 
     private void validatePathVariable(String pathVariable){

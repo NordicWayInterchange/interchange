@@ -841,6 +841,17 @@ public class NapRestControllerIT extends PostgresContainerBase {
         Assertions.assertNull(sp.isBiconsumer());
     }
 
+    @Test
+    public void testGetServiceProviderBiconsumerEndPoint() throws JsonProcessingException {
+        String actorCommonName = "actor";
+        ServiceProvider sp = new ServiceProvider(actorCommonName);
+        sp = serviceProviderRepository.save(sp);
+        sp.setBiconsumer(true);
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiqueueEndPoint(actorCommonName))).
+                isEqualTo("{\"brokerExternalName\":\"blomst.itsinterchange.eu\",\"messageChannelPort\":5671,\"queueName\":bi-queue-c089aeca-8d6a-4b26-9826-f7cd307957ec}");
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

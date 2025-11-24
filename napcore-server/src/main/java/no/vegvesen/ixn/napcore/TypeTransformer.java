@@ -5,7 +5,7 @@ import no.vegvesen.ixn.federation.model.Peer;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
-import no.vegvesen.ixn.napcore.model.BiconsumerEndpointResponse;
+import no.vegvesen.ixn.napcore.model.BiqueueEndpointResponse;
 import no.vegvesen.ixn.napcore.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.napcore.model.PrivateChannelStatus;
 import no.vegvesen.ixn.napcore.model.Subscription;
@@ -186,8 +186,8 @@ public class TypeTransformer {
         );
     }
 
-    public BiconsumerEndpointResponse transformBiconsumerEndpoint(BiconsumerEndpoint biconsumerEndpoint) {
-        return new BiconsumerEndpointResponse(
+    public BiqueueEndpointResponse transformBiqueueEndpoint(BiqueueEndpoint biconsumerEndpoint) {
+        return new BiqueueEndpointResponse(
                 biconsumerEndpoint.getBrokerExternalName(),
                 biconsumerEndpoint.getMessageChannelPort(),
                 biconsumerEndpoint.getQueueName()
