@@ -24,7 +24,8 @@ public class ServiceProvider {
 	private Boolean biconsumer = false;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	private BiqueueEndpoint biqueueEndpoint = new BiqueueEndpoint();
+	@JoinColumn(name="end_id", foreignKey = @ForeignKey(name="fk_end_bi_queue"))
+	private BiqueueEndpoint biqueueEndpoint;
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
@@ -342,6 +343,7 @@ public class ServiceProvider {
 				"id=" + id +
 				", name='" + name + '\'' +
 				", biconsumer='" + biconsumer +
+				", biqueueEndpoint='" + biqueueEndpoint +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +

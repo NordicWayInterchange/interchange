@@ -686,9 +686,8 @@ public class NapRestController {
         String queueName = "bi-queue-" + UUID.randomUUID();
         BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
         serviceProvider.setBiqueueEndpoint(endpoint);
-        serviceProviderRepository.save(serviceProvider);
-
-        return typeTransformer.transformBiqueueEndpoint(serviceProvider.getBiqueueEndpoint());
+        ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProvider);
+        return typeTransformer.transformBiqueueEndpoint(savedServiceProvider.getBiqueueEndpoint());
     }
 
     private void validatePathVariable(String pathVariable){

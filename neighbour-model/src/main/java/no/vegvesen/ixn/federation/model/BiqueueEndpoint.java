@@ -81,6 +81,7 @@ public class BiqueueEndpoint {
     @Override
     public String toString() {
         return "BiqueueEndpoint{" +
+                "id=" + id +
                 ", brokerExternalName='" + brokerExternalName + '\'' +
                 ", messageChannelPort=" + messageChannelPort +
                 ", queueName=" + queueName +
