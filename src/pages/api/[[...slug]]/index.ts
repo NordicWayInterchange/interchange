@@ -33,7 +33,7 @@ import {
   addNapcorePeerToExistingPrivateChannel,
   fetchNapcoreAccessToBiQueue,
   basicPutFunction,
-  addNapcoreAccessToBiQueue, basicPutParams
+  addNapcoreAccessToBiQueue, basicPutParams, fetchNapcoreBiQueueEndpoint
 } from "@/lib/fetchers/interchangeConnector";
 import { ExtendedCapability } from "@/types/capability";
 import { Capability, Publicationids } from "@/types/napcore/capability";
@@ -45,7 +45,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { DeliveriesDelivery } from "@/types/napcore/delivery";
 import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
-import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
+import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 const logger = require("../../../lib/logger");
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
@@ -139,7 +139,13 @@ const fetchPeers = async (params: extendedGetParams) => {
 
 const fetchAccessToBiQueue = async (params: extendedGetParams) => {
   const res = await fetchNapcoreAccessToBiQueue(params);
-  const accessToBiQueue: BiQueueRequest = await res.data;
+  const accessToBiQueue: BiQueueResponse = await res.data;
+  return [res.status, accessToBiQueue];
+}
+
+const fetchBiQueueEndpoint = async (params: extendedGetParams) => {
+  const res = await fetchNapcoreBiQueueEndpoint(params);
+  const accessToBiQueue: BiQueueEndpointResponse = await res.data;
   return [res.status, accessToBiQueue];
 }
 
@@ -155,7 +161,7 @@ export const addAccessToBiQueue: basicPutFunction = async (
   params: basicPutParams
 ) => {
   const res = await addNapcoreAccessToBiQueue(params);
-  const accessToBiQueue: BiQueueRequest = await res.data;
+  const accessToBiQueue: BiQueueResponse = await res.data;
   return [res.status, accessToBiQueue];
 }
 
@@ -271,6 +277,7 @@ const getPaths: {
   "private-channels": fetchPrivateChannels,
   "private-channels/peer": fetchPeers,
   "biconsumer": fetchAccessToBiQueue,
+  "biqueueEndpoint": fetchBiQueueEndpoint
 };
 
 const patchPaths: {

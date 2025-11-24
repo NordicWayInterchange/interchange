@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
+import { BiQueueResponse } from "@/types/napcore/biQueueResponse";
 
 const fetchAccessToBiQueue: (
   commonName: string
-) => Promise<BiQueueRequest> = async (commonName: string) => {
+) => Promise<BiQueueResponse> = async (commonName: string) => {
   const res = await fetch(`/api/${commonName}/biconsumer`);
   if (res.ok) {
     return res.json();
