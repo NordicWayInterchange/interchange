@@ -17,7 +17,8 @@ import { statusChips } from "@/lib/statusChips";
 import { timeConverter } from "@/lib/timeConverter";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { styled } from "@mui/material/styles";
-import { StyledButton, drawerStyle, StyledHeaderBox } from "@/components/shared/styles/StyledSelectorBuilder";
+import { StyledButton, drawerStyle } from "@/components/shared/styles/StyledSelectorBuilder";
+import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
 
 type Props = {
   item: ExtendedSubscription | ExtendedDelivery;

@@ -10,11 +10,11 @@ import {
   Toolbar,
   Typography
 } from "@mui/material";
-import { drawerStyle, StyledCard, StyledHeaderBox } from "@/components/shared/styles/StyledSelectorBuilder";
+import { drawerStyle, StyledCard } from "@/components/shared/styles/StyledSelectorBuilder";
 import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
-import { styled } from "@mui/material/styles";
+import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
 
 type Props = {
   biQueueEndpoint: BiQueueEndpointResponse;

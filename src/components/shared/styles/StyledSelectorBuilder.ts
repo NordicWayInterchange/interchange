@@ -55,10 +55,3 @@ export const drawerStyle = {
     boxSizing: "border-box",
   },
 }
-
-export const StyledHeaderBox = styled(Box)(({}) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  width: "100%",
-}));
