@@ -58,11 +58,9 @@ const BiQueue = () => {
     setFeedback({ feedback: false, message: "", severity: "success" });
   };
 
-  const handleMoreClose = () => {
-    setDrawerOpen(false);
-  };
+  const handleOpen = (value: boolean) => () => setOpen(value);
 
-  const toggleDrawer = (value: boolean) => () => setOpen(value);
+  const handleClose = () => setOpen(false);
 
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
@@ -106,7 +104,7 @@ const BiQueue = () => {
             rowGap: 1,
           }}>
           {hasAccess ? (
-            <Stack direction="row" alignItems="left" spacing={1} onClick={toggleDrawer(true)}>
+            <Stack direction="row" alignItems="left" spacing={1} onClick={handleOpen(true)}>
               <IconButton size="small">
               <CheckCircleOutlineIcon color="success" />
               </IconButton>
@@ -164,8 +162,8 @@ const BiQueue = () => {
       {biQueueEndpoint && (
         <BiQueueEndpointDrawer
           biQueueEndpoint={biQueueEndpoint}
-          handleMoreClose={handleMoreClose}
           open={open}
+          onClose={handleClose}
         />
       )}
       {feedback.feedback && (

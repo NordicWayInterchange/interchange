@@ -19,10 +19,10 @@ import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
 type Props = {
   biQueueEndpoint: BiQueueEndpointResponse;
   open: boolean;
-  handleMoreClose: () => void;
+  onClose: () => void;
 };
 
-const BiQueueEndpointDrawer= ({ biQueueEndpoint, open, handleMoreClose }: Props) => {
+const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
 
   return (
     <>
@@ -32,15 +32,13 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open, handleMoreClose }: Props)
         variant="temporary"
         anchor="right"
         open={open}
-        onClose={() => {
-          handleMoreClose();
-        }}
+        onClose={onClose}
       >
         <Toolbar />
         <Box sx={{ padding: 1 }}>
           <List>
             <ListItem sx={{ justifyContent: "flex-end" }}>
-              <IconButton onClick={handleMoreClose}>
+              <IconButton onClick={onClose}>
                 <CloseIcon />
               </IconButton>
             </ListItem>
