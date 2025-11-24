@@ -2,7 +2,7 @@ import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
 import {
   Box,
   Drawer,
-  FormControl,
+  FormControl, IconButton,
   InputAdornment,
   List,
   ListItem,
@@ -13,6 +13,8 @@ import {
 import { drawerStyle, StyledCard } from "@/components/shared/styles/StyledSelectorBuilder";
 import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
+import CloseIcon from "@mui/icons-material/Close";
+import { styled } from "@mui/material/styles";
 
 type Props = {
   biQueueEndpoint: BiQueueEndpointResponse;
@@ -35,11 +37,21 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open, handleMoreClose }: Props)
         }}
       >
         <Toolbar />
-        <Box sx={{ padding: 1, width: 1 }}>
+        <Box sx={{ padding: 1 }}>
           <List>
+            <ListItem sx={{ justifyContent: "flex-end" }}>
+              <IconButton onClick={handleMoreClose}>
+                <CloseIcon />
+              </IconButton>
+            </ListItem>
+            <ListItem>
+              <StyledHeaderBox>
+                <Typography>Bi-queue details</Typography>
+              </StyledHeaderBox>
+            </ListItem>
             <ListItem>
               <StyledCard variant={"outlined"}>
-                <Typography>Bi-queue endpoint</Typography>
+                <Typography>Endpoint</Typography>
                 <FormControl fullWidth>
                   <TextField
                     value={biQueueEndpoint.brokerExternalName}
@@ -93,5 +105,11 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open, handleMoreClose }: Props)
   );
 };
 
+const StyledHeaderBox = styled(Box)(({}) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  width: "100%",
+}));
 export default BiQueueEndpointDrawer;
 

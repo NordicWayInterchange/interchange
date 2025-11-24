@@ -33,6 +33,7 @@ const BiQueue = () => {
 
   const [hasAccess, setHasAccess] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [open, setOpen] = React.useState(false);
 
   const [feedback, setFeedback] = useState<IFeedback>({
     feedback: false,
@@ -61,6 +62,7 @@ const BiQueue = () => {
     setDrawerOpen(false);
   };
 
+  const toggleDrawer = (value: boolean) => () => setOpen(value);
 
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
@@ -104,12 +106,12 @@ const BiQueue = () => {
             rowGap: 1,
           }}>
           {hasAccess ? (
-            <Stack direction="row" alignItems="left" spacing={1}>
+            <Stack direction="row" alignItems="left" spacing={1} onClick={toggleDrawer(true)}>
               <IconButton size="small">
               <CheckCircleOutlineIcon color="success" />
               </IconButton>
               <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
-                I currently have permission to bi-queue.
+                I currently have permission to bi-queue. Click the row to view details.
                 <Tooltip
                   slotProps={{
                     tooltip: {
@@ -163,7 +165,7 @@ const BiQueue = () => {
         <BiQueueEndpointDrawer
           biQueueEndpoint={biQueueEndpoint}
           handleMoreClose={handleMoreClose}
-          open={drawerOpen}
+          open={open}
         />
       )}
       {feedback.feedback && (
