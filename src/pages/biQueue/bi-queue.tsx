@@ -18,6 +18,7 @@ import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
 import { IFeedback } from "@/interface/IFeedback";
 import Snackbar from "@/components/shared/feedback/Snackbar";
 import { useBiQueueEndpoint } from "@/hooks/useBiQueueEndpoint";
+import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 
 const BiQueue = () => {
 
@@ -31,6 +32,7 @@ const BiQueue = () => {
   );
 
   const [hasAccess, setHasAccess] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const [feedback, setFeedback] = useState<IFeedback>({
     feedback: false,
@@ -54,6 +56,11 @@ const BiQueue = () => {
 
     setFeedback({ feedback: false, message: "", severity: "success" });
   };
+
+  const handleMoreClose = () => {
+    setDrawerOpen(false);
+  };
+
 
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
@@ -152,6 +159,13 @@ const BiQueue = () => {
         </Box>
           )}
       </Box>
+      {biQueueEndpoint && (
+        <BiQueueEndpointDrawer
+          biQueueEndpoint={biQueueEndpoint}
+          handleMoreClose={handleMoreClose}
+          open={drawerOpen}
+        />
+      )}
       {feedback.feedback && (
         <Snackbar
           message={feedback.message}
