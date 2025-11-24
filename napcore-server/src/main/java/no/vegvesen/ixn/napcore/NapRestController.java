@@ -676,7 +676,8 @@ public class NapRestController {
                 serviceProvider.setBiqueueEndpoint(endpoint);
             }
         } else {
-            serviceProvider.setBiqueueEndpoint(null);
+            BiqueueEndpoint endpoint = new BiqueueEndpoint(null, null, null);
+            serviceProvider.setBiqueueEndpoint(endpoint);
         }
         serviceProviderRepository.save(serviceProvider);
         return biQueueAccessResponse;
