@@ -682,10 +682,13 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         String queueName = "bi-queue-" + UUID.randomUUID();
         BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
+        serviceProvider.setBiqueueEndpoint(endpoint);
+        serviceProviderRepository.save(serviceProvider);
 
-        return typeTransformer.transformBiqueueEndpoint(endpoint);
+        return typeTransformer.transformBiqueueEndpoint(serviceProvider.getBiqueueEndpoint());
     }
 
     private void validatePathVariable(String pathVariable){
