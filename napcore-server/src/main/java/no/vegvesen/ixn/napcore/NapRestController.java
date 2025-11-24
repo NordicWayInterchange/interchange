@@ -692,6 +692,9 @@ public class NapRestController {
         logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        if (serviceProvider.getBiqueueEndpoint() == null) {
+            return BiqueueEndpointResponse.empty();
+        }
         return typeTransformer.transformBiqueueEndpoint(serviceProvider.getBiqueueEndpoint());
     }
 
