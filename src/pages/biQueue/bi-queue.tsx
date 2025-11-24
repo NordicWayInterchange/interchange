@@ -1,7 +1,5 @@
-import { Stack } from "@mui/system";
+import { Box, Stack } from "@mui/system";
 import {
-  Card,
-  CardContent,
   IconButton,
   Tooltip,
   Typography,
@@ -82,11 +80,11 @@ const BiQueue = () => {
 
   return (
     <>
-      <Card sx={{...frontPageCardStyle, padding: "0px"}}>
+      <Box sx={frontPageCardStyle}>
         {(biQueueAccess === undefined || isLoading) ? (
           <Loading text="Bi queue access status"/>
         ) : (
-        <CardContent>
+        <Box>
           <Stack direction="row" alignItems="left" spacing={2}
            sx={{
             flexWrap: "wrap",
@@ -145,9 +143,9 @@ const BiQueue = () => {
               {hasAccess ? "Remove my access" : "Give me access"}
             </StyledButton>
           </Stack>
-        </CardContent>
+        </Box>
           )}
-      </Card>
+      </Box>
       {feedback.feedback && (
         <Snackbar
           message={feedback.message}
