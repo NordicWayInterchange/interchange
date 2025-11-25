@@ -733,10 +733,8 @@ public class OnboardRestController {
 				serviceProvider.setBiqueueEndpoint(endpoint);
 			}
 		} else {
-			BiqueueEndpoint endpoint = new BiqueueEndpoint(null, null, null);
-			serviceProvider.setBiqueueEndpoint(endpoint);
+			serviceProvider.setBiqueueEndpoint(null);
 		}
-
 		serviceProviderRepository.save(serviceProvider);
 		return biqueueAccessResponse;
 	}

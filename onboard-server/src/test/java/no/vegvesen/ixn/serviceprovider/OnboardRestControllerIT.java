@@ -1356,6 +1356,18 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGetBiqueueEndPoint() throws JsonProcessingException {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        sp = serviceProviderRepository.save(sp);
+        sp.setBiqueueEndpoint(new BiqueueEndpoint("broker-test", 1337, "queueName"));
+        ObjectMapper mapper = new ObjectMapper();
+        assertThat(mapper.writeValueAsString(restController.getBiqueueEndPoint(serviceProviderName).getBrokerExternalName()))
+                .isEqualTo("\"broker-test\"");
+    }
+
+    @Test
     public void testGettingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
