@@ -1,4 +1,3 @@
-import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
 import {
   Box,
   Drawer,
@@ -11,21 +10,38 @@ import {
   Typography
 } from "@mui/material";
 import { drawerStyle, StyledCard } from "@/components/shared/styles/StyledSelectorBuilder";
-import React from "react";
+import React, { useEffect } from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
+import { useBiQueueEndpoint } from "@/hooks/useBiQueueEndpoint";
+import { useSession } from "next-auth/react";
 
 type Props = {
-  biQueueEndpoint: BiQueueEndpointResponse;
   open: boolean;
   onClose: () => void;
 };
 
-const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
+const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
+
+  const { data: session } = useSession();
+
+  const { data: biQueueEndpoint, refetch} = useBiQueueEndpoint(
+    session?.user?.commonName as string
+  );
+
+  useEffect(() => {
+    if (open) {
+      refetch();
+    }
+  }, [open, refetch]);
 
   return (
     <>
+      {biQueueEndpoint &&
+        Object.values(biQueueEndpoint).every(
+          (v) => v !== null && v !== undefined,
+        ) && (
       <Drawer
         sx={drawerStyle}
         slotProps={{paper: {sx: {backgroundColor: "#F9F9F9"}}}}
@@ -99,6 +115,7 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
           </List>
         </Box>
       </Drawer>
+        )}
     </>
   );
 };
