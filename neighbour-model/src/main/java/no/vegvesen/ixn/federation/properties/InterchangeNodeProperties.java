@@ -26,6 +26,8 @@ public class InterchangeNodeProperties {
 	 */
 	String messageChannelPort = "5671";
 
+	String queueName;
+
 	public String getName() {
 		return name;
 	}
@@ -45,4 +47,12 @@ public class InterchangeNodeProperties {
 	public String getMessageChannelPort() { return messageChannelPort; }
 
 	public void setMessageChannelPort(String messageChannelPort) { this.messageChannelPort = messageChannelPort; }
+
+	public String getQueueName() {
+		return queueName;
+	}
+
+	public void setQueueName(String queueName) {
+		this.queueName = queueName;
+	}
 }

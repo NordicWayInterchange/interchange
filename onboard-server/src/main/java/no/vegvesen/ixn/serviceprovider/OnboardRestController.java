@@ -725,8 +725,40 @@ public class OnboardRestController {
 		OnboardMDCUtil.removeLogVariables();
 		BiqueueAccessResponse biqueueAccessResponse = typeTransformer.transformAddBiqueueToAddBiQueueResponse(serviceProvider, addBiqueueAccessRequest);
 		serviceProvider.setBiconsumer(biqueueAccessResponse.isAccess());
+
+		if (serviceProvider.isBiconsumer()) {
+			if (serviceProvider.getBiqueueEndpoint() == null) {
+				String queueName = "bi-queue-" + UUID.randomUUID();
+				BiqueueEndpoint endpoint = new BiqueueEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
+				serviceProvider.setBiqueueEndpoint(endpoint);
+			}
+		} else {
+			BiqueueEndpoint endpoint = new BiqueueEndpoint(null, null, null);
+			serviceProvider.setBiqueueEndpoint(endpoint);
+		}
+
 		serviceProviderRepository.save(serviceProvider);
 		return biqueueAccessResponse;
+	}
+
+
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Biconsumer")
+	@Operation(summary = "Get bi-queue endpoint")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BIQUEUEENDPOINTRESPONSE)))})
+	public GetBiqueueEndpointResponse getBiqueueEndPoint(@PathVariable("serviceProviderName") String serviceProviderName) {
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Get bi-queue endpoint in service provider {}", serviceProviderName);
+		validatePathVariable(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
+
+		if (serviceProvider.getBiqueueEndpoint() == null) {
+			return GetBiqueueEndpointResponse.empty();
+		}
+
+		OnboardMDCUtil.removeLogVariables();
+		return typeTransformer.transformBiQueueEndpointToGetBiqueueEndpointResponse(serviceProvider.getBiqueueEndpoint());
 	}
 
 

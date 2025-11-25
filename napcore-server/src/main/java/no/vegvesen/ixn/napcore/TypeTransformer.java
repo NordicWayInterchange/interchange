@@ -186,11 +186,11 @@ public class TypeTransformer {
         );
     }
 
-    public BiqueueEndpointResponse transformBiqueueEndpoint(BiqueueEndpoint biconsumerEndpoint) {
+    public BiqueueEndpointResponse transformBiqueueEndpoint(BiqueueEndpoint biqueueEndpoint) {
         return new BiqueueEndpointResponse(
-                biconsumerEndpoint.getBrokerExternalName(),
-                biconsumerEndpoint.getMessageChannelPort(),
-                biconsumerEndpoint.getQueueName()
+                biqueueEndpoint.getBrokerExternalName(),
+                biqueueEndpoint.getMessageChannelPort(),
+                biqueueEndpoint.getQueueName()
         );
     }
 
