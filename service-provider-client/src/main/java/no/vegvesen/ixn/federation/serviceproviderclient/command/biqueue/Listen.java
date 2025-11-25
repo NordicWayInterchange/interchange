@@ -30,9 +30,6 @@ public class Listen implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
-    @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The delivery id")
-    String id;
-
     private final CountDownLatch counter = new CountDownLatch(1);
 
     @Override
@@ -67,5 +64,4 @@ public class Listen implements Callable<Integer> {
         }
         return 0;
     }
-
 }
