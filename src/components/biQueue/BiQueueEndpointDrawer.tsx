@@ -73,7 +73,7 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
                       input: {
                         endAdornment: (
                           <InputAdornment position="end">
-                            <ContentCopy value={biQueueEndpoint.messageChannelPort.toString()} />
+                            <ContentCopy value={biQueueEndpoint.messageChannelPort?.toString()} />
                           </InputAdornment>
                         ),
                       },
