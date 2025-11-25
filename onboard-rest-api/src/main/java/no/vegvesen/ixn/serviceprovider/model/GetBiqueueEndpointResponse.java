@@ -10,6 +10,9 @@ public class GetBiqueueEndpointResponse {
 
     private String queueName;
 
+    public GetBiqueueEndpointResponse() {
+    }
+
     public GetBiqueueEndpointResponse(String brokerExternalName, Integer messageChannelPort, String queueName) {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
