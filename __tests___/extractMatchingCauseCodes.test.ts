@@ -16,7 +16,7 @@ describe('extractMatchingCauseCodes', () => {
         const result = extractMatchingCauseCodes(causeCodeArray);
 
         expect(result).toEqual([
-            {value: 5, label: ""},
+            {value: 5, label: "Road impassable"},
         ]);
     });
 });
