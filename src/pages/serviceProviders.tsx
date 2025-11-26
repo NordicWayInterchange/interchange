@@ -1,7 +1,7 @@
 import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box, Divider} from "@mui/material";
 import Subheading from "@/components/shared/typography/Subheading";
-import React, {useState} from "react";
+import React, { useState} from "react";
 import {GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
@@ -18,13 +18,14 @@ import {
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
+import BiQueueEndpointDrawer from "@/components/shared/drawer/BiqueueEndpointDrawer";
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-
-    const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
+    const [open, setOpen] = React.useState(false);
+    const {data: serviceProviderData, isLoading, refetch} = useFetchServiceProviders(
         session?.user.commonName as string
     );
 
@@ -39,6 +40,12 @@ export default function ServiceProviders() {
     const handleMoreClose = () => {
         setDrawerOpen(false);
     };
+
+    /*useEffect(() => {
+        if (open) {
+            refetch();
+        }
+    }, [open, refetch]);*/
 
     const handleCellClick = (field: any, rowId: number) => {
         setExpandedRows({});
@@ -55,6 +62,10 @@ export default function ServiceProviders() {
         setServiceProviderRow(params?.row || []);
         setDrawerOpen(true);
     };
+
+    const handleOpen = (value: boolean) => () => setOpen(value);
+
+    const handleClose = () => setOpen(false);
 
     const serviceProviderTableHeaders: GridColDef[] = [
         {
@@ -196,7 +207,7 @@ export default function ServiceProviders() {
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
                     These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell
-                    to see details.
+                    to see details. You can also click on service provider&#39;s row to see bi-queue endpoints, if available.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>
@@ -223,6 +234,11 @@ export default function ServiceProviders() {
                             }/>
                     </Box>
                 </Box>
+                <BiQueueEndpointDrawer
+                    biQueueEndpoint={serviceProviderData?.biqueueEndpoint || []}
+                    open={open}
+                    onClose={handleClose}
+                />
                 {Object.keys(expandedRows).map((rowId) => {
                     const row = Array.isArray(serviceProviderData) ? serviceProviderData.find((item) => item.id === parseInt(rowId)) : null;
                     const field = expandedRows[rowId];

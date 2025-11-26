@@ -120,3 +120,8 @@ export const fetchAdminUIAllQueues: extendedGetFunction = async (params) => {
     const { adminUser } = params;
     return await fetchIXN(adminUser, `/queues`);
 };
+
+export const fetchAdminUIBiqueueEndpoint: extendedGetFunction = async (params) => {
+    const { adminUser } = params;
+    return await fetchIXN(adminUser, `/biqueueEndpoint`);
+};

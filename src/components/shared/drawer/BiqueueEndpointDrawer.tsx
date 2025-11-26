@@ -1,0 +1,111 @@
+import {
+    Box,
+    Drawer,
+    FormControl, IconButton,
+    InputAdornment,
+    List,
+    ListItem,
+    TextField,
+    Toolbar,
+    Typography
+} from "@mui/material";
+import React from "react";
+import { ContentCopy } from "@/components/shared/actions/ContentCopy";
+import CloseIcon from "@mui/icons-material/Close";
+import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
+
+type Props = {
+    biQueueEndpoint: any,
+    open: boolean;
+    onClose: () => void;
+};
+
+const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
+    console.log("biQueueEndpointDrawer", biQueueEndpoint);
+    return (
+        <>
+            {biQueueEndpoint &&
+                Object.values(biQueueEndpoint).every(
+                    (v) => v !== null && v !== undefined,
+                ) && (
+                    <Drawer
+                        sx={drawerStyle}
+                        slotProps={{paper: {sx: {backgroundColor: "#F9F9F9"}}}}
+                        variant="temporary"
+                        anchor="right"
+                        open={open}
+                        onClose={onClose}
+                    >
+                        <Toolbar />
+                        <Box sx={{ padding: 1 }}>
+                            <List>
+                                <ListItem sx={{ justifyContent: "flex-end" }}>
+                                    <IconButton onClick={onClose}>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </ListItem>
+                                <ListItem>
+                                    <StyledHeaderBox>
+                                        <Typography>Bi-queue details</Typography>
+                                    </StyledHeaderBox>
+                                </ListItem>
+                                <ListItem>
+                                    <StyledCard variant={"outlined"}>
+                                        <Typography>Endpoint</Typography>
+                                        <FormControl fullWidth>
+                                            <TextField
+                                                value={biQueueEndpoint.brokerExternalName}
+                                                label="Broker Name"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy value={biQueueEndpoint.brokerExternalName} />
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                value={biQueueEndpoint.messageChannelPort}
+                                                label="Port"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy value={biQueueEndpoint.messageChannelPort?.toString()} />
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                            <TextField
+                                                value={biQueueEndpoint.queueName}
+                                                label="Queue Name"
+                                                margin="normal"
+                                                slotProps={{
+                                                    input: {
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <ContentCopy value={biQueueEndpoint.queueName} />
+                                                            </InputAdornment>
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </StyledCard>
+                                </ListItem>
+                            </List>
+                        </Box>
+                    </Drawer>
+                )}
+        </>
+    );
+};
+
+export default BiQueueEndpointDrawer;
+
