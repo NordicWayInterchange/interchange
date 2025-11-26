@@ -6,7 +6,7 @@ describe('extractMatchingCauseCodes', () => {
         const result = extractMatchingCauseCodes(causeCodeArray);
 
         expect(result).toEqual([
-            {value: 1, label: "Traffic"},
+            {value: 1, label: "Traffic condition"},
             {value: 99, label: "Dangerous situation"},
         ]);
     });
