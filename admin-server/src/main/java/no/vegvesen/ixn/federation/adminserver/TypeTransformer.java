@@ -304,6 +304,10 @@ public class TypeTransformer {
     }
 
     public BiqueueEndpointApi biqueueEndpointToBiqueueEndpointApi(BiqueueEndpoint biqueueEndpoint) {
+        if (biqueueEndpoint == null) {
+            return BiqueueEndpointApi.empty();
+        }
+
         return new BiqueueEndpointApi(
                 biqueueEndpoint.getBrokerExternalName(),
                 biqueueEndpoint.getMessageChannelPort(),

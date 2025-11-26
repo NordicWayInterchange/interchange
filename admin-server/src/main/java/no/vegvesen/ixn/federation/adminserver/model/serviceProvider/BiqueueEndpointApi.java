@@ -10,10 +10,17 @@ public class BiqueueEndpointApi {
 
     private String queueName;
 
+    public BiqueueEndpointApi() {
+    }
+
     public BiqueueEndpointApi(String brokerExternalName, Integer messageChannelPort, String queueName) {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
         this.queueName = queueName;
+    }
+
+    public static BiqueueEndpointApi empty() {
+        return new BiqueueEndpointApi(null, null, null);
     }
 
     public String getQueueName() {
