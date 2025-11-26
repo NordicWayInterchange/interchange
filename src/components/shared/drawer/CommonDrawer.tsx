@@ -34,7 +34,7 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
     const consumerCommonName = (commonAttributes as any)?.consumerCommonName;
     const path = (commonAttributes as any)?.path;
     const errorMessage = (commonAttributes as any)?.errorMessage;
-    const statusKey = (subscriptionStatus?.toString() || commonAttributes.status.toString()) as keyof typeof statusChips;
+    const statusKey = (subscriptionStatus?.toString() || commonAttributes.status?.toString()) as keyof typeof statusChips;
     const chipColor = colorMapping[statusChips[statusKey]] || "default";
     return (
         <>
@@ -112,7 +112,7 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                 </FormControl>
                             </StyledCard>
                         </ListItem>
-                        {commonAttributes.endpoints.length > 0 && (
+                        {commonAttributes.endpoints?.length > 0 && (
                             <ListItem>
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>

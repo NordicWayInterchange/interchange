@@ -27,7 +27,7 @@ const PrivateChannelDrawer = ({privateChannel, open, title, handleMoreClose}: Pr
         return <Loading text=""/>
     }
 
-    const statusKey = privateChannel.status.toString() as keyof typeof statusChips;
+    const statusKey = privateChannel.status?.toString() as keyof typeof statusChips;
     const chipColor = colorMapping[statusChips[statusKey]] || "default";
     return (
         <>

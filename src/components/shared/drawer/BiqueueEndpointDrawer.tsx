@@ -13,7 +13,6 @@ import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
-import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
 
 type Props = {
     biQueueEndpoint: any,
