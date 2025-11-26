@@ -17,17 +17,20 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     private List<LocalDeliveryApi> deliveries;
 
+    private BiqueueEndpointApi biqueueEndpoint;
 
     public ServiceProviderApi(
             Integer id,
             String name,
             Boolean biconsumer,
+            BiqueueEndpointApi biqueueEndpoint,
             List<LocalSubscriptionApi> subscriptions,
             List<CapabilityApi> capabilities,
             List<LocalDeliveryApi> deliveries) {
         this.id = id;
         this.name = name;
         this.biconsumer = biconsumer;
+        this.biqueueEndpoint = biqueueEndpoint;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
@@ -86,6 +89,14 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
         this.deliveries = deliveries;
     }
 
+    public BiqueueEndpointApi getBiqueueEndpoint() {
+        return biqueueEndpoint;
+    }
+
+    public void setBiqueueEndpoint(BiqueueEndpointApi biqueueEndpoint) {
+        this.biqueueEndpoint = biqueueEndpoint;
+    }
+
     @Override
     public int compareTo(ServiceProviderApi serviceProviderApi) {
         if(id == null && serviceProviderApi.id == null) {
@@ -108,6 +119,7 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
                 "id=" + id +
                 "name='" + name + '\'' +
                 ", biconsumer=" + biconsumer +
+                ", biqueueEndpoint=" + biqueueEndpoint +
                 ", capabilities=" + capabilities +
                 ", subscriptions=" + subscriptions +
                 ", deliveries=" + deliveries +
