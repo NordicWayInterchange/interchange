@@ -18,6 +18,6 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dnapcore.cert-signer.keystore-location=${SIGN_STORE} \
      -Dnapcore.cert-signer.keystore-password=${SIGN_STORE_PASSWORD} \
      -Dnapcore.cert-signer.key-alias=${SIGN_STORE_ALIAS} \
-     -Dnapcore.node-provider.brokerexternalname=${BROKER_EXTERNAL_NAME}
+     -Dnapcore.node-provider.brokerexternalname=${BROKER_EXTERNAL_NAME} \
      ${LOG_LEVELS} \
      -jar napcore-server.jar
