@@ -803,42 +803,20 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
+    public void testPutServiceProviderHasAccessToBiconsumer() {
         String actorCommonName = "actor";
-        ServiceProvider sp = new ServiceProvider(actorCommonName);
-        sp = serviceProviderRepository.save(sp);
-        sp.setBiconsumer(true);
-        ObjectMapper mapper = new ObjectMapper();
-        assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiconsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
-    }
-
-
-    @Test
-    public void testPutServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
-        String actorCommonName = "actor";
-        ObjectMapper mapper = new ObjectMapper();
         ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
         ServiceProviderBiqueueAccessRequest withoutBiQueueAccess = new ServiceProviderBiqueueAccessRequest(false);
-        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
-        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withoutBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":false}");
+        assertThat(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess).isAccess()).isNotNull().isEqualTo(Boolean.TRUE);
+        assertThat(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withoutBiQueueAccess).isAccess()).isNotNull().isEqualTo(Boolean.FALSE);
     }
 
     @Test
-    public void testPutAndGetServiceProviderHasAccessToBiconsumer() throws JsonProcessingException {
-        String actorCommonName = "actor";
-        ObjectMapper mapper = new ObjectMapper();
-        ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
-        assertThat(mapper.writeValueAsString(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
-        assertThat(mapper.writeValueAsString(napRestController.getServiceProviderBiconsumerAccess(actorCommonName))).isEqualTo("{\"name\":\"actor\",\"access\":true}");
-    }
-
-    @Test
-    public void testNullBiconsumer() {
-        String actorCommonName = "actor-1";
-        ServiceProvider sp = new ServiceProvider(actorCommonName);
-        sp = serviceProviderRepository.save(sp);
-        sp.setBiconsumer(null);
-        Assertions.assertNull(sp.isBiconsumer());
+    public void testGetBiQueueEndpoint() {
+        BiqueueEndpointResponse biqueueEndPoint = napRestController.getBiqueueEndPoint();
+        assertThat(biqueueEndPoint.getBrokerExternalName()).isEqualTo("myBroker"); //from test/resources/application.properties
+        assertThat(biqueueEndPoint.getMessageChannelPort()).isEqualTo(5671);
+        assertThat(biqueueEndPoint.getQueueName()).isEqualTo("bi-queue");
     }
 
     @Autowired

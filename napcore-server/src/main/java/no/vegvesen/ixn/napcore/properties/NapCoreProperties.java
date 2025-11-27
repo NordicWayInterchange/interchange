@@ -13,7 +13,7 @@ public class NapCoreProperties {
 
     private String messageChannelPort = "5671";
 
-    private String biQueueName;
+    private String biQueueName = "bi-queue";
 
     private String brokerExternalName;
 

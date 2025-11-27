@@ -676,7 +676,7 @@ public class NapRestController {
     @Tag(name = "Biconsumer")
     @Operation(summary = "Get bi-queue endpoint")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
-    public BiqueueEndpointResponse getServiceProviderBiqueueEndPoint() {
+    public BiqueueEndpointResponse getBiqueueEndPoint() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
 
         return new BiqueueEndpointResponse(
