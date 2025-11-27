@@ -672,17 +672,13 @@ public class NapRestController {
         return biQueueAccessResponse;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biqueueEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Biconsumer")
     @Operation(summary = "Get bi-queue endpoint")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
-    public BiqueueEndpointResponse getServiceProviderBiqueueEndPoint(@PathVariable("actorCommonName") String actorCommonName) {
-        validatePathVariable(actorCommonName);
+    public BiqueueEndpointResponse getServiceProviderBiqueueEndPoint() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
-        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        //The actual bi-queue endpoint is hard-coded for now.
         return new BiqueueEndpointResponse(
                 napCoreProperties.getBrokerExternalName(),
                 Integer.parseInt(napCoreProperties.getMessageChannelPort()),
