@@ -69,7 +69,6 @@ public class TypeTransformer {
                     serviceProvider.getId(),
                     serviceProvider.getName(),
                     serviceProvider.isBiconsumer(),
-                    biqueueEndpointToBiqueueEndpointApi(serviceProvider.getBiqueueEndpoint()),
                     localSubscriptionSetToSubscriptionApiList(serviceProvider.getSubscriptions()),
                     capabilitiesSetToCapabilitiesApiList(serviceProvider.getCapabilities().getCapabilities()),
                     localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))
@@ -301,18 +300,6 @@ public class TypeTransformer {
             ));
         }
         return subscriptionApiList.stream().sorted().toList();
-    }
-
-    public BiqueueEndpointApi biqueueEndpointToBiqueueEndpointApi(BiqueueEndpoint biqueueEndpoint) {
-        if (biqueueEndpoint == null) {
-            return BiqueueEndpointApi.empty();
-        }
-
-        return new BiqueueEndpointApi(
-                biqueueEndpoint.getBrokerExternalName(),
-                biqueueEndpoint.getMessageChannelPort(),
-                biqueueEndpoint.getQueueName()
-        );
     }
 
     public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {

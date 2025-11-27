@@ -12,7 +12,6 @@ import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.JMSSelectorFilterFactory;
 import no.vegvesen.ixn.federation.exceptions.*;
-import no.vegvesen.ixn.federation.model.BiqueueEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
 import no.vegvesen.ixn.federation.model.PrivateChannelStatus;
 import no.vegvesen.ixn.federation.model.*;
@@ -669,15 +668,6 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         ServiceProviderBiqueueAccessResponse biQueueAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, biconsumerAccess);
         serviceProvider.setBiconsumer(biQueueAccessResponse.isAccess());
-        if (serviceProvider.isBiconsumer()) {
-            if (serviceProvider.getBiqueueEndpoint() == null) {
-                String queueName = "bi-queue-" + UUID.randomUUID();
-                BiqueueEndpoint endpoint = new BiqueueEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
-                serviceProvider.setBiqueueEndpoint(endpoint);
-            }
-        } else {
-            serviceProvider.setBiqueueEndpoint(null);
-        }
         serviceProviderRepository.save(serviceProvider);
         return biQueueAccessResponse;
     }
@@ -692,10 +682,12 @@ public class NapRestController {
         logger.info("Get bi-queue endpoint in service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        if (serviceProvider.getBiqueueEndpoint() == null) {
-            return BiqueueEndpointResponse.empty();
-        }
-        return typeTransformer.transformBiqueueEndpoint(serviceProvider.getBiqueueEndpoint());
+        //The actual bi-queue endpoint is hard-coded for now.
+        return new BiqueueEndpointResponse(
+                napCoreProperties.getBrokerExternalName(),
+                Integer.parseInt(napCoreProperties.getMessageChannelPort()),
+                napCoreProperties.getBiQueueName()
+        );
     }
 
     private void validatePathVariable(String pathVariable){

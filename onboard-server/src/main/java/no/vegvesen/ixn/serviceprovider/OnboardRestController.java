@@ -726,15 +726,6 @@ public class OnboardRestController {
 		BiqueueAccessResponse biqueueAccessResponse = typeTransformer.transformAddBiqueueToAddBiQueueResponse(serviceProvider, addBiqueueAccessRequest);
 		serviceProvider.setBiconsumer(biqueueAccessResponse.isAccess());
 
-		if (serviceProvider.isBiconsumer()) {
-			if (serviceProvider.getBiqueueEndpoint() == null) {
-				String queueName = "bi-queue-" + UUID.randomUUID();
-				BiqueueEndpoint endpoint = new BiqueueEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
-				serviceProvider.setBiqueueEndpoint(endpoint);
-			}
-		} else {
-			serviceProvider.setBiqueueEndpoint(null);
-		}
 		serviceProviderRepository.save(serviceProvider);
 		return biqueueAccessResponse;
 	}
@@ -749,14 +740,13 @@ public class OnboardRestController {
 		logger.info("Get bi-queue endpoint in service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
-		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-
-		if (serviceProvider.getBiqueueEndpoint() == null) {
-			return GetBiqueueEndpointResponse.empty();
-		}
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformBiQueueEndpointToGetBiqueueEndpointResponse(serviceProvider.getBiqueueEndpoint());
+        return new GetBiqueueEndpointResponse(
+                nodeProperties.getBrokerExternalName(),
+                Integer.parseInt(nodeProperties.getMessageChannelPort()),
+                nodeProperties.getBiQueueName()
+        );
 	}
 
 
