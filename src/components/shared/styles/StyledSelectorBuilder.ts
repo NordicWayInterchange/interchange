@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { Button, Card, FormControl } from "@mui/material";
+import { Box, Button, Card, FormControl } from "@mui/material";
 
 const width = 600;
 

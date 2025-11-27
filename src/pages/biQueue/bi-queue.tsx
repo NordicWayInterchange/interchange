@@ -17,6 +17,7 @@ import Loading from "@/components/shared/actions/Loading";
 import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
 import { IFeedback } from "@/interface/IFeedback";
 import Snackbar from "@/components/shared/feedback/Snackbar";
+import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 
 const BiQueue = () => {
 
@@ -24,7 +25,9 @@ const BiQueue = () => {
   const { data: biQueueAccess, isLoading} = useAccessToBiQueue(
     session?.user?.commonName as string
   );
+
   const [hasAccess, setHasAccess] = useState(false);
+  const [open, setOpen] = React.useState(false);
 
   const [feedback, setFeedback] = useState<IFeedback>({
     feedback: false,
@@ -48,6 +51,10 @@ const BiQueue = () => {
 
     setFeedback({ feedback: false, message: "", severity: "success" });
   };
+
+  const handleOpen = (value: boolean) => () => setOpen(value);
+
+  const handleClose = () => setOpen(false);
 
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
@@ -81,71 +88,97 @@ const BiQueue = () => {
   return (
     <>
       <Box sx={frontPageCardStyle}>
-        {(biQueueAccess === undefined || isLoading) ? (
-          <Loading text="Bi queue access status"/>
+        {biQueueAccess === undefined || isLoading ? (
+          <Loading text="Bi queue access status" />
         ) : (
-        <Box>
-          <Stack direction="row" alignItems="left" spacing={2}
-           sx={{
-            flexWrap: "wrap",
-            rowGap: 1,
-          }}>
-          {hasAccess ? (
-            <Stack direction="row" alignItems="left" spacing={1}>
-              <IconButton size="small">
-              <CheckCircleOutlineIcon color="success" />
-              </IconButton>
-              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
-                I currently have permission to bi-queue.
-                <Tooltip
-                  slotProps={{
-                    tooltip: {
-                      sx: tooltipFontStyle,
-                    },
-                  }}
-                  title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
-                >
-                  <IconButton size="small">
-                    <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
-                  </IconButton>
-                </Tooltip>
-              </Typography>
-            </Stack>
-          ) : (
-            <Stack direction="row" alignItems="left" spacing={1}>
-              <IconButton size="small" >
-              <LockOutlinedIcon color="action" />
-                </IconButton>
-              <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
-                I currently do not have permission to bi-queue.
-                <Tooltip
-                  slotProps={{
-                    tooltip: {
-                      sx: tooltipFontStyle,
-                    },
-                  }}
-                  title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
-                >
-                  <IconButton size="small">
-                    <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
-                  </IconButton>
-                </Tooltip>
-              </Typography>
-            </Stack>
-          )}
-
-            <StyledButton
-              variant="contained"
-              color={isLoading ? "grayLight" : hasAccess  ? "redLight" : "buttonThemeColor"}
-              disabled={isLoading}
-              onClick={handleToggleAccess}
+          <Box>
+            <Stack
+              direction="row"
+              alignItems="left"
+              spacing={2}
+              sx={{
+                flexWrap: "wrap",
+                rowGap: 1,
+              }}
             >
-              {hasAccess ? "Remove my access" : "Give me access"}
-            </StyledButton>
-          </Stack>
-        </Box>
-          )}
+              {hasAccess ? (
+                <Stack
+                  direction="row"
+                  alignItems="left"
+                  spacing={1}
+                  onClick={handleOpen(true)}
+                >
+                  <IconButton size="small">
+                    <CheckCircleOutlineIcon color="success" />
+                  </IconButton>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    I currently have permission to bi-queue. Click the row to
+                    view details.
+                    <Tooltip
+                      slotProps={{
+                        tooltip: {
+                          sx: tooltipFontStyle,
+                        },
+                      }}
+                      title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                    >
+                      <IconButton size="small">
+                        <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Typography>
+                </Stack>
+              ) : (
+                <Stack direction="row" alignItems="left" spacing={1}>
+                  <IconButton size="small">
+                    <LockOutlinedIcon color="action" />
+                  </IconButton>
+                  <Typography
+                    variant="body2"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    I currently do not have permission to bi-queue.
+                    <Tooltip
+                      slotProps={{
+                        tooltip: {
+                          sx: tooltipFontStyle,
+                        },
+                      }}
+                      title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                    >
+                      <IconButton size="small">
+                        <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Typography>
+                </Stack>
+              )}
+
+              <StyledButton
+                variant="contained"
+                color={
+                  isLoading
+                    ? "grayLight"
+                    : hasAccess
+                      ? "redLight"
+                      : "buttonThemeColor"
+                }
+                disabled={isLoading}
+                onClick={handleToggleAccess}
+              >
+                {hasAccess ? "Remove my access" : "Give me access"}
+              </StyledButton>
+            </Stack>
+          </Box>
+        )}
       </Box>
+        <BiQueueEndpointDrawer
+          open={open}
+          onClose={handleClose}
+        />
       {feedback.feedback && (
         <Snackbar
           message={feedback.message}

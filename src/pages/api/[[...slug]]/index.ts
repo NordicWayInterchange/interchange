@@ -33,7 +33,7 @@ import {
   addNapcorePeerToExistingPrivateChannel,
   fetchNapcoreAccessToBiQueue,
   basicPutFunction,
-  addNapcoreAccessToBiQueue, basicPutParams
+  addNapcoreAccessToBiQueue, basicPutParams, fetchNapcoreBiQueueEndpoint
 } from "@/lib/fetchers/interchangeConnector";
 import { ExtendedCapability } from "@/types/capability";
 import { Capability, Publicationids } from "@/types/napcore/capability";
@@ -45,7 +45,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { DeliveriesDelivery } from "@/types/napcore/delivery";
 import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
-import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
+import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 const logger = require("../../../lib/logger");
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
@@ -139,7 +139,13 @@ const fetchPeers = async (params: extendedGetParams) => {
 
 const fetchAccessToBiQueue = async (params: extendedGetParams) => {
   const res = await fetchNapcoreAccessToBiQueue(params);
-  const accessToBiQueue: BiQueueRequest = await res.data;
+  const accessToBiQueue: BiQueueResponse = await res.data;
+  return [res.status, accessToBiQueue];
+}
+
+const fetchBiQueueEndpoint = async (params: extendedGetParams) => {
+  const res = await fetchNapcoreBiQueueEndpoint(params);
+  const accessToBiQueue: BiQueueEndpointResponse = await res.data;
   return [res.status, accessToBiQueue];
 }
 
@@ -155,7 +161,7 @@ export const addAccessToBiQueue: basicPutFunction = async (
   params: basicPutParams
 ) => {
   const res = await addNapcoreAccessToBiQueue(params);
-  const accessToBiQueue: BiQueueRequest = await res.data;
+  const accessToBiQueue: BiQueueResponse = await res.data;
   return [res.status, accessToBiQueue];
 }
 
@@ -271,6 +277,7 @@ const getPaths: {
   "private-channels": fetchPrivateChannels,
   "private-channels/peer": fetchPeers,
   "biconsumer": fetchAccessToBiQueue,
+  "biqueueendpoint": fetchBiQueueEndpoint
 };
 
 const patchPaths: {
@@ -334,6 +341,13 @@ const findHandler: (params: any) =>
   switch (method) {
     case "GET":
       const possiblePaths = Object.keys(getPaths);
+      if (path.length === 0 && possiblePaths.includes(actorCommonName)) {
+        return {
+          fn: getPaths[actorCommonName],
+          params: { selector }
+        };
+      }
+
       if (possiblePaths.includes(urlPath)) {
         return {
           fn: getPaths[urlPath],
@@ -395,6 +409,10 @@ const findHandler: (params: any) =>
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.url?.startsWith("/api/biqueueendpoint")) {
+    return true;
+  }
+
   const secret = process.env.NEXTAUTH_SECRET;
   const token = await getToken({ req, secret, raw: true });
   const session = await getServerSession(req, res, authOptions);

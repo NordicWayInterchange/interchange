@@ -5,7 +5,7 @@ import { CertificateSignRequest } from "@/types/napcore/certificate";
 import { DeliveryRequest } from "@/types/napcore/delivery";
 import { CapabilityRequest } from "@/types/napcore/capability";
 import { PrivateChannelRequest } from "@/types/napcore/privateChannel";
-import { BiQueueRequest } from "@/types/napcore/biQueueRequest";
+import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 
 const headers = {
   Accept: "application/json",
@@ -18,7 +18,12 @@ const fetchIXN: (
   selector?: string
 ) => Promise<any> = async (actorCommonName, path, selector = "") => {
   const uri = process.env.INTERCHANGE_URI || "";
-  const uriPath = `${actorCommonName}${path}`;
+
+  const acn = actorCommonName ? actorCommonName : "";
+  const p = path ? path.replace(/^\/|\/$/g, "") : "";
+
+  const uriPath = [acn, p].filter(Boolean).join("/");
+
   const params: { selector?: string } = {};
   if (selector) {
     params.selector = selector;
@@ -47,7 +52,7 @@ const postIXN: (
 const putIXN: (
   actorCommonName: string,
   path: string,
-  body: BiQueueRequest | {}
+  body: BiQueueResponse | {}
 ) => Promise<any> = async (actorCommonName, path, body) => {
   const uri = process.env.INTERCHANGE_URI || "";
   const uriPath = `${actorCommonName}${path}`;
@@ -101,7 +106,7 @@ export type basicPostParams = {
 
 export type basicPutParams = {
   actorCommonName: string;
-  body?: BiQueueRequest;
+  body?: BiQueueResponse | BiQueueEndpointResponse;
 };
 
 export type basicPatchParams = {
@@ -257,6 +262,10 @@ export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
 ) => {
   const { actorCommonName } = params;
   return await fetchIXN(actorCommonName, `/biconsumer`);
+};
+
+export const fetchNapcoreBiQueueEndpoint: extendedGetFunction = async () => {
+  return await fetchIXN("", "/biqueueendpoint");
 };
 
 export const addNapcoreAccessToBiQueue: basicPutFunction = async (params) => {
