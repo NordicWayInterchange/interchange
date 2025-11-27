@@ -18,7 +18,12 @@ const fetchIXN: (
   selector?: string
 ) => Promise<any> = async (actorCommonName, path, selector = "") => {
   const uri = process.env.INTERCHANGE_URI || "";
-  const uriPath = `${actorCommonName}${path}`;
+
+  const acn = actorCommonName ? actorCommonName : "";
+  const p = path ? path.replace(/^\/|\/$/g, "") : "";
+
+  const uriPath = [acn, p].filter(Boolean).join("/");
+
   const params: { selector?: string } = {};
   if (selector) {
     params.selector = selector;
@@ -259,11 +264,8 @@ export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
   return await fetchIXN(actorCommonName, `/biconsumer`);
 };
 
-export const fetchNapcoreBiQueueEndpoint: extendedGetFunction = async (
-  params
-) => {
-  const { actorCommonName } = params;
-  return await fetchIXN(actorCommonName, `/biqueueendpoint`);
+export const fetchNapcoreBiQueueEndpoint: extendedGetFunction = async () => {
+  return await fetchIXN("", "/biqueueendpoint");
 };
 
 export const addNapcoreAccessToBiQueue: basicPutFunction = async (params) => {

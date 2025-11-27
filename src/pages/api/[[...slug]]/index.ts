@@ -277,7 +277,7 @@ const getPaths: {
   "private-channels": fetchPrivateChannels,
   "private-channels/peer": fetchPeers,
   "biconsumer": fetchAccessToBiQueue,
-  "biqueueEndpoint": fetchBiQueueEndpoint
+  "biqueueendpoint": fetchBiQueueEndpoint
 };
 
 const patchPaths: {
@@ -341,6 +341,13 @@ const findHandler: (params: any) =>
   switch (method) {
     case "GET":
       const possiblePaths = Object.keys(getPaths);
+      if (path.length === 0 && possiblePaths.includes(actorCommonName)) {
+        return {
+          fn: getPaths[actorCommonName],
+          params: { selector }
+        };
+      }
+
       if (possiblePaths.includes(urlPath)) {
         return {
           fn: getPaths[urlPath],
@@ -402,6 +409,10 @@ const findHandler: (params: any) =>
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.url?.startsWith("/api/biqueueendpoint")) {
+    return true;
+  }
+
   const secret = process.env.NEXTAUTH_SECRET;
   const token = await getToken({ req, secret, raw: true });
   const session = await getServerSession(req, res, authOptions);

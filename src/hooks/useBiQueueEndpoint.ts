@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
 
-const fetchBiQueueEndpoint: (
-  commonName: string
-) => Promise<BiQueueEndpointResponse> = async (commonName: string) => {
-  const res = await fetch(`/api/${commonName}/biqueueendpoint`);
+const fetchBiQueueEndpoint: () => Promise<BiQueueEndpointResponse> = async () => {
+  const res = await fetch(`/api/biqueueendpoint`);
   if (res.ok) {
     return res.json();
   } else {
@@ -13,10 +11,10 @@ const fetchBiQueueEndpoint: (
   }
 };
 
-const useBiQueueEndpoint = (commonName: string) => {
+const useBiQueueEndpoint = () => {
   return useQuery({
     queryKey: ["biqueueendpoint"],
-    queryFn: () => fetchBiQueueEndpoint(commonName),
+    queryFn: () => fetchBiQueueEndpoint(),
   });
 };
 
