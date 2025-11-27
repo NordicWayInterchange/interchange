@@ -673,7 +673,7 @@ public class NapRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Tag(name = "Biconsumer")
+    @Tag(name = "Bi-queue")
     @Operation(summary = "Get bi-queue endpoint")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
     public BiqueueEndpointResponse getBiqueueEndPoint() {

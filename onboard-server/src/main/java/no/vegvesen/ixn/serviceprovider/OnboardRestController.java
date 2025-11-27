@@ -731,8 +731,8 @@ public class OnboardRestController {
 	}
 
 
-	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueEndpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Tag(name = "Biconsumer")
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Tag(name = "Bi-queue")
 	@Operation(summary = "Get bi-queue endpoint")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BIQUEUEENDPOINTRESPONSE)))})
 	public GetBiqueueEndpointResponse getBiqueueEndPoint(@PathVariable("serviceProviderName") String serviceProviderName) {
