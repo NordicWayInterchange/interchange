@@ -1,9 +1,5 @@
 import { Box, Stack } from "@mui/system";
-import {
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { IconButton, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { tooltipFontStyle } from "@/components/shared/styles/TooltipFontStyle";
@@ -20,10 +16,9 @@ import Snackbar from "@/components/shared/feedback/Snackbar";
 import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 
 const BiQueue = () => {
-
   const { data: session } = useSession();
-  const { data: biQueueAccess, isLoading} = useAccessToBiQueue(
-    session?.user?.commonName as string
+  const { data: biQueueAccess, isLoading } = useAccessToBiQueue(
+    session?.user?.commonName as string,
   );
 
   const [hasAccess, setHasAccess] = useState(false);
@@ -32,18 +27,18 @@ const BiQueue = () => {
   const [feedback, setFeedback] = useState<IFeedback>({
     feedback: false,
     message: "",
-    severity: "success"
+    severity: "success",
   });
 
   useEffect(() => {
     if (biQueueAccess?.access !== undefined) {
-        setHasAccess(biQueueAccess.access ?? false);
+      setHasAccess(biQueueAccess.access ?? false);
     }
   }, [biQueueAccess]);
 
   const handleSnackClose = (
     _event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;
@@ -59,23 +54,24 @@ const BiQueue = () => {
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
       session?.user.commonName as string,
-      { access: !hasAccess }
+      { access: !hasAccess },
     );
 
     if (response.ok) {
       setFeedback({
         feedback: true,
-        message:  `Bi queue access successfully ${hasAccess ? "revoked" : "granted"}!`,
-        severity: "success"
+        message: `Bi queue access successfully ${hasAccess ? "revoked" : "granted"}!`,
+        severity: "success",
       });
     } else {
       const errorData = await response.json();
-      const errorMessage = errorData.message || "Bi queue access could not be granted, try again!";
+      const errorMessage =
+        errorData.message || "Bi queue access could not be granted, try again!";
 
       setFeedback({
         feedback: true,
         message: errorMessage,
-        severity: "warning"
+        severity: "warning",
       });
     }
     const result = await response.json();
@@ -115,8 +111,7 @@ const BiQueue = () => {
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
                   >
-                    I currently have permission to bi-queue. Click the row to
-                    view details.
+                    I currently have permission to bi-queue. Click here to view bi-queue endpoint.
                     <Tooltip
                       slotProps={{
                         tooltip: {
@@ -132,7 +127,7 @@ const BiQueue = () => {
                   </Typography>
                 </Stack>
               ) : (
-                <Stack direction="row" alignItems="left" spacing={1}>
+                <Stack direction="row" alignItems="left" spacing={1} onClick={handleOpen(true)}>
                   <IconButton size="small">
                     <LockOutlinedIcon color="action" />
                   </IconButton>
@@ -140,7 +135,7 @@ const BiQueue = () => {
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
                   >
-                    I currently do not have permission to bi-queue.
+                    I currently do not have permission to bi-queue. Click here to view bi-queue endpoint.
                     <Tooltip
                       slotProps={{
                         tooltip: {
@@ -175,10 +170,7 @@ const BiQueue = () => {
           </Box>
         )}
       </Box>
-        <BiQueueEndpointDrawer
-          open={open}
-          onClose={handleClose}
-        />
+      <BiQueueEndpointDrawer open={open} onClose={handleClose} />
       {feedback.feedback && (
         <Snackbar
           message={feedback.message}
