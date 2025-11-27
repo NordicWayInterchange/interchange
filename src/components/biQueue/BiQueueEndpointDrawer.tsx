@@ -15,7 +15,6 @@ import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
 import { useBiQueueEndpoint } from "@/hooks/useBiQueueEndpoint";
-import { useSession } from "next-auth/react";
 
 type Props = {
   open: boolean;
@@ -24,11 +23,7 @@ type Props = {
 
 const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
 
-  const { data: session } = useSession();
-
-  const { data: biQueueEndpoint, refetch} = useBiQueueEndpoint(
-    session?.user?.commonName as string
-  );
+  const { data: biQueueEndpoint, refetch} = useBiQueueEndpoint();
 
   useEffect(() => {
     if (open) {
