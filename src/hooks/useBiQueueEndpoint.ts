@@ -4,7 +4,7 @@ import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueu
 const fetchBiQueueEndpoint: (
   commonName: string
 ) => Promise<BiQueueEndpointResponse> = async (commonName: string) => {
-  const res = await fetch(`/api/${commonName}/biqueueEndpoint`);
+  const res = await fetch(`/api/${commonName}/biqueueendpoint`);
   if (res.ok) {
     return res.json();
   } else {
@@ -15,7 +15,7 @@ const fetchBiQueueEndpoint: (
 
 const useBiQueueEndpoint = (commonName: string) => {
   return useQuery({
-    queryKey: ["biqueueEndpoint"],
+    queryKey: ["biqueueendpoint"],
     queryFn: () => fetchBiQueueEndpoint(commonName),
   });
 };
