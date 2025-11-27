@@ -64,7 +64,7 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
                 <FormControl fullWidth>
                   <TextField
                     value={biQueueEndpoint.brokerExternalName}
-                    label="Broker Name"
+                    label="Broker External Name"
                     margin="normal"
                     slotProps={{
                       input: {
@@ -78,7 +78,7 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
                   />
                   <TextField
                     value={biQueueEndpoint.messageChannelPort}
-                    label="Port"
+                    label="Message Channel Port"
                     margin="normal"
                     slotProps={{
                       input: {

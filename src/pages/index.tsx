@@ -85,7 +85,7 @@ export default function Home() {
         </Typography>
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
-      <Divider sx={{ marginY: 2, visibility: 'hidden' }} />
+      <Divider sx={{ marginY: 1.5, visibility: 'hidden' }} />
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Box
