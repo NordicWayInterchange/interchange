@@ -21,6 +21,7 @@ server:
 
 admin:
   bi-queue-name: bi-queue
+  broker-external-name: myBroker
 
 #logging
 logging:
