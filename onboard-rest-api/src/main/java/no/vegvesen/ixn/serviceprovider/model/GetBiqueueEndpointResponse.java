@@ -19,10 +19,6 @@ public class GetBiqueueEndpointResponse {
         this.queueName = queueName;
     }
 
-    public static GetBiqueueEndpointResponse empty() {
-        return new GetBiqueueEndpointResponse(null, null, null);
-    }
-
     public String getQueueName() {
         return queueName;
     }

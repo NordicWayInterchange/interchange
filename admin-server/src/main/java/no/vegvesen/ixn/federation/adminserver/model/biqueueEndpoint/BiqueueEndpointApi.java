@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
+package no.vegvesen.ixn.federation.adminserver.model.biqueueEndpoint;
 
 import java.util.Objects;
 
@@ -17,10 +17,6 @@ public class BiqueueEndpointApi {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
         this.queueName = queueName;
-    }
-
-    public static BiqueueEndpointApi empty() {
-        return new BiqueueEndpointApi(null, null, null);
     }
 
     public String getQueueName() {
