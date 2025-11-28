@@ -5,7 +5,7 @@ import picocli.CommandLine;
 
 @CommandLine.Command(
         name = "bi-queue",
-        description = "Manage bi-queue for service provider",
+        description = "Manage bi-queue",
         subcommands = {
                 Listen.class,
         },

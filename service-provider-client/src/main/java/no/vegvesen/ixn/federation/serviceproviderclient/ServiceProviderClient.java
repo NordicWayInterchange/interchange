@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
@@ -15,7 +13,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
-import java.util.Objects;
 
 public class ServiceProviderClient {
 
@@ -157,8 +154,12 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
-    public GetBiqueueEndpointResponse getServiceProviderBiqueueEndpoint() {
-        return restTemplate.getForEntity(server + "/" + user + "/biqueueEndpoint", GetBiqueueEndpointResponse.class).getBody();
+    public GetBiqueueEndpointResponse getBiqueueEndpoint() {
+        return new GetBiqueueEndpointResponse(
+                "myBroker",
+                5671,
+                "bi-queue"
+        );
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){

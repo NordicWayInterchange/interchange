@@ -36,12 +36,7 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        BiqueueAccessResponse biQueueAccess = client.getServiceProviderBiconsumerAccess();
-        if (!biQueueAccess.isAccess()) {
-            throw new RuntimeException(String.format("There is no biqueue assigned for service provider %s", client));
-        }
-
-        GetBiqueueEndpointResponse biqueueEndpointResponse = client.getServiceProviderBiqueueEndpoint();
+        GetBiqueueEndpointResponse biqueueEndpointResponse = client.getBiqueueEndpoint();
 
         String biqueueName = biqueueEndpointResponse.getQueueName();
 
