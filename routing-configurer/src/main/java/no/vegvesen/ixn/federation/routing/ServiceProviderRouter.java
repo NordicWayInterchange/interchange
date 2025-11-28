@@ -86,7 +86,7 @@ public class ServiceProviderRouter {
 
     public void addOrRemoveServiceProviderToBiConsumerGroup(ServiceProvider serviceProvider) {
         BiConsumerMember biConsumerMember = qpidClient.getBiConsumerMember(serviceProvider.getName());
-        if (serviceProvider.isBiconsumer()) {
+        if (Boolean.TRUE.equals(serviceProvider.isBiconsumer())) {
             if (biConsumerMember == null) {
                 qpidClient.addBiConsumerMemberToGroup(serviceProvider.getName());
             }
