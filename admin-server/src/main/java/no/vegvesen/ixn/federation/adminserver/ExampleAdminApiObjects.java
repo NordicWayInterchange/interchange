@@ -348,4 +348,12 @@ public class ExampleAdminApiObjects {
               }
             """;
 
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
+
 }

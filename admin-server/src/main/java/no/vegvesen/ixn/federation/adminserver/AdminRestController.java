@@ -108,6 +108,21 @@ public class AdminRestController {
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/biqueueendpoint", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-queue")
+    @Operation(summary = "Get bi-queue endpoint")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.BIQUEUEENDPOINTRESPONSE)))})
+    public BiqueueEndpointApi getBiqueueEndPoint(@PathVariable("adminUser") String adminUser) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        return new BiqueueEndpointApi(
+                adminProperties.getBrokerExternalName(),
+                Integer.parseInt(adminProperties.getMessageChannelPort()),
+                adminProperties.getBiQueueName()
+        );
+    }
+
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Service providers")
     @Operation(summary = "Get capabilities matching subscription")

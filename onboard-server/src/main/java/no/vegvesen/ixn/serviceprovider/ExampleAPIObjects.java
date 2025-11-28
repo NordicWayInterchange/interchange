@@ -514,7 +514,7 @@ public class ExampleAPIObjects {
 
     static final String BIQUEUEENDPOINTRESPONSE = """
                 {
-                   "brokerExternalName": "blomst.itsinterchange.eu",
+                   "brokerExternalName": "myBroker",
                    "messageChannelPort": 5671,
                    "queueName": "bi-queue"
                 }

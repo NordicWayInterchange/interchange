@@ -19,6 +19,9 @@ server:
   ssl:
     client-auth: need
 
+admin:
+  bi-queue-name: bi-queue
+
 #logging
 logging:
   pattern:
