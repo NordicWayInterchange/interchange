@@ -15,6 +15,7 @@ import Groups2Icon from "@mui/icons-material/Groups2";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import DensitySmallIcon from "@mui/icons-material/DensitySmall";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
+import BiQueue from "@/pages/BiQueue/biQueue";
 
 function useAllApplicationData() {
     const {data: session} = useSession();
@@ -163,6 +164,12 @@ export default function Home() {
                 <Subheading>
                     Dashboard
                 </Subheading>
+                <BiQueue></BiQueue>
+                <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
+                <Subheading>
+                    Shortcuts
+                </Subheading>
+                <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
                 <Box sx={{display: "flex", flexDirection: "column", gap: 3}}>
                     <Box
                         sx={{
@@ -177,7 +184,7 @@ export default function Home() {
                                 style={{
                                     textDecoration: "none",
                                     marginRight: 15,
-                                    marginTop: 10,
+                                    marginTop:  10,
                                 }}
                             >
                                 <Card
@@ -187,13 +194,13 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 320,
+                                        width: 280,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"
                                         },
                                         borderBottom: "2px solid #FF9600",
-                                        height: 350,
+                                        height: 330,
                                         boxShadow: 1
                                     }}
                                 >
