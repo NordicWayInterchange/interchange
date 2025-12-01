@@ -156,7 +156,7 @@ public class ServiceProviderClient {
 
     public GetBiqueueEndpointResponse getBiqueueEndpoint() {
         return new GetBiqueueEndpointResponse(
-                "myBroker",
+                "a.qpid.bouvetinterchange.eu",
                 5671,
                 "bi-queue"
         );
