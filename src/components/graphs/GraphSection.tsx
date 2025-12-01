@@ -8,8 +8,7 @@ import { useFetchShardDetails } from '@/hooks/useFetchShardDetails';
 import { useFetchDeliveryDetails } from '@/hooks/useFetchDeliveryDetails';
 import CapabilityDrawer from '@/components/shared/drawer/CapabilityDrawer';
 import ShardDrawer from '@/components/shared/drawer/ShardDrawer';
-import { Capability } from '@/types/neighbours';
-import {Delivery, Shard} from '@/types/GraphSection';
+import {Delivery} from '@/types/GraphSection';
 import CommonDrawer from "@/components/shared/drawer/CommonDrawer";
 
 const GraphSection: React.FC<{

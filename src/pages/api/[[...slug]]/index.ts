@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIDeliveryEndpoints,
-    fetchAdminUIDeliveryIds, fetchAdminUIDeliveryInfo,
+    fetchAdminUIDeliveryIds,
+    fetchAdminUIDeliveryInfo,
     fetchAdminUIAllExchanges,
     fetchAdminUIExchangeValidator,
     fetchAdminUIMatchingCapabilities,
@@ -13,7 +14,10 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeer
+    fetchAdminUIServiceProviders,
+    fetchAdminUIAllQueues,
+    fetchAdminUIPrivateChannelsPeer,
+    fetchAdminUIBiqueueEndpoint
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
@@ -22,6 +26,7 @@ import {ServiceProviderPrivatechannels, ServiceProviderPrivateChannelsPeer} from
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
+import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
 
 interface CustomSession extends Session {
     user: {
@@ -52,6 +57,12 @@ const fetchAllQueues = async (params: basicGetParams) => {
     const res = await fetchAdminUIAllQueues(params);
     const queues: Array<queues> = await res.data;
     return [res.status, queues];
+};
+
+const fetchBiqueueEndpoint = async (params: basicGetParams) => {
+    const res = await fetchAdminUIBiqueueEndpoint(params);
+    const biQueueEndpoint: Array<BiQueueEndpointResponse> = await res.data;
+    return [res.status, biQueueEndpoint];
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
@@ -144,6 +155,7 @@ const getPaths: {
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]/[shardId]": fetchMatchingCapabilityShardDetails,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
+    biqueueendpoint: fetchBiqueueEndpoint
 };
 const findHandler: (params: any) =>
     | {
