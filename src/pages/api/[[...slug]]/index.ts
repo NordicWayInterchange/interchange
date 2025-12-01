@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth/next';
 import {getToken} from "next-auth/jwt";
 import {
     fetchAdminUIDeliveryEndpoints,
-    fetchAdminUIDeliveryIds, fetchAdminUIDeliveryInfo,
+    fetchAdminUIDeliveryIds,
+    fetchAdminUIDeliveryInfo,
     fetchAdminUIAllExchanges,
     fetchAdminUIExchangeValidator,
     fetchAdminUIMatchingCapabilities,
@@ -13,7 +14,11 @@ import {
     fetchAdminUINeighbours,
     fetchAdminUIPrivateChannels,
     fetchAdminUIQueueValidator,
-    fetchAdminUIServiceProviders, fetchAdminUIAllQueues, fetchAdminUIPrivateChannelsPeer, fetchAdminUIBiqueueEndpoint
+    fetchAdminUIServiceProviders,
+    fetchAdminUIAllQueues,
+    fetchAdminUIPrivateChannelsPeer,
+    fetchAdminUIBiqueueEndpoint,
+    fetchAdminUIBiqueueAccess
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
@@ -22,7 +27,7 @@ import {ServiceProviderPrivatechannels, ServiceProviderPrivateChannelsPeer} from
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
-import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
+import {BiQueueEndpointResponse, BiQueueResponse} from "@/types/BiQueueResponse";
 
 interface CustomSession extends Session {
     user: {
@@ -59,6 +64,12 @@ const fetchBiqueueEndpoint = async (params: basicGetParams) => {
     const res = await fetchAdminUIBiqueueEndpoint(params);
     const biQueueEndpoint: Array<BiQueueEndpointResponse> = await res.data;
     return [res.status, biQueueEndpoint];
+};
+
+const fetchBiqueueAccess = async (params: basicGetParams) => {
+    const res = await fetchAdminUIBiqueueAccess(params);
+    const biQueueAccess: Array<BiQueueResponse> = await res.data;
+    return [res.status, biQueueAccess];
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
@@ -151,7 +162,8 @@ const getPaths: {
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]/[shardId]": fetchMatchingCapabilityShardDetails,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
-    biqueueEndpoint: fetchBiqueueEndpoint
+    biqueueendpoint: fetchBiqueueEndpoint,
+    biconsumer: fetchBiqueueAccess
 };
 const findHandler: (params: any) =>
     | {
@@ -172,7 +184,12 @@ const findHandler: (params: any) =>
     switch (method) {
         case "GET":
             const possiblePaths = Object.keys(getPaths);
-
+            if (path.length === 0 && possiblePaths.includes(adminUser)) {
+                return {
+                    fn: getPaths[adminUser],
+                    params: { selector }
+                };
+            }
             const matchedPath = possiblePaths.find((pattern) => {
                 const patternSegments = pattern.split("/").filter(Boolean);
                 if (patternSegments.length !== path.length) return false;
@@ -220,6 +237,11 @@ const findHandler: (params: any) =>
 };
 
 const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
+
+    if (req.url?.startsWith("/api/biqueueendpoint")) {
+        return true;
+    }
+
     const secret = process.env.NEXTAUTH_SECRET;
     const token = await getToken({ req, secret, raw: true });
     const session = await getServerSession(req as any, res as any, authOptions as any);

@@ -1,7 +1,7 @@
 import Mainheading from "@/components/shared/typography/Mainheading";
 import {Box, Divider} from "@mui/material";
 import Subheading from "@/components/shared/typography/Subheading";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {GridColDef, GridRowParams} from "@mui/x-data-grid";
 import {dataGridTemplate} from "@/components/shared/datagrid/DataGridTemplate";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
@@ -18,19 +18,17 @@ import {
 import {ExpandedRows} from "@/types/expandedRows";
 import {StyledBorderlineSpan, StyledTableHeader} from "@/components/styles/StyledElements";
 import NestedGridServiceProviders from "@/components/serviceProviders/NestedGridServiceProviders";
-import BiQueueEndpointDrawer from "@/components/shared/drawer/BiqueueEndpointDrawer";
-
 
 export default function ServiceProviders() {
     const {data: session} = useSession();
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-    const [open, setOpen] = React.useState(false);
-    const {data: serviceProviderData, isLoading, refetch} = useFetchServiceProviders(
+
+    const {data: serviceProviderData, isLoading} = useFetchServiceProviders(
         session?.user.commonName as string
     );
 
-    const [serviceProviderRow, setServiceProviderRow] = useState<any>(null);
+    const [serviceProviderRow, setServiceProviderRow] = useState<ServiceProviderSubscriptions | ServiceProviderDeliveries | ServiceProviderCapabilities | ServiceProviderPrivatechannels | null>(null);
     const [highlightedCell, setHighlightedCell] = useState<{
         id: number | null;
         field: string | null;
@@ -41,12 +39,6 @@ export default function ServiceProviders() {
     const handleMoreClose = () => {
         setDrawerOpen(false);
     };
-
-    useEffect(() => {
-        if (open) {
-            refetch();
-        }
-    }, [open, refetch]);
 
     const handleCellClick = (field: any, rowId: number) => {
         setExpandedRows({});
@@ -64,54 +56,17 @@ export default function ServiceProviders() {
         setDrawerOpen(true);
     };
 
-    const handleOnRowWithBiQueueClick = (params: GridRowParams) => {
-        console.log(params);
-        setServiceProviderRow(null);
-        setServiceProviderRow(params?.row || []);
-        setOpen(true);
-    };
-
-    const handleOpen = (value: boolean) => () => setOpen(value);
-
-    const handleClose = () => setOpen(false);
-
     const serviceProviderTableHeaders: GridColDef[] = [
         {
             ...dataGridTemplate,
             field: "id",
             headerName: "ID",
-            renderCell: (params) => {
-                const serviceIds = params.row.id;
-                return (
-                    <Box
-                        onClick={() => {
-                            setServiceProviderRow(null);
-                            setServiceProviderRow(params?.row || []);
-                            setOpen(true);
-                        }}
-                    >{serviceIds}
-                    </Box>
-                );
-            },
         },
         {
             ...dataGridTemplate,
             field: "name",
             flex: 4,
-            headerName: "Domain name",
-            renderCell: (params) => {
-                const serviceNames = params.row.name;
-                return (
-                    <Box
-                        onClick={() => {
-                            setServiceProviderRow(null);
-                            setServiceProviderRow(params?.row || []);
-                            setOpen(true);
-                        }}
-                    >{serviceNames}
-                    </Box>
-                );
-            },
+            headerName: "Domain name"
         },
         {
             ...dataGridTemplate,
@@ -231,32 +186,17 @@ export default function ServiceProviders() {
         {
             ...dataGridTemplate,
             field: "biconsumer",
-            headerName: "Bi-consumer",
-            renderCell: (params) => {
-                const serviceBiconsumer = params.row.biconsumer;
-                console.log(serviceBiconsumer);
-                return (
-                    <Box
-                        onClick={() => {
-                            setServiceProviderRow(null);
-                            setServiceProviderRow(params?.row || []);
-                            setOpen(true);
-                        }}
-                    > {serviceBiconsumer?.toString()}
-                    </Box>
-                );
-            },
+            headerName: "Bi-consumer"
         },
     ];
 
-    const displayBiQueueEndpointDrawer = serviceProviderRow && serviceProviderRow?.biqueueEndpoint;
     return (
         <>
             <Box flex={1}>
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
-                    These are all of all service providers. You can click on each underlined data cell to see the details.
-                    You can also click on each service provider&#39;s row to see bi-queue endpoints, if available.
+                    These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell
+                    to see details.
                 </Subheading>
                 <Divider sx={{marginY: 3}}/>
                 <Box sx={{height: 450, width: "100%"}}>
@@ -272,6 +212,7 @@ export default function ServiceProviders() {
                             }}
                             onCellClick={(params) => {
                                 setHighlightedCell({ id: params.id as number, field: params.field });
+
                             }}
                             getCellClassName={(params) =>
                                 (params.field === 'subscriptions' || params.field === 'capabilities'
@@ -281,12 +222,6 @@ export default function ServiceProviders() {
                                     : ""
                             }/>
                     </Box>
-                    {displayBiQueueEndpointDrawer && ( <BiQueueEndpointDrawer
-                            biQueueEndpoint={displayBiQueueEndpointDrawer}
-                            open={open}
-                            onClose={handleClose}
-                        />
-                    )}
                 </Box>
                 {Object.keys(expandedRows).map((rowId) => {
                     const row = Array.isArray(serviceProviderData) ? serviceProviderData.find((item) => item.id === parseInt(rowId)) : null;

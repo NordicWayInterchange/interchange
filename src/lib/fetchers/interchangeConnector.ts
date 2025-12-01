@@ -7,8 +7,8 @@ const headers = {
 const tlsAgent = getTLSAgent();
 
 const fetchIXN: (
-    adminUser: string,
-    path: string,
+    adminUser?: string,
+    path?: string,
     selector?: string
 ) => Promise<any> = async (adminUser, path) => {
     const uri = process.env.INTERCHANGE_URI || "";
@@ -121,7 +121,10 @@ export const fetchAdminUIAllQueues: extendedGetFunction = async (params) => {
     return await fetchIXN(adminUser, `/queues`);
 };
 
-export const fetchAdminUIBiqueueEndpoint: extendedGetFunction = async (params) => {
-    const { adminUser } = params;
-    return await fetchIXN(adminUser, `/biqueueEndpoint`);
+export const fetchAdminUIBiqueueEndpoint: extendedGetFunction = async () => {
+    return await fetchIXN("", "/biqueueendpoint");
+};
+
+export const fetchAdminUIBiqueueAccess: extendedGetFunction = async () => {
+    return await fetchIXN("", "/biconsumer");
 };

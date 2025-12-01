@@ -1,4 +1,4 @@
-import {Application, CapabilitiesStatus, Capability, Metadata} from "@/types/neighbours";
+import {Application, CapabilitiesStatus, Metadata} from "@/types/neighbours";
 import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
 
 export type ServiceProviders = {

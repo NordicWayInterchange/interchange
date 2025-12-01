@@ -3,3 +3,7 @@ export type BiQueueEndpointResponse = {
     messageChannelPort: number;
     queueName: string,
 }
+
+export type BiQueueResponse = {
+    access: boolean;
+}

@@ -1,5 +1,5 @@
 import {
-    Box,
+    Box, Card,
     Drawer,
     FormControl, IconButton,
     InputAdornment,
@@ -9,19 +9,28 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
-import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {drawerStyle, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {useFetchBiQueueEndpoint} from "@/hooks/UseFetchBiQueueEndpoint";
+import {styled} from "@mui/system";
 
 type Props = {
-    biQueueEndpoint: any,
     open: boolean;
     onClose: () => void;
 };
 
-const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
-    console.log("biQueueEndpointDrawer", biQueueEndpoint);
+const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
+
+    const { data: biQueueEndpoint, refetch} = useFetchBiQueueEndpoint();
+
+    useEffect(() => {
+        if (open) {
+            refetch();
+        }
+    }, [open, refetch]);
+
     return (
         <>
             {biQueueEndpoint &&
@@ -55,7 +64,7 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
                                         <FormControl fullWidth>
                                             <TextField
                                                 value={biQueueEndpoint.brokerExternalName}
-                                                label="Broker Name"
+                                                label="Host"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
@@ -83,7 +92,7 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
                                             />
                                             <TextField
                                                 value={biQueueEndpoint.queueName}
-                                                label="Queue Name"
+                                                label="Source"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
@@ -105,6 +114,12 @@ const BiQueueEndpointDrawer= ({ biQueueEndpoint, open , onClose}: Props) => {
         </>
     );
 };
+
+const StyledCard = styled(Card)(({}) => ({
+    padding: "16px",
+    width: "100%",
+}));
+
 
 export default BiQueueEndpointDrawer;
 
