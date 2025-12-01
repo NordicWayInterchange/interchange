@@ -162,11 +162,6 @@ export default function Home() {
                 <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
                 <Divider sx={{marginY: 3}}/>
                 <Subheading>
-                    Dashboard
-                </Subheading>
-                <BiQueue></BiQueue>
-                <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
-                <Subheading>
                     Shortcuts
                 </Subheading>
                 <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
@@ -248,6 +243,12 @@ export default function Home() {
                         ))}
                     </Box>
                 </Box>
+                <Divider style={{ margin: '25px 0', visibility: 'hidden' }}/>
+                <Subheading>
+                    Bi-queue
+                </Subheading>
+                <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
+                <BiQueue></BiQueue>
             </Box>
         </>
     );

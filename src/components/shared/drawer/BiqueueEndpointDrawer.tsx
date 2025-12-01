@@ -15,6 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledHeaderBox} from "@/components/styles/StyledElements";
 import {useFetchBiQueueEndpoint} from "@/hooks/UseFetchBiQueueEndpoint";
 import {styled} from "@mui/system";
+import {useSession} from "next-auth/react";
 
 type Props = {
     open: boolean;
@@ -23,7 +24,10 @@ type Props = {
 
 const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
 
-    const { data: biQueueEndpoint, refetch} = useFetchBiQueueEndpoint();
+    const { data: session } = useSession();
+    const commonName = session?.user.commonName as string;
+
+    const { data: biQueueEndpoint, refetch} = useFetchBiQueueEndpoint(commonName);
 
     useEffect(() => {
         if (open) {
