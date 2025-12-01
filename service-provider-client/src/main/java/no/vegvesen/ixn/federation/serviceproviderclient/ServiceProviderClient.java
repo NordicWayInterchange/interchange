@@ -155,11 +155,8 @@ public class ServiceProviderClient {
     }
 
     public GetBiqueueEndpointResponse getBiqueueEndpoint() {
-        return new GetBiqueueEndpointResponse(
-                "a.qpid.bouvetinterchange.eu",
-                5671,
-                "bi-queue"
-        );
+        String url = String.format("%s/%s/biqueueendpoint", server, user);
+        return restTemplate.getForEntity(url, GetBiqueueEndpointResponse.class).getBody();
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
