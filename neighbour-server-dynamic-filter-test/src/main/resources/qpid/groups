@@ -1,0 +1,5 @@
+federated-interchanges.users=a.bouvetinterchange.eu
+administrators.users=qpid-admin,routing_configurer,localhost
+service-providers.users=king_gustaf.b.bouvetinterchange.eu
+remote-service-providers.users=
+clients-private-channels.users=

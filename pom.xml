@@ -262,5 +262,6 @@
         <module>admin-server-app</module>
         <module>import-export-service</module>
         <module>csr-generator</module>
+        <module>neighbour-server-dynamic-filter-test</module>
     </modules>
 </project>

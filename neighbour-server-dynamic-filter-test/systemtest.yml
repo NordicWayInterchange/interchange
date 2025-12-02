@@ -1,0 +1,248 @@
+services:
+
+# Note: now all the containers are on the same network - testing_net
+# An idea for later would be to have two separate networks, one for each node,
+# where the modules that need to communicate with each other are a part of both networks.
+
+
+#For this test, use the target folder for keys, config, etc.
+
+  mock-dns-server:
+    build:
+      context: ../fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+    - NET_ADMIN
+    container_name: mock-dns-server
+    hostname: mock-dns-server
+    networks:
+      testing_net:
+        ipv4_address: 172.28.1.1
+        aliases:
+          - dns.bouvetinterchange.eu
+
+
+  a_db:
+    image: postgres:15.1
+    container_name: a_db
+    depends_on:
+      - mock-dns-server
+    ports:
+      - 15432:5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+    - testing_net
+
+
+  a_onboard_server:
+    build:
+      context: ../onboard-server-app
+    container_name: a_onboard_server
+    depends_on:
+      - a_db
+    ports:
+      - 32666:8797
+    volumes:
+    - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+
+  a_qpid:
+    build:
+      context: ../qpid
+    container_name: a_qpid
+    ports:
+      - 8666:8080
+      - 443
+      - 63003:5671
+      - 5672
+    volumes:
+      - "../qpid/a:/config"
+      - "../tmp:/jks"
+      - "../qpid/messages/a:/work/a/messages"
+    environment:
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - INTERNAL_KEY_STORE=/jks/keys/a_qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.qpid.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - VHOST_FILE=/work/default/config/default.json
+      - STATIC_VHOST_FILE=/config/vhost.json
+      - GROUPS_FILE=/work/default/config/groups
+      - STATIC_GROUPS_FILE=/config/groups
+      - PASSWD_FILE=/config/passwd
+    depends_on:
+    - mock-dns-server
+    networks:
+    - testing_net
+
+  a_neighbour_server:
+    build:
+      context: ../neighbour-server-app
+    container_name: a_neighbour_server
+    depends_on:
+      - a_db
+    ports:
+      - 8090
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+    - testing_net
+    dns: 172.28.1.1
+
+  a_routing_configurer:
+    build:
+      context: ../routing-configurer-app
+    container_name: a_routing_configurer
+    depends_on:
+      - a_db
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - BASE_URL=https://a_qpid
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+    networks:
+    - testing_net
+
+  a_neighbour_discoverer:
+    build:
+      context: ../neighbour-discoverer-app
+    container_name: a_neighbour_discoverer
+    depends_on:
+      - a_db
+    links:
+     - "b_neighbour_server:b.bouvetinterchange.eu"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - DOMAIN_NAME=bouvetinterchange.eu
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+    dns: 172.28.1.1
+    networks:
+    - testing_net
+
+  a_message_collector_app:
+    build:
+      context: ../../interchange/message-collector-app
+    container_name: a_message_collector_app
+    depends_on:
+    - a_db
+    links:
+    - "a_qpid:a.qpid.bouvetinterchange.eu"
+    - "b_qpid:b.qpid.bouvetinterchange.eu"
+    volumes:
+    - "../tmp:/jks"
+    environment:
+    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_USER=federation
+    - POSTGRES_PASSWORD=federation
+    - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+    - KEY_STORE_PASSWORD=password
+    - KEY_STORE_TYPE=PKCS12
+    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+    - TRUST_STORE_PASSWORD=password
+    - TRUST_STORE_TYPE=JKS
+    - SERVER_NAME=a.bouvetinterchange.eu
+    - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+    - PREFETCH=1000
+    networks:
+    - testing_net
+
+  #THIS is where we put the new Docker Compose image
+  b_neighbour_server:
+    build:
+      context: ./
+    container_name: b_neighbour_server
+    ports:
+      - "8090"
+    volumes:
+      - "../tmp:/jks"
+    environment:
+      - HOSTNAME=b.bouvetinterchange.eu
+      - NEIGHBOUR_NAME=a.bouvetinterchange.eu
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER=b.qpid.bouvetinterchange.eu
+      - QUEUE=test-queue
+    networks:
+      - testing_net
+    dns: 172.28.1.1
+
+  #This should use qpid image, and have a single, static config from file.
+  b_qpid:
+    image: apache/qpid-broker-j:10.0.0-alpine
+    container_name: b_qpid
+    ports:
+      - 8555:8080
+      - 443
+      - 63001:5671
+      - 5672
+    volumes:
+      - "./src/main/resources/qpid/:/qpid-broker-j/work-override"
+      - "../tmp:/jks"
+    environment:
+      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/jks/keys/b.qpid.bouvetinterchange.eu.p12
+      - KEY_STORE_PASSWORD=password
+      - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
+      - GROUPS_FILE=/qpid-broker-j/work/groups
+    depends_on:
+    - mock-dns-server
+    networks:
+    - testing_net
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.28.0.0/16
+
+

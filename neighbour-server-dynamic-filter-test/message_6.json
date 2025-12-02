@@ -1,0 +1,21 @@
+{
+  "messages" : [{
+    "messageText" : "This is my message",
+    "userId" : "king_gustaf.b.bouvetinterchange.eu",
+    "publisherId" : "NO0001",
+    "publicationId" : "N00001:1234",
+    "originatingCountry" : "NO",
+    "protocolVersion" : "1.0",
+    "serviceType" : "service",
+    "baselineVersion" : "1.8.0",
+    "messageType" : "DENM",
+    "longitude" : 124.0,
+    "latitude" : 213.0,
+    "quadTree" : ",12004,",
+    "shardId" : 1,
+    "shardCount" : 1,
+    "causeCode" : 6,
+    "subCauseCode" : 61
+  }]
+}
+
