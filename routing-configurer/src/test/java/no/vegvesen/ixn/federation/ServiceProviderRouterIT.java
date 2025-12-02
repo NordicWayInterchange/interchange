@@ -1492,6 +1492,22 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
 	}
+    @Test
+    public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsNull() {
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                null,
+                new Capabilities(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+        assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+    }
 
 	@Test
 	public void testServiceProviderAddedToBiConsumerGroup() {
