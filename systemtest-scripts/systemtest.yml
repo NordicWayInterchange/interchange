@@ -86,6 +86,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -114,6 +115,7 @@ services:
       - SIGN_STORE=/jks/keys/ca.a.bouvetinterchange.eu.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -316,6 +318,7 @@ services:
     - TRUST_STORE_PASSWORD=password
     - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
+    - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
     - testing_net
 
