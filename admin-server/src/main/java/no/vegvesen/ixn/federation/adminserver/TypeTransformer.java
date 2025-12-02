@@ -65,10 +65,11 @@ public class TypeTransformer {
     public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
+            Boolean biconsumer = serviceProvider.isBiconsumer();
             serviceProviderApiList.add(new ServiceProviderApi(
                     serviceProvider.getId(),
                     serviceProvider.getName(),
-                    serviceProvider.isBiconsumer(),
+                    biconsumer == null ? Boolean.FALSE : biconsumer,
                     localSubscriptionSetToSubscriptionApiList(serviceProvider.getSubscriptions()),
                     capabilitiesSetToCapabilitiesApiList(serviceProvider.getCapabilities().getCapabilities()),
                     localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))

@@ -330,9 +330,10 @@ public class TypeTransformer {
     }
 
     public BiqueueAccessResponse transformBiQueueToGetBiqueueResponse(ServiceProvider serviceProvider) {
+        Boolean biconsumer = serviceProvider.isBiconsumer();
         return new BiqueueAccessResponse(
                 serviceProvider.getName(),
-                serviceProvider.isBiconsumer()
+                biconsumer == null ? Boolean.FALSE : biconsumer
         );
     }
 

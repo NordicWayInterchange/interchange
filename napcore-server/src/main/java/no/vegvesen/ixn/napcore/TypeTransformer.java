@@ -179,9 +179,10 @@ public class TypeTransformer {
     }
 
     public ServiceProviderBiqueueAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
+        Boolean biconsumer = serviceProvider.isBiconsumer();
         return new ServiceProviderBiqueueAccessResponse(
                 serviceProvider.getName(),
-                serviceProvider.isBiconsumer()
+                biconsumer == null ? Boolean.FALSE : biconsumer
         );
     }
 
