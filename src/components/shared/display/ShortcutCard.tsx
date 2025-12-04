@@ -19,12 +19,12 @@ const ShortcutCard = (props: Props) => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        width: 195,
+        width: 180,
         "&:hover": {
           boxShadow: 7,
           textDecoration: "underline"
         },
-        height: 195,
+        height: 180,
         borderBottom: "2px solid #FF9600",
         boxShadow: 1
       }}
@@ -46,7 +46,7 @@ const ShortcutCard = (props: Props) => {
         }}
       >
         <Typography sx={{ fontWeight: 500 }}>{header}</Typography>
-        <Typography>{description}</Typography>
+        <Typography sx={{ fontSize: ".89rem" }}>{description}</Typography>
       </Box>
     </Card>
   );
