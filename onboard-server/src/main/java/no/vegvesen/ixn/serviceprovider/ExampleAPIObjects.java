@@ -498,4 +498,26 @@ public class ExampleAPIObjects {
               }
             }
             """;
+
+    public static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
+
+    public static final String ADDBICONSUMERACCESSREQUEST = """
+                {
+                    "access": true
+                }
+                """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
+
 }

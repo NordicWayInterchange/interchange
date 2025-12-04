@@ -299,4 +299,25 @@ public class ExampleApiObjects {
                     "description": "private channel between king olav and king gustaf"
                 }
                 """;
+
+    static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
+
+    static final String ADDBICONSUMERACCESSREQUEST = """
+                {
+                    "access": true
+                }
+                """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
 }

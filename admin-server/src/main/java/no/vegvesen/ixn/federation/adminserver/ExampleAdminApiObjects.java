@@ -44,6 +44,7 @@ public class ExampleAdminApiObjects {
                    {
                        "id": 1,
                        "name": "king_olav.bouvetinterchange.eu",
+                       "biconsumer": true,
                        "subscriptions": [
                            {
                                "id": "1",
@@ -346,5 +347,13 @@ public class ExampleAdminApiObjects {
                   "exchangeNameExists": true
               }
             """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
 
 }

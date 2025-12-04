@@ -15,7 +15,6 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +33,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1325,6 +1323,32 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
             restController.getDelivery(serviceProviderName, "999");
         });
     }
+
+    @Test
+    public void testGettingHasAccessToBiConsumer() {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutAndGetHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        AddBiqueueAccessRequest withoutBiQueueAccess = new AddBiqueueAccessRequest(false);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withoutBiQueueAccess).isAccess()).isFalse();
+    }
+
 
     @Test
     public void testGettingDeliveryWithInvalidId() {

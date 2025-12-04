@@ -7,6 +7,8 @@ public class ServiceProviderImportApi {
 
     private String name;
 
+    private Boolean biconsumer;
+
     private Set<LocalSubscriptionImportApi> subscriptions;
 
     private Set<CapabilityImportApi> capabilities;
@@ -20,11 +22,13 @@ public class ServiceProviderImportApi {
     }
 
     public ServiceProviderImportApi(String name,
+                                    Boolean biconsumer,
                                     Set<LocalSubscriptionImportApi> subscriptions,
                                     Set<CapabilityImportApi> capabilities,
                                     Set<DeliveryImportApi> deliveries,
                                     long subscriptionsUpdated) {
         this.name = name;
+        this.biconsumer = biconsumer;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
@@ -37,6 +41,14 @@ public class ServiceProviderImportApi {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getBiconsumer() {
+        return biconsumer;
+    }
+
+    public void setBiconsumer(Boolean biconsumer) {
+        this.biconsumer = biconsumer;
     }
 
     public Set<LocalSubscriptionImportApi> getSubscriptions() {
@@ -76,7 +88,7 @@ public class ServiceProviderImportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ServiceProviderImportApi that = (ServiceProviderImportApi) o;
-        return subscriptionsUpdated == that.subscriptionsUpdated && Objects.equals(name, that.name) && Objects.equals(subscriptions, that.subscriptions) && Objects.equals(capabilities, that.capabilities) && Objects.equals(deliveries, that.deliveries);
+        return subscriptionsUpdated == that.subscriptionsUpdated && Objects.equals(name, that.name) && Objects.equals(biconsumer, that.biconsumer) && Objects.equals(subscriptions, that.subscriptions) && Objects.equals(capabilities, that.capabilities) && Objects.equals(deliveries, that.deliveries);
     }
 
     @Override
@@ -88,6 +100,7 @@ public class ServiceProviderImportApi {
     public String toString() {
         return "ServiceProviderImportApi{" +
                 "name='" + name + '\'' +
+                ", biconsumer=" + biconsumer +
                 ", subscriptions=" + subscriptions +
                 ", capabilities=" + capabilities +
                 ", deliveries=" + deliveries +

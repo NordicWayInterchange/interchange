@@ -21,6 +21,7 @@ public class ExportTransformer {
     public ServiceProviderExportApi transformServiceProviderToServiceProviderExportApi(ServiceProvider serviceProvider) {
         return new ServiceProviderExportApi(
                 serviceProvider.getName(),
+                serviceProvider.isBiconsumer(),
                 serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionToLocalSubscriptionExportApi).collect(Collectors.toSet()),
                 serviceProvider.getCapabilities().getCapabilities().stream().map(this::transformCapabilityToCapabilityExportApi).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryToDeliveryExportApi).collect(Collectors.toSet())

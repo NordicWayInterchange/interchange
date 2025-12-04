@@ -58,6 +58,8 @@ public class ServiceProviderRouter {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
+
+            addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
@@ -79,6 +81,19 @@ public class ServiceProviderRouter {
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
             serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
+        }
+    }
+
+    public void addOrRemoveServiceProviderToBiConsumerGroup(ServiceProvider serviceProvider) {
+        BiConsumerMember biConsumerMember = qpidClient.getBiConsumerMember(serviceProvider.getName());
+        if (Boolean.TRUE.equals(serviceProvider.isBiconsumer())) {
+            if (biConsumerMember == null) {
+                qpidClient.addBiConsumerMemberToGroup(serviceProvider.getName());
+            }
+        } else {
+            if (biConsumerMember != null) {
+                qpidClient.removeBiConsumerMemberFromGroup(biConsumerMember);
+            }
         }
     }
 
