@@ -44,6 +44,7 @@ public class ExampleAdminApiObjects {
                    {
                        "id": 1,
                        "name": "king_olav.bouvetinterchange.eu",
+                       "biconsumer": true,
                        "subscriptions": [
                            {
                                "id": "1",
@@ -111,6 +112,7 @@ public class ExampleAdminApiObjects {
                                        "host": "a.qpid.bouvetinterchange.eu",
                                        "port": 5671,
                                        "target": "del-efe7b96f-dd7d-4f68-bf0f-4585689403f6",
+                                       "dlqName": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9",
                                        "maxBandwidth": null,
                                        "maxMessageRate": null
                                    }
@@ -219,7 +221,10 @@ public class ExampleAdminApiObjects {
                                 "x-filter-jms-selector": "(quadTree like '%,1203%') AND (causeCode = 5) AND (publicationId = 'NO00002:test') AND (messageType = 'DENM') AND (publisherId = 'NO00002') AND (protocolVersion = 'DENM:1.2.2') AND (originatingCountry = 'SE')"
                             }
                         }
-                    ]
+                    ],
+                    "alternateBinding": {
+                    "destination": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9"
+                    }
                 }]
             """;
 
@@ -261,7 +266,8 @@ public class ExampleAdminApiObjects {
               "endpoints" : [ {
                 "host" : "bouvet.itsinterchange.eu",
                 "port" : 5671,
-                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
+                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63",
+                "dlqName": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9"
               } ],
               "lastUpdatedTimestamp" : 1726567679,
               "description": "Deliver messages from Norway"
@@ -274,7 +280,8 @@ public class ExampleAdminApiObjects {
                        "localDeliveryEndpointApi": {
                            "host": "a.qpid.bouvetinterchange.eu",
                            "port": 5671,
-                           "target": "del-1b39c7b9-f27d-4149-9422-54360333be33"
+                           "target": "del-1b39c7b9-f27d-4149-9422-54360333be33",
+                           "dlqName": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9"
                        },
                        "exists": true
                    }
@@ -340,5 +347,13 @@ public class ExampleAdminApiObjects {
                   "exchangeNameExists": true
               }
             """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
 
 }

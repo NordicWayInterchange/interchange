@@ -25,6 +25,8 @@ public class Sink implements AutoCloseable {
 
 	private ExceptionListener exceptionListener;
 
+	private String dynamicFilter;
+
     public Sink(String url, String queueName, SSLContext sslContext) {
         this.url = url;
         this.queueName = queueName;
@@ -32,11 +34,27 @@ public class Sink implements AutoCloseable {
 		this.listener = new WriteToScreenMessageListener();
     }
 
+	public Sink(String url, String queueName, SSLContext sslContext, String dynamicFilter) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = new WriteToScreenMessageListener();
+		this.dynamicFilter = dynamicFilter;
+	}
+
 	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener) {
 		this.url = url;
 		this.queueName = queueName;
 		this.sslContext = sslContext;
 		this.listener = listener;
+	}
+
+	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, String dynamicFilter) {
+		this.url = url;
+		this.queueName = queueName;
+		this.sslContext = sslContext;
+		this.listener = listener;
+		this.dynamicFilter = dynamicFilter;
 	}
 
 	public Sink(String url, String queueName, SSLContext sslContext, MessageListener listener, ExceptionListener exceptionListener) {
@@ -78,7 +96,7 @@ public class Sink implements AutoCloseable {
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = session.createConsumer(destination);
+		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
@@ -89,7 +107,7 @@ public class Sink implements AutoCloseable {
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		MessageConsumer consumer = session.createConsumer(destination);
+		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}

@@ -8,8 +8,6 @@ import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransform
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ImportTransformer {
@@ -23,6 +21,7 @@ public class ImportTransformer {
 
     public ServiceProvider transformServiceProviderImportApiToServiceProvider(ServiceProviderImportApi serviceProvider) {
         return new ServiceProvider(serviceProvider.getName(),
+                serviceProvider.getBiconsumer(),
                 new Capabilities(serviceProvider.getCapabilities().stream().map(this::transformCapabilityImportApiToCapability).collect(Collectors.toSet())),
                 serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionImportApiToLocalSubscription).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryImportApiToLocalDelivery).collect(Collectors.toSet()),
@@ -130,10 +129,12 @@ public class ImportTransformer {
     }
 
     public LocalDelivery transformDeliveryImportApiToLocalDelivery(DeliveryImportApi delivery) {
-        return new LocalDelivery(delivery.getUuid(),delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
+        return new LocalDelivery(
+                delivery.getUuid(),
+                delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                //transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(delivery.getStatus())
-                LocalDeliveryStatus.REQUESTED
+                LocalDeliveryStatus.REQUESTED,
+                delivery.getDlqueue()
         );
     }
 
@@ -142,7 +143,8 @@ public class ImportTransformer {
                 endpoint.getPort(),
                 endpoint.getTarget(),
                 endpoint.getMaxBandwidth(),
-                endpoint.getMaxMessageRate()
+                endpoint.getMaxMessageRate(),
+                endpoint.getDlqName()
         );
     }
 

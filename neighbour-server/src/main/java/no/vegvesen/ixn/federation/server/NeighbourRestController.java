@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.model.ServiceProvider;

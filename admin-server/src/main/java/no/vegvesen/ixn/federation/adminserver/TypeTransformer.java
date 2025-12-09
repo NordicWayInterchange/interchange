@@ -65,9 +65,11 @@ public class TypeTransformer {
     public List<ServiceProviderApi> serviceProviderListToServiceProviderApiList(List<ServiceProvider> serviceProviderList) {
         List<ServiceProviderApi> serviceProviderApiList = new ArrayList<>();
         for (ServiceProvider serviceProvider : serviceProviderList) {
+            Boolean biconsumer = serviceProvider.isBiconsumer();
             serviceProviderApiList.add(new ServiceProviderApi(
                     serviceProvider.getId(),
                     serviceProvider.getName(),
+                    biconsumer == null ? Boolean.FALSE : biconsumer,
                     localSubscriptionSetToSubscriptionApiList(serviceProvider.getSubscriptions()),
                     capabilitiesSetToCapabilitiesApiList(serviceProvider.getCapabilities().getCapabilities()),
                     localDeliveriesSetToDeliveriesApiList(serviceProvider.getDeliveries()))
@@ -130,7 +132,8 @@ public class TypeTransformer {
                     exchange.getId(),
                     exchange.isDurable(),
                     exchange.getType(),
-                    exchange.getBindings())
+                    exchange.getBindings(),
+                    exchange.getAlternateBinding())
             );
         }
         return exchangeApiList;
@@ -218,7 +221,8 @@ public class TypeTransformer {
                     endpoint.getPort(),
                     endpoint.getTarget(),
                     endpoint.getMaxBandwidth(),
-                    endpoint.getMaxMessageRate()
+                    endpoint.getMaxMessageRate(),
+                    endpoint.getDlqName()
             ));
         }
         return deliveryEndpointApiSet;

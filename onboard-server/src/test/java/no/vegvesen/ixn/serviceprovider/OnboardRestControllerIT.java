@@ -1294,6 +1294,63 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingDeliveryWithDlq() {
+        String serviceProviderName = "my-service-provider";
+        String queueName = "dlqueue";
+
+        GetDeliveryResponse response = new GetDeliveryResponse(
+                UUID.randomUUID().toString(),
+                Collections.singleton(new DeliveryEndpoint(
+                        "amqps://sp-1",
+                        5671,
+                        "sp1-1",
+                        0,
+                        0,
+                        queueName
+                )),
+                "/sp-1/deliveries/1",
+                "originatingCountry = 'NO' and messageType = 'DENM'",
+                System.currentTimeMillis(),
+                DeliveryStatus.CREATED,
+                null
+        );
+
+
+        System.out.println(response);
+        assertThat(response).isNotNull();
+        assertThat(response.getEndpoints().stream().findFirst().orElse(null).getDlqName()).isEqualTo(queueName);
+        assertThrows(NotFoundException.class, () -> {
+            restController.getDelivery(serviceProviderName, "999");
+        });
+    }
+
+    @Test
+    public void testGettingHasAccessToBiConsumer() {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutAndGetHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        AddBiqueueAccessRequest withoutBiQueueAccess = new AddBiqueueAccessRequest(false);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withoutBiQueueAccess).isAccess()).isFalse();
+    }
+
+
+    @Test
     public void testGettingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(

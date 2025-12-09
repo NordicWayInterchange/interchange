@@ -28,6 +28,8 @@ public class QpidClient {
 
 	private static final String CLIENTS_PRIVATE_CHANNELS_GROUP_NAME = "clients-private-channels";
 
+	private static final String BI_CONSUMERS_GROUP_NAME = "bi-consumers";
+
 	public final static long MAX_TTL_15_MINUTES = 900_000L;
 
 	private final Logger logger = LoggerFactory.getLogger(QpidClient.class);
@@ -120,6 +122,10 @@ public class QpidClient {
 
 	public Exchange createHeadersExchange(String name) {
 		return createExchange(new CreateExchangeRequest(name,"headers"));
+	}
+
+	public Exchange createDirectExchangeWithDlq(String name, String dlqName) {
+		return createExchange(new CreateExchangeRequest(name,"direct",new AlternateBinding(dlqName)));
 	}
 
 	public Exchange createDirectExchange(String exchangeName) {
@@ -247,6 +253,37 @@ public class QpidClient {
 		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
 		logger.debug("DELETE to URL {}",url);
 		logger.info("Removing private channel member '{}' from group", member.name());
+		restTemplate.delete(url);
+	}
+
+	public BiConsumerMember getBiConsumerMember(String memberName) {
+		try {
+			String url = groupMembersURL + "/" + BI_CONSUMERS_GROUP_NAME + "/" + memberName;
+			logger.debug("GETting from {}", url);
+			return restTemplate.getForEntity(url, BiConsumerMember.class).getBody();
+		} catch (HttpClientErrorException.NotFound e) {
+			return null;
+		}
+	}
+
+	public List<BiConsumerMember> getBiConsumerMembers() {
+		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME;
+		logger.debug("Getting from URL {}", url);
+		ResponseEntity<BiConsumerMember[]> response = restTemplate.getForEntity(url, BiConsumerMember[].class);
+		return Arrays.asList(response.getBody());
+	}
+
+	public BiConsumerMember addBiConsumerMemberToGroup(String memberName) {
+		BiConsumerMember biConsumerMember = new BiConsumerMember(memberName);
+		logger.info("Adding bi consumer member '{}' to group",memberName);
+		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME;
+		return restTemplate.postForEntity(url,biConsumerMember, BiConsumerMember.class).getBody();
+	}
+
+	public void removeBiConsumerMemberFromGroup(BiConsumerMember member) {
+		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME + "/" + member.name();
+		logger.debug("DELETE to URL {}",url);
+		logger.info("Removing bi consumer member '{}' from group", member.name());
 		restTemplate.delete(url);
 	}
 

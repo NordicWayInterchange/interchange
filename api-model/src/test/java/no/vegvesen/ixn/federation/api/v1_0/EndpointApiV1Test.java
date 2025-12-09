@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-public class EndpointApiTest {
+public class EndpointApiV1Test {
 
     @Test
     public void writeEndpointWithoutBandwidthAndMessageRate() throws JsonProcessingException {
-        EndpointApi api = new EndpointApi(
+        EndpointApiV1 api = new EndpointApiV1(
                 "mySource",
                 "myHost",
                 123
@@ -20,14 +20,14 @@ public class EndpointApiTest {
     }
 
     @Test
-    public void readEndpointWithoutBandwidthAndMessageRate() throws JsonProcessingException {
+    public void readEndpointV1WithoutBandwidthAndMessageRate() throws JsonProcessingException {
         String input = "{\"source\":\"mySource\",\"host\":\"myHost\",\"port\":123}";
-        EndpointApi endpointApi = new ObjectMapper().readValue(input,EndpointApi.class);
-        assertThat(endpointApi.getSource()).isEqualTo("mySource");
-        assertThat(endpointApi.getHost()).isEqualTo("myHost");
-        assertThat(endpointApi.getPort()).isEqualTo(123);
-        assertThat(endpointApi.getMaxMessageRate()).isNull();
-        assertThat(endpointApi.getMaxBandwidth()).isNull();
+        EndpointApiV1 endpointApiV1 = new ObjectMapper().readValue(input, EndpointApiV1.class);
+        assertThat(endpointApiV1.getSource()).isEqualTo("mySource");
+        assertThat(endpointApiV1.getHost()).isEqualTo("myHost");
+        assertThat(endpointApiV1.getPort()).isEqualTo(123);
+        assertThat(endpointApiV1.getMaxMessageRate()).isNull();
+        assertThat(endpointApiV1.getMaxBandwidth()).isNull();
 
     }
 }

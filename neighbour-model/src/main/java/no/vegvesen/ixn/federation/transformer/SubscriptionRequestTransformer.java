@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.transformer;
 
 import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.federation.api.v1_0.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import no.vegvesen.ixn.federation.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,7 @@ public class SubscriptionRequestTransformer {
         return new NeighbourSubscriptionRequest(subscriptionTransformer.requestedSubscriptionApiToSubscriptions(request.getSubscriptions(), request.getName()));
 	}
 
+    //TODO need the selector from the subscription...
 	public Subscription subscriptionPollApiToSubscription(SubscriptionPollResponseApi subscriptionApi) {
 		Subscription subscription = new Subscription();
 		subscription.setSubscriptionStatus(subscriptionTransformer.subscriptionStatusApiToSubscriptionStatus(subscriptionApi.getStatus()));
@@ -45,44 +48,69 @@ public class SubscriptionRequestTransformer {
 		subscription.setLastUpdatedTimestamp(subscriptionApi.getLastUpdatedTimestamp());
 		subscription.setConsumerCommonName(subscriptionApi.getConsumerCommonName());
 
-		Set<EndpointApi> apiEndpoints = subscriptionApi.getEndpoints();
-		if (apiEndpoints != null) {
-			Set<Endpoint> endpoints = new HashSet<>();
-			for (EndpointApi endpointApi : apiEndpoints) {
-				Endpoint endpoint = new Endpoint(endpointApi.getSource(), endpointApi.getHost(), endpointApi.getPort(),endpointApi.getMaxBandwidth(),endpointApi.getMaxMessageRate());
-				endpoints.add(endpoint);
-			}
-			subscription.setEndpoints(endpoints);
-		}
+        if (subscriptionApi instanceof SubscriptionPollResponseApiV1 subscriptionPollResponseApiV1) {
+            Set<EndpointApiV1> apiEndpointsV1 = subscriptionPollResponseApiV1.getEndpoints();
+            if (apiEndpointsV1 != null) {
+                Set<Endpoint> endpoints = new HashSet<>();
+                for (EndpointApiV1 endpointApi : apiEndpointsV1) {
+                    Endpoint endpoint = new Endpoint(
+                            endpointApi.getSource(),
+                            endpointApi.getHost(),
+                            endpointApi.getPort(),
+                            endpointApi.getMaxBandwidth(),
+                            endpointApi.getMaxMessageRate(),
+                            null
+                    );
+                    endpoints.add(endpoint);
+                }
+                subscription.setEndpoints(endpoints);
+            }
+        } else if (subscriptionApi instanceof SubscriptionPollResponseApiV2 subscriptionPollResponseApiV2) {
+            Set<EndpointApiV2> apiEndpointsV2 = subscriptionPollResponseApiV2.getEndpoints();
+            if (apiEndpointsV2 != null) {
+                Set<Endpoint> endpoints = new HashSet<>();
+                for (EndpointApiV2 endpointApi : apiEndpointsV2) {
+                    Endpoint endpoint = new Endpoint(
+                            endpointApi.getSource(),
+                            endpointApi.getHost(),
+                            endpointApi.getPort(),
+                            endpointApi.getMaxBandwidth(),
+                            endpointApi.getMaxMessageRate(),
+                            subscriptionApi.getSelector()
+                    );
+                    endpoints.add(endpoint);
+                }
+                subscription.setEndpoints(endpoints);
+            }
+        }
 		return subscription;
 
 	}
 
-	public SubscriptionPollResponseApi neighbourSubscriptionToSubscriptionPollResponseApi(NeighbourSubscription subscription) {
-		SubscriptionPollResponseApi response = new SubscriptionPollResponseApi();
-		response.setId(subscription.getUuid());
-		response.setSelector(subscription.getSelector());
-		response.setPath(subscription.getPath());
-		SubscriptionStatusApi status = subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus());
-		response.setStatus(status);
-		response.setConsumerCommonName(subscription.getConsumerCommonName());
-		response.setLastUpdatedTimestamp(subscription.getLastUpdatedTimestamp());
-		if (status.equals(SubscriptionStatusApi.CREATED)) {
-			Set<EndpointApi> newEndpoints = new HashSet<>();
-			for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
-				EndpointApi endpointApi = new EndpointApi(
-						endpoint.getSource(),
-						endpoint.getHost(),
-						endpoint.getPort(),
-						endpoint.getMaxBandwidth(),
-						endpoint.getMaxMessageRate()
-				);
-				newEndpoints.add(endpointApi);
-			}
-			response.setEndpoints(newEndpoints);
-			//TODO: Return redirectQueueName
-		}
-		return response;
+	public SubscriptionPollResponseApiV1 neighbourSubscriptionToSubscriptionPollResponseApiV1(NeighbourSubscription subscription) {
+        Set<EndpointApiV1> newEndpoints = new HashSet<>();
+        if (subscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) {
+            for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
+                EndpointApiV1 endpointApi = new EndpointApiV1(
+                        endpoint.getSource(),
+                        endpoint.getHost(),
+                        endpoint.getPort(),
+                        endpoint.getMaxBandwidth(),
+                        endpoint.getMaxMessageRate()
+                );
+                newEndpoints.add(endpointApi);
+            }
+        }
+
+        return new SubscriptionPollResponseApiV1(
+                subscription.getUuid(),
+                subscription.getSelector(),
+                subscription.getPath(),
+                subscriptionTransformer.neighbourSubscriptionStatusToSubscriptionStatusApi(subscription.getSubscriptionStatus()),
+                subscription.getConsumerCommonName(),
+                newEndpoints,
+                subscription.getLastUpdatedTimestamp()
+        );
 	}
 
 }
