@@ -18,7 +18,6 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -1249,9 +1248,12 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 )
         );
         serviceProviderRepository.save(new ServiceProvider(serviceProviderName));
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            restController.addDeliveries(serviceProviderName, request);
-        });
+        AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
+        assertThat(response.getDeliveries()).hasSize(1);
+
+        Delivery delivery = response.getDeliveries().stream().findFirst().orElseThrow();
+        assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
+        assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
 
     @Test
