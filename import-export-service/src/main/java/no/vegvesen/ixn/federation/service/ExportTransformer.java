@@ -134,6 +134,7 @@ public class ExportTransformer {
                 delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus()),
+                delivery.getDescription(),
                 delivery.isDlqueue()
                 );
     }
