@@ -134,6 +134,7 @@ public class ImportTransformer {
                 delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 LocalDeliveryStatus.REQUESTED,
+                delivery.getDescription(),
                 delivery.getDlqueue()
         );
     }
