@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Binding {
@@ -9,6 +10,7 @@ public class Binding {
 
     String destination;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Filter arguments;
 
 
@@ -34,9 +36,6 @@ public class Binding {
     public Filter getArguments() {
         return arguments;
     }
-
-
-
 
     @Override
     public String toString() {

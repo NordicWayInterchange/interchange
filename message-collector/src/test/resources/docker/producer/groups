@@ -1,3 +1,4 @@
 administrators.users=qpid-admin,producer
 service-providers.users=sp_producer
 federated-interchanges.users=localhost
+bi-consumers.users=
