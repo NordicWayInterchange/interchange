@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestImportDelivery {
+public class ImportDeliveryTest {
     @Test
     public void testImportDelivery(){
         DeliveryImportApi deliveryImportApi = new DeliveryImportApi(

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestExportDelivery {
+public class ExportDeliveryTest {
 
     @Test
     public void testExportDelivery() {

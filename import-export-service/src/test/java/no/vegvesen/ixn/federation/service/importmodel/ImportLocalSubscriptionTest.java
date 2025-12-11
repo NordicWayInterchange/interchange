@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TestImportLocalSubscription {
+public class ImportLocalSubscriptionTest {
 
     @Test
     public void testImportLocalSubscriptionRetainsDescription() {
