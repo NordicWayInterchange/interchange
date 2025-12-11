@@ -6,7 +6,10 @@ import java.util.List;
 public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     private Integer id;
+
     private String name;
+
+    private Boolean biconsumer;
 
     private List<LocalSubscriptionApi> subscriptions;
 
@@ -18,11 +21,13 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
     public ServiceProviderApi(
             Integer id,
             String name,
+            Boolean biconsumer,
             List<LocalSubscriptionApi> subscriptions,
             List<CapabilityApi> capabilities,
             List<LocalDeliveryApi> deliveries) {
         this.id = id;
         this.name = name;
+        this.biconsumer = biconsumer;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
@@ -47,6 +52,14 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getBiconsumer() {
+        return biconsumer;
+    }
+
+    public void setBiconsumer(Boolean biconsumer) {
+        this.biconsumer = biconsumer;
     }
 
     public List<LocalSubscriptionApi> getSubscriptions() {
@@ -94,6 +107,7 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
         return "serviceProviderApi{" +
                 "id=" + id +
                 "name='" + name + '\'' +
+                ", biconsumer=" + biconsumer +
                 ", capabilities=" + capabilities +
                 ", subscriptions=" + subscriptions +
                 ", deliveries=" + deliveries +

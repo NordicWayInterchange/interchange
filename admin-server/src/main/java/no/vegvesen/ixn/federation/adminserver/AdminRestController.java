@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.vegvesen.ixn.federation.adminserver.model.biqueueEndpoint.BiqueueEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
@@ -106,6 +107,21 @@ public class AdminRestController {
         logger.info("List service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/biqueueendpoint", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-queue")
+    @Operation(summary = "Get bi-queue endpoint")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.BIQUEUEENDPOINTRESPONSE)))})
+    public BiqueueEndpointApi getBiqueueEndPoint(@PathVariable("adminUser") String adminUser) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        return new BiqueueEndpointApi(
+                adminProperties.getBrokerExternalName(),
+                Integer.parseInt(adminProperties.getMessageChannelPort()),
+                adminProperties.getBiQueueName()
+        );
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)

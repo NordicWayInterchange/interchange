@@ -535,6 +535,16 @@ public class NapRestControllerTest {
         ).andExpect(status().isNotFound());
     }
 
+
+    @Test
+    public void getBiQueueEndpoint() throws Exception {
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                get("/nap/biqueueendpoint")
+        ).andExpect(status().isOk());
+    }
+
+
     @Configuration
     public static class NapCorePropertiesCreator {
         @Bean

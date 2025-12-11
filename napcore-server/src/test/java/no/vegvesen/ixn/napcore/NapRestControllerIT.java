@@ -802,6 +802,23 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(napRestController.getPrivateChannels(actorCommonName).getFirst().getPeers()).hasSize(0);
     }
 
+    @Test
+    public void testPutServiceProviderHasAccessToBiconsumer() {
+        String actorCommonName = "actor";
+        ServiceProviderBiqueueAccessRequest withBiQueueAccess = new ServiceProviderBiqueueAccessRequest(true);
+        ServiceProviderBiqueueAccessRequest withoutBiQueueAccess = new ServiceProviderBiqueueAccessRequest(false);
+        assertThat(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withBiQueueAccess).isAccess()).isNotNull().isEqualTo(Boolean.TRUE);
+        assertThat(napRestController.addServiceProviderBiconsumerAccess(actorCommonName, withoutBiQueueAccess).isAccess()).isNotNull().isEqualTo(Boolean.FALSE);
+    }
+
+    @Test
+    public void testGetBiQueueEndpoint() {
+        BiqueueEndpointResponse biqueueEndPoint = napRestController.getBiqueueEndPoint();
+        assertThat(biqueueEndPoint.getBrokerExternalName()).isEqualTo("myBroker"); //from test/resources/application.properties
+        assertThat(biqueueEndPoint.getMessageChannelPort()).isEqualTo(5671);
+        assertThat(biqueueEndPoint.getQueueName()).isEqualTo("bi-queue");
+    }
+
     @Autowired
     WebApplicationContext context;
     @Test

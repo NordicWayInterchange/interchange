@@ -202,6 +202,7 @@ public class TypeTransformer {
                 localDelivery.getDescription()
         );
     }
+
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalEndpoint localEndpoint : localEndpoints) {
@@ -328,4 +329,21 @@ public class TypeTransformer {
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
+
+    public BiqueueAccessResponse transformBiQueueToGetBiqueueResponse(ServiceProvider serviceProvider) {
+        Boolean biconsumer = serviceProvider.isBiconsumer();
+        return new BiqueueAccessResponse(
+                serviceProvider.getName(),
+                biconsumer == null ? Boolean.FALSE : biconsumer
+        );
+    }
+
+
+    public BiqueueAccessResponse transformAddBiqueueToAddBiQueueResponse(ServiceProvider serviceProvider, AddBiqueueAccessRequest addBiqueueAccess) {
+        return new BiqueueAccessResponse(
+                serviceProvider.getName(),
+                addBiqueueAccess.isAccess()
+        );
+    }
+
 }

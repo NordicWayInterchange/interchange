@@ -1322,6 +1322,32 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingHasAccessToBiConsumer() {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutAndGetHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        AddBiqueueAccessRequest withoutBiQueueAccess = new AddBiqueueAccessRequest(false);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withoutBiQueueAccess).isAccess()).isFalse();
+    }
+
+
+    @Test
     public void testGettingDeliveryWithInvalidId() {
         String serviceProviderName = "my-service-provider";
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(

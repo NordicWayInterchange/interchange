@@ -642,6 +642,50 @@ public class NapRestController {
         logger.debug("Saved updated private channel {}", updatedPrivateChannel);
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Biconsumer")
+    @Operation(summary = "Check if service provider have access to biconsumer")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
+    public ServiceProviderBiqueueAccessResponse getServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName) {
+        validatePathVariable(actorCommonName);
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get service provider {} have access to biconsumer", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        return typeTransformer.transformBiconsumerAccess(serviceProvider);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = {"/nap/{actorCommonName}/biconsumer"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Biconsumer")
+    @Operation(summary = "Add/Remove access to biconsumer")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = {@ExampleObject(value = ExampleApiObjects.ADDBICONSUMERACCESSREQUEST)}))
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK: Adds/removes access to service provider biconsumer" , content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BICONSUMERACCESSRESPONSE)))})
+    public ServiceProviderBiqueueAccessResponse addServiceProviderBiconsumerAccess(@PathVariable("actorCommonName") String actorCommonName, @RequestBody ServiceProviderBiqueueAccessRequest biconsumerAccess) {
+        validatePathVariable(actorCommonName);
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Add or remove access to biconsumer in service provider {}", actorCommonName);
+
+        ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
+        ServiceProviderBiqueueAccessResponse biQueueAccessResponse = typeTransformer.transformAddBiconsumerAccess(serviceProvider, biconsumerAccess);
+        serviceProvider.setBiconsumer(biQueueAccessResponse.isAccess());
+        serviceProviderRepository.save(serviceProvider);
+        return biQueueAccessResponse;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-queue")
+    @Operation(summary = "Get bi-queue endpoint")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
+    public BiqueueEndpointResponse getBiqueueEndPoint() {
+        this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+
+        return new BiqueueEndpointResponse(
+                napCoreProperties.getBrokerExternalName(),
+                Integer.parseInt(napCoreProperties.getMessageChannelPort()),
+                napCoreProperties.getBiQueueName()
+        );
+    }
+
     private void validatePathVariable(String pathVariable){
         Matcher matcher = pattern.matcher(pathVariable);
         if(!matcher.matches()){
