@@ -312,6 +312,7 @@ public class ImportTransformer {
         return new PrivateChannel(
                 privateChannel.getPeers().stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet()),
                 PrivateChannelStatus.REQUESTED,
+                privateChannel.getDescription(),
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
         );
