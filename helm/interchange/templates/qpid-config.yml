@@ -105,7 +105,7 @@ data:
             },
             {
               "objectType": "QUEUE",
-              "identity": "ALL",
+              "identity": "bi-consumers",
               "operation": "CONSUME",
               "outcome": "ALLOW_LOG",
               "attributes": {

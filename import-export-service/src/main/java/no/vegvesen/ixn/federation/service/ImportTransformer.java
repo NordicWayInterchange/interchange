@@ -21,6 +21,7 @@ public class ImportTransformer {
 
     public ServiceProvider transformServiceProviderImportApiToServiceProvider(ServiceProviderImportApi serviceProvider) {
         return new ServiceProvider(serviceProvider.getName(),
+                serviceProvider.getBiconsumer(),
                 new Capabilities(serviceProvider.getCapabilities().stream().map(this::transformCapabilityImportApiToCapability).collect(Collectors.toSet())),
                 serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionImportApiToLocalSubscription).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryImportApiToLocalDelivery).collect(Collectors.toSet()),
