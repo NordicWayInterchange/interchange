@@ -35,7 +35,8 @@ public class ExportTransformer {
                 localSubscription.getConsumerCommonName(),
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusExportApi(localSubscription.getStatus()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointToLocalEndpointExportApi).collect(Collectors.toSet()),
-                localSubscription.getConnections().stream().map(this::transformLocalConnectionToLocalConnectionExportApi).collect(Collectors.toSet())
+                localSubscription.getConnections().stream().map(this::transformLocalConnectionToLocalConnectionExportApi).collect(Collectors.toSet()),
+                localSubscription.getDescription()
                 );
     }
 
