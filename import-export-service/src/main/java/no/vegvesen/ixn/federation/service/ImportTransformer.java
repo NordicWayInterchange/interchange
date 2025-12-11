@@ -36,7 +36,8 @@ public class ImportTransformer {
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()),
-                localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet())
+                localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()),
+                localSubscription.getDescription()
         );
     }
 
