@@ -1,11 +1,13 @@
-{{ if or .Values.napcore_frontend.enabled .Values.admin_frontend.enabled}}
+{{ if or .Values.napcore_frontend.enabled .Values.admin_frontend.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-interchange-ingress
   #namespace?
+  {{- if or .Values.napcore_frontend.certmanager_enabled .Values.admin_frontend.certmanager_enabled }}
   annotations:
     cert-manager.io/issuer: letsencrypt-prod
+  {{- end }}
 spec:
   ingressClassName: nginx
   rules:
@@ -33,15 +35,17 @@ spec:
                 port:
                   number: 3000
     {{- end}}
+  {{- if or .Values.napcore_frontend.certmanager_enabled .Values.admin_frontend.certmanager_enabled }}
   tls:
-    {{- if .Values.napcore_frontend.enabled}}
+    {{- if and .Values.napcore_frontend.enabled .Values.napcore_frontend.certmanager_enabled }}
     - hosts:
       - portal.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-portal-cert
     {{- end}}
-    {{- if .Values.admin_frontend.enabled}}
+    {{- if and .Values.admin_frontend.enabled .Values.admin_frontend.certmanager_enabled }}
     - hosts:
       - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-admin-cert
     {{- end}}
+  {{- end }}
 {{- end }}

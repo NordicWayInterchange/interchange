@@ -34,6 +34,15 @@ public class QpidDeltaTest {
     }
 
     @Test
+    public void testFindExchangeByNameNullParameter() {
+        Exchange exchange1 = new Exchange("1");
+        Exchange exchange2 = new Exchange("2");
+        QpidDelta delta = new QpidDelta(Arrays.asList(exchange1,exchange2),Arrays.asList());
+        assertThat(delta.findByExchangeName(null)).isNull();
+
+    }
+
+    @Test
     public void testAddingBindingToExchange() {
         QpidDelta delta = new QpidDelta(
                 List.of(new Exchange("E1")),

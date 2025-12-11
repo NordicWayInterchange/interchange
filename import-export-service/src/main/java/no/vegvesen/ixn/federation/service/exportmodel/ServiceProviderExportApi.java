@@ -7,6 +7,8 @@ public class ServiceProviderExportApi {
 
     private String name;
 
+    private Boolean biconsumer;
+
     private Set<LocalSubscriptionExportApi> subscriptions;
 
     private Set<CapabilityExportApi> capabilities;
@@ -18,10 +20,12 @@ public class ServiceProviderExportApi {
     }
 
     public ServiceProviderExportApi(String name,
+                                    Boolean biconsumer,
                                     Set<LocalSubscriptionExportApi> subscriptions,
                                     Set<CapabilityExportApi> capabilities,
                                     Set<DeliveryExportApi> deliveries) {
         this.name = name;
+        this.biconsumer = biconsumer;
         this.subscriptions = subscriptions;
         this.capabilities = capabilities;
         this.deliveries = deliveries;
@@ -33,6 +37,14 @@ public class ServiceProviderExportApi {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getBiconsumer() {
+        return biconsumer;
+    }
+
+    public void setBiconsumer(Boolean biconsumer) {
+        this.biconsumer = biconsumer;
     }
 
     public Set<LocalSubscriptionExportApi> getSubscriptions() {
@@ -64,18 +76,19 @@ public class ServiceProviderExportApi {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ServiceProviderExportApi that = (ServiceProviderExportApi) o;
-        return Objects.equals(name, that.name) && Objects.equals(subscriptions, that.subscriptions) && Objects.equals(capabilities, that.capabilities) && Objects.equals(deliveries, that.deliveries);
+        return Objects.equals(name, that.name) && Objects.equals(biconsumer, that.biconsumer) && Objects.equals(subscriptions, that.subscriptions) && Objects.equals(capabilities, that.capabilities) && Objects.equals(deliveries, that.deliveries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, subscriptions, capabilities, deliveries);
+        return Objects.hash(name, biconsumer, subscriptions, capabilities, deliveries);
     }
 
     @Override
     public String toString() {
         return "ServiceProviderExportApi{" +
                 "name='" + name + '\'' +
+                ", biconsumer=" + biconsumer +
                 ", subscriptions=" + subscriptions +
                 ", capabilities=" + capabilities +
                 ", deliveries=" + deliveries +

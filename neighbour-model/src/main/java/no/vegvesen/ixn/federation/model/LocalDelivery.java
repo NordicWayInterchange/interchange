@@ -38,14 +38,18 @@ public class LocalDelivery {
     @Column
     private String errorMessage;
 
+    @Column
+    private Boolean dlqueue = false;
+
     public LocalDelivery() {
     }
 
-    public LocalDelivery(Integer id, Set<LocalDeliveryEndpoint> endpoints,  String selector, LocalDeliveryStatus status) {
-        this.id = id;
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status, Boolean dlqueue) {
+        this.uuid = uuid;
         this.endpoints.addAll(endpoints);
         this.selector = selector;
         this.status = status;
+        this.dlqueue = dlqueue;
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
@@ -55,8 +59,10 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery(Integer id, String selector, LocalDeliveryStatus status) {
-        this(id, Collections.emptySet(),selector,status);
+    public LocalDelivery(String uuid, String selector, LocalDeliveryStatus status) {
+        this.uuid = uuid;
+        this.selector = selector;
+        this.status = status;
     }
 
     public LocalDelivery(String selector, String description){
@@ -64,16 +70,17 @@ public class LocalDelivery {
         this.description = description;
     }
 
-    public LocalDelivery(String selector, LocalDeliveryStatus status, String description) {
+    public LocalDelivery(String selector, LocalDeliveryStatus status, String description, Boolean dlqueue) {
         this.selector = selector;
         this.status = status;
         this.description = description;
+        this.dlqueue = dlqueue;
     }
 
-    public LocalDelivery(Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status) {
-        this.endpoints = endpoints;
+    public LocalDelivery(String selector, String description, Boolean dlqueue) {
         this.selector = selector;
-        this.status = status;
+        this.description = description;
+        this.dlqueue = dlqueue;
     }
 
     public Integer getId() {
@@ -156,6 +163,14 @@ public class LocalDelivery {
         this.endpoints.remove(endpoint);
     }
 
+    public Boolean isDlqueue() {
+        return dlqueue;
+    }
+
+    public void setDlqueue(Boolean dlqueue) {
+        this.dlqueue = dlqueue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -173,13 +188,14 @@ public class LocalDelivery {
     public String toString() {
         return "LocalDelivery{" +
                 "id=" + id +
-                ", uuid=" + uuid +
+                ", uuid='" + uuid + '\'' +
                 ", endpoints=" + endpoints +
                 ", selector='" + selector + '\'' +
                 ", lastUpdatedTimestamp=" + lastUpdatedTimestamp +
                 ", status=" + status +
-                ", errorMessage=" + errorMessage +
-                ", description=" + description +
+                ", description='" + description + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", dlqueue='" + dlqueue + '\'' +
                 '}';
     }
 }

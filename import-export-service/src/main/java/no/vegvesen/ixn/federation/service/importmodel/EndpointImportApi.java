@@ -14,6 +14,8 @@ public class EndpointImportApi {
 
     private Integer maxMessageRate;
 
+    private String dlq;
+
     public EndpointImportApi() {
 
     }
@@ -22,12 +24,14 @@ public class EndpointImportApi {
                              String host,
                              Integer port,
                              Integer maxBandwidth,
-                             Integer maxMessageRate) {
+                             Integer maxMessageRate,
+                             String dlq) {
         this.source = source;
         this.host = host;
         this.port = port;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlq = dlq;
     }
 
     public String getSource() {
@@ -70,17 +74,24 @@ public class EndpointImportApi {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getDlq() {
+        return dlq;
+    }
+
+    public void setDlq(String dlq) {
+        this.dlq = dlq;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EndpointImportApi that = (EndpointImportApi) o;
-        return Objects.equals(source, that.source) && Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate);
+        return Objects.equals(source, that.source) && Objects.equals(host, that.host) && Objects.equals(port, that.port) && Objects.equals(maxBandwidth, that.maxBandwidth) && Objects.equals(maxMessageRate, that.maxMessageRate) && Objects.equals(dlq, that.dlq);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source, host, port, maxBandwidth, maxMessageRate);
+        return Objects.hash(source, host, port, maxBandwidth, maxMessageRate, dlq);
     }
 
     @Override
@@ -91,6 +102,7 @@ public class EndpointImportApi {
                 ", port=" + port +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +
+                ", dlq='" + dlq + '\'' +
                 '}';
     }
 }

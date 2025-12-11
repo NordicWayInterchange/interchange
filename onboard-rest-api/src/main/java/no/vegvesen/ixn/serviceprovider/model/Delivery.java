@@ -24,7 +24,6 @@ public class Delivery {
     public Delivery() {
     }
 
-
     public Delivery(String id, String path, String selector, long lastUpdatedTimestamp, DeliveryStatus status, String errorMessage, String description) {
         this.id = id;
         this.path = path;
@@ -89,7 +88,6 @@ public class Delivery {
     public void setDescription(String description) {
         this.description = description;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

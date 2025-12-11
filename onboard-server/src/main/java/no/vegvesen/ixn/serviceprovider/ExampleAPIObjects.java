@@ -215,7 +215,8 @@ public class ExampleAPIObjects {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no",
               "deliveries" : [ {
                 "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
-                "description" : "DENM delivery"
+                "description" : "DENM delivery",
+                "dlqueue" : true
               } ]
             }
             """;
@@ -435,7 +436,8 @@ public class ExampleAPIObjects {
                 "port" : 5671,
                 "target" : "del-bfae4c14-566e-4713-aa99-ef24d4928005",
                 "maxBandwidth" : 0,
-                "maxMessageRate" : 0
+                "maxMessageRate" : 0,
+                "dlqName": "dlq-1ef59f21-1355-4972-b02c-18d0b4ba1585"
               } ],
               "selector" : "originatingCountry = 'NO' and messageType = 'DENM'",
               "lastUpdatedTimestamp" : 1684934230041,
@@ -496,4 +498,26 @@ public class ExampleAPIObjects {
               }
             }
             """;
+
+    public static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
+
+    public static final String ADDBICONSUMERACCESSREQUEST = """
+                {
+                    "access": true
+                }
+                """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
+                }
+                """;
+
 }

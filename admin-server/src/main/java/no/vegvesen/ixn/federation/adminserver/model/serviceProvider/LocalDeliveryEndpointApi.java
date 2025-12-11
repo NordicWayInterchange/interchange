@@ -14,20 +14,25 @@ public class LocalDeliveryEndpointApi {
     private Integer maxBandwidth;
 
     private Integer maxMessageRate;
+
+    private String dlqName;
+
     public LocalDeliveryEndpointApi() {}
 
-    public LocalDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate) {
+    public LocalDeliveryEndpointApi(String host, Integer port, String target, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
         this.host = host;
         this.port = port;
         this.target = target;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
+        this.dlqName = dlqName;
     }
 
-    public LocalDeliveryEndpointApi(String host, Integer port, String target) {
+    public LocalDeliveryEndpointApi(String host, Integer port, String target, String dlqName) {
         this.host = host;
         this.port = port;
         this.target = target;
+        this.dlqName = dlqName;
     }
 
     public String getHost() {
@@ -70,6 +75,14 @@ public class LocalDeliveryEndpointApi {
         this.maxMessageRate = maxMessageRate;
     }
 
+    public String getDlqName() {
+        return dlqName;
+    }
+
+    public void setDlqName(String dlqName) {
+        this.dlqName = dlqName;
+    }
+
     @Override
     public String toString() {
         return "ServiceProviderDeliveryEndpointApi{" +
@@ -78,6 +91,7 @@ public class LocalDeliveryEndpointApi {
                 "target='" + target + "'" +
                 "maxBandwidth=" + maxBandwidth +
                 "maxMessageRate=" + maxMessageRate +
+                "dlqName='" + dlqName + '\'' +
                 "}";
     }
 }

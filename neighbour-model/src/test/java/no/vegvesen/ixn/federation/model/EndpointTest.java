@@ -25,7 +25,8 @@ public class EndpointTest {
                "b",
                1,
                2,
-               3
+               3,
+               null
        );
        assertThat(endpoint1).isEqualTo(endpoint2);
     }
@@ -46,7 +47,8 @@ public class EndpointTest {
                 "b",
                 1,
                 2,
-                3
+                3,
+                null
         );
         Set<Endpoint> wantedEndpoints = Collections.singleton(endpoint1);
         Set<Endpoint> existingEndpoins = Collections.singleton(endpoint2);
