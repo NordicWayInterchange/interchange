@@ -178,6 +178,21 @@ public class TypeTransformer {
         );
     }
 
+    public ServiceProviderBiqueueAccessResponse transformBiconsumerAccess(ServiceProvider serviceProvider) {
+        Boolean biconsumer = serviceProvider.isBiconsumer();
+        return new ServiceProviderBiqueueAccessResponse(
+                serviceProvider.getName(),
+                biconsumer == null ? Boolean.FALSE : biconsumer
+        );
+    }
+
+    public ServiceProviderBiqueueAccessResponse transformAddBiconsumerAccess(ServiceProvider serviceProvider, ServiceProviderBiqueueAccessRequest serviceProviderBiqueueAccessRequest) {
+        return new ServiceProviderBiqueueAccessResponse(
+                serviceProvider.getName(),
+                serviceProviderBiqueueAccessRequest.isAccess()
+        );
+    }
+
     public PrivateChannelStatus transformPrivateChannelStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus status) {
         return switch (status) {
             case REQUESTED -> PrivateChannelStatus.REQUESTED;

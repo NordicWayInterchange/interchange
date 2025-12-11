@@ -1476,6 +1476,60 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsFalse() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				false,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isFalse();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+	}
+    @Test
+    public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsNull() {
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                null,
+                new Capabilities(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+        assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+    }
+
+	@Test
+	public void testServiceProviderAddedToBiConsumerGroup() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				true,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isTrue();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName()).name()).isEqualTo(serviceProvider.getName());
+	}
+
+
+
+	@Test
 	public void testIllegalLocalSubscriptionGetsRemovedFromServiceProvider() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,

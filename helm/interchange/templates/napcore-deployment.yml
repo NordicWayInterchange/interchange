@@ -52,6 +52,8 @@ spec:
               value: {{ .Values.napcore_server_sign_store_password }}
             - name: SIGN_STORE_ALIAS
               value: {{ .Values.napcore_server.sign_store_alias }}
+            - name: BROKER_EXTERNAL_NAME
+              value: {{ .Values.broker_external_name }}
             - name: LOG_LEVELS
               value: "{{- range .Values.napcore_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
