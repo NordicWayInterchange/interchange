@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.MapemApplication;
