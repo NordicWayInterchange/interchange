@@ -75,7 +75,6 @@ public class CapabilityValidatorTest {
                 ),
                 new MetadataApi()
         );
-        assertThat(capability1).isNotNull();
-        assertThat(capability1.getApplication().getPublicationId()).contains("NO00000:IVIM_BERLIN_067");
+        assertThat(CapabilityValidator.napcoreCapabilityHasValidProperties(capability1)).isEmpty();
     }
 }
