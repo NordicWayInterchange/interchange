@@ -1,6 +1,7 @@
+package no.vegvesen.ixn.federation.service.importmodel;
+
 import no.vegvesen.ixn.federation.model.LocalDelivery;
 import no.vegvesen.ixn.federation.service.ImportTransformer;
-import no.vegvesen.ixn.federation.service.importmodel.DeliveryImportApi;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
