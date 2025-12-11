@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jms.JMSException;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
@@ -13,6 +14,7 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -534,7 +536,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		String deliverySelector = "messageType = 'DATEX2'";
 		LocalDelivery localDelivery = new LocalDelivery(
-				1,
+				UUID.randomUUID().toString(),
 				deliverySelector,
 				LocalDeliveryStatus.CREATED
 		);
@@ -765,7 +767,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex1");
 
 		String deliveryExchangeName = "my-exchange5";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -783,6 +785,58 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
 		assertThat(deliveryExchange).isNotNull();
 		assertThat(deliveryExchange.getBindings()).hasSize(1);
+	}
+
+	@Test
+	public void createDlQueueAndConnectForServiceProvider() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String queueName = "dlq-" + UUID.randomUUID();
+		CapabilityShard shard = new CapabilityShard(1, "dlq-ex1", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("dlq-ex1");
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				"target",
+				2,
+				3,
+				queueName));
+
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		verify(serviceProviderRepository, times(1)).save(any());
+
+		QpidDelta delta = client.getQpidDelta();
+		String dlqName = Objects.requireNonNull(delivery.getEndpoints().stream().findFirst().orElse(null)).getDlqName();
+		Assertions.assertThat(dlqName).isEqualTo(queueName);
+
+
+		Exchange deliveryExchange = delta.findByExchangeName("target");
+		assertThat(deliveryExchange).isNotNull();
+		assertThat(deliveryExchange.getBindings()).hasSize(1);
+
+		assertThat(client.getQueue(queueName)).isNotNull();
 	}
 
 	@Test
@@ -806,7 +860,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 		String deliveryExchangeName = "my-exchange-non-exist5";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -863,7 +917,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex3");
 
 		String deliveryExchangeName = "my-exchange6";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
 
@@ -902,7 +956,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		client.createHeadersExchange("cap-ex4");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, exchangeName));
 		delivery.setId(1);
 		serviceProvider.addDeliveries(Set.of(delivery));
@@ -922,6 +976,59 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(delivery.getEndpoints()).isEmpty();
 	}
+
+
+	@Test
+	public void tearDownDlqForDeliveryByDeletedDelivery() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String exchangeName = "dlq-exchange";
+		String dlqName = "dlq-name";
+
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex40", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("cap-ex40");
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				exchangeName,
+				2,
+				3,
+				dlqName));
+
+		serviceProvider.addDeliveries(Set.of(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+
+		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+
+		assertThat(client.queueExists(dlqName)).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
+		assertThat(delivery.getEndpoints()).isEmpty();
+	}
+
 
 	@Test
 	public void tearDownTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
@@ -944,7 +1051,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex5");
 
 		String deliveryExchangeName = "my-exchange9";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
 
@@ -964,6 +1071,62 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
 
 		assertThat(delivery.getEndpoints()).isEmpty();
+		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+	}
+
+
+
+	@Test
+	public void tearDownDlqNameAndTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
+		String serviceProviderName = "my-service-provider";
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
+		String exchangeName = "dlq1-exchange";
+		String dlqName = "dlq-name";
+
+		CapabilityShard shard = new CapabilityShard(1, "cap-ex50", "publicationId = 'pub-1'");
+		Capability denmCapability = new Capability(
+				new DenmApplication(
+						"NPRA",
+						"pub-1",
+						"NO",
+						"1.0",
+						List.of("1234"),
+						List.of(6)
+				),
+				new Metadata(RedirectStatus.OPTIONAL),
+				Collections.singletonList(shard)
+		);
+		client.createHeadersExchange("cap-ex50");
+
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
+		delivery.addEndpoint(new LocalDeliveryEndpoint(
+				1,
+				"host",
+				123,
+				exchangeName,
+				2,
+				3,
+				dlqName));
+
+		serviceProvider.addDeliveries(Collections.singleton(delivery));
+
+		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		router.setUpDeliveryQueue(serviceProvider, client.getQpidDelta());
+
+		assertThat(client.exchangeExists(delivery.getEndpoints().stream().findFirst().get().getTarget())).isTrue();
+		assertThat(client.queueExists(delivery.getEndpoints().stream().findFirst().get().getDlqName())).isTrue();
+
+		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
+
+		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
+		router.tearDownDeliveryQueues(serviceProvider, client.getQpidDelta());
+
+		assertThat(delivery.getEndpoints()).isEmpty();
+		assertThat(client.queueExists(dlqName)).isFalse();
+		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(delivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
 	}
 
@@ -1003,7 +1166,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		client.createHeadersExchange("cap-ex7");
 
 		String deliveryExchangeName = "my-exchange10";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "No delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "No delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 		delivery.setId(1);
 
@@ -1056,7 +1219,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 		String deliveryExchangeName = "my-exchange11";
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery");
+		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", LocalDeliveryStatus.CREATED, "Delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
 
 		serviceProvider.addDeliveries(Collections.singleton(delivery));
@@ -1077,7 +1240,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownDeliveryQueueShouldNotChangeRequestedDeliveries() {
 		LocalDelivery localDelivery = new LocalDelivery(
-				1,
+				UUID.randomUUID().toString(),
 				"a = b",
 				LocalDeliveryStatus.REQUESTED
 		);
@@ -1311,6 +1474,60 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 		assertThat(serviceProvider.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 	}
+
+	@Test
+	public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsFalse() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				false,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isFalse();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+	}
+    @Test
+    public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsNull() {
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                null,
+                new Capabilities(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+        assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+    }
+
+	@Test
+	public void testServiceProviderAddedToBiConsumerGroup() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				true,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isTrue();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName()).name()).isEqualTo(serviceProvider.getName());
+	}
+
+
 
 	@Test
 	public void testIllegalLocalSubscriptionGetsRemovedFromServiceProvider() {

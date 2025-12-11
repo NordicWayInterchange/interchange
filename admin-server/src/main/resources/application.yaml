@@ -19,6 +19,10 @@ server:
   ssl:
     client-auth: need
 
+admin:
+  bi-queue-name: bi-queue
+  broker-external-name: myBroker
+
 #logging
 logging:
   pattern:

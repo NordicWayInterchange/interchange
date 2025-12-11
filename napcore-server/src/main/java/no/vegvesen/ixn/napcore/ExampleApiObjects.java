@@ -93,7 +93,8 @@ public class ExampleApiObjects {
               "endpoints" : [ {
                 "host" : "a.bouvetinterchange.eu",
                 "port" : 5671,
-                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
+                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63",
+                "dlqName": "dlq-079f0248-7979-48ae-8563-2ff30afe986c"
               } ],
               "lastUpdatedTimestamp" : 1726567679,
               "description": "Deliver messages from Norway"
@@ -108,7 +109,8 @@ public class ExampleApiObjects {
               "endpoints" : [ {
                 "host" : "a.bouvetinterchange.eu",
                 "port" : 5671,
-                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63"
+                "target" : "del-d6728909-0f6e-4a6d-9fee-3e1be3eadd63",
+                "dlqName": "dlq-f333183a-ad2f-4e46-9ff6-ae6a0c88cfa9"
               } ],
               "lastUpdatedTimestamp" : 1726567679,
               "description": "Deliver messages from Norway"
@@ -295,6 +297,27 @@ public class ExampleApiObjects {
                     },
                     "lastUpdated": 1729840858,
                     "description": "private channel between king olav and king gustaf"
+                }
+                """;
+
+    static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
+
+    static final String ADDBICONSUMERACCESSREQUEST = """
+                {
+                    "access": true
+                }
+                """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+                {
+                   "brokerExternalName": "myBroker",
+                   "messageChannelPort": 5671,
+                   "queueName": "bi-queue"
                 }
                 """;
 }

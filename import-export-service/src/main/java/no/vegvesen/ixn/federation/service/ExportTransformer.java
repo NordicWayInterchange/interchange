@@ -21,6 +21,7 @@ public class ExportTransformer {
     public ServiceProviderExportApi transformServiceProviderToServiceProviderExportApi(ServiceProvider serviceProvider) {
         return new ServiceProviderExportApi(
                 serviceProvider.getName(),
+                serviceProvider.isBiconsumer(),
                 serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionToLocalSubscriptionExportApi).collect(Collectors.toSet()),
                 serviceProvider.getCapabilities().getCapabilities().stream().map(this::transformCapabilityToCapabilityExportApi).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryToDeliveryExportApi).collect(Collectors.toSet())
@@ -132,7 +133,8 @@ public class ExportTransformer {
                 delivery.getUuid(),
                 delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
-                transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus())
+                transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus()),
+                delivery.isDlqueue()
                 );
     }
 
@@ -141,7 +143,8 @@ public class ExportTransformer {
                 endpoint.getPort(),
                 endpoint.getTarget(),
                 endpoint.getMaxBandwidth(),
-                endpoint.getMaxMessageRate()
+                endpoint.getMaxMessageRate(),
+                endpoint.getDlqName()
         );
     }
 

@@ -20,6 +20,9 @@ public class ServiceProvider {
 	@Column(length = 320)
 	private String name;
 
+	@Column
+	private Boolean biconsumer = false;
+
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_spr_cap"))
 	private Capabilities capabilities = new Capabilities(new HashSet<>());
@@ -88,6 +91,16 @@ public class ServiceProvider {
 		this.subscriptionUpdated = subscriptionUpdated;
 	}
 
+	public ServiceProvider(String name, Boolean biconsumer, Capabilities capabilities, Set<LocalSubscription> localSubscriptions,
+			Set<LocalDelivery> localDeliveries, LocalDateTime subscriptionUpdated) {
+		this.name = name;
+		this.biconsumer = biconsumer;
+		this.capabilities = capabilities;
+		this.subscriptions.addAll(localSubscriptions);
+		this.deliveries.addAll(localDeliveries);
+		this.subscriptionUpdated = subscriptionUpdated;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -102,6 +115,14 @@ public class ServiceProvider {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public Boolean isBiconsumer() {
+		return biconsumer;
+	}
+
+	public void setBiconsumer(Boolean biconsumer) {
+		this.biconsumer = biconsumer;
 	}
 
 	public Capabilities getCapabilities() {
@@ -309,6 +330,7 @@ public class ServiceProvider {
 		return "ServiceProvider{" +
 				"id=" + id +
 				", name='" + name + '\'' +
+				", biconsumer='" + biconsumer +
 				", capabilities=" + capabilities +
 				", subscriptions=" + Arrays.toString(subscriptions.toArray()) +
 				", deliveries=" + Arrays.toString(deliveries.toArray()) +

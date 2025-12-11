@@ -21,9 +21,10 @@ import java.util.concurrent.Callable;
         customSynopsis = {
         """
                 Examples: \n
-                serviceproviderclient deliveries add -s "originatingCountry='NO'" -d "NO DELIVERY" \n
-                serviceproviderclient deliveries add -f denmDelivery.json -d "DENM Delivery" \n
+                serviceproviderclient deliveries add -s "originatingCountry='NO'" -d "Description to delivery" -dlq \n
+                serviceproviderclient deliveries add -f denmDelivery.json \n
                 -d is optional
+                -dlq is optional
                 """
 }
 )
@@ -38,6 +39,10 @@ public class AddDeliveries implements Callable<Integer> {
     @Option(names = {"-d", "--description"})
     String description;
 
+    @Option(names = {"-dlq", "--dead-letter-queue"}, description = "Messages that couldn't be delivered are moved to dlqueue")
+    Boolean dlqueue = false;
+
+
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
@@ -49,7 +54,7 @@ public class AddDeliveries implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
         else{
-            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description)));
+            AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description, dlqueue)));
             AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }

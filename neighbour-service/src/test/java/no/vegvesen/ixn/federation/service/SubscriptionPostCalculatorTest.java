@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.model.Endpoint;
 import no.vegvesen.ixn.federation.model.Subscription;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,49 @@ public class SubscriptionPostCalculatorTest {
                 "/",
                 "user"
         );
-        Set<Subscription> existingSubscriptions = Collections.singleton(existingSubscription);
+        Set<Subscription> existingSubscriptions = Set.of(existingSubscription);
+        SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
+        assertThat(subscriptionPostCalculator.getSubscriptionsToRemove()).isEmpty();
+        assertThat(subscriptionPostCalculator.getNewSubscriptions()).isEmpty();
+        assertThat(subscriptionPostCalculator.getCalculatedSubscriptions()).hasSize(1).contains(existingSubscription);
+    }
+
+    @Test
+    public void singleSubscriptionWithDynamicFilter() {
+        Subscription wantedSubscription = new Subscription(
+                SubscriptionStatus.CREATED,
+                "a = b",
+                "/",
+                "user",
+                Set.of(
+                        new Endpoint(
+                                "source",
+                                "host",
+                                5671,
+                                null,
+                                null,
+                                "a = b"
+                        )
+                )
+        );
+        Set<Subscription> wantedSubscriptions = Collections.singleton(wantedSubscription);
+        Subscription existingSubscription = new Subscription(
+                SubscriptionStatus.CREATED,
+                "a = b",
+                "/",
+                "user",
+                Set.of(
+                        new Endpoint(
+                                "source",
+                                "host",
+                                5671,
+                                null,
+                                null,
+                                "a = b"
+                        )
+                )
+        );
+        Set<Subscription> existingSubscriptions = Set.of(existingSubscription);
         SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
         assertThat(subscriptionPostCalculator.getSubscriptionsToRemove()).isEmpty();
         assertThat(subscriptionPostCalculator.getNewSubscriptions()).isEmpty();
