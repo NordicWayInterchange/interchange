@@ -308,7 +308,8 @@ public class ExportTransformer {
                 privateChannel.getServiceProviderName(),
                 privateChannel.getPeers().stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet()),
                 transformPrivateChannelStatusToPrivateChannelStatusExportApi(privateChannel.getStatus()),
-                transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint())
+                transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint()),
+                privateChannel.getDescription()
         );
     }
 
