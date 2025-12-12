@@ -15,7 +15,7 @@ public class CapabilityValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(CapabilityValidator.class);
 
-    private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z.:-]*");
+    private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z._:-]*");
 
     private static Pattern countryCodeRegex = Pattern.compile("[A-Z]{2}");
 
