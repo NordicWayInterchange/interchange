@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.vegvesen.ixn.federation.api.v1_0.ApiVersion;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
 
 import java.util.HashSet;
 import java.util.Set;

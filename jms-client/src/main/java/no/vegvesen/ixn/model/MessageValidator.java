@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.properties.MessageProperty;
+import no.vegvesen.ixn.shared.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

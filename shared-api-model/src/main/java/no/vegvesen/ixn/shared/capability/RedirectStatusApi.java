@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.api.v1_0.capability;
+package no.vegvesen.ixn.shared.capability;
 
 public enum RedirectStatusApi {
     OPTIONAL,

@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.concurrent.Callable;
 
-import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
+import static no.vegvesen.ixn.shared.Constants.*;
 
 @Command(name = "send", description = "Sending a message from JSON",
         defaultValueProvider = PropertiesDefaultProvider.class,

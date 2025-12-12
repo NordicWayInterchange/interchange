@@ -1,9 +1,9 @@
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.IvimApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.napcore.model.CapabilityErrorCode;
 import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 import no.vegvesen.ixn.napcore.model.CapabilityValidator;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.IvimApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

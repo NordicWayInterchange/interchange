@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.api.v1_0;
+package no.vegvesen.ixn.shared;
 
 public class Constants {
     public static final String DATEX_2 = "DATEX2";

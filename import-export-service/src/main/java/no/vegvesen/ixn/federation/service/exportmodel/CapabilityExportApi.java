@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.service.exportmodel;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
 
 import java.util.Objects;
 import java.util.Set;
