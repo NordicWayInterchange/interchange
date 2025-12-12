@@ -1251,7 +1251,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
-        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        Delivery delivery = response.getDeliveries().stream().findFirst().orElseThrow();
         assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }

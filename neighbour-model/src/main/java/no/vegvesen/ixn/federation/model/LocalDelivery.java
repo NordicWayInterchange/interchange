@@ -22,9 +22,7 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    //TODO this should be set as non-null.
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String selector = "";
 
     @Column
