@@ -1,8 +1,11 @@
 package no.vegvesen.ixn.federation.service.importmodel;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 import java.util.Set;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeliveryImportApi {
 
     private String uuid;
@@ -17,6 +20,8 @@ public class DeliveryImportApi {
 
     private Boolean dlqueue;
 
+    private String description;
+
 
     public enum DeliveryStatusImportApi {
         REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR;
@@ -30,12 +35,14 @@ public class DeliveryImportApi {
                              String path,
                              String selector,
                              DeliveryStatusImportApi status,
+                             String description,
                              Boolean dlqueue) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.path = path;
         this.selector = selector;
         this.status = status;
+        this.description = description;
         this.dlqueue = dlqueue;
     }
 
@@ -87,16 +94,24 @@ public class DeliveryImportApi {
         this.dlqueue = dlqueue;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryImportApi that = (DeliveryImportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(path, that.path) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, endpoints, path, selector, status, dlqueue);
+        return Objects.hash(uuid, endpoints, path, selector, status, dlqueue, description);
     }
 
     @Override
@@ -107,7 +122,8 @@ public class DeliveryImportApi {
                 ", path='" + path + '\'' +
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
-                ", dlq=" + dlqueue +
+                ", dlqueue=" + dlqueue +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

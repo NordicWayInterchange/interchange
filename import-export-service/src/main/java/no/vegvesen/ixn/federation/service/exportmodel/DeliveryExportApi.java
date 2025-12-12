@@ -15,8 +15,12 @@ public class DeliveryExportApi {
 
     private Boolean dlqueue;
 
+    private String description;
+
     public enum DeliveryStatusExportApi{
         REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR;
+
+
 
     }
     public DeliveryExportApi() {
@@ -26,18 +30,18 @@ public class DeliveryExportApi {
                              Set<DeliveryEndpointExportApi> endpoints,
                              String selector,
                              DeliveryStatusExportApi status,
+                             String description,
                              Boolean dlqueue) {
         this.uuid = uuid;
         this.endpoints = endpoints;
         this.selector = selector;
         this.status = status;
+        this.description = description;
         this.dlqueue = dlqueue;
     }
-
     public Set<DeliveryEndpointExportApi> getEndpoints() {
         return endpoints;
     }
-
     public void setEndpoints(Set<DeliveryEndpointExportApi> endpoints) {
         this.endpoints = endpoints;
     }
@@ -74,16 +78,24 @@ public class DeliveryExportApi {
         this.dlqueue = dlqueue;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         DeliveryExportApi that = (DeliveryExportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(endpoints, that.endpoints) && Objects.equals(selector, that.selector) && status == that.status && Objects.equals(dlqueue, that.dlqueue) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, endpoints, selector, status, dlqueue);
+        return Objects.hash(uuid, endpoints, selector, status, dlqueue, description);
     }
 
     @Override
@@ -94,6 +106,7 @@ public class DeliveryExportApi {
                 ", selector='" + selector + '\'' +
                 ", status=" + status +
                 ", dlqueue=" + dlqueue +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

@@ -44,6 +44,15 @@ public class LocalDelivery {
     public LocalDelivery() {
     }
 
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status, String description, Boolean dlqueue) {
+        this.uuid = uuid;
+        this.endpoints.addAll(endpoints);
+        this.selector = selector;
+        this.status = status;
+        this.description = description;
+        this.dlqueue = dlqueue;
+    }
+
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status, Boolean dlqueue) {
         this.uuid = uuid;
         this.endpoints.addAll(endpoints);
