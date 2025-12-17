@@ -1,9 +1,8 @@
-package no.vegvesen.ixn.federation.api.v1_0.capability;
+package no.vegvesen.ixn.shared.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.shared.Constants;
 
 import java.util.List;
-import java.util.Set;
 
 public class SremApplicationApi extends ApplicationApi {
 

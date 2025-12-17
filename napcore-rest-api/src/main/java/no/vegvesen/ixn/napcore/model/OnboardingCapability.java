@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.napcore.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 
 @JsonIgnoreProperties(value = {"createdTimestamp"})
 public class OnboardingCapability implements Comparable<OnboardingCapability> {

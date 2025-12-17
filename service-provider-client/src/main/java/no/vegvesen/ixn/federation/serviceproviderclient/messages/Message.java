@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
 import com.fasterxml.jackson.annotation.*;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.shared.Constants;
 
 import java.io.File;
 

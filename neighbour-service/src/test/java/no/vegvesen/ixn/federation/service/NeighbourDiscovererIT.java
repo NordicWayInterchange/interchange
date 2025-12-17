@@ -1,8 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -12,6 +11,11 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;

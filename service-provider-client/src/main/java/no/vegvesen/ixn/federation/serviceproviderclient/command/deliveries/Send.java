@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static no.vegvesen.ixn.federation.api.v1_0.Constants.*;
+import static no.vegvesen.ixn.shared.Constants.*;
 
 @Command(name="send",
         description = "Add delivery and send message",

@@ -1,14 +1,12 @@
 package no.vegvesen.ixn.federation.model.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CamApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.CamApplicationApi;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @DiscriminatorValue(Constants.CAM)

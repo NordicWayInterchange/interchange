@@ -1,12 +1,14 @@
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.IvimApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.napcore.model.CapabilityErrorCode;
 import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
 import no.vegvesen.ixn.napcore.model.CapabilityValidator;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.IvimApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityValidatorTest {
@@ -61,4 +63,18 @@ public class CapabilityValidatorTest {
         assertEquals("publicationId must start with '<publisherId>:'", secondMessage);
     }
 
+    @Test
+    public void testCapabilityWithUnderscoreInPublicationId(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new IvimApplicationApi(
+                        "NO00000",
+                        "NO00000:IVIM_BERLIN_067",
+                        "NO",
+                        "IVIM",
+                        List.of("1")
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.napcoreCapabilityHasValidProperties(capability1)).isEmpty();
+    }
 }

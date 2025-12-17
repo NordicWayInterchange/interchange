@@ -2,8 +2,8 @@ package no.vegvesen.ixn;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.model.IllegalMessageException;
+import no.vegvesen.ixn.shared.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

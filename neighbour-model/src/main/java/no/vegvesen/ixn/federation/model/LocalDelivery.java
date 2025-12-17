@@ -22,9 +22,7 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    //TODO this should be set as non-null.
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locdel_sel"))
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition="TEXT", nullable = false)
     private String selector = "";
 
     @Column
@@ -44,6 +42,15 @@ public class LocalDelivery {
     private Boolean dlqueue = false;
 
     public LocalDelivery() {
+    }
+
+    public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status, String description, Boolean dlqueue) {
+        this.uuid = uuid;
+        this.endpoints.addAll(endpoints);
+        this.selector = selector;
+        this.status = status;
+        this.description = description;
+        this.dlqueue = dlqueue;
     }
 
     public LocalDelivery(String uuid, Set<LocalDeliveryEndpoint> endpoints, String selector, LocalDeliveryStatus status, Boolean dlqueue) {
