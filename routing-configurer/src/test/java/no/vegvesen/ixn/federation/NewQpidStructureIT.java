@@ -12,17 +12,10 @@ import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.apache.qpid.jms.message.JmsMessage;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 
 import jakarta.jms.JMSException;
@@ -70,7 +63,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
         String exchangeName = "inputExchange";
-        qpidClient.createDirectExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
         String queueName = "outputQueue";
         qpidClient.createQueue(queueName);
 
@@ -175,7 +168,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(inQueueName);
+        qpidClient.createHeadersExchange(inQueueName);
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         qpidClient.createQueue(outQueueName);
@@ -319,7 +312,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createQueue(subscriptionQueue);
@@ -408,7 +401,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createHeadersExchange(capabilityExchange);

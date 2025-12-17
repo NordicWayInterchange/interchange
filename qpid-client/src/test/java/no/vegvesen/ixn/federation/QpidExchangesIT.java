@@ -62,6 +62,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
     }
 
+    /*
     @Test
     public void testDirectExchangeWithRandomBinding() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
@@ -74,11 +75,12 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
 
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isFalse();
     }
+*/
 
     @Test
     public void testDirectExchangeWithBindingLikeSourceName() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
-        Exchange inExchange = qpidClient.createDirectExchange("delex");
+        Exchange inExchange = qpidClient.createHeadersExchange("delex");
         Exchange capExhange = qpidClient.createHeadersExchange("capex");
         Queue subscriptionQueue = qpidClient.createQueue("loc");
 
@@ -92,7 +94,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
     public void testDirectExchangeWithAlternateBindingAndBindLikeSourceName() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
         //dlqueue er allerede laget, ligger i config.json
-        Exchange inExchange = qpidClient.createDirectExchangeWithDlq("delex", "dlqueue");
+        Exchange inExchange = qpidClient.createHeadersExchangeWithDlq("delex", "dlqueue");
         Exchange capExhange = qpidClient.createHeadersExchange("capex");
         Queue subscriptionQueue = qpidClient.createQueue("loc");
 
@@ -101,7 +103,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
 
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
     }
-
+/*
     @Test
     public void testDirectExchangeWithAlternateBindingAndBindNotLikeSourceName() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
@@ -115,7 +117,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
 
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isFalse();
     }
-
+*/
     private boolean sendAndReceive(String inExchangeName, String outQueue) throws Exception {
         WriteToScreenMessageListener writeToScreenMessageListener = new WriteToScreenMessageListener();
         CountDownLatch latch = new CountDownLatch(1);

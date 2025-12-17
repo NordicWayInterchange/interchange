@@ -438,10 +438,10 @@ public class ServiceProviderRouter {
                                     qpidClient.addReadAccess(serviceProvider.getName(),createdDlq.getName());
                                     delta.addQueue(createdDlq);
                                 }
-                                exchange = qpidClient.createDirectExchangeWithDlq(exchangeName, endpoint.getDlqName());
+                                exchange = qpidClient.createHeadersExchangeWithDlq(exchangeName, endpoint.getDlqName());
                                 logger.info("Created direct exchange {} with dlqueue {}", exchangeName, endpoint.getDlqName());
                             } else {
-                                exchange = qpidClient.createDirectExchange(exchangeName);
+                                exchange = qpidClient.createHeadersExchange(exchangeName);
                                 logger.info("Created exchange {}", exchangeName);
                             }
                             qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);
