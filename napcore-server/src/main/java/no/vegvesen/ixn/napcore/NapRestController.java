@@ -674,16 +674,27 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Bi-queue")
-    @Operation(summary = "Get bi-queue endpoint")
+    @Operation(summary = "Get bi-queue endpoint per message type")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
-    public BiqueueEndpointResponse getBiqueueEndPoint() {
+    public List<BiqueueEndpointResponsePerMessageType> getBiqueueEndPoint() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
 
-        return new BiqueueEndpointResponse(
-                napCoreProperties.getBrokerExternalName(),
-                Integer.parseInt(napCoreProperties.getMessageChannelPort()),
-                napCoreProperties.getBiQueueName()
-        );
+        List<String> messageType = Arrays.asList("DATEX2", "DENM", "IVIM", "SPATEM", "MAPEM", "SREM", "SSEM", "CAM");
+        List<String> queueNames = napCoreProperties.getBiQueueName();
+
+        return messageType.stream().map(type -> {
+            Optional<String> matchedQueueName = queueNames.stream()
+                    .filter(qName -> qName.contains(type)).findFirst();
+
+            if (!matchedQueueName.isPresent()) {
+                return null;
+            }
+
+            return new BiqueueEndpointResponsePerMessageType(type, new BiqueueEndpointResponse(
+                    napCoreProperties.getBrokerExternalName(),
+                    Integer.parseInt(napCoreProperties.getMessageChannelPort()),
+                    matchedQueueName.get()));
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private void validatePathVariable(String pathVariable){
