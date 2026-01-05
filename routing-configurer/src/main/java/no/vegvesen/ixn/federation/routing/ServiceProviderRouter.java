@@ -385,9 +385,10 @@ public class ServiceProviderRouter {
         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
             for (CapabilityShard shard : capability.getShards()) {
                 Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                Binding binding = null;
                 if (exchange != null) {
-                    if (!exchange.isBoundTo("bi-queue")) {
-                        Binding binding = new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector()));
+                    if (! isExchangeBoundToBiQueuePerMessageType(exchange)) {
+                        binding = getBinding(capability, shard, binding);
                         qpidClient.addBinding(shard.getExchangeName(), binding);
                         exchange.addBinding(binding);
                     }
@@ -396,6 +397,33 @@ public class ServiceProviderRouter {
                 }
             }
         }
+    }
+
+    private static boolean isExchangeBoundToBiQueuePerMessageType(Exchange exchange) {
+        return exchange.isBoundTo("bi-datex") || exchange.isBoundTo("bi-denm") || exchange.isBoundTo("bi-cam") || exchange.isBoundTo("bi-ivim")
+                || exchange.isBoundTo("bi-mapem") || exchange.isBoundTo("bi-spatem") || exchange.isBoundTo("bi-ssrem") || exchange.isBoundTo("bi-ssem");
+    }
+
+    private static Binding getBinding(Capability capability, CapabilityShard shard, Binding binding) {
+
+        if (capability.getApplication().getMessageType().equals("DATEX2")) {
+            binding = new Binding(shard.getExchangeName(), "bi-datex", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("DENM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-denm", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("CAM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-cam", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("IVIM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-ivim", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("MAPEM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-mapem", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("SPATEM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-spatem", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("SSREM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-ssrem", new Filter(shard.getSelector()));
+        } else if (capability.getApplication().getMessageType().equals("SSEM")) {
+            binding = new Binding(shard.getExchangeName(), "bi-ssem", new Filter(shard.getSelector()));
+        }
+        return binding;
     }
 
     public ServiceProvider tearDownCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
