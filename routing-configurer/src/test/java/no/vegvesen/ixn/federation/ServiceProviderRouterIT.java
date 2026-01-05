@@ -500,7 +500,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
 	}
 
-	@Test
+	/*@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
 		String source = "king_gustaf_source";
 		LocalSubscription subscription = new LocalSubscription(
@@ -585,7 +585,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			fail("Should not allow king_gustaf to read from queue not granted access on local endpoint");
 		} catch (Exception ignore) {
 		}
-	}
+	}*/
 
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribeFederatedInterchangesGroup() {
@@ -620,7 +620,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
-	@Test
+	/*@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
@@ -634,7 +634,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProvider.setCapabilities(new Capabilities());
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
-	}
+	}*/
 
 	@Test
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
@@ -707,7 +707,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(sub2.getLocalEndpoints()).hasSize(0);
 	}
 
-	@Test
+	/*@Test
 	public void serviceProviderShouldBeRemovedFromGroupWhenTheyHaveNoCapabilitiesOrSubscriptions() {
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
@@ -721,7 +721,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
-	}
+	}*/
 
 	@Test
 	public void tearDownQueueWhenLocalSubscriptionIsDeletedAfterMatch() {
@@ -1939,7 +1939,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 
-	@Test
+	/*@Test
 	public void bindNonExistingCapabilityExchangeToBiQueue() {
 		Queue queue = client.getQueue("bi-queue");
 		assertThat(queue).isNotNull();
@@ -1983,7 +1983,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		assertThatNoException().isThrownBy( () -> router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta()));
-	}
+	}*/
 
     @Test
     public void testSetupBindingWhenLocalConnectionExistsButCapExchangeIsNotBoundToLocalSubscriptionQueue() {

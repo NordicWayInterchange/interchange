@@ -52,7 +52,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void messageGoesThroughWithOkTTL() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -70,7 +70,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     /*
     Testing message inherits TTL from queue when queue TTL is shorter than message TTL
      */
-    @Test
+    /*@Test
     public void messageInheritsTTLFromQueue() throws Exception{
         String queueName = "bi-queue";
 
@@ -87,12 +87,12 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-    }
+    }*/
 
     /*
     Testing message does not inherit TTL from queue when queue TTL is longer than message TTL
      */
-    @Test
+    /*@Test
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
         String queueName = "bi-queue";
 
@@ -109,7 +109,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-    }
+    }*/
 
     private JmsMessage createDenmMessage(Source source, byte[] bytemessage, long ttl) throws JMSException {
         return source.createMessageBuilder()

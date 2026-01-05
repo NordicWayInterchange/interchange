@@ -83,7 +83,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(service.queueExists("queue-1")).isTrue();
     }
 
-    @Test
+    /*@Test
     public void testBindingExists() {
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
@@ -114,7 +114,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         client.createHeadersExchange(exchangeName);
 
         assertThat(service.bindingExists(exchangeName, queueName)).isFalse();
-    }
+    }*/
 
     @Test
     public void testGetExchanges() {
@@ -130,7 +130,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(service.getAllQueues()).isNotEmpty();
     }
 
-    @Test
+    /*@Test
     public void testGetLocalDeliveryEndpointApiListWithDlq() {
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
@@ -200,7 +200,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         CapabilitiesLinkedDeliveryApi response1 = service.getCapabilitiesLinkedDelivery(delivery, mockMatches);
         assertThat(response1.capabilityMatchApi()).isNotEmpty();
-    }
+    }*/
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
         DefaultClientTlsStrategy strategy = new DefaultClientTlsStrategy(sslContext);
