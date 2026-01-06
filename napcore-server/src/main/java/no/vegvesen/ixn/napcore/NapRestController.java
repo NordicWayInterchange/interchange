@@ -27,6 +27,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import no.vegvesen.ixn.shared.Constants;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @RestController
 public class NapRestController {
@@ -674,27 +677,33 @@ public class NapRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Bi-queue")
-    @Operation(summary = "Get bi-queue endpoint per message type")
+    @Operation(summary = "Get bi-queue endpoints per message type")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
     public List<BiqueueEndpointResponsePerMessageType> getBiqueueEndPoint() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get bi-queue endpoints per message type");
 
-        List<String> messageType = Arrays.asList("DATEX2", "DENM", "IVIM", "SPATEM", "MAPEM", "SREM", "SSEM", "CAM");
-        List<String> queueNames = napCoreProperties.getBiQueueName();
-
-        return messageType.stream().map(type -> {
-            Optional<String> matchedQueueName = queueNames.stream()
-                    .filter(qName -> qName.contains(type)).findFirst();
-
-            if (!matchedQueueName.isPresent()) {
-                return null;
-            }
-
-            return new BiqueueEndpointResponsePerMessageType(type, new BiqueueEndpointResponse(
-                    napCoreProperties.getBrokerExternalName(),
-                    Integer.parseInt(napCoreProperties.getMessageChannelPort()),
-                    matchedQueueName.get()));
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        Map<String, String> typeToQueue = Map.of(
+                "DATEX2", "bi-datex",
+                "DENM", "bi-denm",
+                "IVIM", "bi-ivim",
+                "SPATEM", "bi-spatem",
+                "MAPEM", "bi-mapem",
+                "SREM", "bi-ssrem",
+                "SSEM", "bi-ssem",
+                "CAM", "bi-cam"
+        );
+        return
+                Constants.getAllMessageTypes().stream()
+                        .map(type -> new BiqueueEndpointResponsePerMessageType(
+                                type,
+                                new BiqueueEndpointResponse(
+                                        napCoreProperties.getBrokerExternalName(),
+                                        Integer.parseInt(napCoreProperties.getMessageChannelPort()),
+                                        typeToQueue.get(type)
+                                )
+                        ))
+                        .collect(Collectors.toList());
     }
 
     private void validatePathVariable(String pathVariable){
