@@ -123,9 +123,6 @@ export default function Home() {
             </Link>
           ))}
         </Box>
-        <Subheading>My bi-queue access</Subheading>
-        <Divider sx={{ marginY: -3, visibility: 'hidden' }} />
-        <BiQueue></BiQueue>
         <Subheading>My latest subscriptions</Subheading>
         <DataGrid
           columns={SubscriptionDatagrid}

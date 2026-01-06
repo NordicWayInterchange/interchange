@@ -23,6 +23,7 @@ import LocalPostOfficeIcon from '@mui/icons-material/LocalPostOffice';
 import PersonIcon from '@mui/icons-material/Person';
 import ArticleIcon from '@mui/icons-material/Article';
 import LockIcon from '@mui/icons-material/Lock';
+import TableRowsIcon from '@mui/icons-material/TableRows';
 
 const MAIN_PAGES: Array<IPages> = [
   {
@@ -52,7 +53,13 @@ const MAIN_PAGES: Array<IPages> = [
     text: "Private channels",
     url: "/private-channels",
     icon: <LockIcon />,
-  }
+  },
+  {
+    text: "Bi queues",
+    url: "/bi-queues",
+    icon: <TableRowsIcon />,
+  },
+
 ];
 
 const SECONDARY_PAGES: Array<IPages> = [
