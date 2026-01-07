@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.adminserver.model.biqueueEndpoint;
 
 import java.util.Objects;
 
-public class BiqueueEndpointApi {
+public class BiqueueEndpointsApi {
 
     private String brokerExternalName;
 
@@ -10,10 +10,10 @@ public class BiqueueEndpointApi {
 
     private String queueName;
 
-    public BiqueueEndpointApi() {
+    public BiqueueEndpointsApi() {
     }
 
-    public BiqueueEndpointApi(String brokerExternalName, Integer messageChannelPort, String queueName) {
+    public BiqueueEndpointsApi(String brokerExternalName, Integer messageChannelPort, String queueName) {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
         this.queueName = queueName;
@@ -47,7 +47,7 @@ public class BiqueueEndpointApi {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BiqueueEndpointApi that = (BiqueueEndpointApi) o;
+        BiqueueEndpointsApi that = (BiqueueEndpointsApi) o;
         return brokerExternalName.equals(that.brokerExternalName) &&
                 messageChannelPort.equals(that.messageChannelPort) &&
                 queueName.equals(that.queueName);
