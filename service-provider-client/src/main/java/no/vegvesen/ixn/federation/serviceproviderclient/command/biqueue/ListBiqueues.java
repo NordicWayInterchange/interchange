@@ -30,7 +30,7 @@ public class ListBiqueues implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        GetBiqueueEndpointsResponsePerMessageType response = client.listBiqueues();
+        GetBiqueueEndpointsResponsePerMessageType[] response = client.listBiqueues();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return 0;
     }

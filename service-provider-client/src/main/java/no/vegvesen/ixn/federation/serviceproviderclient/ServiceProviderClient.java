@@ -159,9 +159,9 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, GetBiqueueEndpointResponse.class).getBody();
     }
 
-    public GetBiqueueEndpointsResponsePerMessageType listBiqueues() {
+    public GetBiqueueEndpointsResponsePerMessageType[] listBiqueues() {
         String url = String.format("%s/%s/biqueueendpoints",server,user);
-        return restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType.class).getBody();
+        return restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType[].class).getBody();
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
