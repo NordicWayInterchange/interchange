@@ -754,7 +754,7 @@ public class OnboardRestController {
 				Constants.getAllMessageTypes().stream()
 						.map(type -> new GetBiqueueEndpointsResponsePerMessageType(
 								type,
-								new GetBiqueueEndpointsResponse(
+								new GetBiqueueEndpointResponse(
 										nodeProperties.getBrokerExternalName(),
 										Integer.parseInt(nodeProperties.getMessageChannelPort()),
 										MESSAGE_TYPE_TO_QUEUE.get(type)

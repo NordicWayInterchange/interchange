@@ -2,7 +2,7 @@ package no.vegvesen.ixn.serviceprovider.model;
 
 import java.util.Objects;
 
-public class GetBiqueueEndpointsResponse {
+public class GetBiqueueEndpointResponse {
 
     private String brokerExternalName;
 
@@ -10,10 +10,10 @@ public class GetBiqueueEndpointsResponse {
 
     private String queueName;
 
-    public GetBiqueueEndpointsResponse() {
+    public GetBiqueueEndpointResponse() {
     }
 
-    public GetBiqueueEndpointsResponse(String brokerExternalName, Integer messageChannelPort, String queueName) {
+    public GetBiqueueEndpointResponse(String brokerExternalName, Integer messageChannelPort, String queueName) {
         this.brokerExternalName = brokerExternalName;
         this.messageChannelPort = messageChannelPort;
         this.queueName = queueName;
@@ -47,7 +47,7 @@ public class GetBiqueueEndpointsResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GetBiqueueEndpointsResponse that = (GetBiqueueEndpointsResponse) o;
+        GetBiqueueEndpointResponse that = (GetBiqueueEndpointResponse) o;
         return brokerExternalName.equals(that.brokerExternalName) &&
                 messageChannelPort.equals(that.messageChannelPort) &&
                 queueName.equals(that.queueName);

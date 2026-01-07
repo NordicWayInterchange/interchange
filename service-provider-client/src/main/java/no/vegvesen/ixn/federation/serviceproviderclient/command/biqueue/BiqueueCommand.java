@@ -8,6 +8,7 @@ import picocli.CommandLine;
         description = "Manage bi-queue",
         subcommands = {
                 Listen.class,
+                ListBiqueues.class
         },
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,

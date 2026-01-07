@@ -5,14 +5,14 @@ import java.util.Objects;
 public class GetBiqueueEndpointsResponsePerMessageType {
 
     String messageType;
-    GetBiqueueEndpointsResponse getBiqueueEndpointsResponse;
+    GetBiqueueEndpointResponse getBiqueueEndpointResponse;
 
     public GetBiqueueEndpointsResponsePerMessageType() {
     }
 
-    public GetBiqueueEndpointsResponsePerMessageType(String type, GetBiqueueEndpointsResponse getBiqueueEndpointsResponse) {
+    public GetBiqueueEndpointsResponsePerMessageType(String type, GetBiqueueEndpointResponse getBiqueueEndpointsResponse) {
         this.messageType = type;
-        this.getBiqueueEndpointsResponse = getBiqueueEndpointsResponse;
+        this.getBiqueueEndpointResponse = getBiqueueEndpointsResponse;
     }
 
     public String getMessageType() {
@@ -23,12 +23,12 @@ public class GetBiqueueEndpointsResponsePerMessageType {
         this.messageType = messageType;
     }
 
-    public GetBiqueueEndpointsResponse getGetBiqueueEndpointResponse() {
-        return getBiqueueEndpointsResponse;
+    public GetBiqueueEndpointResponse getGetBiqueueEndpointResponse() {
+        return getBiqueueEndpointResponse;
     }
 
-    public void setGetBiqueueEndpointResponse(GetBiqueueEndpointsResponse getBiqueueEndpointsResponse) {
-        this.getBiqueueEndpointsResponse = getBiqueueEndpointsResponse;
+    public void setGetBiqueueEndpointResponse(GetBiqueueEndpointResponse getBiqueueEndpointsResponse) {
+        this.getBiqueueEndpointResponse = getBiqueueEndpointsResponse;
     }
 
     @Override
@@ -36,19 +36,19 @@ public class GetBiqueueEndpointsResponsePerMessageType {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GetBiqueueEndpointsResponsePerMessageType that = (GetBiqueueEndpointsResponsePerMessageType) o;
-        return messageType.equals(that.messageType) && getBiqueueEndpointsResponse.equals(that.getBiqueueEndpointsResponse);
+        return messageType.equals(that.messageType) && getBiqueueEndpointResponse.equals(that.getBiqueueEndpointResponse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageType, getBiqueueEndpointsResponse);
+        return Objects.hash(messageType, getBiqueueEndpointResponse);
     }
 
     @Override
     public String toString() {
         return "GetBiqueueEndpointsResponsePerMessageType{" +
                 ", messageType='" + messageType + '\'' +
-                ", getBiqueueEndpointResponse=" + getBiqueueEndpointsResponse +
+                ", getBiqueueEndpointResponse=" + getBiqueueEndpointResponse +
                 '}';
     }
 }
