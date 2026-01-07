@@ -154,9 +154,9 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
-    public GetBiqueueEndpointResponse getBiqueueEndpoint() {
+    public GetBiqueueEndpointsResponse getBiqueueEndpoint() {
         String url = String.format("%s/%s/biqueueendpoint", server, user);
-        return restTemplate.getForEntity(url, GetBiqueueEndpointResponse.class).getBody();
+        return restTemplate.getForEntity(url, GetBiqueueEndpointsResponse.class).getBody();
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){

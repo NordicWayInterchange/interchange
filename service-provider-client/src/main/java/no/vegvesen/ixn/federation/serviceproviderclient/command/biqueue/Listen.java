@@ -36,7 +36,7 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        GetBiqueueEndpointResponse biqueueEndpointResponse = client.getBiqueueEndpoint();
+        GetBiqueueEndpointsResponse biqueueEndpointResponse = client.getBiqueueEndpoint();
 
         String biqueueName = biqueueEndpointResponse.getQueueName();
 
