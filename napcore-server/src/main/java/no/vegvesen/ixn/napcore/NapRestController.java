@@ -48,8 +48,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
 
 @RestController
 public class NapRestController {
@@ -675,32 +675,22 @@ public class NapRestController {
         return biQueueAccessResponse;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoints"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Bi-queue")
     @Operation(summary = "Get bi-queue endpoints per message type")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
-    public List<BiqueueEndpointResponsePerMessageType> getBiqueueEndPoint() {
+    public List<BiqueueEndpointsResponsePerMessageType> getBiqueueEndPoints() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get bi-queue endpoints per message type");
 
-        Map<String, String> typeToQueue = Map.of(
-                "DATEX2", "bi-datex",
-                "DENM", "bi-denm",
-                "IVIM", "bi-ivim",
-                "SPATEM", "bi-spatem",
-                "MAPEM", "bi-mapem",
-                "SREM", "bi-ssrem",
-                "SSEM", "bi-ssem",
-                "CAM", "bi-cam"
-        );
         return
                 Constants.getAllMessageTypes().stream()
-                        .map(type -> new BiqueueEndpointResponsePerMessageType(
+                        .map(type -> new BiqueueEndpointsResponsePerMessageType(
                                 type,
                                 new BiqueueEndpointResponse(
                                         napCoreProperties.getBrokerExternalName(),
                                         Integer.parseInt(napCoreProperties.getMessageChannelPort()),
-                                        typeToQueue.get(type)
+                                        MESSAGE_TYPE_TO_QUEUE.get(type)
                                 )
                         ))
                         .collect(Collectors.toList());

@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.napcore.model;
 
-public class BiqueueEndpointResponsePerMessageType {
+public class BiqueueEndpointsResponsePerMessageType {
 
     private String messageType;
     private BiqueueEndpointResponse biqueueEndpointResponse;
 
-    public BiqueueEndpointResponsePerMessageType() {
+    public BiqueueEndpointsResponsePerMessageType() {
     }
 
-    public BiqueueEndpointResponsePerMessageType(String messageType, BiqueueEndpointResponse biqueueEndpointResponse) {
+    public BiqueueEndpointsResponsePerMessageType(String messageType, BiqueueEndpointResponse biqueueEndpointResponse) {
         this.messageType = messageType;
         this.biqueueEndpointResponse = biqueueEndpointResponse;
     }
