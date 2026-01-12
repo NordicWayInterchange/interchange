@@ -326,7 +326,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
     }
 
-   /* @Test
+    @Test
     public void testDeliveryExchangesAreAutomaticallyAddedToQpidAfterRestart() {
         Capability capability = new Capability(
                 new DenmApplication(
@@ -401,5 +401,5 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();
-    }*/
+    }
 }

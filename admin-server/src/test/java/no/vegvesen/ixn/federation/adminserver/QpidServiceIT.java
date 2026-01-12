@@ -104,7 +104,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
-    }
+    }*/
 
     @Test
     public void testBindingExistsReturnsFalse(){
@@ -114,7 +114,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         client.createHeadersExchange(exchangeName);
 
         assertThat(service.bindingExists(exchangeName, queueName)).isFalse();
-    }*/
+    }
 
     @Test
     public void testGetExchanges() {
@@ -130,7 +130,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(service.getAllQueues()).isNotEmpty();
     }
 
-    /*@Test
+    @Test
     public void testGetLocalDeliveryEndpointApiListWithDlq() {
         String selector = "originatingCountry = 'NO'";
         String queueName = "bi-queue";
@@ -149,7 +149,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(response1).isNotEmpty();
     }
 
-    @Test
+   /* @Test
     public void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
