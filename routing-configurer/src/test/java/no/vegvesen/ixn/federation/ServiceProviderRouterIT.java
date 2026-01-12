@@ -1939,9 +1939,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 
-	/*@Test
+	@Test
 	public void bindNonExistingCapabilityExchangeToBiQueue() {
-		Queue queue = client.getQueue("bi-queue");
+		Queue queue = client.getQueue("bi-datex");
 		assertThat(queue).isNotNull();
 
 		ServiceProvider serviceProvider = new ServiceProvider(
@@ -1983,7 +1983,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		assertThatNoException().isThrownBy( () -> router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta()));
-	}*/
+	}
 
     @Test
     public void testSetupBindingWhenLocalConnectionExistsButCapExchangeIsNotBoundToLocalSubscriptionQueue() {
