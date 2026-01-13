@@ -4,14 +4,12 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.shared.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -71,9 +69,9 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     /*
     Testing message inherits TTL from queue when queue TTL is shorter than message TTL
      */
-    /*@Test
+    @Test
     public void messageInheritsTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -88,14 +86,14 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-    }*/
+    }
 
     /*
     Testing message does not inherit TTL from queue when queue TTL is longer than message TTL
      */
-    /*@Test
+    @Test
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -110,7 +108,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-    }*/
+    }
 
     private JmsMessage createDenmMessage(Source source, byte[] bytemessage, long ttl) throws JMSException {
         return source.createMessageBuilder()

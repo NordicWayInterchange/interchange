@@ -500,7 +500,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(king_gustaf.getSubscriptions().size()).isEqualTo(1);
 	}
 
-	/*@Test
+	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
 		String source = "king_gustaf_source";
 		LocalSubscription subscription = new LocalSubscription(
@@ -585,7 +585,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			fail("Should not allow king_gustaf to read from queue not granted access on local endpoint");
 		} catch (Exception ignore) {
 		}
-	}*/
+	}
 
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribeFederatedInterchangesGroup() {

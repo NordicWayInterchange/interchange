@@ -83,9 +83,9 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(service.queueExists("queue-1")).isTrue();
     }
 
-    /*@Test
+    @Test
     public void testBindingExists() {
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         String exchangeName = "my-exchange";
 
         client.createHeadersExchange(exchangeName);
@@ -104,7 +104,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
-    }*/
+    }
 
     @Test
     public void testBindingExistsReturnsFalse(){
@@ -149,11 +149,11 @@ public class QpidServiceIT extends QpidDockerBaseIT {
         assertThat(response1).isNotEmpty();
     }
 
-   /* @Test
+    @Test
     public void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 UUID.randomUUID().toString(),
@@ -200,7 +200,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         CapabilitiesLinkedDeliveryApi response1 = service.getCapabilitiesLinkedDelivery(delivery, mockMatches);
         assertThat(response1.capabilityMatchApi()).isNotEmpty();
-    }*/
+    }
 
     private RestTemplate createRestTemplate(SSLContext sslContext) {
         DefaultClientTlsStrategy strategy = new DefaultClientTlsStrategy(sslContext);

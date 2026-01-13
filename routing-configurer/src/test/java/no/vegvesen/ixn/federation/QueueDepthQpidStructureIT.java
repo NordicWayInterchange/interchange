@@ -50,7 +50,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
     }
 
-   /* @Test
+    @Test
     public void maxingOutQueueSizeGets1003ErrorMessage() throws Exception{
         String queueName = "bi-queue";
         String exchangeName = "my-exchange";
@@ -143,7 +143,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void unroutableMessageGets1003ErrorMessage() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         String exchangeName = "my-exchange";
 
         qpidClient.createHeadersExchange(exchangeName);
@@ -182,7 +182,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         String logsAfter = qpidContainer.getLogs();
         assertThat(logsAfter).contains("EXH-1003");
-    }*/
+    }
 
     private JmsMessage createDenmMessage(Source source, byte[] bytemessage, Integer causeCode) throws JMSException {
         return source.createMessageBuilder()

@@ -375,10 +375,10 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
         assertThat(numMessages.get()).isEqualTo(1);
     }
 
-    /*@Test
+    @Test
     public void consumeFromQueueWithNonDestructiveConsumers() throws Exception{
         System.out.println(qpidContainer.getHttpUrl());
-        String consumeQueue = "bi-queue";
+        String consumeQueue = "bi-denm";
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
 
@@ -450,11 +450,11 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                This also documents that a client that reconnects will get duplicate messages, and are required to deal
                with this on the reader side.
              */
-            /*sink.close();
+            sink.close();
             sink.start(); //We get the message delivered again here
             Thread.sleep(200);
         }
         assertThat(numMessages.get()).isEqualTo(2);
-    }*/
+    }
 
 }
