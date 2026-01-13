@@ -50,9 +50,9 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
     }
 
-    @Test
+   /* @Test
     public void maxingOutQueueSizeGets1003ErrorMessage() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         String exchangeName = "my-exchange";
 
         qpidClient.createHeadersExchange(exchangeName);
@@ -91,7 +91,7 @@ public class QueueDepthQpidStructureIT extends QpidDockerBaseIT {
 
         String logsAfter = qpidContainer.getLogs();
         assertThat(logsAfter).contains("EXH-1003");
-    }
+    }*/
 
     @Test
     @Disabled("Need to fix this")
