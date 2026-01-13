@@ -44,11 +44,9 @@ public class Listen implements Callable<Integer> {
 
         String biqueueName = biqueueEndpointsResponse.stream()
                 .map(biqueueEndpointResponse -> biqueueEndpointResponse.getGetBiqueueEndpointResponse().getQueueName())
-                .filter(s -> isMatched(s, messageType))
+                .filter(s -> s.contains(messageType) || messageType.contains(s))
                 .findFirst()
                 .orElse(null);
-
-        System.out.println(biqueueName);
 
         if (biqueueName == null) {
             throw new RuntimeException(String.format("Bi-queue %s does not exist!", biqueueName));
@@ -79,16 +77,5 @@ public class Listen implements Callable<Integer> {
         return 0;
     }
 
-    private static boolean isMatched(String id, String input) {
-        String a = normalize(id);
-        String b = normalize(input);
-        return a.contains(b) || b.contains(a);
-    }
-
-    private static String normalize(String s) {
-        return s.toLowerCase()
-                .replace("_", "")
-                .replace("-", "");
-    }
 }
 
