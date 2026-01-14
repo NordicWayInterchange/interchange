@@ -17,7 +17,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
-import BiConsumer from "@/pages/biConsumer/bi-consumer";
 import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 
 export default function Home() {

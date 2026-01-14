@@ -47,8 +47,6 @@ const BiConsumer = () => {
 
   const handleOpen = (value: boolean) => () => setOpen(value);
 
-  const handleClose = () => setOpen(false);
-
   const handleToggleAccess = async () => {
     const response = await addBiqueueAccess(
       session?.user.commonName as string,
@@ -81,7 +79,17 @@ const BiConsumer = () => {
 
   return (
     <>
-      <Box sx={frontPageCardStyle}>
+      <Box
+        sx={{
+          ...frontPageCardStyle,
+          justifyContent: "left",
+          "@media (min-width:600px)": {
+            flexDirection: "row",
+            maxWidth: "950px",
+          },
+          maxWidth: "950px",
+        }}
+      >
         {biQueueAccess === undefined || isLoading ? (
           <Loading text="Bi queue access status" />
         ) : (
@@ -89,7 +97,7 @@ const BiConsumer = () => {
             <Stack
               direction="row"
               alignItems="left"
-              spacing={2}
+              spacing={1}
               sx={{
                 flexWrap: "wrap",
                 rowGap: 1,
@@ -125,7 +133,12 @@ const BiConsumer = () => {
                   </Typography>
                 </Stack>
               ) : (
-                <Stack direction="row" alignItems="left" spacing={1} onClick={handleOpen(true)}>
+                <Stack
+                  direction="row"
+                  alignItems="left"
+                  spacing={1}
+                  onClick={handleOpen(true)}
+                >
                   <IconButton size="small">
                     <LockOutlinedIcon color="action" />
                   </IconButton>
@@ -168,7 +181,6 @@ const BiConsumer = () => {
           </Box>
         )}
       </Box>
-
     </>
   );
 };
