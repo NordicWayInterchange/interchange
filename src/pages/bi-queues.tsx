@@ -12,7 +12,7 @@ import {
   CustomEmptyOverlayBiqueueEndpoints,
 } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
-import { BiQueueEndpointResponse} from "@/types/napcore/biQueueResponse";
+import { BiqueueEndpointResponse, BiQueueEndpointsApi } from "@/types/napcore/biQueueResponse";
 import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Chip } from "@/components/shared/display/Chip";
@@ -20,21 +20,19 @@ import { messageTypeChips } from "@/lib/statusChips";
 
 export default function BiQueues() {
 
-  const { data: biQueueEndpoint, isLoading} = useBiQueueEndpoints();
-  const [biqueueEndpointRow, setBiqueueEndpointRow] = useState<BiQueueEndpointResponse>();
+  const { data, isLoading} = useBiQueueEndpoints();
+  const [biqueueEndpointRow, setBiqueueEndpointRow] = useState<BiQueueEndpointsApi>();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
-  console.log(biQueueEndpoint);
+  const rows = Array.isArray(data) ? data : [];
 
-  const rows = Array.isArray(biQueueEndpoint) ? biQueueEndpoint : [];
+  const handleMore = (biQueueEndpoint: BiQueueEndpointsApi) => {
+    setBiqueueEndpointRow(biQueueEndpoint);
+    setDrawerOpen(true);
+  };
 
   const handleOnRowClick = (params: any) => {
     handleMore(params.row);
-  };
-
-  const handleMore = (biQueueEndpoint: BiQueueEndpointResponse) => {
-    setBiqueueEndpointRow(biQueueEndpoint);
-    setDrawerOpen(true);
   };
 
   const handleMoreClose = () => {
@@ -77,6 +75,7 @@ export default function BiQueues() {
       },
     },
   ]
+  console.log(biqueueEndpointRow);
   return (
     <Box flex={1}>
       <Mainheading>Bi-queues</Mainheading>
@@ -103,11 +102,11 @@ export default function BiQueues() {
           noRowsOverlay: CustomEmptyOverlayBiqueueEndpoints
         }}
       />
-      {biqueueEndpointRow && (
+      {biqueueEndpointRow?.biqueueEndpointResponse && (
         <BiQueueEndpointDrawer
           open={drawerOpen}
           onClose={handleMoreClose}
-          biQueueEndpoints={biqueueEndpointRow}
+          biqueueEndpointRow={biqueueEndpointRow}
         />
       )}
 

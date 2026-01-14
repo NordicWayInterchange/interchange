@@ -10,24 +10,26 @@ import {
   Typography
 } from "@mui/material";
 import { drawerStyle, StyledCard } from "@/components/shared/styles/StyledSelectorBuilder";
-import React, { useEffect } from "react";
+import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
-import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointsApi } from "@/types/napcore/biQueueResponse";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  biQueueEndpoints: BiQueueEndpointResponse
+  biqueueEndpointRow: BiQueueEndpointsApi
 };
 
-const BiQueueEndpointDrawer= ({ open , onClose, biQueueEndpoints}: Props) => {
+const BiQueueEndpointDrawer= ({ open , onClose, biqueueEndpointRow}: Props) => {
+
+  const biqueueEndpoint = biqueueEndpointRow.biqueueEndpointResponse;
 
   return (
     <>
-      {biQueueEndpoints &&
-        Object.values(biQueueEndpoints).every(
+      {biqueueEndpointRow &&
+        Object.values(biqueueEndpointRow).every(
           (v) => v !== null && v !== undefined,
         ) && (
       <Drawer
@@ -48,7 +50,7 @@ const BiQueueEndpointDrawer= ({ open , onClose, biQueueEndpoints}: Props) => {
             </ListItem>
             <ListItem>
               <StyledHeaderBox>
-                <Typography>Bi-queue details</Typography>
+                <Typography>Bi-queue endpoint details</Typography>
               </StyledHeaderBox>
             </ListItem>
             <ListItem>
@@ -56,42 +58,42 @@ const BiQueueEndpointDrawer= ({ open , onClose, biQueueEndpoints}: Props) => {
                 <Typography>Endpoint</Typography>
                 <FormControl fullWidth>
                   <TextField
-                    value={biQueueEndpoints.brokerExternalName}
+                    value={biqueueEndpoint.brokerExternalName}
                     label="Host"
                     margin="normal"
                     slotProps={{
                       input: {
                         endAdornment: (
                           <InputAdornment position="end">
-                            <ContentCopy value={biQueueEndpoints.brokerExternalName} />
+                            <ContentCopy value={biqueueEndpoint.brokerExternalName} />
                           </InputAdornment>
                         ),
                       },
                     }}
                   />
                   <TextField
-                    value={biQueueEndpoints.messageChannelPort}
+                    value={biqueueEndpoint.messageChannelPort}
                     label="Port"
                     margin="normal"
                     slotProps={{
                       input: {
                         endAdornment: (
                           <InputAdornment position="end">
-                            <ContentCopy value={biQueueEndpoints.messageChannelPort?.toString()} />
+                            <ContentCopy value={biqueueEndpoint.messageChannelPort?.toString()} />
                           </InputAdornment>
                         ),
                       },
                     }}
                   />
                     <TextField
-                      value={biQueueEndpoints.queueName}
+                      value={biqueueEndpoint.queueName}
                       label="Source"
                       margin="normal"
                       slotProps={{
                         input: {
                           endAdornment: (
                             <InputAdornment position="end">
-                              <ContentCopy value={biQueueEndpoints.queueName} />
+                              <ContentCopy value={biqueueEndpoint.queueName} />
                             </InputAdornment>
                           ),
                         },

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointsApi } from "@/types/napcore/biQueueResponse";
 
-const fetchBiQueueEndpoints: () => Promise<BiQueueEndpointResponse[]> = async () => {
+const fetchBiQueueEndpoints: () => Promise<BiQueueEndpointsApi[]> = async () => {
   const res = await fetch(`/api/biqueueendpoints`);
 
   if (res.ok) {

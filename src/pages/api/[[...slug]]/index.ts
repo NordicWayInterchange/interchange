@@ -45,7 +45,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { DeliveriesDelivery } from "@/types/napcore/delivery";
 import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
-import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointsApi, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 const logger = require("../../../lib/logger");
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
@@ -145,7 +145,7 @@ const fetchAccessToBiQueue = async (params: extendedGetParams) => {
 
 const fetchBiQueueEndpoints = async (params: extendedGetParams) => {
   const res = await fetchNapcoreBiQueueEndpoints(params);
-  const biQueueEndpointResponse: BiQueueEndpointResponse = await res.data;
+  const biQueueEndpointResponse: BiQueueEndpointsApi = await res.data;
   return [res.status, biQueueEndpointResponse];
 }
 

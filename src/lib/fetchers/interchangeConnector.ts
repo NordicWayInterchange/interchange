@@ -5,7 +5,7 @@ import { CertificateSignRequest } from "@/types/napcore/certificate";
 import { DeliveryRequest } from "@/types/napcore/delivery";
 import { CapabilityRequest } from "@/types/napcore/capability";
 import { PrivateChannelRequest } from "@/types/napcore/privateChannel";
-import { BiQueueEndpointResponse, BiQueueResponse } from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointsApi, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 
 const headers = {
   Accept: "application/json",
@@ -106,7 +106,7 @@ export type basicPostParams = {
 
 export type basicPutParams = {
   actorCommonName: string;
-  body?: BiQueueResponse | BiQueueEndpointResponse;
+  body?: BiQueueResponse | BiQueueEndpointsApi;
 };
 
 export type basicPatchParams = {
