@@ -1,33 +1,81 @@
 import { Box } from "@mui/system";
 import BiQueue from "@/pages/biQueue/bi-queue";
 import Subheading from "@/components/shared/display/typography/Subheading";
-import { Divider } from "@mui/material";
-import React from "react";
+import { Divider, IconButton } from "@mui/material";
+import React, { useState } from "react";
 import Mainheading from "@/components/shared/display/typography/Mainheading";
 import { dataGridTemplate } from "@/components/shared/datagrid/DataGridTemplate";
 import { GridColDef } from "@mui/x-data-grid";
+import { useBiQueueEndpoints } from "@/hooks/useBiQueueEndpoints";
+import { CustomFooter } from "@/components/shared/datagrid/CustomFooter";
+import {
+  CustomEmptyOverlayBiqueueEndpoints,
+} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import DataGrid from "@/components/shared/datagrid/DataGrid";
+import { BiQueueEndpointResponse} from "@/types/napcore/biQueueResponse";
+import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Chip } from "@/components/shared/display/Chip";
+import { messageTypeChips } from "@/lib/statusChips";
 
 export default function BiQueues() {
 
-  /*const rows = backendData.map((row, index) => ({
-    id: index + 1,
-    name: row.messageType,
-  }));*/
+  const { data: biQueueEndpoint, isLoading} = useBiQueueEndpoints();
+  const [biqueueEndpointRow, setBiqueueEndpointRow] = useState<BiQueueEndpointResponse>();
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+
+  console.log(biQueueEndpoint);
+
+  const rows = Array.isArray(biQueueEndpoint) ? biQueueEndpoint : [];
+
+  const handleOnRowClick = (params: any) => {
+    handleMore(params.row);
+  };
+
+  const handleMore = (biQueueEndpoint: BiQueueEndpointResponse) => {
+    setBiqueueEndpointRow(biQueueEndpoint);
+    setDrawerOpen(true);
+  };
+
+  const handleMoreClose = () => {
+    setDrawerOpen(false);
+  };
+
   const tableHeaders: GridColDef[] = [
     {
       ...dataGridTemplate,
-      field: "id",
-      headerName: "ID",
-      renderCell: (params) => {
-        const value = params.row.id;
-        return value ? value.substring(0, 8) : '';
+      field: "messageType",
+      headerName: "Message type",
+      flex: 2,
+      renderCell: (cell) => {
+        return (
+          <Chip
+            color={
+              messageTypeChips[cell.value as keyof typeof messageTypeChips] as any
+            }
+            label={cell.value}
+          />
+        );
       },
     },
     {
       ...dataGridTemplate,
-      field: "messateType",
-      headerName: "Messate Type"
-    }
+      field: "actions",
+      headerName: "",
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      align: "right",
+      renderCell: (params) => {
+        return (
+          <Box>
+            <IconButton onClick={() => handleMore(params.row)}>
+              <MoreVertIcon />
+            </IconButton>
+          </Box>
+        );
+      },
+    },
   ]
   return (
     <Box flex={1}>
@@ -43,6 +91,25 @@ export default function BiQueues() {
       <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
       <Subheading>My bi-queues</Subheading>
       <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
+      <DataGrid
+        columns={tableHeaders}
+        rows={rows || []}
+        onRowClick={handleOnRowClick}
+        loading={isLoading}
+        getRowId={(row) => `${row.name}-${row.messageType}`}
+        sort={{ field: "row?.id", sort: "desc" }}
+        slots={{
+          footer: CustomFooter,
+          noRowsOverlay: CustomEmptyOverlayBiqueueEndpoints
+        }}
+      />
+      {biqueueEndpointRow && (
+        <BiQueueEndpointDrawer
+          open={drawerOpen}
+          onClose={handleMoreClose}
+          biQueueEndpoints={biqueueEndpointRow}
+        />
+      )}
 
 
     </Box>

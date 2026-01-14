@@ -264,8 +264,8 @@ export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
   return await fetchIXN(actorCommonName, `/biconsumer`);
 };
 
-export const fetchNapcoreBiQueueEndpoint: extendedGetFunction = async () => {
-  return await fetchIXN("", "/biqueueendpoint");
+export const fetchNapcoreBiQueueEndpoints: extendedGetFunction = async () => {
+  return await fetchIXN("", "/biqueueendpoints");
 };
 
 export const addNapcoreAccessToBiQueue: basicPutFunction = async (params) => {

@@ -14,27 +14,20 @@ import React, { useEffect } from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
-import { useBiQueueEndpoint } from "@/hooks/useBiQueueEndpoint";
+import { BiQueueEndpointResponse } from "@/types/napcore/biQueueResponse";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  biQueueEndpoints: BiQueueEndpointResponse
 };
 
-const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
-
-  const { data: biQueueEndpoint, refetch} = useBiQueueEndpoint();
-
-  useEffect(() => {
-    if (open) {
-      refetch();
-    }
-  }, [open, refetch]);
+const BiQueueEndpointDrawer= ({ open , onClose, biQueueEndpoints}: Props) => {
 
   return (
     <>
-      {biQueueEndpoint &&
-        Object.values(biQueueEndpoint).every(
+      {biQueueEndpoints &&
+        Object.values(biQueueEndpoints).every(
           (v) => v !== null && v !== undefined,
         ) && (
       <Drawer
@@ -63,42 +56,42 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
                 <Typography>Endpoint</Typography>
                 <FormControl fullWidth>
                   <TextField
-                    value={biQueueEndpoint.brokerExternalName}
+                    value={biQueueEndpoints.brokerExternalName}
                     label="Host"
                     margin="normal"
                     slotProps={{
                       input: {
                         endAdornment: (
                           <InputAdornment position="end">
-                            <ContentCopy value={biQueueEndpoint.brokerExternalName} />
+                            <ContentCopy value={biQueueEndpoints.brokerExternalName} />
                           </InputAdornment>
                         ),
                       },
                     }}
                   />
                   <TextField
-                    value={biQueueEndpoint.messageChannelPort}
+                    value={biQueueEndpoints.messageChannelPort}
                     label="Port"
                     margin="normal"
                     slotProps={{
                       input: {
                         endAdornment: (
                           <InputAdornment position="end">
-                            <ContentCopy value={biQueueEndpoint.messageChannelPort?.toString()} />
+                            <ContentCopy value={biQueueEndpoints.messageChannelPort?.toString()} />
                           </InputAdornment>
                         ),
                       },
                     }}
                   />
                     <TextField
-                      value={biQueueEndpoint.queueName}
+                      value={biQueueEndpoints.queueName}
                       label="Source"
                       margin="normal"
                       slotProps={{
                         input: {
                           endAdornment: (
                             <InputAdornment position="end">
-                              <ContentCopy value={biQueueEndpoint.queueName} />
+                              <ContentCopy value={biQueueEndpoints.queueName} />
                             </InputAdornment>
                           ),
                         },

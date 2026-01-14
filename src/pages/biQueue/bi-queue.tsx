@@ -170,15 +170,7 @@ const BiQueue = () => {
           </Box>
         )}
       </Box>
-      <BiQueueEndpointDrawer open={open} onClose={handleClose} />
-      {feedback.feedback && (
-        <Snackbar
-          message={feedback.message}
-          severity={feedback.severity}
-          open={feedback.feedback}
-          handleClose={handleSnackClose}
-        />
-      )}
+    
     </>
   );
 };

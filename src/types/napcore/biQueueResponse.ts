@@ -8,6 +8,11 @@ export type BiQueueResponse = {
 }
 
 export type BiQueueEndpointResponse = {
+  messageType: any;
+  biqueueEndpoints: Array<biqueueEndpointsApi>;
+}
+
+export type biqueueEndpointsApi = {
   brokerExternalName: string;
   messageChannelPort: number;
   queueName: string,
