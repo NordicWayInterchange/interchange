@@ -12,10 +12,8 @@ import { useAccessToBiQueue } from "@/hooks/useAccessToBiQueue";
 import Loading from "@/components/shared/actions/Loading";
 import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
 import { IFeedback } from "@/interface/IFeedback";
-import Snackbar from "@/components/shared/feedback/Snackbar";
-import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 
-const BiQueue = () => {
+const BiConsumer = () => {
   const { data: session } = useSession();
   const { data: biQueueAccess, isLoading } = useAccessToBiQueue(
     session?.user?.commonName as string,
@@ -111,7 +109,7 @@ const BiQueue = () => {
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
                   >
-                    I currently have permission to bi-queue. Click here to view bi-queue endpoint.
+                    I currently have permission to bi-queue.
                     <Tooltip
                       slotProps={{
                         tooltip: {
@@ -135,7 +133,7 @@ const BiQueue = () => {
                     variant="body2"
                     sx={{ display: "flex", alignItems: "center" }}
                   >
-                    I currently do not have permission to bi-queue. Click here to view bi-queue endpoint.
+                    I currently do not have permission to bi-queue.
                     <Tooltip
                       slotProps={{
                         tooltip: {
@@ -170,9 +168,9 @@ const BiQueue = () => {
           </Box>
         )}
       </Box>
-    
+
     </>
   );
 };
 
-export default BiQueue;
+export default BiConsumer;

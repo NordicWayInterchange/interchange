@@ -1,5 +1,5 @@
 import { Box } from "@mui/system";
-import BiQueue from "@/pages/biQueue/bi-queue";
+import BiConsumer from "@/pages/biConsumer/bi-consumer";
 import Subheading from "@/components/shared/display/typography/Subheading";
 import { Divider, IconButton } from "@mui/material";
 import React, { useState } from "react";
@@ -75,7 +75,6 @@ export default function BiQueues() {
       },
     },
   ]
-  console.log(biqueueEndpointRow);
   return (
     <Box flex={1}>
       <Mainheading>Bi-queues</Mainheading>
@@ -86,10 +85,10 @@ export default function BiQueues() {
       <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
       <Subheading>My bi-queue access</Subheading>
       <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
-      <BiQueue></BiQueue>
-      <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
-      <Subheading>My bi-queues</Subheading>
-      <Divider style={{ margin: '5px 0', visibility: 'hidden' }} />
+      <BiConsumer></BiConsumer>
+      <Divider style={{ margin: '10px 0', visibility: 'hidden' }} />
+      <Subheading>My bi-queues list</Subheading>
+      <Divider style={{ margin: '10px 0', visibility: 'hidden' }} />
       <DataGrid
         columns={tableHeaders}
         rows={rows || []}
