@@ -351,56 +351,56 @@ public class ExampleAdminApiObjects {
     static final String BIQUEUEENDPOINTRESPONSE = """
             [ {
                "messageType" : "DATEX2",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-datex"
                }
              }, {
                "messageType" : "DENM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-denm"
                }
              }, {
                "messageType" : "IVIM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-ivim"
                }
              }, {
                "messageType" : "SPATEM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-spatem"
                }
              }, {
                "messageType" : "MAPEM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-mapem"
                }
              }, {
                "messageType" : "SREM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-ssrem"
                }
              }, {
                "messageType" : "SSEM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-ssem"
                }
              }, {
                "messageType" : "CAM",
-               "getBiqueueEndpointResponse" : {
+               "biqueueEndpointsApi" : {
                  "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
                  "messageChannelPort" : 5671,
                  "queueName" : "bi-cam"
