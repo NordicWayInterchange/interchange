@@ -56,13 +56,13 @@ const BiConsumer = () => {
     if (response.ok) {
       setFeedback({
         feedback: true,
-        message: `Bi queue access successfully ${hasAccess ? "revoked" : "granted"}!`,
+        message: `Bi-queue access successfully ${hasAccess ? "revoked" : "granted"}!`,
         severity: "success",
       });
     } else {
       const errorData = await response.json();
       const errorMessage =
-        errorData.message || "Bi queue access could not be granted, try again!";
+        errorData.message || "Bi-queue access could not be granted, try again!";
 
       setFeedback({
         feedback: true,
@@ -91,7 +91,7 @@ const BiConsumer = () => {
         }}
       >
         {biQueueAccess === undefined || isLoading ? (
-          <Loading text="Bi queue access status" />
+          <Loading text="Bi-queue access status" />
         ) : (
           <Box>
             <Stack
@@ -124,7 +124,7 @@ const BiConsumer = () => {
                           sx: tooltipFontStyle,
                         },
                       }}
-                      title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                      title="Bi-queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
                     >
                       <IconButton size="small">
                         <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
@@ -153,7 +153,7 @@ const BiConsumer = () => {
                           sx: tooltipFontStyle,
                         },
                       }}
-                      title="Bi queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                      title="Bi-queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
                     >
                       <IconButton size="small">
                         <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />

@@ -55,7 +55,7 @@ const MAIN_PAGES: Array<IPages> = [
     icon: <LockIcon />,
   },
   {
-    text: "Bi queues",
+    text: "Bi-queues",
     url: "/bi-queues",
     icon: <TableRowsIcon />,
   },

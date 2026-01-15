@@ -10,10 +10,7 @@ import { useBiQueueEndpoints } from "@/hooks/useBiQueueEndpoints";
 import { CustomFooter } from "@/components/shared/datagrid/CustomFooter";
 import { CustomEmptyOverlayBiqueueEndpoints } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
-import {
-  BiqueueEndpointResponse,
-  BiQueueEndpointsApi,
-} from "@/types/napcore/biQueueResponse";
+import { BiQueueEndpointsApi } from "@/types/napcore/biQueueResponse";
 import BiQueueEndpointDrawer from "@/components/biQueue/BiQueueEndpointDrawer";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Chip } from "@/components/shared/display/Chip";
@@ -88,17 +85,24 @@ export default function BiQueues() {
       <Divider sx={{ marginY: 2 }} />
       <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
 
-      <Stack direction="row" spacing={5} alignItems="left">
-        <Stack spacing={0.5}>
+      <Box display="flex" flexWrap="wrap" gap={3}>
+        <Box
+          flex={1}
+          sx={{
+            width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" },
+          }}
+        >
           <Subheading>My bi-queue access</Subheading>
           <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
           <BiConsumer></BiConsumer>
-        </Stack>
-
-        <Stack spacing={0.5}>
-          <Subheading>My bi-queues list</Subheading>
+        </Box>
+        <Box
+          flex={1}
+          sx={{
+            width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" },
+          }}
+        >          <Subheading>My bi-queues list</Subheading>
           <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
-          <Box style={{ width: 800 }}>
             <DataGrid
               columns={tableHeaders}
               rows={rows || []}
@@ -112,8 +116,7 @@ export default function BiQueues() {
               }}
             />
           </Box>
-        </Stack>
-      </Stack>
+      </Box>
       {biqueueEndpointRow?.biqueueEndpointResponse && (
         <BiQueueEndpointDrawer
           open={drawerOpen}
