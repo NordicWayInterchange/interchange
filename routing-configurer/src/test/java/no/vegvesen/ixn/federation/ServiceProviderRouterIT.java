@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -1983,6 +1984,61 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 
 		assertThatNoException().isThrownBy( () -> router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta()));
+	}
+
+	@Test
+	public void testSetupBindingToBiQueue() {
+		{
+			String biQueueName = "bi-datex";
+			Queue queue = client.getQueue(biQueueName);
+			assertThat(queue).isNotNull();
+
+			String exchangeName = UUID.randomUUID().toString();
+			Exchange headersExchange = client.createHeadersExchange(exchangeName);
+
+			AssertionsForClassTypes.assertThat(headersExchange.isBoundTo(biQueueName)).isFalse();
+			ServiceProvider serviceProvider = new ServiceProvider(
+					"my-service-provider",
+					new Capabilities(
+							Set.of(
+									new Capability(
+											"123-323",
+											new DatexApplication(
+													"NO12345",
+													"NO12345:001",
+													"NO",
+													"1.0",
+													List.of("1234"),
+													"type",
+													"publisher"
+											),
+											new Metadata(
+													"https://mysite.com",
+													1,
+													RedirectStatus.OPTIONAL,
+													0,
+													0,
+													0
+											),
+											List.of(
+													new CapabilityShard(
+															1,
+															exchangeName,
+															"publicationId = 'NO12345:001' and shardId = 1"
+													)
+											)
+									)
+							)
+					),
+					Set.of(),
+					Set.of(),
+					null
+			);
+			router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta());
+			Exchange exchange = client.getExchange(exchangeName);
+			assertThat(exchange).isNotNull();
+			assertThat(exchange.isBoundTo(biQueueName)).isTrue();
+		}
 	}
 
     @Test
