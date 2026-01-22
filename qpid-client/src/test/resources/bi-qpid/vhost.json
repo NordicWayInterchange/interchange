@@ -15,7 +15,7 @@
       "name": "bi-datex",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -24,7 +24,7 @@
       "name": "bi-denm",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -33,7 +33,7 @@
       "name": "bi-cam",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -42,7 +42,7 @@
       "name": "bi-ivim",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -51,7 +51,7 @@
       "name": "bi-mapem",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -60,7 +60,7 @@
       "name": "bi-spatem",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -69,7 +69,7 @@
       "name": "bi-ssrem",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "ensureNondestructiveConsumers": true,
       "holdOnPublishEnabled": false,
       "owner": null
@@ -78,7 +78,7 @@
       "name": "bi-ssem",
       "type": "standard",
       "durable": true,
-      "maximumMessageTtl": 900000,
+      "maximumMessageTtl": 5000,
       "holdOnPublishEnabled": false,
       "owner": null
     }

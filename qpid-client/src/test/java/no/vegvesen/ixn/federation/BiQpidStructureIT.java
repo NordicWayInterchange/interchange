@@ -69,7 +69,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
     /*
     Testing message inherits TTL from queue when queue TTL is shorter than message TTL
      */
-  /*  @Test
+    @Test
     public void messageInheritsTTLFromQueue() throws Exception{
         String queueName = "bi-datex";
 
@@ -86,7 +86,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             Optional<Message> receive = Optional.ofNullable(sink.createConsumer().receive(1000));
             assertThat(receive).isNotPresent();
         }
-    }*/
+    }
 
     /*
     Testing message does not inherit TTL from queue when queue TTL is longer than message TTL
