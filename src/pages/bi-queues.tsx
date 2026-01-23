@@ -18,8 +18,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 export default function BiQueues() {
     const {data: session} = useSession();
     const { data, isLoading } = useFetchBiQueueEndpoints(session?.user.commonName as string);
-    const [biqueueEndpointRow, setBiqueueEndpointRow] =
-        useState<BiQueueEndpointsApi>();
+    const [biqueueEndpointRow, setBiqueueEndpointRow] = useState<BiQueueEndpointsApi>();
+
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const rows = Array.isArray(data) ? data : [];

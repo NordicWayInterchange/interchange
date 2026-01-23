@@ -15,7 +15,6 @@ import Groups2Icon from "@mui/icons-material/Groups2";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import DensitySmallIcon from "@mui/icons-material/DensitySmall";
 import AutoGraphIcon from "@mui/icons-material/AutoGraph";
-import BiQueue from "@/pages/BiQueue/biQueue";
 
 function useAllApplicationData() {
     const {data: session} = useSession();
@@ -243,12 +242,6 @@ export default function Home() {
                         ))}
                     </Box>
                 </Box>
-                <Divider style={{ margin: '25px 0', visibility: 'hidden' }}/>
-                <Subheading>
-                    Bi-queue
-                </Subheading>
-                <Divider style={{ margin: '10px 0', visibility: 'hidden' }}/>
-                <BiQueue></BiQueue>
             </Box>
         </>
     );
