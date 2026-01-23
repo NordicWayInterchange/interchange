@@ -44,7 +44,7 @@ public class Listen implements Callable<Integer> {
 
         String biqueueName = biqueueEndpointsResponse.stream()
                 .map(biqueueEndpointResponse -> biqueueEndpointResponse.getGetBiqueueEndpointResponse().getQueueName())
-                .filter(s -> s.contains(messageType) || messageType.contains(s))
+                .filter(s -> s.toLowerCase().contains(messageType.toLowerCase()) || messageType.toLowerCase().contains(s.toLowerCase()))
                 .findFirst()
                 .orElse(null);
 
