@@ -47,7 +47,6 @@ const BiQueue = () => {
                     </Stack>
                 </Box>
             </Box>
-            <BiQueueEndpointDrawer open={open} onClose={handleClose}/>
         </>
     );
 };
