@@ -17,18 +17,18 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = {MatchDiscoveryService.class, MatchRepository.class, ServiceProviderRepository.class,NeighbourRepository.class})
 @Transactional
 public class MatchDiscoveryServiceIT extends PostgresContainerBase {
-
-    @Autowired
-    private MatchRepository matchRepository;
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
     private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
 
     @Autowired
     private MatchDiscoveryService matchDiscoveryService;
@@ -161,5 +161,6 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(0);
     }
+
 
 }

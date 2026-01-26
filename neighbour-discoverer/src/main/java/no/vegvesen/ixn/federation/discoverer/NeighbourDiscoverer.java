@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -45,7 +44,6 @@ public class NeighbourDiscoverer {
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
-	private final MatchDiscoveryService matchDiscoveryService;
 	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 	private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
@@ -56,7 +54,6 @@ public class NeighbourDiscoverer {
 						ServiceProviderService serviceProviderService,
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
-						MatchDiscoveryService matchDiscoveryService,
 						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
 						OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
@@ -64,7 +61,6 @@ public class NeighbourDiscoverer {
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
-		this.matchDiscoveryService = matchDiscoveryService;
 		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
 		this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
@@ -137,10 +133,6 @@ public class NeighbourDiscoverer {
 		neigbourDiscoveryService.setGiveUpSubscriptionsToTearDownForRemoval();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void createMatches() {
-		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighboursByIgnoreIs(false));
-	}
 
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createOutgoingMatches() {
@@ -152,10 +144,6 @@ public class NeighbourDiscoverer {
 		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void syncMatchesToDelete() {
-		matchDiscoveryService.syncMatchesToDelete();
-	}
 
 	@Scheduled(fixedRateString = "10000", initialDelayString = "8000")
 	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();}

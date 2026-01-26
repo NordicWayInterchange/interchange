@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.messagecollector;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,8 +23,6 @@ class MessageCollectorTestSpring {
 	@MockitoBean
 	ListenerEndpointRepository listenerEndpointRepository;
 
-	@MockitoBean
-	MatchDiscoveryService matchDiscoveryService;
 
 	@Autowired
 	MessageCollector messageCollector;

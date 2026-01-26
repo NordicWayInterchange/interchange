@@ -5,14 +5,15 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.shared.Constants;
@@ -42,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
-@SpringBootTest(classes = {RoutingConfigurer.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, ServiceProviderRouter.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, MatchDiscoveryService.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	public static final String HOST_NAME = getDockerHost();
@@ -84,6 +85,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@MockitoBean
 	NeighbourService neighbourService;
+
+	@MockitoBean
+	MatchDiscoveryService matchDiscoveryService;
 
 	@Autowired
 	RoutingConfigurer routingConfigurer;

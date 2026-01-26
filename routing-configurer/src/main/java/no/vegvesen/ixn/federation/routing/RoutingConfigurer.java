@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +38,17 @@ public class RoutingConfigurer {
 
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
+	private final MatchDiscoveryService matchDiscoveryService;
+
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
-	}
+        this.matchDiscoveryService = matchDiscoveryService;
+    }
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
 	public void checkForNeighboursToSetupRoutingFor() {
@@ -352,6 +356,16 @@ public class RoutingConfigurer {
 		logger.debug("Checking for new service providers to setup routing");
 		Iterable<ServiceProvider> serviceProviders = serviceProviderRouter.findServiceProviders();
 		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void createMatches() {
+		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderRouter.findServiceProvidersAsList(), neighbourService.findAllNeighboursByIgnoreIs(false));
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void syncMatchesToDelete() {
+		matchDiscoveryService.syncMatchesToDelete();
 	}
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
