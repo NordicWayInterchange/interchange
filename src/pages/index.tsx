@@ -17,7 +17,6 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
-import BiQueue from "@/pages/biQueue/bi-queue";
 import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 
 export default function Home() {
@@ -123,9 +122,6 @@ export default function Home() {
             </Link>
           ))}
         </Box>
-        <Subheading>My bi-queue access</Subheading>
-        <Divider sx={{ marginY: -3, visibility: 'hidden' }} />
-        <BiQueue></BiQueue>
         <Subheading>My latest subscriptions</Subheading>
         <DataGrid
           columns={SubscriptionDatagrid}

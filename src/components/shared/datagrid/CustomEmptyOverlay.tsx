@@ -69,6 +69,17 @@ export const CustomEmptyOverlayPrivateChannels = () => {
   );
 };
 
+export const CustomEmptyOverlayBiqueueEndpoints = () => {
+  return (
+    <StyledGridOverlay>
+      <StyledBox>
+        <SentimentNeutralIcon fontSize="medium" color="disabled" sx={{ mt: -0.5 }} />
+        Could not find any bi-queue endpoints!
+      </StyledBox>
+    </StyledGridOverlay>
+  );
+};
+
 const StyledGridOverlay = styled("div")(({}) => ({
   display: "flex",
   flexDirection: "column",
