@@ -361,12 +361,12 @@ public class RoutingConfigurer {
 		serviceProviderRouter.syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void createMatches() {
 		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderRouter.findServiceProvidersAsList(), neighbourService.findAllNeighboursByIgnoreIs(false));
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void syncMatchesToDelete() {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
