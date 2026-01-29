@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
+
 @CommandLine.Command(name = "listen", description = "Listen to a bi-queue",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
@@ -42,11 +44,7 @@ public class Listen implements Callable<Integer> {
 
         List<GetBiqueueEndpointsResponsePerMessageType> biqueueEndpointsResponse = client.listBiqueues();
 
-        String biqueueName = biqueueEndpointsResponse.stream()
-                .map(biqueueEndpointResponse -> biqueueEndpointResponse.getGetBiqueueEndpointResponse().getQueueName())
-                .filter(s -> s.toLowerCase().contains(messageType.toLowerCase()) || messageType.toLowerCase().contains(s.toLowerCase()))
-                .findFirst()
-                .orElse(null);
+        String biqueueName = MESSAGE_TYPE_TO_QUEUE.get(messageType.toUpperCase());
 
         if (biqueueName == null) {
             throw new RuntimeException(String.format("Bi-queue %s does not exist!", biqueueName));
@@ -54,7 +52,7 @@ public class Listen implements Callable<Integer> {
 
         String brokerName = biqueueEndpointsResponse.stream()
                 .filter(element -> element.getGetBiqueueEndpointResponse().getQueueName().equals(biqueueName))
-                .map( o -> o.getGetBiqueueEndpointResponse().getBrokerExternalName())
+                .map(o -> o.getGetBiqueueEndpointResponse().getBrokerExternalName())
                 .findFirst().orElse(null);
 
         String url = "amqps://" + brokerName;
