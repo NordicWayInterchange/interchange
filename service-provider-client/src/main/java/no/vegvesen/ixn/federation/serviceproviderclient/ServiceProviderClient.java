@@ -156,11 +156,6 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
-    public GetBiqueueEndpointResponse getBiqueueEndpoint() {
-        String url = String.format("%s/%s/biqueueendpoints", server, user);
-        return restTemplate.getForEntity(url, GetBiqueueEndpointResponse.class).getBody();
-    }
-
     public List<GetBiqueueEndpointsResponsePerMessageType> listBiqueues() {
         String url = String.format("%s/%s/biqueueendpoints",server,user);
         return List.of(Objects.requireNonNull(restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType[].class).getBody()));
