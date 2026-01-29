@@ -39,15 +39,18 @@ public class RoutingConfigurer {
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
 	private final MatchDiscoveryService matchDiscoveryService;
+	//private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService
+							 /*OutgoingMatchDiscoveryService outgoingMatchDiscoveryService*/) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
         this.matchDiscoveryService = matchDiscoveryService;
+		/*this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;*/
     }
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -367,6 +370,16 @@ public class RoutingConfigurer {
 	public void syncMatchesToDelete() {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
+
+	/*@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void createOutgoingMatches() {
+		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderRouter.findServiceProvidersAsList());
+	}
+
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	public void updateOutgoingMatchesToTearDown() {
+		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
+	}*/
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		Queue queue = delta.findByQueueName(queueName);

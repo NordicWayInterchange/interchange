@@ -8,8 +8,8 @@ import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -42,8 +42,8 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-
-@SpringBootTest(classes = {RoutingConfigurer.class, MatchDiscoveryService.class, QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
+@SpringBootTest(classes = {RoutingConfigurer.class, MatchDiscoveryService.class, QpidClient.class, RoutingConfigurerProperties.class,
+		QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	public static final String HOST_NAME = getDockerHost();
