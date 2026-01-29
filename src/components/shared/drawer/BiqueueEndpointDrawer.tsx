@@ -1,5 +1,5 @@
 import {
-    Box, Card,
+    Box,
     Drawer,
     FormControl, IconButton,
     InputAdornment,
@@ -9,36 +9,26 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
-import {drawerStyle, StyledHeaderBox} from "@/components/styles/StyledElements";
-import {useFetchBiQueueEndpoint} from "@/hooks/UseFetchBiQueueEndpoint";
-import {styled} from "@mui/system";
-import {useSession} from "next-auth/react";
+import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
+import {BiqueueEndpointsApi} from "@/types/BiQueueResponse";
 
 type Props = {
     open: boolean;
     onClose: () => void;
+    biqueueEndpointRow: BiqueueEndpointsApi
 };
 
-const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
+const BiQueueEndpointDrawer= ({ open , onClose, biqueueEndpointRow}: Props) => {
 
-    const { data: session } = useSession();
-    const commonName = session?.user.commonName as string;
-
-    const { data: biQueueEndpoint, refetch} = useFetchBiQueueEndpoint(commonName);
-
-    useEffect(() => {
-        if (open) {
-            refetch();
-        }
-    }, [open, refetch]);
+    const biqueueEndpoint = biqueueEndpointRow;
 
     return (
         <>
-            {biQueueEndpoint &&
-                Object.values(biQueueEndpoint).every(
+            {biqueueEndpointRow &&
+                Object.values(biqueueEndpointRow).every(
                     (v) => v !== null && v !== undefined,
                 ) && (
                     <Drawer
@@ -59,7 +49,7 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
                                 </ListItem>
                                 <ListItem>
                                     <StyledHeaderBox>
-                                        <Typography>Bi-queue details</Typography>
+                                        <Typography>Bi-queue endpoint details</Typography>
                                     </StyledHeaderBox>
                                 </ListItem>
                                 <ListItem>
@@ -67,42 +57,42 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
                                         <Typography>Endpoint</Typography>
                                         <FormControl fullWidth>
                                             <TextField
-                                                value={biQueueEndpoint.brokerExternalName}
+                                                value={biqueueEndpoint.brokerExternalName}
                                                 label="Host"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={biQueueEndpoint.brokerExternalName} />
+                                                                <ContentCopy value={biqueueEndpoint.brokerExternalName} />
                                                             </InputAdornment>
                                                         ),
                                                     },
                                                 }}
                                             />
                                             <TextField
-                                                value={biQueueEndpoint.messageChannelPort}
+                                                value={biqueueEndpoint.messageChannelPort}
                                                 label="Port"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={biQueueEndpoint.messageChannelPort?.toString()} />
+                                                                <ContentCopy value={biqueueEndpoint.messageChannelPort?.toString()} />
                                                             </InputAdornment>
                                                         ),
                                                     },
                                                 }}
                                             />
                                             <TextField
-                                                value={biQueueEndpoint.queueName}
+                                                value={biqueueEndpoint.queueName}
                                                 label="Source"
                                                 margin="normal"
                                                 slotProps={{
                                                     input: {
                                                         endAdornment: (
                                                             <InputAdornment position="end">
-                                                                <ContentCopy value={biQueueEndpoint.queueName} />
+                                                                <ContentCopy value={biqueueEndpoint.queueName} />
                                                             </InputAdornment>
                                                         ),
                                                     },
@@ -118,12 +108,6 @@ const BiQueueEndpointDrawer= ({ open , onClose}: Props) => {
         </>
     );
 };
-
-const StyledCard = styled(Card)(({}) => ({
-    padding: "16px",
-    width: "100%",
-}));
-
 
 export default BiQueueEndpointDrawer;
 

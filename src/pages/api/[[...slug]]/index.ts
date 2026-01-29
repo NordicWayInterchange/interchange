@@ -17,7 +17,7 @@ import {
     fetchAdminUIServiceProviders,
     fetchAdminUIAllQueues,
     fetchAdminUIPrivateChannelsPeer,
-    fetchAdminUIBiqueueEndpoint
+    fetchAdminUIBiqueueEndpoints
 } from "@/lib/fetchers/interchangeConnector";
 import {Neighbours} from "@/types/neighbours";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
@@ -26,7 +26,7 @@ import {ServiceProviderPrivatechannels, ServiceProviderPrivateChannelsPeer} from
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
-import {BiQueueEndpointResponse} from "@/types/BiQueueResponse";
+import {BiQueueResponse} from "@/types/BiQueueResponse";
 
 interface CustomSession extends Session {
     user: {
@@ -59,10 +59,10 @@ const fetchAllQueues = async (params: basicGetParams) => {
     return [res.status, queues];
 };
 
-const fetchBiqueueEndpoint = async (params: basicGetParams) => {
-    const res = await fetchAdminUIBiqueueEndpoint(params);
-    const biQueueEndpoint: Array<BiQueueEndpointResponse> = await res.data;
-    return [res.status, biQueueEndpoint];
+const fetchBiqueueEndpoints = async (params: basicGetParams) => {
+    const res = await fetchAdminUIBiqueueEndpoints(params);
+    const biQueueEndpoints: Array<BiQueueResponse> = await res.data;
+    return [res.status, biQueueEndpoints];
 };
 
 const fetchPrivateChannels = async (params: extendedGetParams) => {
@@ -155,7 +155,7 @@ const getPaths: {
     "/serviceproviders/[serviceProviderName]/deliveries/[deliveryId]/matches/[capabilityId]/[shardId]": fetchMatchingCapabilityShardDetails,
     queueValidator: fetchQueueValidator,
     exchangeValidator: fetchExchangeValidator,
-    biqueueendpoint: fetchBiqueueEndpoint
+    biqueueendpoints: fetchBiqueueEndpoints
 };
 const findHandler: (params: any) =>
     | {

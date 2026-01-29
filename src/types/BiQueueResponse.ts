@@ -1,9 +1,15 @@
-export type BiQueueEndpointResponse = {
-    brokerExternalName: string;
-    messageChannelPort: number;
-    queueName: string,
+export type BiQueue = {
+    name: string;
+    access: boolean;
 }
 
 export type BiQueueResponse = {
-    access: boolean;
+    messageType: any;
+    biqueueEndpointsApi: BiqueueEndpointsApi;
+}
+
+export type BiqueueEndpointsApi = {
+    brokerExternalName: string;
+    messageChannelPort: number;
+    queueName: string,
 }
