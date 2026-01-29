@@ -17,7 +17,7 @@ import { useRouter } from "next/router";
 import HouseIcon from "@mui/icons-material/House";
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
-import DensitySmallIcon from '@mui/icons-material/DensitySmall';
+import QueueIcon from '@mui/icons-material/Queue';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 
 const drawerWidth = 145;
@@ -46,7 +46,7 @@ const SIDE_PAGES: Array<IPages> = [
     {
         text: "Queues",
         url: "/queues",
-        icon: <DensitySmallIcon />
+        icon: <QueueIcon />
     },
     {
         text: "Bi-queues",

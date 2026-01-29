@@ -26,7 +26,7 @@ import {ServiceProviderPrivatechannels, ServiceProviderPrivateChannelsPeer} from
 import {Delivery, GraphSectionProps, Shard} from "@/types/GraphSection";
 import {queues} from "@/types/queues";
 import {Exchanges} from "@/types/exchanges";
-import {BiQueueEndpointsApi} from "@/types/BiQueueResponse";
+import {BiQueueResponse} from "@/types/BiQueueResponse";
 
 interface CustomSession extends Session {
     user: {
@@ -61,7 +61,7 @@ const fetchAllQueues = async (params: basicGetParams) => {
 
 const fetchBiqueueEndpoints = async (params: basicGetParams) => {
     const res = await fetchAdminUIBiqueueEndpoints(params);
-    const biQueueEndpoints: Array<BiQueueEndpointsApi> = await res.data;
+    const biQueueEndpoints: Array<BiQueueResponse> = await res.data;
     return [res.status, biQueueEndpoints];
 };
 

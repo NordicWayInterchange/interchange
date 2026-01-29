@@ -13,17 +13,17 @@ import React from "react";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import CloseIcon from "@mui/icons-material/Close";
 import {drawerStyle, StyledCard, StyledHeaderBox} from "@/components/styles/StyledElements";
-import {BiQueueEndpointsApi} from "@/types/BiQueueResponse";
+import {BiqueueEndpointsApi} from "@/types/BiQueueResponse";
 
 type Props = {
     open: boolean;
     onClose: () => void;
-    biqueueEndpointRow: BiQueueEndpointsApi
+    biqueueEndpointRow: BiqueueEndpointsApi
 };
 
 const BiQueueEndpointDrawer= ({ open , onClose, biqueueEndpointRow}: Props) => {
 
-    const biqueueEndpoint = biqueueEndpointRow.biqueueEndpointResponse;
+    const biqueueEndpoint = biqueueEndpointRow;
 
     return (
         <>

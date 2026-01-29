@@ -2,29 +2,30 @@ import { Box } from "@mui/system";
 import React, { useState } from "react";
 import { dataGridTemplate } from "@/components/shared/datagrid/DataGridTemplate";
 import { GridColDef } from "@mui/x-data-grid";
-import BiQueueEndpointDrawer from "@/components/shared/drawer/BiqueueEndpointDrawer";
 import {Chip, Divider, IconButton} from "@mui/material";
 import Mainheading from "@/components/shared/typography/Mainheading";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import Subheading from "@/components/shared/typography/Subheading";
-import {BiQueueEndpointsApi} from "@/types/BiQueueResponse";
+import {BiQueueResponse} from "@/types/BiQueueResponse";
 import {useFetchBiQueueEndpoints} from "@/hooks/UseFetchBiQueueEndpoint";
 import {CustomFooter} from "@/components/shared/datagrid/CustomFooter";
 import {messageTypeChips} from "@/lib/statusChips";
 import {CustomEmptyOverlayBiqueueEndpoints} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import {useSession} from "next-auth/react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import BiQueueEndpointDrawer from "@/components/shared/drawer/BiqueueEndpointDrawer";
 
 export default function BiQueues() {
     const {data: session} = useSession();
     const { data, isLoading } = useFetchBiQueueEndpoints(session?.user.commonName as string);
-    const [biqueueEndpointRow, setBiqueueEndpointRow] = useState<BiQueueEndpointsApi>();
+    const [biqueueEndpointRow, setBiqueueEndpointRow] =
+        useState<BiQueueResponse>();
 
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
     const rows = Array.isArray(data) ? data : [];
 
-    const handleMore = (biQueueEndpoint: BiQueueEndpointsApi) => {
+    const handleMore = (biQueueEndpoint: BiQueueResponse) => {
         setBiqueueEndpointRow(biQueueEndpoint);
         setDrawerOpen(true);
     };
@@ -108,11 +109,11 @@ export default function BiQueues() {
                     />
                 </Box>
             </Box>
-            {biqueueEndpointRow?.biqueueEndpointResponse && (
+            {biqueueEndpointRow?.biqueueEndpointsApi && (
                 <BiQueueEndpointDrawer
                     open={drawerOpen}
                     onClose={handleMoreClose}
-                    biqueueEndpointRow={biqueueEndpointRow}
+                    biqueueEndpointRow={biqueueEndpointRow?.biqueueEndpointsApi}
                 />
             )}
         </Box>

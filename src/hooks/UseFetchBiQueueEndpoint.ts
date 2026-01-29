@@ -1,9 +1,9 @@
 import {useQuery} from "@tanstack/react-query";
-import {BiQueueEndpointsApi} from "@/types/BiQueueResponse";
+import {BiQueueResponse} from "@/types/BiQueueResponse";
 
 const fetchBiQueueEndpoints: (
     commonName: string
-) => Promise<BiQueueEndpointsApi> = async (commonName) => {
+) => Promise<BiQueueResponse[]> = async (commonName) => {
     const res = await fetch(`/api/${commonName}/biqueueendpoints`);
     if (res.ok) {
         return res.json();
