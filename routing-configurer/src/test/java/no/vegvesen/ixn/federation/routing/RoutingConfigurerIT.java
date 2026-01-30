@@ -11,8 +11,10 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
@@ -42,7 +44,7 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {RoutingConfigurer.class, MatchDiscoveryService.class, QpidClient.class, RoutingConfigurerProperties.class,
+@SpringBootTest(classes = {RoutingConfigurer.class, MatchDiscoveryService.class, OutgoingMatchDiscoveryService.class, QpidClient.class, RoutingConfigurerProperties.class,
 		QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
 public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
@@ -100,6 +102,9 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 
 	@MockitoBean
 	ListenerEndpointRepository listenerEndpointRepository;
+
+	@MockitoBean
+	OutgoingMatchRepository outgoingMatchRepository;
 
 	@MockitoBean
 	InterchangeNodeProperties interchangeNodeProperties;
@@ -651,7 +656,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownSubscriptionShardExchange() {
 		String selector = "a=b";
-		String exchangeName = "subscription-exchange";
+		String exchangeName = "subscription-exchange-teardown-shard";
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN);
 		subscription.setEndpoints(singleton(new Endpoint("my-source", "my-host", 5671, new SubscriptionShard(exchangeName))));
 		subscription.setConsumerCommonName("my-node");
@@ -927,7 +932,7 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 				NeighbourSubscriptionStatus.TEAR_DOWN,
 				neighbourSPName);
 		subscription.setEndpoints(singleton(endpoint));
-		String neighbourName = "redirect-neighbour";
+		String neighbourName = "redirect-neighbour-acl-test";
 		Neighbour neighbour = new Neighbour(
 				neighbourName,
 				new NeighbourCapabilities(),

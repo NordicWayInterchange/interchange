@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +40,18 @@ public class RoutingConfigurer {
 	private final ListenerEndpointRepository listenerEndpointRepository;
 
 	private final MatchDiscoveryService matchDiscoveryService;
-	//private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+	private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 	@Autowired
-	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService
-							 /*OutgoingMatchDiscoveryService outgoingMatchDiscoveryService*/) {
+	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, ServiceProviderRouter serviceProviderRouter, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService,
+							 OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.serviceProviderRouter = serviceProviderRouter;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
         this.matchDiscoveryService = matchDiscoveryService;
-		/*this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;*/
+		this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
     }
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -371,7 +372,7 @@ public class RoutingConfigurer {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
 
-	/*@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void createOutgoingMatches() {
 		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderRouter.findServiceProvidersAsList());
 	}
@@ -379,7 +380,7 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void updateOutgoingMatchesToTearDown() {
 		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
-	}*/
+	}
 
 	private void createQueue(String queueName, String subscriberName, QpidDelta delta) {
 		Queue queue = delta.findByQueueName(queueName);
