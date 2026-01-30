@@ -12,6 +12,7 @@ import { useAccessToBiQueue } from "@/hooks/useAccessToBiQueue";
 import Loading from "@/components/shared/actions/Loading";
 import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
 import { IFeedback } from "@/interface/IFeedback";
+import Snackbar from "@/components/shared/feedback/Snackbar";
 
 const BiConsumer = () => {
   const { data: session } = useSession();
@@ -111,7 +112,7 @@ const BiConsumer = () => {
                   onClick={handleOpen(true)}
                 >
                   <IconButton size="small">
-                    <CheckCircleOutlineIcon color="success" />
+                    <CheckCircleOutlineIcon color="success"/>
                   </IconButton>
                   <Typography
                     variant="body2"
@@ -179,6 +180,14 @@ const BiConsumer = () => {
               </StyledButton>
             </Stack>
           </Box>
+        )}
+        {feedback.feedback && (
+          <Snackbar
+            message={feedback.message}
+            severity={feedback.severity}
+            open={feedback.feedback}
+            handleClose={handleSnackClose}
+          />
         )}
       </Box>
     </>
