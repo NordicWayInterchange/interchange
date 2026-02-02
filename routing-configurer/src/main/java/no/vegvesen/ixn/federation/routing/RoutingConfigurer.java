@@ -372,12 +372,12 @@ public class RoutingConfigurer {
 		matchDiscoveryService.syncMatchesToDelete();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void createOutgoingMatches() {
 		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderRouter.findServiceProvidersAsList());
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
+	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void updateOutgoingMatchesToTearDown() {
 		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
 	}
