@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -1476,6 +1477,60 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsFalse() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				false,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isFalse();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+	}
+    @Test
+    public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsNull() {
+
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProvider",
+                null,
+                new Capabilities(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                LocalDateTime.now()
+        );
+        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+        assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
+    }
+
+	@Test
+	public void testServiceProviderAddedToBiConsumerGroup() {
+
+		ServiceProvider serviceProvider = new ServiceProvider(
+				"serviceProvider",
+				true,
+				new Capabilities(),
+				Collections.emptySet(),
+				Collections.emptySet(),
+				LocalDateTime.now()
+		);
+		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		assertThat(serviceProvider.isBiconsumer()).isTrue();
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+
+		assertThat(client.getBiConsumerMember(serviceProvider.getName()).name()).isEqualTo(serviceProvider.getName());
+	}
+
+
+
+	@Test
 	public void testIllegalLocalSubscriptionGetsRemovedFromServiceProvider() {
 		LocalSubscription subscription = new LocalSubscription(
 				1,
@@ -1887,7 +1942,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void bindNonExistingCapabilityExchangeToBiQueue() {
-		Queue queue = client.getQueue("bi-queue");
+		Queue queue = client.getQueue("bi-datex");
 		assertThat(queue).isNotNull();
 
 		ServiceProvider serviceProvider = new ServiceProvider(
@@ -1930,4 +1985,198 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		assertThatNoException().isThrownBy( () -> router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta()));
 	}
+
+	@Test
+	public void testSetupBindingToBiQueue() {
+		{
+			String biQueueName = "bi-datex";
+			Queue queue = client.getQueue(biQueueName);
+			assertThat(queue).isNotNull();
+
+			String exchangeName = UUID.randomUUID().toString();
+			Exchange headersExchange = client.createHeadersExchange(exchangeName);
+
+			AssertionsForClassTypes.assertThat(headersExchange.isBoundTo(biQueueName)).isFalse();
+			ServiceProvider serviceProvider = new ServiceProvider(
+					"my-service-provider",
+					new Capabilities(
+							Set.of(
+									new Capability(
+											"123-323",
+											new DatexApplication(
+													"NO12345",
+													"NO12345:001",
+													"NO",
+													"1.0",
+													List.of("1234"),
+													"type",
+													"publisher"
+											),
+											new Metadata(
+													"https://mysite.com",
+													1,
+													RedirectStatus.OPTIONAL,
+													0,
+													0,
+													0
+											),
+											List.of(
+													new CapabilityShard(
+															1,
+															exchangeName,
+															"publicationId = 'NO12345:001' and shardId = 1"
+													)
+											)
+									)
+							)
+					),
+					Set.of(),
+					Set.of(),
+					null
+			);
+			router.bindCapabilityExchangesToBiQueue(serviceProvider,client.getQpidDelta());
+			Exchange exchange = client.getExchange(exchangeName);
+			assertThat(exchange).isNotNull();
+			assertThat(exchange.isBoundTo(biQueueName)).isTrue();
+		}
+	}
+
+    @Test
+    public void testSetupBindingWhenLocalConnectionExistsButCapExchangeIsNotBoundToLocalSubscriptionQueue() {
+        String publisherId = "NO98765";
+        String publicationName = "sdkjsd";
+        String publicationId = String.join(":", publisherId, publicationName);
+        String capabilityExchangeName = "binding-test-exchange-1";
+        String subscriptionQueue = "my-local-subscription-queue";
+        //create local subscription queue
+        client.createQueue(subscriptionQueue);
+        //create capability exchange (but not bound to local subscription)
+        client.createHeadersExchange(capabilityExchangeName);
+        Capability capability = new Capability(
+                UUID.randomUUID().toString(),
+                new DenmApplication(
+                        publisherId,
+                        publicationId,
+                        "NO",
+                        "1.0",
+                        List.of(),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL),
+                List.of(
+                        new CapabilityShard(
+                                1,
+                                capabilityExchangeName,
+                                "publicationId = '" + publicationId + "' and shardId = 1"
+                        )
+                )
+        );
+        capability.setStatus(CapabilityStatus.CREATED);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProviderBindingTest",
+                new Capabilities(
+                        Set.of(
+                                capability
+                        )
+
+                ),
+                Set.of(
+                        new LocalSubscription(
+                            UUID.randomUUID().toString(),
+                                LocalSubscriptionStatus.CREATED,
+                                "publicationId = '" + publicationId + "'",
+                                "myserver",
+                                Set.of(
+                                        new LocalConnection(
+                                                capabilityExchangeName,
+                                                subscriptionQueue
+                                        )
+                                ),
+                                Set.of(
+                                        new LocalEndpoint(
+                                                subscriptionQueue,
+                                                "myhost",
+                                                5671
+                                        )
+                                )
+                        )
+                ),
+                LocalDateTime.now()
+        );
+        router.syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider,client.getQpidDelta(),List.of(serviceProvider));
+        Exchange exchange = client.getExchange(capabilityExchangeName);
+        List<String> destinations = exchange.getBindings().stream().map(Binding::getDestination).toList();
+        assertThat(destinations).contains(subscriptionQueue);
+
+
+    }
+    @Test
+    public void testCreateConnectionIfItDoesNotExistButBindingExists() {
+        String publisherId = "NO87654";
+        String publicationName = "abjasd";
+        String publicationId = String.join(":", publisherId, publicationName);
+        String capabilityExchangeName = "binding-test-exchange-2";
+        String subscriptionQueue = "my-local-subscription-queue-2";
+        //create local subscription queue
+        client.createQueue(subscriptionQueue);
+        //create capability exchange (but not bound to local subscription)
+        client.createHeadersExchange(capabilityExchangeName);
+        String selector = "publicationId = '" + publicationId + "'";
+        client.addBinding(capabilityExchangeName,new Binding(capabilityExchangeName,subscriptionQueue,new Filter(selector)));
+        Capability capability = new Capability(
+                UUID.randomUUID().toString(),
+                new DenmApplication(
+                        publisherId,
+                        publicationId,
+                        "NO",
+                        "1.0",
+                        List.of(),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL),
+                List.of(
+                        new CapabilityShard(
+                                1,
+                                capabilityExchangeName,
+                                selector
+                        )
+                )
+        );
+        capability.setStatus(CapabilityStatus.CREATED);
+        ServiceProvider serviceProvider = new ServiceProvider(
+                "serviceProviderBindingTest",
+                new Capabilities(
+                        Set.of(
+                                capability
+                        )
+
+                ),
+                Set.of(
+                        new LocalSubscription(
+                                UUID.randomUUID().toString(),
+                                LocalSubscriptionStatus.CREATED,
+                                selector,
+                                "myserver",
+                                Set.of(),
+                                Set.of(
+                                        new LocalEndpoint(
+                                                subscriptionQueue,
+                                                "myhost",
+                                                5671
+                                        )
+                                )
+                        )
+                ),
+                LocalDateTime.now()
+        );
+        router.syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider,client.getQpidDelta(),List.of(serviceProvider));
+        Exchange exchange = client.getExchange(capabilityExchangeName);
+        List<String> destinations = exchange.getBindings().stream().map(Binding::getDestination).toList();
+        System.out.println(destinations);
+        assertThat(destinations).contains(subscriptionQueue);
+        List<LocalConnection> connections = serviceProvider.getSubscriptions().stream().flatMap(subscption -> subscption.getConnections().stream()).toList();
+        assertThat(connections).contains(new LocalConnection(capabilityExchangeName,subscriptionQueue));
+
+    }
+
 }

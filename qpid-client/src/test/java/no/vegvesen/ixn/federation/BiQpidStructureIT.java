@@ -4,9 +4,9 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.shared.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,19 +40,18 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
             HOST_NAME,
             HOST_NAME,
             Path.of("bi-qpid")
-            );
+    );
 
     @BeforeEach
     public void setUp() {
         sslContext = sslClientContext(stores,"routing_configurer");
         QpidClientConfig config = new QpidClientConfig(sslContext);
-        //TODO messageCollectorUser should not be there...
         qpidClient = new QpidClient(qpidContainer.getHttpsUrl(),qpidContainer.getvHostName(),config.qpidRestTemplate());
     }
 
     @Test
     public void messageGoesThroughWithOkTTL() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -72,7 +71,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageInheritsTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -94,7 +93,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();

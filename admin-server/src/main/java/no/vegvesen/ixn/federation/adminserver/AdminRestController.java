@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.vegvesen.ixn.federation.adminserver.model.biqueueEndpoint.BiqueueEndpointsApi;
+import no.vegvesen.ixn.federation.adminserver.model.biqueueEndpoint.BiqueueEndpointsPerMessgeTypeApi;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.exchange.ExchangeApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
@@ -36,6 +38,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import no.vegvesen.ixn.shared.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
 
 @RestController
 public class AdminRestController {
@@ -106,6 +111,25 @@ public class AdminRestController {
         logger.info("List service providers for admin user {}", adminUser);
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         return typeTransformer.serviceProviderListToServiceProviderApiList(serviceProviderList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/biqueueendpoints", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Tag(name = "Bi-queue")
+    @Operation(summary = "Get bi-queue endpoints")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.BIQUEUEENDPOINTRESPONSE)))})
+    public List<BiqueueEndpointsPerMessgeTypeApi> getBiqueueEndPoints(@PathVariable("adminUser") String adminUser) {
+        this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
+        validatePathVariable(adminUser);
+
+        return Constants.getAllMessageTypes().stream()
+                .map(type -> new BiqueueEndpointsPerMessgeTypeApi(
+                        type,
+                        new BiqueueEndpointsApi(
+                                adminProperties.getBrokerExternalName(),
+                                Integer.parseInt(adminProperties.getMessageChannelPort()),
+                                MESSAGE_TYPE_TO_QUEUE.get(type)
+                        )
+                )).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/admin/{adminUser}/serviceproviders/subscriptions/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)

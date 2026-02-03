@@ -12,11 +12,73 @@
       "owner": null
     },
     {
-      "name": "bi-queue",
+      "name": "bi-datex",
       "type": "standard",
       "durable": true,
       "maximumMessageTtl": 900000,
       "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-denm",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-cam",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-ivim",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-mapem",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-spatem",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-ssrem",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
+      "ensureNondestructiveConsumers": true,
+      "holdOnPublishEnabled": false,
+      "owner": null
+    },
+    {
+      "name": "bi-ssem",
+      "type": "standard",
+      "durable": true,
+      "maximumMessageTtl": 900000,
       "holdOnPublishEnabled": false,
       "owner": null
     }
@@ -82,20 +144,74 @@
         },
         {
           "objectType": "QUEUE",
-          "identity": "ALL",
+          "identity": "bi-consumers",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "bi-queue"
+            "NAME": "bi-datex"
           }
         },
         {
           "objectType": "QUEUE",
-          "identity": "ALL",
+          "identity": "bi-consumers",
           "operation": "CONSUME",
           "outcome": "ALLOW_LOG",
           "attributes": {
-            "NAME": "bi-queue"
+            "NAME": "bi-denm"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-cam"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-ivim"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-mapem"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-spatem"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-ssrem"
+          }
+        },
+        {
+          "objectType": "QUEUE",
+          "identity": "bi-consumers",
+          "operation": "CONSUME",
+          "outcome": "ALLOW_LOG",
+          "attributes": {
+            "NAME": "bi-ssem"
           }
         },
         {

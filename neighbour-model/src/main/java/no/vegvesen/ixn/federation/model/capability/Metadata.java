@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.federation.model.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.model.RedirectStatus;
 
 import jakarta.persistence.*;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
+
 import java.util.*;
 
 @Entity

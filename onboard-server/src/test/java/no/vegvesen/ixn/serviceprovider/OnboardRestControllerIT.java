@@ -2,10 +2,6 @@ package no.vegvesen.ixn.serviceprovider;
 
 import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.RedirectStatusApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
@@ -15,7 +11,7 @@ import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import org.junit.Assert;
+import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +30,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1253,7 +1248,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         AddDeliveriesResponse response = restController.addDeliveries(serviceProviderName, request);
         assertThat(response.getDeliveries()).hasSize(1);
 
-        Delivery delivery = response.getDeliveries().stream().findFirst().get();
+        Delivery delivery = response.getDeliveries().stream().findFirst().orElseThrow();
         assertThat(delivery.getErrorMessage()).isEqualTo("Bad api object for adding delivery. The selector object was null.");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
     }
@@ -1325,6 +1320,32 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
             restController.getDelivery(serviceProviderName, "999");
         });
     }
+
+    @Test
+    public void testGettingHasAccessToBiConsumer() {
+        String serviceProviderName = "my-provider";
+        ServiceProvider sp = new ServiceProvider(serviceProviderName);
+        serviceProviderRepository.save(sp).setBiconsumer(true);
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutAndGetHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.getBiconsumerAccess(serviceProviderName).isAccess()).isTrue();
+    }
+
+    @Test
+    public void testPutHasAccessToBiconsumer() {
+        String serviceProviderName = "my-provider";
+        AddBiqueueAccessRequest withBiQueueAccess = new AddBiqueueAccessRequest(true);
+        AddBiqueueAccessRequest withoutBiQueueAccess = new AddBiqueueAccessRequest(false);
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withBiQueueAccess).isAccess()).isTrue();
+        assertThat(restController.addBiConsumerAccess(serviceProviderName, withoutBiQueueAccess).isAccess()).isFalse();
+    }
+
 
     @Test
     public void testGettingDeliveryWithInvalidId() {

@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.napcore.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 
 public class CapabilitiesRequest {
 

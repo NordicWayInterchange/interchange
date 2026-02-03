@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.serviceprovider;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -201,6 +202,7 @@ public class TypeTransformer {
                 localDelivery.getDescription()
         );
     }
+
     private Set<LocalEndpointApi> transformLocalEndpointsToLocalEndpointApis(Set<LocalEndpoint> localEndpoints) {
         Set<LocalEndpointApi> result = new HashSet<>();
         for (LocalEndpoint localEndpoint : localEndpoints) {
@@ -327,4 +329,21 @@ public class TypeTransformer {
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
+
+    public BiqueueAccessResponse transformBiQueueToGetBiqueueResponse(ServiceProvider serviceProvider) {
+        Boolean biconsumer = serviceProvider.isBiconsumer();
+        return new BiqueueAccessResponse(
+                serviceProvider.getName(),
+                biconsumer == null ? Boolean.FALSE : biconsumer
+        );
+    }
+
+
+    public BiqueueAccessResponse transformAddBiqueueToAddBiQueueResponse(ServiceProvider serviceProvider, AddBiqueueAccessRequest addBiqueueAccess) {
+        return new BiqueueAccessResponse(
+                serviceProvider.getName(),
+                addBiqueueAccess.isAccess()
+        );
+    }
+
 }

@@ -2,9 +2,9 @@ package no.vegvesen.ixn.federation.transformer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

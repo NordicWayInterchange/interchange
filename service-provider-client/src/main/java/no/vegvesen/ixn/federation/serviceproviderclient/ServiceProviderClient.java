@@ -13,6 +13,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.util.List;
+import java.util.Objects;
 
 public class ServiceProviderClient {
 
@@ -140,6 +142,23 @@ public class ServiceProviderClient {
     public ListPeerPrivateChannels getPeerPrivateChannels(){
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
+    }
+
+    public BiqueueAccessResponse getServiceProviderBiconsumerAccess() {
+        return restTemplate.getForEntity(server + "/" + user + "/biconsumer", BiqueueAccessResponse.class).getBody();
+    }
+
+    public BiqueueAccessResponse addServiceProviderBiconsumerAccess(BiqueueAccessResponse withBiQueueAccess) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(new AddBiqueueAccessRequest(withBiQueueAccess.isAccess()),headers);
+        String url = String.format("/%s/biconsumer", user) ;
+        return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
+    }
+
+    public List<GetBiqueueEndpointsResponsePerMessageType> listBiqueues() {
+        String url = String.format("%s/%s/biqueueendpoints",server,user);
+        return List.of(Objects.requireNonNull(restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType[].class).getBody()));
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){

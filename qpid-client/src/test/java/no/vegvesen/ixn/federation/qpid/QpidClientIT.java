@@ -467,4 +467,44 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(queue.getEnsureNondestructiveConsumers()).isTrue();
 		assertThat(client.queueExists("test-non-destructive-queue")).isTrue();
 	}
+
+	@Test
+	public void testGetMemberFromBiConsumerGroup() {
+		String groupMember = "test-bi-consumer-group-member";
+		client.addBiConsumerMemberToGroup(groupMember);
+
+		BiConsumerMember member = client.getBiConsumerMember(groupMember);
+		assertThat(member).isNotNull();
+		assertThat(member.getName()).isEqualTo(groupMember);
+	}
+
+	@Test
+	public void testGetBiConsumerGroupMembersList() {
+		String groupMember1 = "test-bi-consumer-group-member-1";
+		String groupMember2 = "test-bi-consumer-group-member-2";
+		BiConsumerMember member1 = client.addBiConsumerMemberToGroup(groupMember1);
+		BiConsumerMember member2 = client.addBiConsumerMemberToGroup(groupMember2);
+
+		List<BiConsumerMember> groupMembers = client.getBiConsumerMembers();
+		assertThat(groupMembers).hasSize(2);
+		assertThat(groupMembers).contains(member1,member2);
+	}
+
+	@Test
+	public void testGetNonExistingBiConsumerGroupMember() {
+		BiConsumerMember groupMember = client.getBiConsumerMember("this-member-does-not-exist-in-bi-consumer-group");
+		assertThat(groupMember).isNull();
+	}
+
+	@Test
+	public void createAndDeleteServiceProviderFromBiConsumerGroup() {
+		String myUser = "my-service-provider";
+		BiConsumerMember groupMember = client.addBiConsumerMemberToGroup(myUser);
+		assertThat(groupMember).isNotNull().extracting(BiConsumerMember::getName).isEqualTo(myUser);
+
+		client.removeBiConsumerMemberFromGroup(groupMember);
+		groupMember = client.getBiConsumerMember(myUser);
+
+		assertThat(groupMember).isNull();
+	}
 }

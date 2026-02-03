@@ -1,11 +1,10 @@
 package no.vegvesen.ixn.federation.model.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.api.v1_0.capability.SsemApplicationApi;
-
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.SsemApplicationApi;
 
 import java.util.List;
 

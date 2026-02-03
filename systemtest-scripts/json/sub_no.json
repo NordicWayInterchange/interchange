@@ -3,8 +3,8 @@
     "version": "1.0",
     "subscriptions": [
         {
-            "selector": "originatingCountry = 'NO'",
-	    "consumerCommonName": "belle.stminterchange.com"
+          "selector": "originatingCountry = 'NO'",
+          "consumerCommonName": "belle.stminterchange.com"
         }
     ]
 }

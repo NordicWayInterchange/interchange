@@ -299,4 +299,77 @@ public class ExampleApiObjects {
                     "description": "private channel between king olav and king gustaf"
                 }
                 """;
+
+    static final String BICONSUMERACCESSRESPONSE = """
+                {
+                    "name": "king_olav.bouvetinterchange.eu,
+                    "access": true
+                }
+                """;
+
+    static final String ADDBICONSUMERACCESSREQUEST = """
+                {
+                    "access": true
+                }
+                """;
+
+    static final String BIQUEUEENDPOINTRESPONSE = """
+            [ {
+               "messageType" : "DATEX2",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-datex"
+               }
+             }, {
+               "messageType" : "DENM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-denm"
+               }
+             }, {
+               "messageType" : "IVIM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ivim"
+               }
+             }, {
+               "messageType" : "SPATEM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-spatem"
+               }
+             }, {
+               "messageType" : "MAPEM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-mapem"
+               }
+             }, {
+               "messageType" : "SREM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ssrem"
+               }
+             }, {
+               "messageType" : "SSEM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ssem"
+               }
+             }, {
+               "messageType" : "CAM",
+               "getBiqueueEndpointResponse" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-cam"
+               }
+             } ]
+            """;
 }

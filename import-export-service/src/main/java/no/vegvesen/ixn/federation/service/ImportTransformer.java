@@ -21,6 +21,7 @@ public class ImportTransformer {
 
     public ServiceProvider transformServiceProviderImportApiToServiceProvider(ServiceProviderImportApi serviceProvider) {
         return new ServiceProvider(serviceProvider.getName(),
+                serviceProvider.getBiconsumer(),
                 new Capabilities(serviceProvider.getCapabilities().stream().map(this::transformCapabilityImportApiToCapability).collect(Collectors.toSet())),
                 serviceProvider.getSubscriptions().stream().map(this::transformLocalSubscriptionImportApiToLocalSubscription).collect(Collectors.toSet()),
                 serviceProvider.getDeliveries().stream().map(this::transformDeliveryImportApiToLocalDelivery).collect(Collectors.toSet()),
@@ -35,7 +36,8 @@ public class ImportTransformer {
                 localSubscription.getSelector(),
                 localSubscription.getConsumerCommonName(),
                 localSubscription.getLocalConnections().stream().map(this::transformLocalConnectionImportApiToLocalConnection).collect(Collectors.toSet()),
-                localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet())
+                localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointImportApiToLocalEndpoint).collect(Collectors.toSet()),
+                localSubscription.getDescription()
         );
     }
 
@@ -133,6 +135,7 @@ public class ImportTransformer {
                 delivery.getEndpoints().stream().map(this::transformLocalDeliveryEndpointImportApiToLocalDeliveryEndpoint).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 LocalDeliveryStatus.REQUESTED,
+                delivery.getDescription(),
                 delivery.getDlqueue()
         );
     }
@@ -309,6 +312,7 @@ public class ImportTransformer {
         return new PrivateChannel(
                 privateChannel.getPeers().stream().map(this::transformPeerImportApiToPeer).collect(Collectors.toSet()),
                 PrivateChannelStatus.REQUESTED,
+                privateChannel.getDescription(),
                 transformPrivateChannelEndpointImportApiToPrivateChannelEndpoint(privateChannel.getEndpoint()),
                 privateChannel.getServiceProviderName()
         );

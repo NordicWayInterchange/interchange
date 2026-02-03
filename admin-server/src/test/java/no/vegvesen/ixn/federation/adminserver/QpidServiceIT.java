@@ -85,7 +85,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
     @Test
     public void testBindingExists() {
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         String exchangeName = "my-exchange";
 
         client.createHeadersExchange(exchangeName);
@@ -153,7 +153,7 @@ public class QpidServiceIT extends QpidDockerBaseIT {
     public void TestGetDeliverysExchangeBindingToMatchingCapabilities() {
         String serviceProviderName = "my-service-provider";
         String selector = "originatingCountry = 'NO'";
-        String queueName = "bi-queue";
+        String queueName = "bi-denm";
         CapabilityShard shard = new CapabilityShard(1, queueName, "publicationId = 'pub-1'");
         Capability capability = new Capability(
                 UUID.randomUUID().toString(),

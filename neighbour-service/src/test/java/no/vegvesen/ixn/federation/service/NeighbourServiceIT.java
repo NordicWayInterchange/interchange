@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.shared.capability.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

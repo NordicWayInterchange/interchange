@@ -44,6 +44,7 @@ public class ExampleAdminApiObjects {
                    {
                        "id": 1,
                        "name": "king_olav.bouvetinterchange.eu",
+                       "biconsumer": true,
                        "subscriptions": [
                            {
                                "id": "1",
@@ -347,4 +348,63 @@ public class ExampleAdminApiObjects {
               }
             """;
 
+    static final String BIQUEUEENDPOINTRESPONSE = """
+            [ {
+               "messageType" : "DATEX2",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-datex"
+               }
+             }, {
+               "messageType" : "DENM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-denm"
+               }
+             }, {
+               "messageType" : "IVIM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ivim"
+               }
+             }, {
+               "messageType" : "SPATEM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-spatem"
+               }
+             }, {
+               "messageType" : "MAPEM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-mapem"
+               }
+             }, {
+               "messageType" : "SREM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ssrem"
+               }
+             }, {
+               "messageType" : "SSEM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-ssem"
+               }
+             }, {
+               "messageType" : "CAM",
+               "biqueueEndpointsApi" : {
+                 "brokerExternalName" : "a.qpid.bouvetinterchange.eu",
+                 "messageChannelPort" : 5671,
+                 "queueName" : "bi-cam"
+               }
+             } ]
+            """;
 }

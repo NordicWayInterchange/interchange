@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
+import no.vegvesen.ixn.shared.capability.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -223,7 +224,7 @@ class NeighbourRestControllerTest {
 		String subscriptionRequestApiToServerJson = objectMapper.writeValueAsString(ericsson);
 
 		SubscriptionResponseApi response = new SubscriptionResponseApi(name,
-				Collections.singleton(new RequestedSubscriptionResponseApi(UUID.randomUUID().toString(),selector,path,SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
+				Collections.singleton(new RequestedSubscriptionResponseApi(UUID.randomUUID().toString(),selector,path, SubscriptionStatusApi.REQUESTED, "sp-ericsson")));
 
 		doReturn(response).when(neighbourService).incomingSubscriptionRequest(any());
 
