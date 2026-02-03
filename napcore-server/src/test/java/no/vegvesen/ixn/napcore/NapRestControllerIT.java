@@ -21,6 +21,7 @@ import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MapemApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -812,11 +814,18 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGetBiQueueEndpoint() {
-        BiqueueEndpointResponse biqueueEndPoint = napRestController.getBiqueueEndPoint();
-        assertThat(biqueueEndPoint.getBrokerExternalName()).isEqualTo("myBroker"); //from test/resources/application.properties
-        assertThat(biqueueEndPoint.getMessageChannelPort()).isEqualTo(5671);
-        assertThat(biqueueEndPoint.getQueueName()).isEqualTo("bi-queue");
+    public void   testGetBiQueueEndpoint() {
+        List<BiqueueEndpointsResponsePerMessageType> biqueueEndPoints = napRestController.getBiqueueEndPoints();
+        Assertions.assertEquals(8, biqueueEndPoints.size());
+        BiqueueEndpointsResponsePerMessageType datex =
+                biqueueEndPoints.stream()
+                        .filter(r -> r.getMessageType().equals("DATEX2"))
+                        .findFirst()
+                        .orElseThrow();
+
+        Assertions.assertEquals("myBroker", datex.getBiqueueEndpointResponse().getBrokerExternalName()); //from test/resources/application.properties
+        Assertions.assertEquals(5671, datex.getBiqueueEndpointResponse().getMessageChannelPort());
+        Assertions.assertEquals("bi-datex", datex.getBiqueueEndpointResponse().getQueueName());
     }
 
     @Autowired

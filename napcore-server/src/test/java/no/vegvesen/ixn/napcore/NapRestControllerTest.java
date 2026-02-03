@@ -540,7 +540,7 @@ public class NapRestControllerTest {
     public void getBiQueueEndpoint() throws Exception {
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         mockMvc.perform(
-                get("/nap/biqueueendpoint")
+                get("/nap/biqueueendpoints")
         ).andExpect(status().isOk());
     }
 

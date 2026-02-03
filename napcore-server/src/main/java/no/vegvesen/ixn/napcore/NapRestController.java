@@ -27,6 +27,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
+import no.vegvesen.ixn.shared.Constants;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
 
 @RestController
 public class NapRestController {
@@ -672,18 +675,25 @@ public class NapRestController {
         return biQueueAccessResponse;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/biqueueendpoints"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Bi-queue")
-    @Operation(summary = "Get bi-queue endpoint")
+    @Operation(summary = "Get bi-queue endpoints per message type")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.BIQUEUEENDPOINTRESPONSE)))})
-    public BiqueueEndpointResponse getBiqueueEndPoint() {
+    public List<BiqueueEndpointsResponsePerMessageType> getBiqueueEndPoints() {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        logger.info("Get bi-queue endpoints per message type");
 
-        return new BiqueueEndpointResponse(
-                napCoreProperties.getBrokerExternalName(),
-                Integer.parseInt(napCoreProperties.getMessageChannelPort()),
-                napCoreProperties.getBiQueueName()
-        );
+        return
+                Constants.getAllMessageTypes().stream()
+                        .map(type -> new BiqueueEndpointsResponsePerMessageType(
+                                type,
+                                new BiqueueEndpointResponse(
+                                        napCoreProperties.getBrokerExternalName(),
+                                        Integer.parseInt(napCoreProperties.getMessageChannelPort()),
+                                        MESSAGE_TYPE_TO_QUEUE.get(type)
+                                )
+                        ))
+                        .collect(Collectors.toList());
     }
 
     private void validatePathVariable(String pathVariable){

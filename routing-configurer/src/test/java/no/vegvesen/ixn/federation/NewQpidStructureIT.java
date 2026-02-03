@@ -378,7 +378,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     @Test
     public void consumeFromQueueWithNonDestructiveConsumers() throws Exception{
         System.out.println(qpidContainer.getHttpUrl());
-        String consumeQueue = "bi-queue";
+        String consumeQueue = "bi-denm";
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
 

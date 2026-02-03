@@ -13,6 +13,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLContext;
+import java.util.List;
+import java.util.Objects;
 
 public class ServiceProviderClient {
 
@@ -154,9 +156,9 @@ public class ServiceProviderClient {
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
-    public GetBiqueueEndpointResponse getBiqueueEndpoint() {
-        String url = String.format("%s/%s/biqueueendpoint", server, user);
-        return restTemplate.getForEntity(url, GetBiqueueEndpointResponse.class).getBody();
+    public List<GetBiqueueEndpointsResponsePerMessageType> listBiqueues() {
+        String url = String.format("%s/%s/biqueueendpoints",server,user);
+        return List.of(Objects.requireNonNull(restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType[].class).getBody()));
     }
 
     public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){

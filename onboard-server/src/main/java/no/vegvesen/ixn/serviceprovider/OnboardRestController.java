@@ -20,6 +20,7 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.shared.Constants;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
 
 @RestController
 public class OnboardRestController {
@@ -736,22 +739,28 @@ public class OnboardRestController {
 	}
 
 
-	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueendpoints"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Bi-queue")
-	@Operation(summary = "Get bi-queue endpoint")
+	@Operation(summary = "Get bi-queue endpoints")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BIQUEUEENDPOINTRESPONSE)))})
-	public GetBiqueueEndpointResponse getBiqueueEndPoint(@PathVariable("serviceProviderName") String serviceProviderName) {
+	public List<GetBiqueueEndpointsResponsePerMessageType> getBiqueueEndPoints(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("Get bi-queue endpoint in service provider {}", serviceProviderName);
+		logger.info("Get bi-queue endpoints in service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
-        return new GetBiqueueEndpointResponse(
-                nodeProperties.getBrokerExternalName(),
-                Integer.parseInt(nodeProperties.getMessageChannelPort()),
-                nodeProperties.getBiQueueName()
-        );
+		return
+				Constants.getAllMessageTypes().stream()
+						.map(type -> new GetBiqueueEndpointsResponsePerMessageType(
+								type,
+								new GetBiqueueEndpointResponse(
+										nodeProperties.getBrokerExternalName(),
+										Integer.parseInt(nodeProperties.getMessageChannelPort()),
+										MESSAGE_TYPE_TO_QUEUE.get(type)
+								)
+						))
+						.collect(Collectors.toList());
 	}
 
 

@@ -11,6 +11,8 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -383,11 +385,13 @@ public class ServiceProviderRouter {
 
     public void bindCapabilityExchangesToBiQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         for (Capability capability : serviceProvider.getCapabilities().getCapabilities()) {
+            String messageType = capability.getApplication().getMessageType();
+            String queueName = CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE.get(messageType);
             for (CapabilityShard shard : capability.getShards()) {
                 Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
                 if (exchange != null) {
-                    if (!exchange.isBoundTo("bi-queue")) {
-                        Binding binding = new Binding(shard.getExchangeName(), "bi-queue", new Filter(shard.getSelector()));
+                    if (!exchange.isBoundTo(queueName)) {
+                        Binding binding = new Binding(shard.getExchangeName(), queueName, new Filter(shard.getSelector()));
                         qpidClient.addBinding(shard.getExchangeName(), binding);
                         exchange.addBinding(binding);
                     }

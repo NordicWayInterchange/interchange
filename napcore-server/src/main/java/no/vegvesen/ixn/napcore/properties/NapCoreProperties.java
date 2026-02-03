@@ -2,6 +2,8 @@ package no.vegvesen.ixn.napcore.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "napcore.node-provider")
@@ -13,7 +15,7 @@ public class NapCoreProperties {
 
     private String messageChannelPort = "5671";
 
-    private String biQueueName = "bi-queue";
+    private List<String> biQueueName = Arrays.asList("bi-datex", "bi-denm", "bi-cam", "bi-ivim", "bi-mapem", "bi-spatem", "bi-ssrem", "bi-ssem");
 
     private String brokerExternalName;
 
@@ -50,11 +52,11 @@ public class NapCoreProperties {
         this.messageChannelPort = messageChannelPort;
     }
 
-    public String getBiQueueName() {
+    public List<String> getBiQueueName() {
         return biQueueName;
     }
 
-    public void setBiQueueName(String biQueueName) {
+    public void setBiQueueName(List<String> biQueueName) {
         this.biQueueName = biQueueName;
     }
 

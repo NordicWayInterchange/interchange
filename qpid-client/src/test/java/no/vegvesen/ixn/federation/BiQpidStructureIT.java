@@ -4,7 +4,6 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.shared.Constants;
@@ -52,7 +51,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void messageGoesThroughWithOkTTL() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -72,7 +71,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageInheritsTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -94,7 +93,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
