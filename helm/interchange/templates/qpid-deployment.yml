@@ -46,16 +46,8 @@ spec:
           value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
         - name: TRUST_STORE_PASSWORD
           value: {{ .Values.trust_store_password | quote }}
-        - name: VHOST_FILE
-          value: /work/default/config/default.json
-        - name: STATIC_VHOST_FILE
-          value: /config/default.json
         - name: GROUPS_FILE
-          value: /work/default/config/groups
-        - name: STATIC_GROUPS_FILE
-          value: /config/groups
-        - name: PASSWD_FILE
-          value: /config/passwd
+          value: /qpid-broker-j/work/groups
         - name: INTERNAL_KEY_STORE
           value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
         - name: INTERNAL_KEY_STORE_PASSWORD
