@@ -159,7 +159,7 @@ data:
           "name": "default",
           "type": "JSON",
           "defaultVirtualHostNode": "true",
-          "virtualHostInitialConfiguration": "file:///qpid-broker-j/work/vhost.json"
+          "virtualHostInitialConfiguration": "{}"
         }
       ],
       "groupproviders": [ {
@@ -170,7 +170,7 @@ data:
     }
 
 
-  vhost.json: |
+  default.json: |
     {
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
