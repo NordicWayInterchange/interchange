@@ -16,6 +16,10 @@
       "name" : "king_olav.interchangedomain.com",
       "country" : "NO",
       "email" : "post@slottet.no"
+    },{
+      "name" : "nap.a.interchangedomain.com",
+      "country" : "NO",
+      "email" : "nap@a.interchangedomain.com"
     } ]
   }],
   "hostRequests" : [ ],

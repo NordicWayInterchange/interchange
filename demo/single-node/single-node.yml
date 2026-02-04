@@ -174,6 +174,72 @@ services:
     - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
     - singletest
+    
+  a_napcore_server:
+    image: ghcr.io/nordicwayinterchange/napcore-server-app:${IMAGE_TAG}
+    depends_on:
+      - a_db
+    ports:
+      - 32777:8898
+    volumes:
+      - "../keys/a:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - NAP_NAME=nap.a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - NAP_CHNL_PORT=8898
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - singletest
+
+  a_napcore_frontend:
+    image: napcore-frontend-keycloak
+    ports:
+      - 3000:3000
+    volumes:
+      - ../keys/a/nap.a.interchangedomain.com.p12:/app/nap.a.interchangedomain.com.p12
+    environment:
+      - PFX_KEY_FILENAME=/nap.a.interchangedomain.com.p12
+      - PFX_PASSPHRASE=password
+      - INTERCHANGE_URI=https://a_napcore_server:8898/nap/
+      - INTERCHANGE_PREFIX=a.interchangedomain.lookupdomain.
+      - NEXTAUTH_SECRET=supersecret
+      - KEYCLOAK_CLIENT_ID=napcore-frontend-client
+      - KEYCLOAK_CLIENT_SECRET=anothersupersecret
+      - INTERNAL_KEYCLOAK_URL=http://a_keycloak:8080
+      - KEYCLOAK_REALM=a.interchangedomain.com
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
+    # TODO we need to run the next application in dev mode, since non-development mode requires https between browser and BFF. Figure out how to do this
+    #  - NODE_ENV=dev
+    #command:
+    #  ["dev"]
+    networks:
+      - singletest
+
+  a_keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    ports:
+      - 8888:8080
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    # TODO create a realm, export, and use the exported realm in the import part below
+    #volumes:
+    #  - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    #command: ["start-dev", "--import-realm"]
+    command: ["start-dev"]
+    networks:
+      - singletest
 
 networks:
   singletest:
