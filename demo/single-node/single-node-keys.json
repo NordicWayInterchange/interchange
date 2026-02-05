@@ -10,7 +10,7 @@
     },{
       "name": "a.qpid.interchangedomain.com"
     }, {
-        "name": "a_qpid"
+        "name": "a-qpid"
     } ],
     "clientRequests" : [ {
       "name" : "king_olav.interchangedomain.com",
