@@ -17,7 +17,6 @@ services:
 
   a-db:
     image: postgres:15.1
-    #container_name: a-db
     depends_on:
       - mock-dns-server
     ports:
@@ -31,7 +30,6 @@ services:
 
   a-onboard-server:
     image: ghcr.io/nordicwayinterchange/onboard-server-app:${IMAGE_TAG}
-    #container_name: a-onboard-server
     depends_on:
       - a-db
     ports:
@@ -54,7 +52,6 @@ services:
 
   a-qpid:
     image: ghcr.io/nordicwayinterchange/qpid:${IMAGE_TAG}
-    container_name: a-qpid
     ports:
       - 8666:8080
       - 443
@@ -83,7 +80,6 @@ services:
 
   a-neighbour-server:
     image: ghcr.io/nordicwayinterchange/neighbour-server-app:${IMAGE_TAG}
-    #container_name: a-neighbour-server
     depends_on:
       - a-db
     ports:
@@ -107,7 +103,6 @@ services:
 
   a-routing-configurer:
     image: ghcr.io/nordicwayinterchange/routing-configurer-app:${IMAGE_TAG}
-    #container_name: a-routing-configurer
     depends_on:
       - a-db
     links:
@@ -130,7 +125,6 @@ services:
 
   a-neighbour-discoverer:
     image: ghcr.io/nordicwayinterchange/neighbour-discoverer-app:${IMAGE_TAG}
-    #container_name: a-neighbour-discoverer
     depends_on:
       - a-db
     volumes:
@@ -153,7 +147,6 @@ services:
 
   a-message-collector-app:
     image: ghcr.io/nordicwayinterchange/message-collector-app:${IMAGE_TAG}
-    #container_name: a-message-collector-app
     depends_on:
     - a-db
     links:
