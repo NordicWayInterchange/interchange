@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
+import no.vegvesen.ixn.shared.Constants;
 
 public class SpatemMessage extends Message {
 

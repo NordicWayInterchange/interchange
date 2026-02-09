@@ -1,7 +1,8 @@
-package no.vegvesen.ixn.federation.api.v1_0.capability;
+package no.vegvesen.ixn.shared.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.properties.CapabilityProperty;
+
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.properties.CapabilityProperty;
 
 import java.util.*;
 

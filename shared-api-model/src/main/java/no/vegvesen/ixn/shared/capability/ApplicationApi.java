@@ -1,11 +1,11 @@
-package no.vegvesen.ixn.federation.api.v1_0.capability;
+package no.vegvesen.ixn.shared.capability;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import no.vegvesen.ixn.federation.api.v1_0.*;
-import no.vegvesen.ixn.properties.CapabilityProperty;
+import no.vegvesen.ixn.shared.properties.CapabilityProperty;
+import no.vegvesen.ixn.shared.Constants;
 
 import java.util.*;
 

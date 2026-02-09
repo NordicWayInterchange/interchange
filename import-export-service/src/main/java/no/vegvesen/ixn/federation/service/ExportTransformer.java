@@ -35,7 +35,8 @@ public class ExportTransformer {
                 localSubscription.getConsumerCommonName(),
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusExportApi(localSubscription.getStatus()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointToLocalEndpointExportApi).collect(Collectors.toSet()),
-                localSubscription.getConnections().stream().map(this::transformLocalConnectionToLocalConnectionExportApi).collect(Collectors.toSet())
+                localSubscription.getConnections().stream().map(this::transformLocalConnectionToLocalConnectionExportApi).collect(Collectors.toSet()),
+                localSubscription.getDescription()
                 );
     }
 
@@ -134,6 +135,7 @@ public class ExportTransformer {
                 delivery.getEndpoints().stream().map(this::transformDeliveryEndpointToDeliveryEndpointExportApi).collect(Collectors.toSet()),
                 delivery.getSelector(),
                 transformDeliveryStatusToDeliveryStatusExportApi(delivery.getStatus()),
+                delivery.getDescription(),
                 delivery.isDlqueue()
                 );
     }
@@ -306,7 +308,8 @@ public class ExportTransformer {
                 privateChannel.getServiceProviderName(),
                 privateChannel.getPeers().stream().map(this::transformPeerToPeerExportApi).collect(Collectors.toSet()),
                 transformPrivateChannelStatusToPrivateChannelStatusExportApi(privateChannel.getStatus()),
-                transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint())
+                transformPrivateChannelEndpointToPrivateChannelEndpointExportApi(privateChannel.getEndpoint()),
+                privateChannel.getDescription()
         );
     }
 

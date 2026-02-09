@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.cert.CertSigner;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.DatexApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -15,6 +12,9 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.properties.NapCoreProperties;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -540,7 +540,7 @@ public class NapRestControllerTest {
     public void getBiQueueEndpoint() throws Exception {
         doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
         mockMvc.perform(
-                get("/nap/biqueueendpoint")
+                get("/nap/biqueueendpoints")
         ).andExpect(status().isOk());
     }
 

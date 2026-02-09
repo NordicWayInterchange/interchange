@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.adminserver.model.neighbour;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
-import no.vegvesen.ixn.federation.api.v1_0.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
 
 public class NeighbourCapabilityApi implements Comparable<NeighbourCapabilityApi> {
 

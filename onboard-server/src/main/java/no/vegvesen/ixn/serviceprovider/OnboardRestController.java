@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.capability.CapabilityValidator;
@@ -21,6 +20,8 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper.MESSAGE_TYPE_TO_QUEUE;
 
 @RestController
 public class OnboardRestController {
@@ -590,22 +593,24 @@ public class OnboardRestController {
 
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
 
+
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
+        Set<LocalDelivery> errorDeliveries = new HashSet<>();
 		for(AddDelivery delivery : request.getDeliveries()) {
 			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
 			String selector = localDelivery.getSelector();
-
 			if (selector == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object for adding delivery. The selector object was null.");
-			}
-			else if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
+                errorDeliveries.add(localDelivery);
+			} else if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
 				localDelivery.setErrorMessage("Bad api object. Invalid selector.");
+                errorDeliveries.add(localDelivery);
 			} else {
 				localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
+                localDeliveries.add(localDelivery);
 			}
-			localDeliveries.add(localDelivery);
 		}
 
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
@@ -614,9 +619,12 @@ public class OnboardRestController {
 		ServiceProvider saved = serviceProviderRepository.save(serviceProviderToUpdate);
 		logger.debug("Updated Service Provider: {}", saved.toString());
 		Set<LocalDelivery> savedDeliveries = saved.getSavedDeliveries(localDeliveries);
+        Set<LocalDelivery> allDeliveries =  new HashSet<>();
+        allDeliveries.addAll(savedDeliveries);
+        allDeliveries.addAll(errorDeliveries);
 
 		OnboardMDCUtil.removeLogVariables();
-		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, savedDeliveries);
+		return typeTransformer.transformToDeliveriesResponse(serviceProviderName, allDeliveries);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/deliveries"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -731,22 +739,28 @@ public class OnboardRestController {
 	}
 
 
-	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueendpoint"}, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/biqueueendpoints"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Tag(name = "Bi-queue")
-	@Operation(summary = "Get bi-queue endpoint")
+	@Operation(summary = "Get bi-queue endpoints")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.BIQUEUEENDPOINTRESPONSE)))})
-	public GetBiqueueEndpointResponse getBiqueueEndPoint(@PathVariable("serviceProviderName") String serviceProviderName) {
+	public List<GetBiqueueEndpointsResponsePerMessageType> getBiqueueEndPoints(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
-		logger.info("Get bi-queue endpoint in service provider {}", serviceProviderName);
+		logger.info("Get bi-queue endpoints in service provider {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		OnboardMDCUtil.removeLogVariables();
-        return new GetBiqueueEndpointResponse(
-                nodeProperties.getBrokerExternalName(),
-                Integer.parseInt(nodeProperties.getMessageChannelPort()),
-                nodeProperties.getBiQueueName()
-        );
+		return
+				Constants.getAllMessageTypes().stream()
+						.map(type -> new GetBiqueueEndpointsResponsePerMessageType(
+								type,
+								new GetBiqueueEndpointResponse(
+										nodeProperties.getBrokerExternalName(),
+										Integer.parseInt(nodeProperties.getMessageChannelPort()),
+										MESSAGE_TYPE_TO_QUEUE.get(type)
+								)
+						))
+						.collect(Collectors.toList());
 	}
 
 

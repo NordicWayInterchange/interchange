@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.service.importmodel;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.ApplicationApi;
+import no.vegvesen.ixn.shared.capability.ApplicationApi;
 
 import java.util.Objects;
 

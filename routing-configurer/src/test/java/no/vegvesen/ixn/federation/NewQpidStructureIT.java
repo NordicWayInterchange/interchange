@@ -4,13 +4,13 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
+import no.vegvesen.ixn.shared.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -378,7 +378,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     @Test
     public void consumeFromQueueWithNonDestructiveConsumers() throws Exception{
         System.out.println(qpidContainer.getHttpUrl());
-        String consumeQueue = "bi-queue";
+        String consumeQueue = "bi-denm";
         String deliveryExchange = "del-123456789";
         String capabilityExchange = "cap-123456789";
 

@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.serviceprovider.model;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
 
 import java.util.HashSet;
 import java.util.Objects;

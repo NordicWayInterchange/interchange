@@ -15,6 +15,8 @@ public class PrivateChannelExportApi {
 
     private PrivateChannelEndpointExportApi endpoint;
 
+    private String description;
+
     public enum PrivateChannelStatusExportApi {
         REQUESTED, CREATED, TEAR_DOWN
     }
@@ -27,12 +29,13 @@ public class PrivateChannelExportApi {
                                    String serviceProviderName,
                                    Set<PeerExportApi> peers,
                                    PrivateChannelStatusExportApi status,
-                                   PrivateChannelEndpointExportApi endpoint) {
+                                   PrivateChannelEndpointExportApi endpoint, String description) {
         this.uuid = uuid;
         this.serviceProviderName = serviceProviderName;
         this.peers = peers;
         this.status = status;
         this.endpoint = endpoint;
+        this.description = description;
     }
 
     public String getServiceProviderName() {
@@ -75,16 +78,24 @@ public class PrivateChannelExportApi {
         this.uuid = uuid;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PrivateChannelExportApi that = (PrivateChannelExportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(serviceProviderName, that.serviceProviderName) && Objects.equals(peers, that.peers) && status == that.status && Objects.equals(endpoint, that.endpoint) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, serviceProviderName, peers, status, endpoint);
+        return Objects.hash(uuid, serviceProviderName, peers, status, endpoint, description);
     }
 
     @Override
@@ -95,6 +106,7 @@ public class PrivateChannelExportApi {
                 ", peers=" + peers +
                 ", status=" + status +
                 ", endpoint=" + endpoint +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

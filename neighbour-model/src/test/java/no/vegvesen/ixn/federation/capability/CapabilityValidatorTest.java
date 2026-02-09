@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.capability;
 
-import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

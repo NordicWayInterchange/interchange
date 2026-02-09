@@ -1,20 +1,15 @@
 package no.vegvesen.ixn.federation;
 
-import jakarta.jms.MessageListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.api.v1_0.Constants;
-import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
+import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
+import no.vegvesen.ixn.shared.Constants;
 import org.apache.qpid.jms.message.JmsMessage;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,12 +20,9 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 @Testcontainers
 public class BiQpidStructureIT extends QpidDockerBaseIT {
@@ -59,7 +51,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
 
     @Test
     public void messageGoesThroughWithOkTTL() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -79,7 +71,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageInheritsTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();
@@ -101,7 +93,7 @@ public class BiQpidStructureIT extends QpidDockerBaseIT {
      */
     @Test
     public void messageDoesNotInheritTTLFromQueue() throws Exception{
-        String queueName = "bi-queue";
+        String queueName = "bi-datex";
 
         Source source = new Source(qpidContainer.getAmqpsUrl(),queueName,sslContext);
         source.start();

@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.properties;
+package no.vegvesen.ixn.shared.properties;
 
 import java.util.*;
 import java.util.stream.Collectors;
