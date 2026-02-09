@@ -8,5 +8,3 @@ COPY target/message-collector-app-$JAR_VERSION.jar message-collector.jar
 ADD entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
-CMD tail -f /dev/null
