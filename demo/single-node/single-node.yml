@@ -225,9 +225,14 @@ services:
     # TODO create a realm, export, and use the exported realm in the import part below
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      #- keycloak-data:/opt/keycloak/data
     command: ["start-dev", "--import-realm"]
     networks:
       - singletest
+
+#volumes:
+#  keycloak-data:
+#    external: true
 
 networks:
   singletest:
