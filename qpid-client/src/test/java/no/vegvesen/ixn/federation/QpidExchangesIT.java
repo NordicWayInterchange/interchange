@@ -62,23 +62,9 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
     }
 
-    /*
-    @Test
-    public void testDirectExchangeWithRandomBinding() throws Exception {
-        System.out.println(qpidContainer.getHttpUrl());
-        Exchange inExchange = qpidClient.createDirectExchange("delex");
-        Exchange capExhange = qpidClient.createHeadersExchange("capex");
-        Queue subscriptionQueue = qpidClient.createQueue("loc");
-
-        qpidClient.addBinding(inExchange.getName(),new Binding("yoyoyo", capExhange.getName(), null));
-        qpidClient.addBinding(capExhange.getName(),new Binding(subscriptionQueue.getName(), subscriptionQueue.getName(), null));
-
-        assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isFalse();
-    }
-*/
 
     @Test
-    public void testDirectExchangeWithBindingLikeSourceName() throws Exception {
+    public void testHeadersExchangeWithBindingLikeSourceName() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
         Exchange inExchange = qpidClient.createHeadersExchange("delex");
         Exchange capExhange = qpidClient.createHeadersExchange("capex");
@@ -91,7 +77,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
     }
 
     @Test
-    public void testDirectExchangeWithAlternateBindingAndBindLikeSourceName() throws Exception {
+    public void testHeadersExchangeWithAlternateBindingAndBindLikeSourceName() throws Exception {
         System.out.println(qpidContainer.getHttpUrl());
         //dlqueue er allerede laget, ligger i config.json
         Exchange inExchange = qpidClient.createHeadersExchangeWithDlq("delex", "dlqueue");
@@ -103,21 +89,7 @@ public class QpidExchangesIT extends QpidDockerBaseIT {
 
         assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isTrue();
     }
-/*
-    @Test
-    public void testDirectExchangeWithAlternateBindingAndBindNotLikeSourceName() throws Exception {
-        System.out.println(qpidContainer.getHttpUrl());
-        //dlqueue er allerede laget, ligger i config.json
-        Exchange inExchange = qpidClient.createDirectExchangeWithDlq("delex", "dlqueue");
-        Exchange capExhange = qpidClient.createHeadersExchange("capex");
-        Queue subscriptionQueue = qpidClient.createQueue("loc");
 
-        qpidClient.addBinding(inExchange.getName(),new Binding("notedlex", capExhange.getName(), null));
-        qpidClient.addBinding(capExhange.getName(),new Binding(subscriptionQueue.getName(), subscriptionQueue.getName(), null));
-
-        assertThat(sendAndReceive(inExchange.getName(), subscriptionQueue.getName())).isFalse();
-    }
-*/
     private boolean sendAndReceive(String inExchangeName, String outQueue) throws Exception {
         WriteToScreenMessageListener writeToScreenMessageListener = new WriteToScreenMessageListener();
         CountDownLatch latch = new CountDownLatch(1);
