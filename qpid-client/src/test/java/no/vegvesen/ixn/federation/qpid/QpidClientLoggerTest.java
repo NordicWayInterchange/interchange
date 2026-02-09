@@ -74,7 +74,7 @@ public class QpidClientLoggerTest {
         String exchangeName = "exchangeName";
         when(template.postForEntity(anyString(), any(CreateExchangeRequest.class),any(Class.class)))
                 .thenReturn(new ResponseEntity<>(new Exchange(exchangeName),HttpStatus.OK));
-        client.createDirectExchange(exchangeName);
+        client.createHeadersExchange(exchangeName);
         assertThat(infoEvents(appender.list.stream()))
                 .hasSize(1)
                 .anyMatch(formattedMessageContains(exchangeName));

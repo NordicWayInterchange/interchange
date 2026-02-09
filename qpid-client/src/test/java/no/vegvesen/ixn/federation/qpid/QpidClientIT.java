@@ -310,7 +310,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testRemovingDirectExchange() {
-		Exchange directExchange = client.createDirectExchange("my-exchange");
+		Exchange directExchange = client.createHeadersExchange("my-exchange");
 		assertThat(client.exchangeExists("my-exchange")).isTrue();
 
 		client.removeExchange(directExchange);
@@ -425,7 +425,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String selector = "originatingCountry = 'NO'";
 
 		client.createHeadersExchange(capabilityExchange);
-		client.createDirectExchange(deliveryExchange);
+		client.createHeadersExchange(deliveryExchange);
 
 		client.addBinding(deliveryExchange, new Binding(deliveryExchange, capabilityExchange, new Filter(selector)));
 
