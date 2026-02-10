@@ -1,11 +1,19 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
 import no.vegvesen.ixn.serviceprovider.model.*;
+import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +26,7 @@ import java.util.concurrent.TimeUnit;
         customSynopsis = {
                 """
                         Examples: \n
-                        serviceproviderclient privatechannels send -m "Hello world!" -v "propertyValue" -i 5d16cb60-0534-4469-b525-f92a5953322c \n
+                        serviceproviderclient privatechannels send -m myMessages.json 5d16cb60-0534-4469-b525-f92a5953322c \n
                         """
         })
 public class Send implements Callable<Integer> {
@@ -27,19 +35,16 @@ public class Send implements Callable<Integer> {
     PrivateChannelsCommand parentCommand;
 
     @CommandLine.Option(names = {"-m", "--message"}, description = "The message body", required = true)
-    String messageBody;
+    String messageFileName;
 
-    @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
-    PrivatechannelsOption option;
+    @CommandLine.Parameters(index = "0")
+    String privateChannelId;
 
-    @CommandLine.Option(names = {"-v", "--value"}, description = "Value of the object property (String or boxed type)", required = true)
-    String propertyValue;
 
     @Override
     public Integer call() throws Exception {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        String privateChannelId = option.id;
 
         GetPrivateChannelResponse privateChannel = client.getPrivateChannel(privateChannelId);
 
@@ -65,25 +70,25 @@ public class Send implements Callable<Integer> {
         String queueName = privateChannelEndpoint.getQueueName();
         String url = "amqps://" + privateChannelEndpoint.getHost();
 
-        System.out.printf("Sending message %s and propertyValue %s%n", messageBody, propertyValue);
+        ObjectMapper mapper = new ObjectMapper();
 
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
             source.start();
 
-            MessageBuilder messageBuilder = source.createMessageBuilder()
-                    .textMessage(messageBody)
-                    .objectProperty("objectValue", propertyValue);
+            PrivateTextMessages privateTextMessages = mapper.readValue(Path.of(messageFileName).toFile(), PrivateTextMessages.class);
 
-            source.send(messageBuilder.build());
+            for (PrivateTextMessage message : privateTextMessages.privateTextMessages()) {
+                JmsMessage textMessage = source.createTextMessage(message.messageText());
+                Set<String> properties = message.messageProperties().keySet();
+                for (String property : properties) {
+                   textMessage.setObjectProperty(property, message.messageProperties().get(property));
+                }
+                source.send(textMessage);
+            }
         }
         return 0;
     }
 
-    private static class PrivatechannelsOption {
-
-        @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The privatechannel id")
-        String id;
-    }
 }
 
 

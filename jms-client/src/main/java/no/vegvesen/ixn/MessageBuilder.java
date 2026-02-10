@@ -31,11 +31,6 @@ public class MessageBuilder {
         return this;
     }
 
-    public MessageBuilder objectProperty(String name, Object value) throws JMSException {
-        message.setObjectProperty(name, value);
-        return this;
-    }
-
     public MessageBuilder bytesMessage(byte[] messageBody) throws JMSException {
         JmsBytesMessage bytesMessage = (JmsBytesMessage) session.createBytesMessage();
         bytesMessage.writeBytes(messageBody);

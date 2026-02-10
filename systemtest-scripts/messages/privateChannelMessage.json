@@ -1,0 +1,10 @@
+{
+  "privateTextMessages" : [ {
+    "messageText" : "This is a test of private text messages",
+    "messageProperties" : {
+      "textProperty" : "this is text",
+      "booleanProperty" : true,
+      "integerProperty" : 1
+    }
+  } ]
+}
