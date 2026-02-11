@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: import-export-job
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: import-export
+          image: import-export-service:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - export
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://host.docker.internal:5432/federation
+            - name: SPRING_DATASOURCE_USERNAME
+              value: federation
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: federation
