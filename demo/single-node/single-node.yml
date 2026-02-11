@@ -222,17 +222,11 @@ services:
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
-    # TODO create a realm, export, and use the exported realm in the import part below
     volumes:
-      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
-      #- keycloak-data:/opt/keycloak/data
+      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
     command: ["start-dev", "--import-realm"]
     networks:
       - singletest
-
-#volumes:
-#  keycloak-data:
-#    external: true
 
 networks:
   singletest:
