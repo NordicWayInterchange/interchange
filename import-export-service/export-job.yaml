@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: import-export-job
+  generateName: db-export-job-
 spec:
   template:
     spec:
@@ -10,15 +10,20 @@ spec:
           image: import-export-service:latest
           imagePullPolicy: IfNotPresent
           env:
+            - name: EXPORT_PATH
+              value: /backup
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-service:5432/federation
             - name: SPRING_DATASOURCE_USERNAME
               value: federation
             - name: SPRING_DATASOURCE_PASSWORD
               value: federation
-            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: update
-            - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
-              value: org.hibernate.dialect.PostgreSQLDialect
+          volumeMounts:
+            - name: export-volume
+              mountPath: /backup
       restartPolicy: Never
+      volumes:
+        - name: export-volume
+          persistentVolumeClaim:
+            claimName: db-backup-pvc
   backoffLimit: 4
