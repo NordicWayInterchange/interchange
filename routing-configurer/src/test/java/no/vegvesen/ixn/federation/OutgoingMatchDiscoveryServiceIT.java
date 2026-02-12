@@ -1,5 +1,6 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation;
 
+import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
@@ -7,18 +8,24 @@ import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.docker.PostgresContainerBase;
-import org.assertj.core.util.Sets;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@EnableAutoConfiguration
+@EnableJpaRepositories(basePackages = {"no.vegvesen.ixn.federation.repository","no.vegvesen.ixn.federation.model"})
+@SpringBootTest(classes = {OutgoingMatchDiscoveryService.class, OutgoingMatchRepository.class, ServiceProviderRepository.class})
 public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
 
     @Autowired
