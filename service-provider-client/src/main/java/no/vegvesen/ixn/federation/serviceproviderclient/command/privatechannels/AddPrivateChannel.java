@@ -20,8 +20,8 @@ import java.util.concurrent.Callable;
         customSynopsis = {
                 """
                         Examples:\n
-                        serviceproviderclient privatechannels add -f privatechannels.json -d "Private channel between king_olav and us"
-                        serviceproviderclient privatechannels add -p "king_olav","king_gustaf"
+                        serviceproviderclient privatechannels add -f privatechannels.json
+                        serviceproviderclient privatechannels add <private channel description>
                         """
         })
 public class AddPrivateChannel implements Callable<Integer> {
@@ -31,9 +31,6 @@ public class AddPrivateChannel implements Callable<Integer> {
 
     @ArgGroup(exclusive = true, multiplicity = "1")
     AddPrivateChannelOption option;
-
-    @Option(names = {"-d", "--description"}, required = false, description = "The description of the private channel")
-    String description;
 
     @Override
     public Integer call() throws IOException {
@@ -45,7 +42,12 @@ public class AddPrivateChannel implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         else{
-            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(List.of(new PrivateChannelRequestApi(option.peers, description)));
+            AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(
+                    List.of(new PrivateChannelRequestApi(
+                            Set.of(),
+                            option.description
+                    ))
+            );
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
@@ -57,8 +59,8 @@ public class AddPrivateChannel implements Callable<Integer> {
         @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 
-        @Option(names = {"-p", "--peers"}, required = true, description = "The private channel peers", split=",")
-        Set<String> peers;
+        @Parameters(index = "0")
+        String description;
 
 
     }
