@@ -70,6 +70,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - INTERNAL_KEY_STORE=/keys/a_qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
+      - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
     - mock-dns-server
     networks:
