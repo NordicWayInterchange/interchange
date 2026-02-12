@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: db-export-job-
+  name: db-export-job
 spec:
   template:
     spec:
       containers:
         - name: import-export
           image: import-export-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           env:
             - name: EXPORT_PATH
               value: /backup
