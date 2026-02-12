@@ -120,8 +120,7 @@ services:
       - testing_net
 
   a_qpid:
-    build:
-      context: ../qpid
+    image: apache/qpid-broker-j:10.0.1-alpine
     container_name: a_qpid
     ports:
       - 8666:8080
@@ -129,9 +128,8 @@ services:
       - 63003:5671
       - 5672
     volumes:
-      - "../qpid/a:/config"
+      - "../qpid/a:/qpid-broker-j/work-override"
       - "../tmp:/jks"
-      - "../qpid/messages/a:/work/a/messages"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
@@ -139,11 +137,7 @@ services:
       - INTERNAL_KEY_STORE_PASSWORD=password
       - KEY_STORE=/jks/keys/a.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - VHOST_FILE=/work/default/config/default.json
-      - STATIC_VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/work/default/config/groups
-      - STATIC_GROUPS_FILE=/config/groups
-      - PASSWD_FILE=/config/passwd
+      - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
     - mock-dns-server
     networks:
@@ -377,8 +371,7 @@ services:
     dns: 172.28.1.1
 
   b_qpid:
-    build:
-      context: ../qpid
+    image: apache/qpid-broker-j:10.0.1-alpine
     container_name: b_qpid
     ports:
       - 8555:8080
@@ -386,9 +379,8 @@ services:
       - 63001:5671
       - 5672
     volumes:
-      - "../qpid/b:/config"
+      - "../qpid/b:/qpid-broker-j/work-override"
       - "../tmp:/jks"
-      - "../qpid/messages/b:/work/b/messages"
     environment:
       - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
@@ -396,11 +388,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
-      - VHOST_FILE=/work/default/config/default.json
-      - STATIC_VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/work/default/config/groups
-      - STATIC_GROUPS_FILE=/config/groups
-      - PASSWD_FILE=/config/passwd
+      - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
     - mock-dns-server
     networks:

@@ -50,7 +50,6 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         String configPathInContainer = "/qpid-broker-j/work-override/";
         String workConfigInContainer = "/qpid-broker-j/work/";
         this.withClasspathResourceMapping(configPathFromClasspath.toString(), configPathInContainer, BindMode.READ_ONLY);
-        String passwdFileName = "passwd";
         this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
         String keystoreLocation = "/jks/" + keyStore;
         this.withEnv("KEY_STORE", keystoreLocation);
@@ -60,7 +59,6 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         this.withEnv("VHOST_FILE", workConfigInContainer + "default.json");
         this.withEnv("VHOST_NAME",vHostName);
         this.withEnv("GROUPS_FILE",workConfigInContainer + "groups");
-        this.withEnv("PASSWD_FILE",workConfigInContainer + passwdFileName);
         this.withEnv("INTERNAL_KEY_STORE", keystoreLocation); //for testing locally we use the same internal and external keystores
         this.withEnv("INTERNAL_KEY_STORE_PASSWORD", keyStorePassword);
     }
