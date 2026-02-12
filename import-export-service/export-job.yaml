@@ -8,22 +8,21 @@ spec:
       containers:
         - name: import-export
           image: import-export-service:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           env:
-            - name: EXPORT_PATH
-              value: /backup
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres-service:5432/federation
+              value: jdbc:postgresql://postgres-db:5432/federation
             - name: SPRING_DATASOURCE_USERNAME
               value: federation
             - name: SPRING_DATASOURCE_PASSWORD
               value: federation
+          args: [ "export", "/backup/db-backup.sql" ]
           volumeMounts:
-            - name: export-volume
+            - name: db-backup
               mountPath: /backup
       restartPolicy: Never
       volumes:
-        - name: export-volume
+        - name: db-backup
           persistentVolumeClaim:
-            claimName: db-backup-pvc
+            claimName: db-backup-pvc-2
   backoffLimit: 4
