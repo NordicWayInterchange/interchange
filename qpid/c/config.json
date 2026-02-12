@@ -54,7 +54,7 @@
     {
       "name": "AMQP",
       "type": "AMQP",
-      "authenticationProvider": "passwordFile",
+      "authenticationProvider": "plain",
       "port": "5672",
       "protocols": ["AMQP_1_0"],
       "virtualhostaliases": [
@@ -105,7 +105,7 @@
     {
       "name": "HTTP",
       "port": "8080",
-      "authenticationProvider": "passwordFile",
+      "authenticationProvider": "plain",
       "protocols": ["HTTP"]
     },
     {
@@ -142,7 +142,6 @@
       "virtualHostInitialConfiguration": "file:///qpid-broker-j/work/vhost.json"
     }
   ],
-
   "groupproviders" : [ {
     "name" : "default",
     "type" : "GroupFile",
