@@ -25,6 +25,11 @@ spec:
         component: qpid
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 0
+        fsGroup: 0
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
       - name: qpid
         image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag}}"
