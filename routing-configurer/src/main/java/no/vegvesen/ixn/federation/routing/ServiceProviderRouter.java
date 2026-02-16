@@ -90,11 +90,13 @@ public class ServiceProviderRouter {
         BiConsumerMember biConsumerMember = delta.findBiConsumerMemberByName(serviceProvider.getName());
         if (Boolean.TRUE.equals(serviceProvider.isBiconsumer())) {
             if (biConsumerMember == null) {
+                //TODO: figure out what to do with delta here.
                 qpidClient.addBiConsumerMemberToGroup(serviceProvider.getName());
             }
         } else {
             if (biConsumerMember != null) {
                 qpidClient.removeBiConsumerMemberFromGroup(biConsumerMember);
+                delta.removeBiConsumerMember(biConsumerMember);
             }
         }
     }
