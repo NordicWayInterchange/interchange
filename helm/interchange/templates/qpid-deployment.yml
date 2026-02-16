@@ -71,7 +71,7 @@ spec:
         - name: internal-keys
           mountPath: {{ .Values.qpid.internal_keys_path | quote }}
         - name: storage
-          mountPath: /qpid-broker-j/work-tmp
+          mountPath: /qpid-broker-j/work
         - name: config
           mountPath: /qpid-broker-j/work-override
         #{#{- if .Values.qpid.memorydump.enabled }}
