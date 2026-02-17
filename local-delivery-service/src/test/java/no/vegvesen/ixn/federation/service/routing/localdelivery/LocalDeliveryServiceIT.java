@@ -42,7 +42,7 @@ public class LocalDeliveryServiceIT extends PostgresContainerBase {
         outgoingMatchRepository.save(outgoingMatch);
 
         repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName(), "my-interchange", 5671);
+        service.updateDeliveryStatus("my-interchange", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
 
@@ -56,7 +56,7 @@ public class LocalDeliveryServiceIT extends PostgresContainerBase {
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
         repository.save(serviceProvider);
 
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
+        service.updateDeliveryStatus("our-node", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
         assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
@@ -69,7 +69,7 @@ public class LocalDeliveryServiceIT extends PostgresContainerBase {
         serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
 
         repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
+        service.updateDeliveryStatus("our-node", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
         assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
@@ -83,7 +83,7 @@ public class LocalDeliveryServiceIT extends PostgresContainerBase {
         serviceProvider.addDeliveries(Set.of(delivery));
 
         repository.save(serviceProvider);
-        service.removeTearDownIllegalAndErrorDeliveries(serviceProviderName);
+        service.removeTearDownIllegalAndErrorDeliveries(serviceProvider);
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getDeliveries()).hasSize(0);

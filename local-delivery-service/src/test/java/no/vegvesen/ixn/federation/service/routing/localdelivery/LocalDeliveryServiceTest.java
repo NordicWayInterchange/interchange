@@ -80,12 +80,10 @@ public class LocalDeliveryServiceTest {
 
         );
 
-        when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
+        service.updateDeliveryStatus("our-node", 5671, serviceProvider);
         //The status for the delivery should not have changed
         assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.REQUESTED);
-        verify(serviceProviderRepository).findByName(serviceProvider.getName());
         verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
 
     }
@@ -107,11 +105,9 @@ public class LocalDeliveryServiceTest {
                 LocalDateTime.now()
 
         );
-        when(serviceProviderRepository.findByName(serviceProvider.getName())).thenReturn(serviceProvider);
         when(outgoingMatchRepository.findAllByLocalDelivery_Id(localDelivery.getId())).thenReturn(new ArrayList<>());
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
+        service.updateDeliveryStatus("our-node", 5671, serviceProvider);
         assertThat(localDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
-        verify(serviceProviderRepository).findByName(serviceProvider.getName());
         verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
     }
 }

@@ -31,8 +31,7 @@ public class LocalDeliveryService {
        this.outgoingMatchRepository = outgoingMatchRepository;
     }
 
-    public void updateDeliveryStatus(String serviceProviderName, String host, Integer port) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+    public void updateDeliveryStatus(String host, Integer port, ServiceProvider serviceProvider) {
         if (!serviceProvider.getDeliveries().isEmpty()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.REQUESTED)
@@ -71,8 +70,7 @@ public class LocalDeliveryService {
         }
     }
 
-    public void removeTearDownIllegalAndErrorDeliveries(String serviceProviderName) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
+    public void removeTearDownIllegalAndErrorDeliveries(ServiceProvider serviceProvider) {
         Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
                 .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
                         || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL)

@@ -1,13 +1,11 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +24,12 @@ public class ServiceProviderService {
     private ServiceProviderRepository serviceProviderRepository;
     private OutgoingMatchRepository outgoingMatchRepository;
     private MatchRepository matchRepository;
-    private LocalDeliveryService localDeliveryService;
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchRepository outgoingMatchRepository, MatchRepository matchRepository, LocalDeliveryService localDeliveryService) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, OutgoingMatchRepository outgoingMatchRepository, MatchRepository matchRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.outgoingMatchRepository = outgoingMatchRepository;
         this.matchRepository = matchRepository;
-        this.localDeliveryService = localDeliveryService;
     }
 
     public void syncServiceProviders(String host, Integer port) {
@@ -41,9 +37,9 @@ public class ServiceProviderService {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             updateLocalSubscriptionWithRedirectEndpoints(name);
-            localDeliveryService.updateDeliveryStatus(name, host, port);
+            //localDeliveryService.updateDeliveryStatus(name, host, port);
             removeTearDownCapabilities(name);
-            localDeliveryService.removeTearDownIllegalAndErrorDeliveries(name);
+            //localDeliveryService.removeTearDownIllegalAndErrorDeliveries(name);
         }
     }
 

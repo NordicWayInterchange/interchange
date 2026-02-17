@@ -11,7 +11,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
-import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +42,17 @@ public class ServiceProviderRouter {
 
     private final InterchangeNodeProperties nodeProperties;
 
+    private final LocalDeliveryService localDeliveryService;
+
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, OutgoingMatchRepository outgoingMatchRepository, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
         this.matchRepository = matchRepository;
         this.outgoingMatchRepository = outgoingMatchRepository;
         this.nodeProperties = nodeProperties;
+        this.localDeliveryService = localDeliveryService;
     }
 
     public Iterable<ServiceProvider> findServiceProviders() {
@@ -61,6 +64,7 @@ public class ServiceProviderRouter {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
 
+            localDeliveryService.removeTearDownIllegalAndErrorDeliveries(serviceProvider);
             addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
@@ -83,6 +87,7 @@ public class ServiceProviderRouter {
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
             serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
             serviceProvider = setUpDeliveryQueue(serviceProvider, delta);
+            localDeliveryService.updateDeliveryStatus(nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), serviceProvider);
         }
     }
 

@@ -48,12 +48,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <!-- TODO this is temporary, it should be moved to a dependency of routing-configurer -->
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>local-delivery-service</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
     </dependencies>
 
 </project>
