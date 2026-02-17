@@ -1,11 +1,12 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation.service.routing.localdelivery;
 
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.Capabilities;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
+import no.vegvesen.ixn.federation.model.LocalDeliveryStatus;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,30 +16,33 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
+/*
+TODO see if this should be a part of the IT test intead,
+makes it much easier.
+ */
 @ExtendWith(MockitoExtension.class)
-public class ServiceProviderServiceTest {
+public class LocalDeliveryServiceTest {
 
     @Mock
-    ServiceProviderRepository serviceProviderRepository;
+    private ServiceProviderRepository serviceProviderRepository;
 
     @Mock
-    OutgoingMatchRepository outgoingMatchRepository;
+    private OutgoingMatchRepository outgoingMatchRepository;
 
     @Mock
-    MatchRepository matchRepository;
-
-    ServiceProviderService service;
+    private LocalDeliveryService service;
 
     @BeforeEach
     void setUp() {
-        service = new ServiceProviderService(serviceProviderRepository, outgoingMatchRepository, matchRepository);
+        service = new LocalDeliveryService(serviceProviderRepository, outgoingMatchRepository);
     }
 
     @Test
@@ -85,8 +89,6 @@ public class ServiceProviderServiceTest {
         verify(outgoingMatchRepository).findAllByLocalDelivery_Id(localDelivery.getId());
 
     }
-
-
     @Test
     public void updateDeliveryStatusShouldMakeDeliveryNoOverlapIfNoCapabilitiesMatch() {
         LocalDelivery localDelivery = new LocalDelivery(
