@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: import-export
-          image: import-export-service:latest
+          image: import-export-service:v2
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_DATASOURCE_URL
@@ -16,7 +16,8 @@ spec:
               value: federation
             - name: SPRING_DATASOURCE_PASSWORD
               value: federation
-          args: [ "export", "/backup/db-backup.json" ]
+          args:
+            - "/backup/db-backup.json"
           volumeMounts:
             - name: db-backup
               mountPath: /backup

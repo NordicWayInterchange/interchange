@@ -1,31 +1,36 @@
 package no.vegvesen.ixn.federation.service;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.springframework.stereotype.Component;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
-public class ExportApplication {
+import org.springframework.boot.CommandLineRunner;
 
-    private NeighbourRepository neighbourRepository;
+@Component
+public class ExportApplication implements CommandLineRunner {
 
-    private ServiceProviderRepository serviceProviderRepository;
+    private final NeighbourRepository neighbourRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final PrivateChannelRepository privateChannelRepository;
 
-    private PrivateChannelRepository privateChannelRepository;
-
-    public ExportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository) {
+    public ExportApplication(
+            NeighbourRepository neighbourRepository,
+            ServiceProviderRepository serviceProviderRepository,
+            PrivateChannelRepository privateChannelRepository) {
         this.neighbourRepository = neighbourRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.privateChannelRepository = privateChannelRepository;
     }
 
+    @Override
     public void run(String... args) throws Exception {
         if (args.length == 0) {
             System.out.println("No output path provided. Exiting.");
@@ -33,9 +38,6 @@ public class ExportApplication {
         }
 
         String outputFilePath = args[0];
-        if (outputFilePath == null || outputFilePath.isBlank()) {
-            outputFilePath = "./export.json"; // fallback
-        }
 
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
@@ -52,14 +54,14 @@ public class ExportApplication {
                         .collect(Collectors.toSet())
         );
 
-        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-
         Path filePath = Paths.get(outputFilePath);
         if (filePath.getParent() != null && !Files.exists(filePath.getParent())) {
             Files.createDirectories(filePath.getParent());
         }
 
-        writer.writeValue(filePath.toFile(), exportModel);
+        mapper.writerWithDefaultPrettyPrinter()
+                .writeValue(filePath.toFile(), exportModel);
+
         System.out.println("Export saved to: " + filePath.toAbsolutePath());
     }
 }
