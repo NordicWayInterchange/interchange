@@ -51,7 +51,7 @@ services:
       - singletest
 
   a-qpid:
-    image: ghcr.io/nordicwayinterchange/qpid:${IMAGE_TAG}
+    image: apache/qpid-broker-j:10.0.1-alpine
     ports:
       - 8666:8080
       - 443
