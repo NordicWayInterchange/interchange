@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
         customSynopsis = {
                 """ 
                         Examples: \n
-                        serviceproviderclient privatechannels listen -i 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 -d directory \n
+                        serviceproviderclient privatechannels listen -d directory 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
                         # -d is optional
                         """
         })
@@ -32,7 +32,7 @@ public class Listen implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
-    @CommandLine.Option(names = {"-i", "--id"}, required = true, description = "The private channel id")
+    @CommandLine.Parameters(index = "0")
     String id;
 
     private final CountDownLatch counter = new CountDownLatch(1);
