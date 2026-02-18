@@ -32,7 +32,7 @@ public class Listen implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
-    @CommandLine.Parameters(index = "0")
+    @CommandLine.Parameters(index = "0", description = "The ID of the private channel to listen to")
     String id;
 
     private final CountDownLatch counter = new CountDownLatch(1);

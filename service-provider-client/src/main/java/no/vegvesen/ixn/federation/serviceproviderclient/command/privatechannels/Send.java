@@ -11,6 +11,7 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -34,10 +35,10 @@ public class Send implements Callable<Integer> {
     @CommandLine.ParentCommand
     PrivateChannelsCommand parentCommand;
 
-    @CommandLine.Option(names = {"-m", "--message"}, description = "The message body", required = true)
-    String messageFileName;
+    @CommandLine.Option(names = {"-m", "--message"}, description = "Json file containing the message properties and body", required = true)
+    File messageFile;
 
-    @CommandLine.Parameters(index = "0")
+    @CommandLine.Parameters(index = "0", description = "The ID of the private channel to send a message to")
     String privateChannelId;
 
 
@@ -75,7 +76,7 @@ public class Send implements Callable<Integer> {
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
             source.start();
 
-            PrivateTextMessages privateTextMessages = mapper.readValue(Path.of(messageFileName).toFile(), PrivateTextMessages.class);
+            PrivateTextMessages privateTextMessages = mapper.readValue(messageFile, PrivateTextMessages.class);
 
             for (PrivateTextMessage message : privateTextMessages.privateTextMessages()) {
                 JmsMessage textMessage = source.createTextMessage(message.messageText());
