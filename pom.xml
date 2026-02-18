@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.33-SNAPSHOT</version>
+    <version>1.0.34-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -88,7 +88,7 @@
         <spring-boot-dependencies.version>3.5.3</spring-boot-dependencies.version>
         <picocli-version>4.7.7</picocli-version>
         <qpid-jms-client.version>2.7.0</qpid-jms-client.version>
-        <testcontainers.version>1.21.2</testcontainers.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
         <dnsjava.version>3.6.3</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
         <bouncycastle.version>1.81</bouncycastle.version>
@@ -149,12 +149,12 @@
 
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>postgresql</artifactId>
+                <artifactId>testcontainers-postgresql</artifactId>
                 <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>junit-jupiter</artifactId>
+                <artifactId>testcontainers-junit-jupiter</artifactId>
                 <version>${testcontainers.version}</version>
             </dependency>
             <dependency>

@@ -15,9 +15,8 @@ services:
         aliases:
           - dns.lookupdomain.com
 
-  a_db:
-    image: postgres:15.1
-    container_name: a_db
+  a-db:
+    image: postgres:18.1
     depends_on:
       - mock-dns-server
     ports:
@@ -29,17 +28,16 @@ services:
     networks:
     - singletest
 
-  a_onboard_server:
+  a-onboard-server:
     image: ghcr.io/nordicwayinterchange/onboard-server-app:${IMAGE_TAG}
-    container_name: a_onboard_server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 32666:8797
     volumes:
     - "../keys/a:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
@@ -52,46 +50,39 @@ services:
     networks:
       - singletest
 
-  a_qpid:
-    image: ghcr.io/nordicwayinterchange/qpid:${IMAGE_TAG}
-    container_name: a_qpid
+  a-qpid:
+    image: apache/qpid-broker-j:10.0.1-alpine
     ports:
       - 8666:8080
       - 443
       - 6003:5671
       - 5672
     volumes:
-      - "../qpid/a/config:/config"
+      - "../qpid/a/config:/qpid-broker-j/work-override"
       - "../keys/a:/keys"
-      - "../qpid/a/messages:/work/a/messages"
     environment:
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.qpid.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
-      - INTERNAL_KEY_STORE=/keys/a_qpid.p12
+      - INTERNAL_KEY_STORE=/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
-      - VHOST_FILE=/work/default/config/default.json
-      - STATIC_VHOST_FILE=/config/vhost.json
-      - GROUPS_FILE=/work/default/config/groups
-      - STATIC_GROUPS_FILE=/config/groups
-      - PASSWD_FILE=/config/passwd
+      - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
     - mock-dns-server
     networks:
     - singletest
 
-  a_neighbour_server:
+  a-neighbour-server:
     image: ghcr.io/nordicwayinterchange/neighbour-server-app:${IMAGE_TAG}
-    container_name: a_neighbour_server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 8090
     volumes:
       - "../keys/a:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
@@ -105,20 +96,19 @@ services:
     - singletest
     dns: 172.28.1.1
 
-  a_routing_configurer:
+  a-routing-configurer:
     image: ghcr.io/nordicwayinterchange/routing-configurer-app:${IMAGE_TAG}
-    container_name: a_routing_configurer
     depends_on:
-      - a_db
+      - a-db
     links:
-      - "a_qpid:a.interchangedomain.com"
+      - "a-qpid:a.interchangedomain.com"
     volumes:
       - "../keys/a:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a_qpid
+      - BASE_URL=https://a-qpid
       - SERVER_NAME=a.interchangedomain.com
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
@@ -128,15 +118,14 @@ services:
     networks:
     - singletest
 
-  a_neighbour_discoverer:
+  a-neighbour-discoverer:
     image: ghcr.io/nordicwayinterchange/neighbour-discoverer-app:${IMAGE_TAG}
-    container_name: a_neighbour_discoverer
     depends_on:
-      - a_db
+      - a-db
     volumes:
       - "../keys/a:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
@@ -151,17 +140,16 @@ services:
     networks:
     - singletest
 
-  a_message_collector_app:
+  a-message-collector-app:
     image: ghcr.io/nordicwayinterchange/message-collector-app:${IMAGE_TAG}
-    container_name: a_message_collector_app
     depends_on:
-    - a_db
+    - a-db
     links:
-    - "a_qpid:a.qpid.interchangedomain.com"
+    - "a-qpid:a.qpid.interchangedomain.com"
     volumes:
     - "../keys/a:/keys"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
     - KEY_STORE=/keys/a.interchangedomain.com.p12
@@ -174,6 +162,66 @@ services:
     - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
     - singletest
+
+  a-napcore-server:
+    image: ghcr.io/nordicwayinterchange/napcore-server-app:${IMAGE_TAG}
+    depends_on:
+      - a-db
+    ports:
+      - 32777:8898
+    volumes:
+      - "../keys/a:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - NAP_NAME=nap.a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - NAP_CHNL_PORT=8898
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - singletest
+
+  a-napcore-frontend:
+    image: ghcr.io/nordicwayinterchange/napcore-frontend:${NAP_TAG}
+    ports:
+      - 3000:3000
+    volumes:
+      - ../keys/a/nap.a.interchangedomain.com.p12:/app/nap.a.interchangedomain.com.p12
+    environment:
+      - PFX_KEY_FILENAME=/nap.a.interchangedomain.com.p12
+      - PFX_PASSPHRASE=password
+      - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
+      - INTERCHANGE_PREFIX=a.interchangedomain.lookupdomain.
+      - NEXTAUTH_SECRET=supersecret
+      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
+      - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
+      - KEYCLOAK_REALM=a.interchangedomain.com
+      - KEYCLOAK_CLIENT_SECRET=anothersupersecret
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
+    networks:
+      - singletest
+
+  a-keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    ports:
+      - 8888:8080
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    volumes:
+      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+    command: ["start-dev", "--import-realm"]
+    networks:
+      - singletest
 
 networks:
   singletest:

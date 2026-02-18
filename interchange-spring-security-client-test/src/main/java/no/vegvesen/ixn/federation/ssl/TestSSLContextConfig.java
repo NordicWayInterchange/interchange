@@ -26,8 +26,8 @@ public class TestSSLContextConfig {
 	@Bean
 	public SSLContext getTestSslContext() {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
-				new KeystoreDetails(properties.getKeyStoreRuntimeFileName(), properties.getKeystorePassword(), KeystoreType.valueOf(properties.getKeystoreType())),
-				new KeystoreDetails(properties.getTrustStoreRuntimeFileName(), properties.getTruststorePassword(), KeystoreType.valueOf(properties.getTruststoreType())));
+				new KeystoreDetails(properties.getKeyStore(), properties.getKeystorePassword(), KeystoreType.valueOf(properties.getKeystoreType())),
+				new KeystoreDetails(properties.getTrustStore(), properties.getTruststorePassword(), KeystoreType.valueOf(properties.getTruststoreType())));
 	}
 
 }
