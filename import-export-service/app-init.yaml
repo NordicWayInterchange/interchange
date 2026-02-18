@@ -1,12 +1,19 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: db-export-job
+  name: app-init
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-init
   template:
+    metadata:
+      labels:
+        app: app-init
     spec:
       containers:
-        - name: import-export
+        - name: app
           image: import-export-service:latest
           imagePullPolicy: IfNotPresent
           env:
@@ -16,13 +23,5 @@ spec:
               value: federation
             - name: SPRING_DATASOURCE_PASSWORD
               value: federation
-          args: [ "export", "/backup/db-backup.json" ]
-          volumeMounts:
-            - name: db-backup
-              mountPath: /backup
-      restartPolicy: Never
-      volumes:
-        - name: db-backup
-          persistentVolumeClaim:
-            claimName: db-backup-pvc-2
-  backoffLimit: 4
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
