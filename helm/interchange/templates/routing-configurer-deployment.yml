@@ -30,9 +30,9 @@ spec:
             - name: POSTGRES_URI
               value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres_user }}
+              value: {{ .Values.postgres_user | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgres_password }}
+              value: {{ .Values.postgres_password | quote }}
             - name: BASE_URL
               value: https://{{ .Release.Name }}-qpid-http
             - name: SERVER_NAME
