@@ -29,12 +29,13 @@ data:
         {
           "name": "plain",
           "type": "Plain",
-          "secureOnlyMechanisms": [ ],
-          "users": [ {
-            "name": "{{ .Values.qpid.admin_user }}",
-            "type": "managed",
-            "password": "{{ .Values.admin_password }}"
-          } ]
+          "secureOnlyMechanisms": [],
+          "users": [
+            {
+              "name": "{{ .Values.qpid.admin_user }}",
+              "type": "managed",
+              "password": "{{ .Values.admin_password }}"
+            }]
         }
       ],
       "brokerloggers": [
@@ -42,12 +43,13 @@ data:
           "name": "console",
           "type": "Console",
           "lastUpdatedBy": "admin",
-          "brokerloginclusionrules": [ {
-            "name": "rootInclude",
-            "type": "NameAndLevel",
-            "durable": true,
-            "level": "INFO"
-          } ]
+          "brokerloginclusionrules": [
+            {
+              "name": "rootInclude",
+              "type": "NameAndLevel",
+              "durable": true,
+              "level": "INFO"
+            }]
         }
       ],
       "keystores": [
@@ -76,7 +78,8 @@ data:
           "type": "AMQP",
           "authenticationProvider": "plain",
           "port": "5672",
-          "protocols": [ "AMQP_1_0" ],
+          "protocols": [
+            "AMQP_1_0"],
           "virtualhostaliases": [
             {
               "name": "defaultAlias",
@@ -100,12 +103,14 @@ data:
           "keyStore": "default",
           "needClientAuth": true,
           "port": "5671",
-          "protocols": [ "AMQP_1_0" ],
+          "protocols": [
+            "AMQP_1_0"],
           "transports": [
             "SSL",
             "TCP"
           ],
-          "trustStores": [ "default" ],
+          "trustStores": [
+            "default"],
           "wantClientAuth": false,
           "virtualhostaliases": [
             {
@@ -126,7 +131,8 @@ data:
           "name": "HTTP",
           "port": "8080",
           "authenticationProvider": "plain",
-          "protocols": [ "HTTP" ]
+          "protocols": [
+            "HTTP"]
         },
         {
           "name": "HTTPS",
@@ -134,7 +140,8 @@ data:
           "authenticationProvider": "clientCerts",
           "bindingAddress": "*",
           "port": "443",
-          "trustStores": [ "default" ],
+          "trustStores": [
+            "default"],
           "keyStore": "internal",
           "needClientAuth": true,
           "wantClientAuth": false,
@@ -162,11 +169,12 @@ data:
           "virtualHostInitialConfiguration": "file:///qpid-broker-j/work/default.json"
         }
       ],
-      "groupproviders": [ {
-        "name": "default",
-        "type": "GroupFile",
-        "path": "${GROUPS_FILE}"
-      } ]
+      "groupproviders": [
+        {
+          "name": "default",
+          "type": "GroupFile",
+          "path": "${GROUPS_FILE}"
+        }]
     }
 
 
@@ -175,7 +183,7 @@ data:
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
       "modelVersion": "9.0",
-      "exchanges": [ ],
+      "exchanges": [],
       "queues": [
         {
           "id": "0EF5AA55-E3A8-4DD6-A394-46E1F6AED77A",
