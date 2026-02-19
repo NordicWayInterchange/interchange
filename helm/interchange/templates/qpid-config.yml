@@ -166,7 +166,7 @@ data:
           "name": "default",
           "type": "JSON",
           "defaultVirtualHostNode": "true",
-          "virtualHostInitialConfiguration": "file:///qpid-broker-j/work/default.json"
+          "virtualHostInitialConfiguration":"file:///qpid-broker-j/work/default.json"
         }
       ],
       "groupproviders": [
