@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -29,12 +30,13 @@ public class ImportExportApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (args.length == 0) {
-            // Just start normally (used for DB initialization)
-            return;
+            System.out.println("usage ...");
+            System.exit(1);
         }
         if (args[0].equals("import")) {
             if (args.length != 2) {
-                throw new IllegalArgumentException("usage: import <file>");
+                System.out.println("usage ...");
+                System.exit(2);
             }
             ImportApplication importApplication = new ImportApplication(
                     neighbourRepository,
@@ -42,8 +44,6 @@ public class ImportExportApplication implements CommandLineRunner {
                     privateChannelRepository
             );
             importApplication.run(Paths.get(args[1]));
-
-            System.exit(0);
         } else if (args[0].equals("export")) {
             ExportApplication exportApplication = new ExportApplication(
                     neighbourRepository,
@@ -51,8 +51,6 @@ public class ImportExportApplication implements CommandLineRunner {
                     privateChannelRepository
             );
             exportApplication.run();
-
-            System.exit(0);
         }
     }
 }

@@ -5,10 +5,13 @@ metadata:
 spec:
   template:
     spec:
+      restartPolicy: Never
       containers:
         - name: import-export
           image: import-export-service:v2
           imagePullPolicy: IfNotPresent
+          args:
+            - "export"
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-db:5432/federation
@@ -16,12 +19,9 @@ spec:
               value: federation
             - name: SPRING_DATASOURCE_PASSWORD
               value: federation
-          args:
-            - "/backup/db-backup.json"
           volumeMounts:
             - name: db-backup
               mountPath: /backup
-      restartPolicy: Never
       volumes:
         - name: db-backup
           persistentVolumeClaim:
