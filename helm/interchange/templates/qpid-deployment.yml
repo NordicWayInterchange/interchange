@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
+        checksum/config:{{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
       labels:
         app: {{ .Chart.Name }}
         component: qpid
@@ -61,10 +61,6 @@ spec:
             - name: QPID_JAVA_MEM
               value: {{ .Values.qpid.java_mem }}
         {{- end }}
-        {{- if .Values.qpid.memorydump.enabled }}
-            - name: JAVA_OPTS
-              value: -XX:HeapDumpPath=/work/memorydump/
-        {{- end }}
           volumeMounts:
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}
@@ -74,11 +70,6 @@ spec:
               mountPath: /qpid-broker-j/work
             - name: config
               mountPath: /qpid-broker-j/work-override
-            #{#{- if .Values.qpid.memorydump.enabled }}
-            #- name: storage
-            #  mountPath: /work/memorydump
-            # subPath: memorydump
-          #{#{- end }}
           readinessProbe:
             initialDelaySeconds: 5
             tcpSocket:
@@ -98,5 +89,5 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-qpid
       {{- else }}
-          emptyDir: { }
+          emptyDir: {}
       {{- end }}
