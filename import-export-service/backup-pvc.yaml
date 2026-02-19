@@ -1,12 +1,10 @@
-# pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: db-backup-pvc-2
+  name: db-backup-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
-  storageClassName: hostpath
+      storage: 5Gi

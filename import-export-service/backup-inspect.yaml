@@ -1,8 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pvc-inspector
+  name: backup-inspect
 spec:
+  restartPolicy: Never
   containers:
     - name: inspector
       image: busybox
@@ -14,4 +15,3 @@ spec:
     - name: db-backup
       persistentVolumeClaim:
         claimName: db-backup-pvc-2
-  restartPolicy: Never
