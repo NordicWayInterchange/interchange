@@ -51,7 +51,7 @@ spec:
             - name: SIGN_STORE_PASSWORD
               value: {{ .Values.napcore_server_sign_store_password | quote }}
             - name: SIGN_STORE_ALIAS
-              value: {{ .Values.napcore_server.sign_store_alias }}
+              value: {{ .Values.napcore_server.sign_store_alias | quote }}
             - name: BROKER_EXTERNAL_NAME
               value: {{ .Values.broker_external_name }}
             - name: LOG_LEVELS
