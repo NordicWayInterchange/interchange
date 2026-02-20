@@ -59,6 +59,10 @@ public class Source implements AutoCloseable {
 		producer.send(message,  DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeToLive);
 	}
 
+	public JmsMessage createTextMessage(String messageBody) throws JMSException {
+		return (JmsMessage) session.createTextMessage(messageBody);
+	}
+
 	@Override
     public void close() {
 		if (session != null) {

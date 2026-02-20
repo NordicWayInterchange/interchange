@@ -59,6 +59,10 @@ public class ServiceProviderRouter {
         return repository.findAll();
     }
 
+    public List<ServiceProvider> findServiceProvidersAsList() {
+        return repository.findAll();
+    }
+
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();

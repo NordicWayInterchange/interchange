@@ -17,7 +17,7 @@ public class CapabilityValidator {
 
     private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z._:-]*");
 
-    private static Pattern countryCodeRegex = Pattern.compile("[A-Z]{2}");
+    private static final Set<String> ISO_COUNTRIES = Set.of(Locale.getISOCountries());
 
     private static Pattern publisherIdRegex = Pattern.compile("[A-Z]{2}[0-9]{5}");
 
@@ -84,8 +84,8 @@ public class CapabilityValidator {
                     }
                 }
                 case "originatingCountry" -> {
-                    Matcher countryCodeMatcher = countryCodeRegex.matcher(value);
-                    if (!countryCodeMatcher.matches()) {
+                    boolean isValidCountryCode = ISO_COUNTRIES.contains(value);
+                    if (!isValidCountryCode) {
                         errorList.add(String.format("'%s' is not a valid country code", value));
                     }
                 }

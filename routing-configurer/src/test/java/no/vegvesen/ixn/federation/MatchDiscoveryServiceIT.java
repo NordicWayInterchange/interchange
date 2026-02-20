@@ -1,15 +1,18 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,18 +20,20 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@EnableAutoConfiguration
+@EnableJpaRepositories(basePackages = {"no.vegvesen.ixn.federation.repository","no.vegvesen.ixn.federation.model"})
+@SpringBootTest(classes = {ServiceProviderRepository.class,NeighbourRepository.class, MatchRepository.class, MatchDiscoveryService.class})
 @Transactional
 public class MatchDiscoveryServiceIT extends PostgresContainerBase {
-
-    @Autowired
-    private MatchRepository matchRepository;
 
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
     private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
 
     @Autowired
     private MatchDiscoveryService matchDiscoveryService;
@@ -161,5 +166,6 @@ public class MatchDiscoveryServiceIT extends PostgresContainerBase {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.singletonList(serviceProvider), Collections.singletonList(neighbour));
         assertThat(matchRepository.findAll()).hasSize(0);
     }
+
 
 }

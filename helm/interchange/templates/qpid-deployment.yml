@@ -25,6 +25,11 @@ spec:
         component: qpid
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 0
+        fsGroup: 0
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
       - name: qpid
         image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag}}"
@@ -46,16 +51,8 @@ spec:
           value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
         - name: TRUST_STORE_PASSWORD
           value: {{ .Values.trust_store_password | quote }}
-        - name: VHOST_FILE
-          value: /work/default/config/default.json
-        - name: STATIC_VHOST_FILE
-          value: /config/default.json
         - name: GROUPS_FILE
-          value: /work/default/config/groups
-        - name: STATIC_GROUPS_FILE
-          value: /config/groups
-        - name: PASSWD_FILE
-          value: /config/passwd
+          value: /qpid-broker-j/work/groups
         - name: INTERNAL_KEY_STORE
           value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
         - name: INTERNAL_KEY_STORE_PASSWORD
@@ -69,23 +66,19 @@ spec:
           value: -XX:HeapDumpPath=/work/memorydump/
         {{- end }}
         volumeMounts:
-        - name: config
-          mountPath: /config
         - name: secure
           mountPath: {{ .Values.self.secret_mount_path | quote }}
         - name: internal-keys
           mountPath: {{ .Values.qpid.internal_keys_path | quote }}
         - name: storage
-          mountPath: /work/default
-          subPath: default
-        - name: storage
-          mountPath: /work/{{ required "must provide .Values.external_name" .Values.external_name }}
-          subPath: {{ required "must provide .Values.external_name" .Values.external_name }}
-        {{- if .Values.qpid.memorydump.enabled }}
-        - name: storage
-          mountPath: /work/memorydump
-          subPath: memorydump
-        {{- end }}
+          mountPath: /qpid-broker-j/work
+        - name: config
+          mountPath: /qpid-broker-j/work-override
+        #{#{- if .Values.qpid.memorydump.enabled }}
+        #- name: storage
+        #  mountPath: /work/memorydump
+         # subPath: memorydump
+        #{#{- end }}
         readinessProbe:
           initialDelaySeconds: 5
           tcpSocket:

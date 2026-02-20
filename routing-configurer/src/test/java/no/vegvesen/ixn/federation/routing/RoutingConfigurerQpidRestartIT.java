@@ -2,7 +2,6 @@ package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
-import no.vegvesen.ixn.federation.TestSSLContextConfigGeneratedExternalKeys;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
@@ -13,7 +12,11 @@ import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
+import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfigGeneratedExternalKeys.class, TestSSLProperties.class, RoutingConfigurer.class})
+@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, MatchDiscoveryService.class, OutgoingMatchDiscoveryService.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, RoutingConfigurer.class})
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
@@ -86,6 +89,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     @MockitoBean
     NeighbourService neighbourService;
 
+    @MockitoBean
+    MatchDiscoveryService matchDiscoveryService;
+
     @Autowired
     RoutingConfigurer routingConfigurer;
 
@@ -97,6 +103,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     @MockitoBean
     ServiceProviderRouter serviceProviderRouter;
+
+    @MockitoBean
+    OutgoingMatchRepository outgoingMatchRepository;
 
     @MockitoBean
     InterchangeNodeProperties properties;

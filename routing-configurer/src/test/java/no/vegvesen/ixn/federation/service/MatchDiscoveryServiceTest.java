@@ -218,4 +218,5 @@ public class MatchDiscoveryServiceTest {
         verify(matchRepository,times(0)).findAllBySubscriptionId(any());
         verify(matchRepository,times(0)).save(any(Match.class));
     }
+
 }

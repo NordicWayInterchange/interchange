@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = {
         QpidClient.class,
         QpidClientConfig.class,
-        TestSSLContextConfigGeneratedExternalKeys.class,
+        TestSSLContextConfig.class,
         TestSSLProperties.class,
         RoutingConfigurerProperties.class,
         InterchangeNodeProperties.class,
