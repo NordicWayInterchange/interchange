@@ -34,7 +34,7 @@ data:
             {
               "name": "{{ .Values.qpid.admin_user }}",
               "type": "managed",
-              "password": "{{ .Values.admin_password }}"
+              "password": "{{ .Values.admin_password | trim }}"
             }]
         }
       ],
