@@ -14,4 +14,4 @@ spec:
   volumes:
     - name: db-backup
       persistentVolumeClaim:
-        claimName: db-backup-pvc-2
+        claimName: db-backup-pvc

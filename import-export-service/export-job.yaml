@@ -3,15 +3,29 @@ kind: Job
 metadata:
   name: db-export-job
 spec:
+  backoffLimit: 4
   template:
     spec:
       restartPolicy: Never
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Postgres to be ready..."
+              until nc -z postgres-db 5432; do
+                echo "Postgres not ready yet. Sleeping 2s..."
+                sleep 2
+              done
+              echo "Postgres is ready!"
       containers:
         - name: import-export
           image: import-export-service:v2
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:
-            - "export"
+            - "/backup/export.json"
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-db:5432/federation
@@ -26,4 +40,3 @@ spec:
         - name: db-backup
           persistentVolumeClaim:
             claimName: db-backup-pvc
-  backoffLimit: 4
