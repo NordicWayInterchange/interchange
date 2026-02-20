@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config:{{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/qpid-config.yml") . | sha256sum }}
       labels:
         app: {{ .Chart.Name }}
         component: qpid
