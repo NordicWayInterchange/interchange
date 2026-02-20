@@ -56,6 +56,10 @@ public class ServiceProviderRouter {
         return repository.findAll();
     }
 
+    public List<ServiceProvider> findServiceProvidersAsList() {
+        return repository.findAll();
+    }
+
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
@@ -442,10 +446,10 @@ public class ServiceProviderRouter {
                                     qpidClient.addReadAccess(serviceProvider.getName(),createdDlq.getName());
                                     delta.addQueue(createdDlq);
                                 }
-                                exchange = qpidClient.createDirectExchangeWithDlq(exchangeName, endpoint.getDlqName());
+                                exchange = qpidClient.createHeadersExchangeWithDlq(exchangeName, endpoint.getDlqName());
                                 logger.info("Created direct exchange {} with dlqueue {}", exchangeName, endpoint.getDlqName());
                             } else {
-                                exchange = qpidClient.createDirectExchange(exchangeName);
+                                exchange = qpidClient.createHeadersExchange(exchangeName);
                                 logger.info("Created exchange {}", exchangeName);
                             }
                             qpidClient.addWriteAccess(serviceProvider.getName(), exchangeName);

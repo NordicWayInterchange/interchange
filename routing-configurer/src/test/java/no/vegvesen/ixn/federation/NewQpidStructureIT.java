@@ -63,7 +63,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
     @Test
     public void directExchangeToOutputQueuePOC() throws Exception {
         String exchangeName = "inputExchange";
-        qpidClient.createDirectExchange(exchangeName);
+        qpidClient.createHeadersExchange(exchangeName);
         String queueName = "outputQueue";
         qpidClient.createQueue(queueName);
 
@@ -168,7 +168,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(inQueueName);
+        qpidClient.createHeadersExchange(inQueueName);
         qpidClient.addWriteAccess("king_gustaf", inQueueName);
 
         qpidClient.createQueue(outQueueName);
@@ -312,7 +312,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createQueue(subscriptionQueue);
@@ -401,7 +401,7 @@ public class NewQpidStructureIT extends QpidDockerBaseIT {
                 false
         );
 
-        qpidClient.createDirectExchange(deliveryExchange);
+        qpidClient.createHeadersExchange(deliveryExchange);
         qpidClient.addWriteAccess("king_gustaf", deliveryExchange);
 
         qpidClient.createHeadersExchange(capabilityExchange);
