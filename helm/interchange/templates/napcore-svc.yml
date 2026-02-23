@@ -21,6 +21,6 @@ spec:
     component: napcore-server
     release: {{ .Release.Name }}
   ports:
-  - name: napcore
-    port: {{ .Values.self.nap_provider_port }}
+    - name: napcore
+      port: {{ .Values.self.nap_provider_port }}
 {{- end }}

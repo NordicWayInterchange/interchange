@@ -18,5 +18,5 @@ spec:
     component: neighbour-server
     release: {{ .Release.Name }}
   ports:
-  - name: https-control
-    port: {{ .Values.self.control_channel_port }}
+    - name: https-control
+      port: {{ .Values.self.control_channel_port }}

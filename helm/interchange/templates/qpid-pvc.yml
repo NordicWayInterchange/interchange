@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: {{ .Values.qpid.persistence.size | quote }}

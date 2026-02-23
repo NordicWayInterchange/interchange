@@ -31,72 +31,63 @@ spec:
         fsGroup: 0
         fsGroupChangePolicy: "OnRootMismatch"
       containers:
-      - name: qpid
-        image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag}}"
-        ports:
-        - name: amqp
-          containerPort: 5672
-        - name: amqps
-          containerPort: 5671
-        - name: http-qpid-gui
-          containerPort: 8080
-        - name: https-qpid-rest
-          containerPort: 443
-        env:
-        - name: KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}key_store.p12
-        - name: KEY_STORE_PASSWORD
-          value: {{ .Values.key_store_password | quote }}
-        - name: TRUST_STORE
-          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
-        - name: TRUST_STORE_PASSWORD
-          value: {{ .Values.trust_store_password | quote }}
-        - name: GROUPS_FILE
-          value: /qpid-broker-j/work/groups
-        - name: INTERNAL_KEY_STORE
-          value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
-        - name: INTERNAL_KEY_STORE_PASSWORD
-          value: {{ .Values.internal_key_store_password | quote }}
+        - name: qpid
+          image: "{{ .Values.qpid.image.repository }}:{{ .Values.qpid.image.tag}}"
+          ports:
+            - name: amqp
+              containerPort: 5672
+            - name: amqps
+              containerPort: 5671
+            - name: http-qpid-gui
+              containerPort: 8080
+            - name: https-qpid-rest
+              containerPort: 443
+          env:
+            - name: KEY_STORE
+              value: {{ .Values.self.secret_mount_path }}key_store.p12
+            - name: KEY_STORE_PASSWORD
+              value: {{ .Values.key_store_password | quote }}
+            - name: TRUST_STORE
+              value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
+            - name: TRUST_STORE_PASSWORD
+              value: {{ .Values.trust_store_password | quote }}
+            - name: GROUPS_FILE
+              value: /qpid-broker-j/work/groups
+            - name: INTERNAL_KEY_STORE
+              value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
+            - name: INTERNAL_KEY_STORE_PASSWORD
+              value: {{ .Values.internal_key_store_password | quote }}
         {{- if .Values.qpid.java_mem }}
-        - name: QPID_JAVA_MEM
-          value: {{ .Values.qpid.java_mem }}
+            - name: QPID_JAVA_MEM
+              value: {{ .Values.qpid.java_mem }}
         {{- end }}
-        {{- if .Values.qpid.memorydump.enabled }}
-        - name: JAVA_OPTS
-          value: -XX:HeapDumpPath=/work/memorydump/
-        {{- end }}
-        volumeMounts:
-        - name: secure
-          mountPath: {{ .Values.self.secret_mount_path | quote }}
-        - name: internal-keys
-          mountPath: {{ .Values.qpid.internal_keys_path | quote }}
-        - name: storage
-          mountPath: /qpid-broker-j/work
-        - name: config
-          mountPath: /qpid-broker-j/work-override
-        #{#{- if .Values.qpid.memorydump.enabled }}
-        #- name: storage
-        #  mountPath: /work/memorydump
-         # subPath: memorydump
-        #{#{- end }}
-        readinessProbe:
-          initialDelaySeconds: 5
-          tcpSocket:
-            port: amqps
+          volumeMounts:
+            - name: secure
+              mountPath: {{ .Values.self.secret_mount_path | quote }}
+            - name: internal-keys
+              mountPath: {{ .Values.qpid.internal_keys_path | quote }}
+            - name: storage
+              mountPath: /qpid-broker-j/work
+            - name: config
+              mountPath: /qpid-broker-j/work-override
+          readinessProbe:
+            initialDelaySeconds: 5
+            tcpSocket:
+              port: amqps
       volumes:
-      - name: config
-        configMap:
-          name: {{ .Release.Name }}-qpid
-      - name: secure
-        secret:
-          secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
-      - name: internal-keys
-        secret:
-          secretName: {{ required "must provide .Values.qpid.internal_secrets_name" .Values.qpid.internal_secrets_name }}
-      - name: storage
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-qpid
+        - name: secure
+          secret:
+            secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+        - name: internal-keys
+          secret:
+            secretName: {{ required "must provide .Values.qpid.internal_secrets_name" .Values.qpid.internal_secrets_name }}
+        - name: storage
       {{- if .Values.qpid.persistence.enabled }}
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-qpid
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-qpid
       {{- else }}
-        emptyDir: {}
+          emptyDir: {}
       {{- end }}

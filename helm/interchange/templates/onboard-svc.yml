@@ -17,5 +17,5 @@ spec:
     component: onboard-server
     release: {{ .Release.Name }}
   ports:
-  - name: onboard
-    port: {{ .Values.self.service_provider_port }}
+    - name: onboard
+      port: {{ .Values.self.service_provider_port }}
