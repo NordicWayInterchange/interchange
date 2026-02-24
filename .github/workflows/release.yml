@@ -107,8 +107,9 @@ jobs:
       - name: Persist to workspace
         uses: actions/upload-artifact@v4
         with:
-          name: interchange
+          name: interchange-${{ env.CURRENT_VERSION }}-${{ github.job }}
           path: ./
+          if-no-files-found: warn
 
   docker-push-svv:
     runs-on: ubuntu-latest
