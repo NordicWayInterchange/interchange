@@ -67,7 +67,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       # ------------------------
-      # NODE SETUP
+      # NODE SETUP AND FRONTEND TESTS
       # ------------------------
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -83,24 +83,6 @@ jobs:
       - name: Run frontend tests
         working-directory: ./frontend
         run: npm test -- --watchAll=false
-
-      # ------------------------
-      # BUILD FRONTEND
-      # ------------------------
-      - name: Build frontend
-        if: matrix.node-version == '20.x'
-        working-directory: ./frontend
-        run: npm run build
-
-      # Copy frontend into Spring Boot static resources
-      - name: Copy frontend build into backend
-        if: matrix.node-version == '20.x'
-        run: |
-          ls -la frontend
-          ls -la frontend/build
-          rm -rf src/main/resources/static/*
-          mkdir -p src/main/resources/static
-          cp -r frontend/build/* src/main/resources/static/
 
       - name: Build with Maven and run integration tests
         run: mvn -B verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
