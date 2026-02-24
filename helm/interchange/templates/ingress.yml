@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-interchange-ingress
-  #namespace?
+  # namespace?
   {{- if or .Values.napcore_frontend.certmanager_enabled .Values.admin_frontend.certmanager_enabled }}
   annotations:
     cert-manager.io/issuer: letsencrypt-prod
@@ -39,12 +39,12 @@ spec:
   tls:
     {{- if and .Values.napcore_frontend.enabled .Values.napcore_frontend.certmanager_enabled }}
     - hosts:
-      - portal.{{ .Values.external_name }}
+        - portal.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-portal-cert
     {{- end}}
     {{- if and .Values.admin_frontend.enabled .Values.admin_frontend.certmanager_enabled }}
     - hosts:
-      - admin.{{ .Values.external_name }}
+        - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-admin-cert
     {{- end}}
   {{- end }}
