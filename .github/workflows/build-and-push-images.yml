@@ -96,6 +96,8 @@ jobs:
       - name: Copy frontend build into backend
         if: matrix.node-version == '20.x'
         run: |
+          ls -la frontend
+          ls -la frontend/build
           rm -rf src/main/resources/static/*
           mkdir -p src/main/resources/static
           cp -r frontend/build/* src/main/resources/static/
