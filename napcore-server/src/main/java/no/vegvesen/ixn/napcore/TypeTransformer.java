@@ -59,6 +59,7 @@ public class TypeTransformer {
                         )
                 ),
                 delivery.getSelector(),
+                LocalDeliveryStatus.REQUESTED,
                 delivery.getDescription(),
                 dlqueue
         );
