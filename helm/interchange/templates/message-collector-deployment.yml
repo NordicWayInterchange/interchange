@@ -22,43 +22,43 @@ spec:
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: message-collector
-        image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
-        env:
-        - name: BROKER_EXTERNAL_NAME
-          value: {{ .Values.broker_external_name }}
-        - name: PREFETCH
-          value: {{ .Values.message_collector.prefetch | quote }}
-        - name: POSTGRES_URI
-          value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
-        - name: POSTGRES_PASSWORD
-          value: {{ .Values.postgres_password }}
-        - name: POSTGRES_USER
-          value: {{ .Values.postgres_user }}
-        - name: KEY_STORE
-          value: {{ .Values.self.secret_mount_path }}key_store.p12
-        - name: KEY_STORE_PASSWORD
-          value: {{ .Values.key_store_password | quote }}
-        - name: KEY_STORE_TYPE
-          value: {{ .Values.message_collector.key_store_type | quote }}
-        - name: DOMAIN_NAME
-          value: {{ .Values.self.domain_name | quote }}
-        - name: TRUST_STORE
-          value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
-        - name: TRUST_STORE_PASSWORD
-          value: {{ .Values.trust_store_password | quote }}
-        - name: TRUST_STORE_TYPE
-          value: {{ .Values.message_collector.trust_store_type | quote }}
-        - name: SERVER_NAME
-          value: {{ .Values.external_name | quote }}
-        - name: LOG_LEVELS
-          value: "{{- range .Values.message_collector.logging -}}
+        - name: message-collector
+          image: "{{ .Values.message_collector.image.repository }}:{{ .Values.message_collector.image.tag }}"
+          env:
+            - name: BROKER_EXTERNAL_NAME
+              value: {{ .Values.broker_external_name }}
+            - name: PREFETCH
+              value: {{ .Values.message_collector.prefetch | quote }}
+            - name: POSTGRES_URI
+              value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres_password | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres_user | quote }}
+            - name: KEY_STORE
+              value: {{ .Values.self.secret_mount_path }}key_store.p12
+            - name: KEY_STORE_PASSWORD
+              value: {{ .Values.key_store_password | quote }}
+            - name: KEY_STORE_TYPE
+              value: {{ .Values.message_collector.key_store_type | quote }}
+            - name: DOMAIN_NAME
+              value: {{ .Values.self.domain_name | quote }}
+            - name: TRUST_STORE
+              value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
+            - name: TRUST_STORE_PASSWORD
+              value: {{ .Values.trust_store_password | quote }}
+            - name: TRUST_STORE_TYPE
+              value: {{ .Values.message_collector.trust_store_type | quote }}
+            - name: SERVER_NAME
+              value: {{ .Values.external_name | quote }}
+            - name: LOG_LEVELS
+              value: "{{- range .Values.message_collector.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                   {{- end }}"
-        volumeMounts:
-        - name: secure
-          mountPath: {{ .Values.self.secret_mount_path | quote }}
+          volumeMounts:
+            - name: secure
+              mountPath: {{ .Values.self.secret_mount_path | quote }}
       volumes:
-      - name: secure
-        secret:
-          secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+        - name: secure
+          secret:
+            secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}

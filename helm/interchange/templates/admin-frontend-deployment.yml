@@ -29,21 +29,21 @@ spec:
             - name: PFX_KEY_FILENAME
               value: {{ .Values.admin_frontend.keystore_file_name }}
             - name: PFX_PASSPHRASE
-              value: {{ .Values.admin_keystore_password }}
+              value: {{ .Values.admin_keystore_password | quote }}
             - name: INTERCHANGE_URI
               value: "https://{{ .Release.Name }}-admin-server:{{ .Values.self.admin_port }}/admin/"
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.admin_frontend.generated_username_prefix }}
             - name: NEXTAUTH_SECRET
-              value: {{ .Values.admin_nextauth_secret }}
+              value: {{ .Values.admin_nextauth_secret | quote }}
             - name: AUTH0_CLIENT_ID
-              value: {{ .Values.admin_auth0_client_id }}
+              value: {{ .Values.admin_auth0_client_id | quote }}
             - name: AUTH0_CLIENT_SECRET
-              value: {{ .Values.admin_auth0_client_secret }}
+              value: {{ .Values.admin_auth0_client_secret | quote }}
             - name: AUTH0_ISSUER
-              value: {{ .Values.admin_frontend.admin_auth0_issuer }}
+              value: {{ .Values.admin_frontend.admin_auth0_issuer | quote }}
             - name: NEXTAUTH_URL
-              value: {{ .Values.admin_frontend.home_url }}
+              value: {{ .Values.admin_frontend.home_url | quote }}
 
           volumeMounts:
             - mountPath: /app/secret

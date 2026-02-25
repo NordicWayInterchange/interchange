@@ -13,6 +13,6 @@ spec:
     component: database
     release: {{ .Release.Name }}
   ports:
-  - name: db
-    port: 5432
-    targetPort: db
+    - name: db
+      port: 5432
+      targetPort: db
