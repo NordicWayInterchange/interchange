@@ -50,8 +50,10 @@ public class LocalDeliveryService {
                             if (matchingCapabilities.isEmpty()) {
                                 delivery.setStatus(LocalDeliveryStatus.NO_OVERLAP);
                             }
+                            //TODO if we find matching capabilities, should they not be created? And should we not create the exchanges?
                         }
                     } else {
+                        //TODO this should be done when constructing the objects, surely?
                         if (delivery.getEndpoints().isEmpty()) {
                             String target = "del-" + UUID.randomUUID();
                             if (!delivery.isDlqueue()) {
@@ -66,6 +68,7 @@ public class LocalDeliveryService {
                                 ));
                             }
                         }
+                        //TODO we set the status to created, without creating exchanges in qpid...
                         delivery.setStatus(LocalDeliveryStatus.CREATED);
                         logger.info("Delivery with id {} is set to status CREATED", delivery.getId());
                     }
@@ -75,24 +78,7 @@ public class LocalDeliveryService {
         }
     }
 
-    public void removeTearDownIllegalAndErrorDeliveries(ServiceProvider serviceProvider) {
-        Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
-                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
-                        || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
-                        || d.getStatus().equals(LocalDeliveryStatus.ERROR))
-                .collect(Collectors.toSet());
-
-        for (LocalDelivery delivery : deliveriesToTearDown) {
-            List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
-            if (possibleMatches.isEmpty() && delivery.getEndpoints().isEmpty()) {
-                logger.info("Removing delivery with id {}", delivery.getId());
-                serviceProvider.getDeliveries().remove(delivery);
-            }
-        }
-        serviceProviderRepository.save(serviceProvider);
-    }
-
-    public ServiceProvider setUpDeliveryQueue(ServiceProvider serviceProvider, QpidDelta delta) {
+    public void setUpDeliveryQueue(ServiceProvider serviceProvider, QpidDelta delta) {
         if (serviceProvider.hasDeliveries()) {
             for (LocalDelivery delivery : serviceProvider.getDeliveries()) {
                 if (delivery.getStatus().equals(LocalDeliveryStatus.CREATED)) {
@@ -150,9 +136,25 @@ public class LocalDeliveryService {
                     }
                 }
             }
-            serviceProvider = serviceProviderRepository.save(serviceProvider);
+            serviceProviderRepository.save(serviceProvider);
         }
-        return serviceProvider;
+    }
+
+    public void removeTearDownIllegalAndErrorDeliveries(ServiceProvider serviceProvider) {
+        Set<LocalDelivery> deliveriesToTearDown = serviceProvider.getDeliveries().stream()
+                .filter(d -> d.getStatus().equals(LocalDeliveryStatus.TEAR_DOWN)
+                        || d.getStatus().equals(LocalDeliveryStatus.ILLEGAL)
+                        || d.getStatus().equals(LocalDeliveryStatus.ERROR))
+                .collect(Collectors.toSet());
+
+        for (LocalDelivery delivery : deliveriesToTearDown) {
+            List<OutgoingMatch> possibleMatches = outgoingMatchRepository.findAllByLocalDelivery_Id(delivery.getId());
+            if (possibleMatches.isEmpty() && delivery.getEndpoints().isEmpty()) {
+                logger.info("Removing delivery with id {}", delivery.getId());
+                serviceProvider.getDeliveries().remove(delivery);
+            }
+        }
+        serviceProviderRepository.save(serviceProvider);
     }
 
     public String joinTwoSelectors(String firstSelector, String secondSelector) {

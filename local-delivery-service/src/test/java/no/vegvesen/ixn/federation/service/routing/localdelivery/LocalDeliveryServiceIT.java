@@ -71,7 +71,6 @@ public class LocalDeliveryServiceIT {
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
-    //@Autowired
     private LocalDeliveryService localDeliveryService;
 
     private QpidClient qpidClient ;
@@ -91,9 +90,18 @@ public class LocalDeliveryServiceIT {
     public void createTargetAndConnectForServiceProvider() {
         String serviceProviderName = "my-service-provider";
         String deliveryExchangeName = "my-exchange5";
-        LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
-        delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName));
-        CapabilityShard shard = new CapabilityShard(1, "cap-ex1", "publicationId = 'pub-1'");
+        LocalDelivery delivery = new LocalDelivery(
+                UUID.randomUUID().toString(),
+                        Set.of(
+                                createLocalDeliveryEndpoint(deliveryExchangeName)
+                        ),
+                "originatingCountry = 'NO'",
+                LocalDeliveryStatus.CREATED,
+                "delivery",
+                false
+        );
+        String shardExchange= "cap-ex1";
+        qpidClient.createHeadersExchange(shardExchange);
         Capability denmCapability = new Capability(
                 new DenmApplication(
                         "NPRA",
@@ -104,27 +112,13 @@ public class LocalDeliveryServiceIT {
                         List.of(6)
                 ),
                 new Metadata(RedirectStatus.OPTIONAL),
-                Collections.singletonList(shard)
+                Collections.singletonList(new CapabilityShard(
+                        1,
+                        shardExchange,
+                        "publicationId = 'pub-1'"
+                ))
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability
-                        )
-                ),
-                Set.of(),
-                Set.of(
-                        delivery
-                ),
-                LocalDateTime.now()
-
-        );
-
-
-        qpidClient.createHeadersExchange("cap-ex1");
-
-        serviceProvider.addDeliveries(Collections.singleton(delivery));
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,denmCapability,delivery);
 
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
 
@@ -145,6 +139,7 @@ public class LocalDeliveryServiceIT {
     public void createDlQueueAndConnectForServiceProvider() {
         String serviceProviderName = "my-service-provider";
         String dlqName = "dlq-" + UUID.randomUUID();
+        String exchangeName = UUID.randomUUID().toString();
         Capability denmCapability = new Capability(
                 new DenmApplication(
                         "NPRA",
@@ -157,36 +152,27 @@ public class LocalDeliveryServiceIT {
                 new Metadata(RedirectStatus.OPTIONAL),
                 Collections.singletonList(
                         new CapabilityShard(1,
-                                "dlq-ex1",
+                                exchangeName,
                                 "publicationId = 'pub-1'"
                         )
                 )
         );
-        qpidClient.createHeadersExchange("dlq-ex1");
+        qpidClient.createHeadersExchange(exchangeName);
 
-        LocalDelivery delivery = new LocalDelivery(UUID.randomUUID().toString(),
-                Set.of(new LocalDeliveryEndpoint(
-                        "host",
-                        123,
-                        "target",
-                        2,
-                        3,
-                        dlqName)),
+        String deliveryExchangeName = "del-" +  UUID.randomUUID();
+        LocalDelivery delivery = new LocalDelivery(
+                UUID.randomUUID().toString(),
+                Set.of(
+                        createLocalDeliveryEndpoint(deliveryExchangeName,dlqName)
+                ),
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
                 "delivery",
                 false
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(denmCapability)
-                ),
-                Set.of(),
-                Set.of(delivery),
-                LocalDateTime.now()
-        );
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,denmCapability,delivery);
+
         serviceProviderRepository.save(serviceProvider);
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
         outgoingMatchRepository.save(match);
@@ -199,7 +185,7 @@ public class LocalDeliveryServiceIT {
         assertThat(actualDlqName).isEqualTo(dlqName);
 
 
-        Exchange deliveryExchange = delta.findByExchangeName("target");
+        Exchange deliveryExchange = delta.findByExchangeName(deliveryExchangeName);
         assertThat(deliveryExchange).isNotNull();
         assertThat(deliveryExchange.getBindings()).hasSize(1);
 
@@ -234,26 +220,15 @@ public class LocalDeliveryServiceIT {
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
                 Set.of(
-                        new LocalDeliveryEndpoint(
-                                "my-interchange",
-                                5671,
-                                deliveryExchangeName
-                        )
+                        createLocalDeliveryEndpoint(deliveryExchangeName)
                 ),
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
                 "delivery",
                 false
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(denmCapability)
-                ),
-                Set.of(),
-                Set.of(delivery),
-                LocalDateTime.now()
-        );
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,denmCapability,delivery);
+
         serviceProviderRepository.save(serviceProvider);
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
         outgoingMatchRepository.save(match);
@@ -313,29 +288,22 @@ public class LocalDeliveryServiceIT {
         qpidClient.createHeadersExchange(denmCapability2Exchange);
 
         String deliveryExchangeName = "my-exchange6";
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
-                Set.of(endpoint),
+                Set.of(
+                        createLocalDeliveryEndpoint(deliveryExchangeName)
+                ),
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
                 "delivery",
                 false
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
+        ServiceProvider serviceProvider = createServiceProvider(
                 serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability,
-                                denmCapability2
-                        )
-                ),
-                Set.of(),
-                Set.of(
-                        delivery
-                ),
-                LocalDateTime.now()
+                Set.of(denmCapability,denmCapability2),
+                Set.of(delivery)
         );
+
         serviceProviderRepository.save(serviceProvider);
 
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
@@ -379,11 +347,7 @@ public class LocalDeliveryServiceIT {
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
                 Set.of(
-                        new LocalDeliveryEndpoint(
-                                "my-interchange",
-                                5671,
-                                deliveryExchangeName
-                        )
+                        createLocalDeliveryEndpoint(deliveryExchangeName)
                 ),
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
@@ -391,17 +355,7 @@ public class LocalDeliveryServiceIT {
                 false
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability
-                        )
-                ),
-                Set.of(),
-                Set.of(delivery),
-                LocalDateTime.now()
-        );
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,denmCapability,delivery);
         serviceProviderRepository.save(serviceProvider);
 
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
@@ -441,29 +395,17 @@ public class LocalDeliveryServiceIT {
 
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
-                Set.of(new LocalDeliveryEndpoint(
-                        "host",
-                        123,
-                        exchangeName,
-                        2,
-                        3,
-                        dlqName)),
+                Set.of(
+                        createLocalDeliveryEndpoint(exchangeName,dlqName)
+                ),
                 "originatingCountry = 'NO'",
                 LocalDeliveryStatus.CREATED,
                 "delivery",
                 false
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability
-                        )
-                ),
-                Set.of(),
-                Set.of(delivery),
-                LocalDateTime.now()
-        );
+
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,denmCapability,delivery);
+
         serviceProviderRepository.save(serviceProvider);
 
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
@@ -531,31 +473,18 @@ public class LocalDeliveryServiceIT {
         qpidClient.createHeadersExchange(cap2ShardExchange);
 
         String deliveryExchangeName = "my-exchange10";
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
                 Set.of(
-                        endpoint
+                        createLocalDeliveryEndpoint(deliveryExchangeName)
                 ),
                 "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')",
                 LocalDeliveryStatus.CREATED,
                 "No delivery",
                 false
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability1,
-                                denmCapability2
-                        )
-                ),
-                Set.of(),
-                Set.of(
-                        delivery
-                ),
-                LocalDateTime.now()
-        );
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName, Set.of(denmCapability1,denmCapability2),Set.of(delivery));
+
         serviceProviderRepository.save(serviceProvider);
 
         OutgoingMatch match1 = new OutgoingMatch(delivery, denmCapability1, serviceProviderName);
@@ -613,11 +542,10 @@ public class LocalDeliveryServiceIT {
 
 
         String deliveryExchangeName = "my-exchange11";
-        LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint("my-interchange", 5671, deliveryExchangeName);
         LocalDelivery delivery = new LocalDelivery(
                 UUID.randomUUID().toString(),
                 Set.of(
-                        endpoint
+                        createLocalDeliveryEndpoint(deliveryExchangeName)
                 ),
                 "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')",
                 LocalDeliveryStatus.CREATED,
@@ -625,19 +553,8 @@ public class LocalDeliveryServiceIT {
                 false
         );
 
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                new Capabilities(
-                        Set.of(
-                                denmCapability
-                        )
-                ),
-                Set.of(),
-                Set.of(
-                        delivery
-                ),
-                LocalDateTime.now()
-        );
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName, denmCapability,delivery);
+
         serviceProviderRepository.save(serviceProvider);
         OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
         outgoingMatchRepository.save(match);
@@ -658,15 +575,11 @@ public class LocalDeliveryServiceIT {
                 "a = b",
                 LocalDeliveryStatus.REQUESTED
         );
-        ServiceProvider serviceProvider = new ServiceProvider(
-                "no-change-for-requested-delivery-sp",
-                new Capabilities(),
-                Collections.emptySet(),
-                Collections.singleton(
-                        localDelivery
-                ),
-                null
+        ServiceProvider serviceProvider = createServiceProvider("no-change-for-requested-delivery-sp",
+                Set.of(),
+                Set.of(localDelivery)
         );
+
         QpidDelta delta = qpidClient.getQpidDelta();
 
         localDeliveryService.tearDownDeliveryQueues(serviceProvider,delta);
@@ -678,15 +591,16 @@ public class LocalDeliveryServiceIT {
 
     @Test
     public void deliveryReceivesExchangeNameWhenItDoesNotExist(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery();
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+        ServiceProvider serviceProvider = createServiceProvider("service-provider",Set.of(), Set.of(delivery));
 
         // Will only receive Exchange Name if outgoing match(es) exist
+        //TODO is this a reasonable assumption? Should we really have a match with nulls?
         OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
         outgoingMatchRepository.save(outgoingMatch);
 
         serviceProviderRepository.save(serviceProvider);
+        //TODO this is a weird way of doing things, should we not just create the endpoints straight away?
         localDeliveryService.updateDeliveryStatus("my-interchange", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName(serviceProvider.getName());
@@ -696,36 +610,34 @@ public class LocalDeliveryServiceIT {
 
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExist(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description", false);
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+        ServiceProvider serviceProvider = createServiceProvider("service-provider", Set.of(), Set.of(delivery));
+
         serviceProviderRepository.save(serviceProvider);
 
         localDeliveryService.updateDeliveryStatus("our-node", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().orElseThrow().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
     }
 
     @Test
     public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
         LocalDelivery delivery = new LocalDelivery();
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
+        ServiceProvider serviceProvider = createServiceProvider("service-provider", Set.of(),Set.of(delivery));
 
         serviceProviderRepository.save(serviceProvider);
         localDeliveryService.updateDeliveryStatus("our-node", 5671, serviceProvider);
 
         ServiceProvider savedServiceProvider = serviceProviderRepository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
+        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().orElseThrow().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
     }
 
     @Test
     public void deliveryWithErrorGetsRemovedFromServiceProvider(){
         String serviceProviderName = "my-service-provider";
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
         LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description", false);
-        serviceProvider.addDeliveries(Set.of(delivery));
+        ServiceProvider serviceProvider = createServiceProvider(serviceProviderName,  Set.of(), Set.of(delivery));
 
         serviceProviderRepository.save(serviceProvider);
         localDeliveryService.removeTearDownIllegalAndErrorDeliveries(serviceProvider);
@@ -734,5 +646,126 @@ public class LocalDeliveryServiceIT {
         assertThat(savedAgainServiceProvider.getDeliveries()).hasSize(0);
     }
 
+    //TODO go through setUpDeliveryQueue and updateDeliveryStatus, and create tests for the different statuses and states we can encounter there.
+    //DeliveryStatuses:
+    //REQUESTED
+    //CREATED
+    //NO_OVERLAP
+
+    //TODO what if we create endpoints already in the mapper? That way we can take away most of this code in updateDeliveryStatus
+    //This test documents that it is actually a possibility to do that.
+    @Test
+    public void deliveryWithEndpointEndsUpInTheSameStateAsTheOneWithout() {
+        String shardExchange = "cap-" + UUID.randomUUID();
+        qpidClient.createHeadersExchange(shardExchange);
+
+        Capability capability = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL),
+                Collections.singletonList(new CapabilityShard(
+                                1,
+                                shardExchange,
+                                "publicationId = 'pub-1'"
+                        )
+                )
+        );
+        ServiceProvider capabilityOwner = createServiceProvider(
+                "capabilityOwner",
+                Set.of(capability),
+                Set.of()
+        );
+        serviceProviderRepository.save(capabilityOwner);
+        LocalDelivery noEndpoints = new LocalDelivery(
+                UUID.randomUUID().toString(),
+                Set.of(),
+                "orignatingCountry = 'NO'",
+                LocalDeliveryStatus.REQUESTED,
+                "No endpoings",
+                false
+        );
+        ServiceProvider noEndpointOwner = createServiceProvider(
+                "noEndpointOwner",
+                Set.of(),
+                Set.of(
+                        noEndpoints
+                )
+        );
+        serviceProviderRepository.save(noEndpointOwner);
+
+        LocalDelivery deliveryWithEndpoint = new LocalDelivery(
+                UUID.randomUUID().toString(),
+                Set.of(
+                        createLocalDeliveryEndpoint("del-" + UUID.randomUUID())
+                ),
+                "orignatingCountry = 'NO'",
+                LocalDeliveryStatus.REQUESTED,
+                "Delivery with endpoints",
+                false
+        );
+        ServiceProvider withEndpointOwner = createServiceProvider(
+                "withEndpointOwner",
+                Set.of(),
+                Set.of(deliveryWithEndpoint)
+        );
+        serviceProviderRepository.save(withEndpointOwner);
+
+        OutgoingMatch noEndpointMatch = new OutgoingMatch(noEndpoints,capability,noEndpointOwner.getName());
+        outgoingMatchRepository.save(noEndpointMatch);
+        OutgoingMatch deliveryWithEndpointMatch = new OutgoingMatch(deliveryWithEndpoint,capability,withEndpointOwner.getName());
+        outgoingMatchRepository.save(deliveryWithEndpointMatch);
+
+        Integer amqpsPort = qpidContainer.getAmqpsPort();
+
+        for (ServiceProvider serviceProvider : List.of(noEndpointOwner,withEndpointOwner)) {
+            localDeliveryService.updateDeliveryStatus(HOST_NAME, amqpsPort, serviceProvider);
+            localDeliveryService.setUpDeliveryQueue(serviceProvider,qpidClient.getQpidDelta());
+            LocalDelivery actualDelivery = serviceProvider.getDeliveries().stream().findFirst().orElseThrow();
+            assertThat(actualDelivery.getStatus()).isEqualTo(LocalDeliveryStatus.CREATED);
+            assertThat(actualDelivery.getEndpoints()).hasSize(1);
+            LocalDeliveryEndpoint actualEndpoints = actualDelivery.getEndpoints().stream().findFirst().orElseThrow();
+            assertThat(qpidClient.exchangeExists(actualEndpoints.getTarget())).isTrue();
+
+        }
+    }
+
+    private ServiceProvider createServiceProvider(String name, Capability capability, LocalDelivery delivery){
+        return createServiceProvider(name, Set.of(capability),Set.of(delivery));
+    }
+
+    private ServiceProvider createServiceProvider(String name, Set<Capability> capabilities, Set<LocalDelivery> deliveries){
+        return new ServiceProvider(
+                name,
+                new Capabilities(
+                        capabilities
+                ),
+                Set.of(),
+                deliveries,
+                LocalDateTime.now()
+        );
+    }
+
+    private LocalDeliveryEndpoint createLocalDeliveryEndpoint(String target) {
+        return new LocalDeliveryEndpoint(
+                HOST_NAME,
+                qpidContainer.getAmqpsPort(),
+                target
+        );
+    }
+
+    private LocalDeliveryEndpoint createLocalDeliveryEndpoint(String target, String dlq) {
+        return new LocalDeliveryEndpoint(
+                HOST_NAME,
+                qpidContainer.getAmqpsPort(),
+                target,
+                dlq
+        );
+    }
 
 }

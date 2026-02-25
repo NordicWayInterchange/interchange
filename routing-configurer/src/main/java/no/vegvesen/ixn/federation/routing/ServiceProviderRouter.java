@@ -90,8 +90,8 @@ public class ServiceProviderRouter {
             serviceProvider = setUpCapabilityExchanges(serviceProvider, delta);
             bindCapabilityExchangesToBiQueue(serviceProvider, delta);
             serviceProvider = syncLocalSubscriptionsToServiceProviderCapabilities(serviceProvider, delta, serviceProviders);
-            serviceProvider = localDeliveryService.setUpDeliveryQueue(serviceProvider, delta);
             localDeliveryService.updateDeliveryStatus(nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), serviceProvider);
+            localDeliveryService.setUpDeliveryQueue(serviceProvider, delta);
         }
     }
 
