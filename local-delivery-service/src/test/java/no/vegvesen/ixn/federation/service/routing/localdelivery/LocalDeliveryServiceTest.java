@@ -42,7 +42,7 @@ public class LocalDeliveryServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new LocalDeliveryService(serviceProviderRepository, outgoingMatchRepository);
+        service = new LocalDeliveryService(serviceProviderRepository, outgoingMatchRepository, null);
     }
 
     @Test
