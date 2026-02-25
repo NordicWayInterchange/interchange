@@ -74,13 +74,13 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
@@ -116,7 +116,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
@@ -125,7 +125,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         matchRepository.deleteAll();
         neighbourRepository.deleteAll();
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);

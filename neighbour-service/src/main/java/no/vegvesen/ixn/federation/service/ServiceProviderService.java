@@ -32,14 +32,12 @@ public class ServiceProviderService {
         this.matchRepository = matchRepository;
     }
 
-    public void syncServiceProviders(String host, Integer port) {
+    public void syncServiceProviders() {
         List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
             updateLocalSubscriptionWithRedirectEndpoints(name);
-            //localDeliveryService.updateDeliveryStatus(name, host, port);
             removeTearDownCapabilities(name);
-            //localDeliveryService.removeTearDownIllegalAndErrorDeliveries(name);
         }
     }
 
