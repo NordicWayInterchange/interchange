@@ -1,10 +1,7 @@
 #!/bin/bash -eu
-
 IMAGE_TAG=$(<version)
-RELATIVE_KEYS_FOLDER=../keys/a
-mkdir -p $RELATIVE_KEYS_FOLDER
-KEYS_FOLDER=$(realpath ${RELATIVE_KEYS_FOLDER})
-echo Generating systemtest keys to folder $KEYS_FOLDER
-
-docker run -it -v ${PWD}:/work -v $KEYS_FOLDER:/keys --user=$(id -u):$(id -g) \
+VOLUME_NAME=single-node-keys-volume
+echo "Generating systemtest keys to volume $VOLUME_NAME"
+docker volume create $VOLUME_NAME
+docker run -it -v ${PWD}:/work -v $VOLUME_NAME:/keys \
 	ghcr.io/nordicwayinterchange/keys-generator:${IMAGE_TAG} generate -f single-node-keys.json -o /keys
