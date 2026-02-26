@@ -1,5 +1,4 @@
 #!/bin/bash -eu
-IMAGE_TAG=$(<version)
 VOLUME_NAME=single-node-keys-volume
 echo "Generating systemtest keys to volume $VOLUME_NAME"
 docker volume create $VOLUME_NAME
