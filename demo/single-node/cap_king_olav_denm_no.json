@@ -1,4 +1,5 @@
-{	"name" : "king_olav",
+{
+  "name" : "a.interchangedomain.lookupdomain.king_olav@slottet.no",
   "version" : "1.0",
   "capabilities" : [ {
     "application" : {
@@ -12,7 +13,7 @@
     },
     "metadata" : {
       "shardCount" : 1,
-      "infoUrl" : "https://king_olav.info.no",
+      "infoUrl" : "https://king_olav.slottet.info.no",
       "redirectPolicy" : "OPTIONAL",
       "maxBandwidth" : 0,
       "maxMessageRate" : 0,
