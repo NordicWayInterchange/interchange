@@ -1,4 +1,3 @@
-version: '3'
 services:
 
 # Note: now all the containers are on the same network - testing_net
