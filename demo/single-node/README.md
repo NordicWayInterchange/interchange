@@ -74,7 +74,8 @@ the endpoint is being provisioned on the broker, but should end up in a `CREATED
 Click on the three dots on the fat right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
 in order to send messages.
 
-You have to use the service provider client to send messages. 
+You have to use the service provider client to send messages, as described in [Publishing your first message](#publishing-your-first-message). But first, we need to 
+register a subscription and listen to messages.
 
 ### Register a Subscription
 In order to see messages flowing through the system, we can create a [Subscription](../../GLOSSARY.md#subscription) to the data stream, and listen to the associated queue.
@@ -95,13 +96,15 @@ the endpoint is being provisioned on the broker, but should end up in a `CREATED
 Click on the three dots on the fat right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
 in order to receive messages.
 
-You have to use the service provider client to receive messages.
+You have to use the service provider client to receive messages, as described in [Listening to messages](#listening-to-messages). 
 
 ## Using the service provider client
 The script `./a_service_provider_client.sh` runs the service provider client, a test client we provide for [Service Providers](../../GLOSSARY.md#service-provider)
 Try running `./a_service_provider_client.sh --help` to see the different options. The client can also be used for sending and receiving messages. 
 
 ### Register a Capability
+
+If you already registered a capability using the portal, you can skip this section.
 
 In order to be able to publish messages on the node, a [Capability](../../GLOSSARY.md#capability) and a [Delivery](../../GLOSSARY.md#delivery) has to be created.
 We'll start by adding a Capability.
@@ -112,6 +115,8 @@ Run the command `./a_service_provider_client.sh capabilities add -f cap_king_ola
 The capability is now registered. Check using the command `./a_service_provider_client.sh capabilities list`. This lists your capabilities in the system.
 
 ### Register a Delivery
+
+If you already registered a delivery using the portal, you can skip this section.
 
 We have now declared what type of messages we want to publish, and now we have to create somewhere to actually do the publishing.
 In order to do this, we need to create a [Delivery](../../GLOSSARY.md#delivery).
@@ -124,6 +129,8 @@ When the delivery has reached status `CREATED`, the delivery should have one ite
 of the actual [endpoint](../../GLOSSARY.md#endpoint) to publish messages on.
 
 ### Register a Subscription
+
+If you already registered a subscription using the portal, you can skip this section.
 
 In order to see messages flowing through the system, we can create a [Subscription](../../GLOSSARY.md#subscription) to the data stream, and listen to the associated queue.
 The file `sub_king_olav_denm_no.json` declares a Subscription to listen for messages using the [publicationId](../../GLOSSARY.md#publicationid) of `NO00000-pub-1`
@@ -143,7 +150,7 @@ or use the `./a_service_provider_client.sh subscriptions list` to list out your 
 `./a_service_provider_client.sh subscriptions listen -i <subscription id>` to start listening. The command will block, waiting for messages to arrive. 
 Keep it running, and switch to a new console to publish messages.
 
-## Publish your first message
+## Publishing your first message
 
 To send messages, either copy the ID of the delivery from the portal, or use the `./a_service_provider_client.sh deliveries list` command to list your 
 deliveries. Copy the id of the delivery, and use the command 
