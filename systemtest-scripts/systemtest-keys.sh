@@ -1,8 +1,7 @@
 #!/bin/bash -eu
 
+VOLUME_NAME=systemtest-keys-volume
 
-TMP_FOLDER=../tmp/keys/
-echo Generating systemtest keys to folder $TMP_FOLDER
-mkdir -p $TMP_FOLDER
-
-java -jar ../keys-generator/target/keys-generator-${JAR_VERSION}.jar generate -f systemtest-keys.json -o "$TMP_FOLDER"
+echo "Generating keys to volume $VOLUME_NAME"
+docker volume create $VOLUME_NAME
+docker run -it -v${PWD}:/work -v $VOLUME_NAME:/keys keys-generator generate -f systemtest-keys.json -o /keys
