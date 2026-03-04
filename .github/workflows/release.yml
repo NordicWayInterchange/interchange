@@ -116,7 +116,8 @@ jobs:
     needs: release
     strategy:
       matrix:
-        Images: [message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
+        Images: [message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator,
+                 admin-server-app, frontend]
     defaults:
       run:
         shell: bash
