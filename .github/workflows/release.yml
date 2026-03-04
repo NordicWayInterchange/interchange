@@ -107,7 +107,7 @@ jobs:
       - name: Persist to workspace
         uses: actions/upload-artifact@v4
         with:
-          name: interchange-${{ env.CURRENT_VERSION }}-${{ github.job }}-${{ github.run_id }}
+          name: interchange
           path: ./
           if-no-files-found: warn
 
