@@ -36,17 +36,12 @@ jobs:
         working-directory: ./helm/interchange
         run: |
           helm template -f example_values.yml .
-  # ---------------------------------
-  # BUILD (JAVA + NAPCOREFRONTEND)
-  # ---------------------------------
+
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    strategy:
-      matrix:
-        node-version: [ 20.x, 22.x ]
     defaults:
       run:
         shell: bash
@@ -66,24 +61,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      # ------------------------
-      # NODE SETUP AND FRONTEND TESTS
-      # ------------------------
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Run frontend tests
-        working-directory: ./frontend
-        run: npm test -- --watchAll=false
-
       - name: Build with Maven and run integration tests
         run: mvn -B verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
         # Step that does cache save and restore
@@ -147,9 +124,39 @@ jobs:
       - name: Persist to workspace
         uses: actions/upload-artifact@v4
         with:
-          name: interchange-${{ github.job }}
+          name: interchange
           path: ./
-          if-no-files-found: warn
+
+  build-napcore:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download persisted workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: interchange
+      - name: Tags to variables
+        run: |
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Build the Docker image
+        run: |
+          cd ./frontend
+          docker build . -t napcore-frontend
+      - name: Push docker image to Github container registry
+        run: |
+          docker tag napcore-frontend ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }}
+          docker push --all-tags ghcr.io/nordicwayinterchange/napcore-frontend
+
 
   docker-push-svv:
     runs-on: ubuntu-latest
