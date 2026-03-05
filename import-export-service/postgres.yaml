@@ -12,11 +12,9 @@ spec:
       labels:
         app: postgres
     spec:
-      securityContext:
-        fsGroup: 999           # <--- Pod-level
       containers:
         - name: postgres
-          image: postgres:18.1
+          image: postgres:16
           env:
             - name: POSTGRES_USER
               value: federation
@@ -29,14 +27,6 @@ spec:
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
-          securityContext:
-            runAsUser: 999       # <--- Container-level
-            runAsGroup: 999      # <--- Container-level
-          readinessProbe:
-            tcpSocket:
-              port: 5432
-            initialDelaySeconds: 5
-            periodSeconds: 2
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
