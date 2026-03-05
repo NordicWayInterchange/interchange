@@ -11,6 +11,8 @@ import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.DockerImageName;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -39,9 +41,10 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 		String keystorePassword = hostStore.password();
 		String truststoreName = caStore.truststoreName().getFileName().toString();
 		String truststorePassword = caStore.truststorePassword();
-		return new QpidContainer("qpid-it-memory",
-				imageLocation,
-				configPath,
+        DockerImageName imageName = DockerImageName.parse("apache/qpid-broker-j:10.0.1-alpine");
+        return new QpidContainer(
+                imageName,
+                configPath,
 				caStore.truststoreName().getParent(),
 				keystoreName,
 				keystorePassword,

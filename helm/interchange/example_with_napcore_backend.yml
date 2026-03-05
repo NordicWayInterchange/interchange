@@ -13,7 +13,7 @@ napcore_keystore_password: password
 napcore_nextauth_secret: ABC
 napcore_auth0_client_id: my_client
 napcore_auth0_client_secret: my_secret
-
+napcore_server_sign_store_password: "mysecretsignstorepassword"
 # Values:
 external_name: example-node.itsinterchange.eu
 static_external_ip: "1.2.3.4"
@@ -50,7 +50,7 @@ neighbour_discoverer:                                               # Java appli
 database:                                                           # Database of neighbouring interchanges
   image:
     repository: postgres
-    tag: 15.1
+    tag: 18.1
   postgres_db: federation                                           # Database name
   persistence:                                                      # Persistence settings for the database.
     enabled: true

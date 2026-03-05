@@ -17,12 +17,173 @@ data:
     remote-service-providers.users=
     bi-consumers.users=
     clients-private-channels.users=
+  config.json: |
+    {
+      "name": "${broker.name}",
+      "modelVersion": "9.0",
+      "authenticationproviders": [
+        {
+          "name": "clientCerts",
+          "type": "External"
+        },
+        {
+          "name": "plain",
+          "type": "Plain",
+          "secureOnlyMechanisms": [],
+          "users": [
+            {
+              "name": "{{ .Values.qpid.admin_user }}",
+              "type": "managed",
+              "password": "{{ .Values.admin_password | trim }}"
+            }]
+        }
+      ],
+      "brokerloggers": [
+        {
+          "name": "console",
+          "type": "Console",
+          "lastUpdatedBy": "admin",
+          "brokerloginclusionrules": [
+            {
+              "name": "rootInclude",
+              "type": "NameAndLevel",
+              "durable": true,
+              "level": "INFO"
+            }]
+        }
+      ],
+      "keystores": [
+        {
+          "name": "default",
+          "type": "FileKeyStore",
+          "storeUrl": "${KEY_STORE}",
+          "password": "${KEY_STORE_PASSWORD}"
+        },
+        {
+          "name": "internal",
+          "type": "FileKeyStore",
+          "storeUrl": "${INTERNAL_KEY_STORE}",
+          "password": "${INTERNAL_KEY_STORE_PASSWORD}"
+        }
+      ],
+      "plugins": [
+        {
+          "type": "MANAGEMENT-HTTP",
+          "name": "httpManagement"
+        }
+      ],
+      "ports": [
+        {
+          "name": "AMQP",
+          "type": "AMQP",
+          "authenticationProvider": "plain",
+          "port": "5672",
+          "protocols": [
+            "AMQP_1_0"],
+          "virtualhostaliases": [
+            {
+              "name": "defaultAlias",
+              "type": "defaultAlias"
+            },
+            {
+              "name": "hostnameAlias",
+              "type": "hostnameAlias"
+            },
+            {
+              "name": "nameAlias",
+              "type": "nameAlias"
+            }
+          ]
+        },
+        {
+          "name": "AMQPS",
+          "type": "AMQP",
+          "authenticationProvider": "clientCerts",
+          "bindingAddress": "*",
+          "keyStore": "default",
+          "needClientAuth": true,
+          "port": "5671",
+          "protocols": [
+            "AMQP_1_0"],
+          "transports": [
+            "SSL",
+            "TCP"
+          ],
+          "trustStores": [
+            "default"],
+          "wantClientAuth": false,
+          "virtualhostaliases": [
+            {
+              "name": "defaultAlias",
+              "type": "defaultAlias"
+            },
+            {
+              "name": "hostnameAlias",
+              "type": "hostnameAlias"
+            },
+            {
+              "name": "nameAlias",
+              "type": "nameAlias"
+            }
+          ]
+        },
+        {
+          "name": "HTTP",
+          "port": "8080",
+          "authenticationProvider": "plain",
+          "protocols": [
+            "HTTP"]
+        },
+        {
+          "name": "HTTPS",
+          "type": "HTTP",
+          "authenticationProvider": "clientCerts",
+          "bindingAddress": "*",
+          "port": "443",
+          "trustStores": [
+            "default"],
+          "keyStore": "internal",
+          "needClientAuth": true,
+          "wantClientAuth": false,
+          "transports": [
+            "SSL",
+            "TCP"
+          ]
+        }
+      ],
+      "truststores": [
+        {
+          "name": "default",
+          "type": "FileTrustStore",
+          "exposedAsMessageSource": false,
+          "trustAnchorValidityEnforced": false,
+          "storeUrl": "${TRUST_STORE}",
+          "password": "${TRUST_STORE_PASSWORD}"
+        }
+      ],
+      "virtualhostnodes": [
+        {
+          "name": "default",
+          "type": "JSON",
+          "defaultVirtualHostNode": "true",
+          "virtualHostInitialConfiguration":"file:///qpid-broker-j/work/default.json"
+        }
+      ],
+      "groupproviders": [
+        {
+          "name": "default",
+          "type": "GroupFile",
+          "path": "${GROUPS_FILE}"
+        }]
+    }
+
+
   default.json: |
     {
       "type": "BDB",
       "name": "{{ .Values.external_name }}",
       "modelVersion": "9.0",
-      "exchanges": [ ],
+      "exchanges": [],
       "queues": [
         {
           "id": "0EF5AA55-E3A8-4DD6-A394-46E1F6AED77A",

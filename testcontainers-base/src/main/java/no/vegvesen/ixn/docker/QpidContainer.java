@@ -3,7 +3,7 @@ package no.vegvesen.ixn.docker;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.DockerImageName;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -24,8 +24,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
     private final String vHostName;
 
 
-    public QpidContainer(String imageName,
-                         Path dockerFilePath,
+    public QpidContainer(DockerImageName dockerImageName,
                          Path configPathFromClasspath,
                          Path keysBasePath,
                          String keyStore,
@@ -33,8 +32,7 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
                          String trustStore,
                          String trustStorePassword,
                          String vHostName) {
-        super(new ImageFromDockerfile(imageName,false)
-                .withFileFromPath(".",dockerFilePath));
+        super(dockerImageName);
         this.configPathFromClasspath = configPathFromClasspath;
         this.keysBasePath = keysBasePath;
         this.keyStore = keyStore;
@@ -49,23 +47,18 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
 
     @Override
     protected void configure() {
-        String workConfigInContainer = "/work/default/config/";
-        String configPathInContainer = "/config/";
+        String configPathInContainer = "/qpid-broker-j/work-override/";
+        String workConfigInContainer = "/qpid-broker-j/work/";
         this.withClasspathResourceMapping(configPathFromClasspath.toString(), configPathInContainer, BindMode.READ_ONLY);
-        String passwdFileName = "passwd";
-        String passwdContainerPath = configPathInContainer + passwdFileName;
         this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
         String keystoreLocation = "/jks/" + keyStore;
         this.withEnv("KEY_STORE", keystoreLocation);
         this.withEnv("KEY_STORE_PASSWORD", keyStorePassword);
         this.withEnv("TRUST_STORE", "/jks/" + trustStore);
         this.withEnv("TRUST_STORE_PASSWORD", trustStorePassword);
-        this.withEnv("STATIC_VHOST_FILE", configPathInContainer + "vhost.json");
         this.withEnv("VHOST_FILE", workConfigInContainer + "default.json");
         this.withEnv("VHOST_NAME",vHostName);
-        this.withEnv("STATIC_GROUPS_FILE", configPathInContainer + "groups");
         this.withEnv("GROUPS_FILE",workConfigInContainer + "groups");
-        this.withEnv("PASSWD_FILE",passwdContainerPath);
         this.withEnv("INTERNAL_KEY_STORE", keystoreLocation); //for testing locally we use the same internal and external keystores
         this.withEnv("INTERNAL_KEY_STORE_PASSWORD", keyStorePassword);
     }
