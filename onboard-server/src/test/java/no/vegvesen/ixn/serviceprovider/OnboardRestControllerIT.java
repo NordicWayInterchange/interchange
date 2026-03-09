@@ -1126,6 +1126,19 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThat(updated.getPeers().stream().filter(p -> !p.getStatus().equals(PeerStatus.TEAR_DOWN))).hasSize(0);
     }
 
+
+    @Test
+    public void testGetPeerPrivateChannelById(){
+        String privateChannelOwner = "king_olav.bouvetinterchange.eu";
+        String serviceProviderName = "king_gustaf.bouvetinterchange.eu";
+        PrivateChannel privateChannel = new PrivateChannel(
+                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new PrivateChannelEndpoint("test", 1337, "test"), privateChannelOwner);
+        String uuid = privateChannelRepository.save(privateChannel).getUuid();
+        PeerPrivateChannelApi response1 = restController.getPeerPrivateChannelById(serviceProviderName, uuid);
+        assertThat(response1).isNotNull();
+    }
+
     @Test
     public void testAddingNullRequest() {
         assertThatExceptionOfType(DeliveryPostException.class).isThrownBy(
