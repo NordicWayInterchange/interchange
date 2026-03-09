@@ -8,7 +8,7 @@ import picocli.CommandLine.ParentCommand;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "get", description = "List all private channels with service provider as peer",
+@Command(name = "list", description = "List all private channels with service provider as peer",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         version = "1.0",
