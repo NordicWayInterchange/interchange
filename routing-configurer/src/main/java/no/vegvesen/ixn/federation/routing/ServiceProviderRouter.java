@@ -65,7 +65,7 @@ public class ServiceProviderRouter {
             String name = serviceProvider.getName();
             logger.debug("Checking service provider {}",name);
 
-            addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+            addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider, delta);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
@@ -90,15 +90,17 @@ public class ServiceProviderRouter {
         }
     }
 
-    public void addOrRemoveServiceProviderToBiConsumerGroup(ServiceProvider serviceProvider) {
-        BiConsumerMember biConsumerMember = qpidClient.getBiConsumerMember(serviceProvider.getName());
+    public void addOrRemoveServiceProviderToBiConsumerGroup(ServiceProvider serviceProvider, QpidDelta delta) {
+        BiConsumerMember biConsumerMember = delta.findBiConsumerMemberByName(serviceProvider.getName());
         if (Boolean.TRUE.equals(serviceProvider.isBiconsumer())) {
             if (biConsumerMember == null) {
-                qpidClient.addBiConsumerMemberToGroup(serviceProvider.getName());
+                biConsumerMember = qpidClient.addBiConsumerMemberToGroup(serviceProvider.getName());
+                delta.addBiConsumerMember(biConsumerMember);
             }
         } else {
             if (biConsumerMember != null) {
                 qpidClient.removeBiConsumerMemberFromGroup(biConsumerMember);
+                delta.removeBiConsumerMember(biConsumerMember);
             }
         }
     }

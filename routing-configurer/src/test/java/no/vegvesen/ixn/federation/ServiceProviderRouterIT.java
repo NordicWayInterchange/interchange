@@ -1490,7 +1490,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		assertThat(serviceProvider.isBiconsumer()).isFalse();
-		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
 	}
@@ -1506,7 +1506,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
                 LocalDateTime.now()
         );
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+        router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider,client.getQpidDelta());
 
         assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
     }
@@ -1524,7 +1524,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		);
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		assertThat(serviceProvider.isBiconsumer()).isTrue();
-		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider);
+		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider,client.getQpidDelta());
 
 		assertThat(client.getBiConsumerMember(serviceProvider.getName()).name()).isEqualTo(serviceProvider.getName());
 	}
