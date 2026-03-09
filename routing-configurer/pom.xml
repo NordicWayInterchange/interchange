@@ -78,6 +78,11 @@
             <artifactId>jackson-databind</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>local-delivery-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

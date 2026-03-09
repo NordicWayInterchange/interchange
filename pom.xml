@@ -263,5 +263,6 @@
         <module>import-export-service</module>
         <module>csr-generator</module>
         <module>shared-api-model</module>
+        <module>local-delivery-service</module>
     </modules>
 </project>

@@ -89,8 +89,23 @@ public class TypeTransformer {
         return newSubscription;
     }
 
-    public LocalDelivery transformDeliveryToLocalDelivery(AddDelivery delivery) {
-        return new LocalDelivery(delivery.getSelector(), LocalDeliveryStatus.REQUESTED, delivery.getDescription(), delivery.isDlqueue());
+    public LocalDelivery transformDeliveryToLocalDelivery(AddDelivery delivery, String hostname, int port) {
+        Boolean dlqueue = delivery.isDlqueue();
+        return new LocalDelivery(
+                UUID.randomUUID().toString(),
+                Set.of(
+                        new LocalDeliveryEndpoint(
+                                hostname,
+                                port,
+                                "del-" + UUID.randomUUID(),
+                                Objects.equals(dlqueue,Boolean.TRUE) ? "dlq-" + UUID.randomUUID() : null
+                        )
+                ),
+                delivery.getSelector(),
+                LocalDeliveryStatus.REQUESTED,
+                delivery.getDescription(),
+                dlqueue
+        );
     }
 
     public AddDeliveriesResponse transformToDeliveriesResponse(String serviceProviderName, Set<LocalDelivery> localDeliveries) {

@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
+import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
 
 
 
-@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
+@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, InterchangeNodeProperties.class, QpidClientConfig.class, LocalDeliveryService.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
 public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     public static final String HOST_NAME = getDockerHost();
@@ -98,8 +99,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     @Autowired
     QpidClient client;
 
-    @MockitoBean
-    InterchangeNodeProperties properties;
+    @Autowired
+    InterchangeNodeProperties interchangeNodeProperties;
 
     @Test
     public void testLocalSubscriptionQueueIsAutomaticallyAddedToQpidAfterRestart() {
