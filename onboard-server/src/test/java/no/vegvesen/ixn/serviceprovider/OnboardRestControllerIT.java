@@ -1130,13 +1130,19 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGetPeerPrivateChannelById(){
         String privateChannelOwner = "king_olav.bouvetinterchange.eu";
-        String serviceProviderName = "king_gustaf.bouvetinterchange.eu";
+        String peerName = "peer";
         PrivateChannel privateChannel = new PrivateChannel(
-                new HashSet<>(Set.of(new Peer("king_gustaf.bouvetinterchange.eu"))), PrivateChannelStatus.CREATED, "private channel",
+                new HashSet<>(Set.of(new Peer(peerName))), PrivateChannelStatus.CREATED, "private channel",
                 new PrivateChannelEndpoint("test", 1337, "test"), privateChannelOwner);
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
-        PeerPrivateChannelApi response1 = restController.getPeerPrivateChannelById(serviceProviderName, uuid);
-        assertThat(response1).isNotNull();
+        PeerPrivateChannelApi peerChannel = restController.getPeerPrivateChannelById(peerName, uuid);
+        assertThat(peerChannel.getServiceProviderName()).isEqualTo(privateChannelOwner);
+    }
+
+    @Test
+    public void testGetPrivateChannelForPeerWithNonExistingId() {
+        String peerName = "peer";
+        assertThrows(NotFoundException.class, () -> restController.getPeerPrivateChannelById(peerName, "notAnId"));
     }
 
     @Test
