@@ -12,6 +12,8 @@ public class PeerPrivateChannelApi {
 
     private PrivateChannelStatusApi status;
 
+    private String description;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PrivateChannelEndpointApi endpoint;
 
@@ -68,6 +70,14 @@ public class PeerPrivateChannelApi {
         this.endpoint = endpoint;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public long getLastUpdated() {
         return lastUpdated;
     }
@@ -95,6 +105,7 @@ public class PeerPrivateChannelApi {
                 "id='" + id + '\'' +
                 ", serviceProviderName='" + serviceProviderName + '\'' +
                 ", status=" + status +
+                ", description='" + description + '\'' +
                 ", endpoint=" + endpoint +
                 ", lastUpdated=" + lastUpdated +
                 '}';
