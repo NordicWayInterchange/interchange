@@ -17,6 +17,7 @@ services:
 
   a-db:
     image: postgres:18.1
+    platform: linux/amd64
     depends_on:
       - mock-dns-server
     ports:
@@ -30,6 +31,7 @@ services:
 
   a-onboard-server:
     image: ghcr.io/nordicwayinterchange/onboard-server-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
       - a-db
     ports:
@@ -75,6 +77,7 @@ services:
 
   a-neighbour-server:
     image: ghcr.io/nordicwayinterchange/neighbour-server-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
       - a-db
     ports:
@@ -98,6 +101,7 @@ services:
 
   a-routing-configurer:
     image: ghcr.io/nordicwayinterchange/routing-configurer-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
       - a-db
     links:
@@ -120,6 +124,7 @@ services:
 
   a-neighbour-discoverer:
     image: ghcr.io/nordicwayinterchange/neighbour-discoverer-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
       - a-db
     volumes:
@@ -142,6 +147,7 @@ services:
 
   a-message-collector-app:
     image: ghcr.io/nordicwayinterchange/message-collector-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
     - a-db
     links:
@@ -165,6 +171,7 @@ services:
 
   a-napcore-server:
     image: ghcr.io/nordicwayinterchange/napcore-server-app:${IMAGE_TAG}
+    platform: linux/amd64
     depends_on:
       - a-db
     ports:
@@ -192,6 +199,7 @@ services:
 
   a-napcore-frontend:
     image: ghcr.io/nordicwayinterchange/napcore-frontend:${NAP_TAG}
+    platform: linux/amd64
     ports:
       - 3000:3000
     volumes:
