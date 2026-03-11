@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash 
+set -euo pipefail
 
 #Set environment variable to choose what docker image tag to use in the test
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -12,4 +13,4 @@ docker build ../napcore-rest-client -t napcore_rest_client --build-arg JAR_VERSI
 docker build ../keys-generator -t keys-generator --build-arg JAR_VERSION=$JAR_VERSION
 VOL_EXISTS=$( docker volume ls --format '{{.Name}}' -f name=${VOLUME_NAME})
 [ -n "$VOL_EXISTS" ] || ./systemtest-keys.sh
-docker-compose -f systemtest.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker-compose -f systemtest.yml up
+docker compose -f systemtest.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker compose -f systemtest.yml up

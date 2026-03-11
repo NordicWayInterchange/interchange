@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -euo pipefail
 VOLUME_NAME=single-node-keys-volume
 echo "Generating systemtest keys to volume $VOLUME_NAME"
 docker volume create $VOLUME_NAME

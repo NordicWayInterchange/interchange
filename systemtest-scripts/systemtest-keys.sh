@@ -1,4 +1,5 @@
-#!/bin/bash -eu
+#!/bin/bash
+set -euo pipefail
 
 VOLUME_NAME=systemtest-keys-volume
 
