@@ -39,7 +39,7 @@ export default function Login({providers}: InferGetServerSidePropsType<
         Sign in.
       </Typography>
 
-      {Object.values(providers).map((provider) => (
+    {providers && Object.values(providers).map((provider) => (
           <div key={provider.id}>
             <StyledButton
                 variant="contained"

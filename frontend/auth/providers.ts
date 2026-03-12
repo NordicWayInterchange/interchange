@@ -34,7 +34,7 @@ export function buildProviders() {
                     url: `${p.externalUrl}/realms/${p.realm}/protocol/openid-connect/auth`
                 },
                 token: `${p.internalUrl}/realms/${p.realm}/protocol/openid-connect/token`,
-                userInfo: `${p.internalUrl}/realms/${p.realm}/protocol/openid-connect/userinfo`,
+                userinfo: `${p.internalUrl}/realms/${p.realm}/protocol/openid-connect/userinfo`,
             })
         }
 
