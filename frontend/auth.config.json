@@ -1,0 +1,23 @@
+{
+  "defaultProvider": "keycloak",
+  "providers": [
+    {
+      "type": "keycloak",
+      "id": "keycloak",
+      "name": "Keycloak Login",
+      "clientId": "$KEYCLOAK_CLIENT_ID",
+      "clientSecret": "$KEYCLOAK_CLIENT_SECRET",
+      "realm": "$KEYCLOAK_REALM",
+      "externalUrl": "$EXTERNAL_KEYCLOAK_URL",
+      "internalUrl": "$INTERNAL_KEYCLOAK_URL"
+    },
+    {
+      "type": "auth0",
+      "id": "auth0",
+      "name": "Auth0 Login",
+      "clientId": "$AUTH0_CLIENT_ID",
+      "clientSecret": "$AUTH0_CLIENT_SECRET",
+      "issuer": "$AUTH0_ISSUER"
+    }
+  ]
+}

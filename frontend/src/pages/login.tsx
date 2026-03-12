@@ -2,7 +2,7 @@ import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
-import { signIn } from "next-auth/react";
+import {getProviders, signIn} from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Image from "next/image";
@@ -12,7 +12,7 @@ import * as React from "react";
 import { Box } from "@mui/system";
 import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 
-export default function Login({}: InferGetServerSidePropsType<
+export default function Login({providers}: InferGetServerSidePropsType<
   typeof getServerSideProps
 >) {
   return (
@@ -36,20 +36,32 @@ export default function Login({}: InferGetServerSidePropsType<
       </Typography>
 
       <Typography variant="body1">
-        Sign in will redirect you to our authentication provider.
+        Sign in.
       </Typography>
 
-      <StyledButton
-        variant="contained"
-        color={"buttonThemeColor"}
-        sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
-        onClick={() => {
-          /*TODO: get from props*/
-          void signIn("auth0");
-        }}
-      >
-        <Typography>Sign in</Typography>
-      </StyledButton>
+      {Object.values(providers).map((provider) => (
+          <div key={provider.id}>
+            <StyledButton
+                variant="contained"
+                color={"buttonThemeColor"}
+                sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
+                onClick={() => signIn(provider.id)}
+            >
+              <Typography>Sign in</Typography>
+            </StyledButton>
+          </div>
+      ))}
+
+      {/*<StyledButton*/}
+      {/*  variant="contained"*/}
+      {/*  color={"buttonThemeColor"}*/}
+      {/*  sx={{ textTransform: "none", width: 200, alignSelf: "center" }}*/}
+      {/*  onClick={() => {*/}
+      {/*    void signIn("auth0");*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  <Typography>Sign in</Typography>*/}
+      {/*</StyledButton>*/}
     </Card>
   );
 }
@@ -61,7 +73,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     return { redirect: { destination: "/" } };
   }
 
-  return {
-    props: {},
-  };
+  const providers = await getProviders()
+  return { props: { providers } }
+
 }
