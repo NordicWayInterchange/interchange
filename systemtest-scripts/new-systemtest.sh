@@ -10,4 +10,4 @@ cd ../service-provider-client
 docker build . -t service-provider-client --build-arg JAR_VERSION=$(mvn -f .. org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
 cd ../systemtest-scripts
 [ -f ../tmp/keys/b.bouvetinterchange.eu.p12 ] || ./systemtest-keys.sh
-docker-compose -f new-systemtest.yml build --build-arg JAR_VERSION=$(mvn -f .. org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)  && docker-compose -f new-systemtest.yml up
+docker compose -f new-systemtest.yml build --build-arg JAR_VERSION=$(mvn -f .. org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)  && docker compose -f new-systemtest.yml up

@@ -6,10 +6,9 @@ URL="https://a.bouvetinterchange.eu:8797/"
 docker run \
   -it \
   --rm \
-  --name a_service_provider_client${RANDOM} \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
-  -v $PWD/../tmp/keys:/keys \
+  -v systemtest-keys-volume:/keys \
   -v $PWD:/work \
   --link a_onboard_server:a.bouvetinterchange.eu \
   --link a_qpid:a.qpid.bouvetinterchange.eu \

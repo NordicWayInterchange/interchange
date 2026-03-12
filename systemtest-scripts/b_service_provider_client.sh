@@ -7,10 +7,9 @@ URL="https://b.bouvetinterchange.eu:8696/"
 docker run \
   -it \
   --rm \
-  --name b_service_provider_client${RANDOM} \
   --network=systemtest-scripts_testing_net \
   --dns=172.28.1.1 \
-  -v $PWD/../tmp/keys:/keys \
+  -v systemtest-keys-volume:/keys \
   -v $PWD:/work \
   --link b_onboard_server:b.bouvetinterchange.eu \
   --link b_qpid:b.qpid.bouvetinterchange.eu \
