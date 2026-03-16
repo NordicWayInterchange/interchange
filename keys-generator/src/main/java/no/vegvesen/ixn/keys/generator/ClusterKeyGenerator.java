@@ -159,7 +159,7 @@ public class ClusterKeyGenerator {
         return new CaStore(response.name(), truststorePath, truststorePassword,keystorePath,keystorePassword);
     }
 
-    private static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    public static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         List<HostStore> hostStores = new ArrayList<>();
         for (HostResponse hostResponse : hostResponses) {
             String hostPassword = randomPasswordGenerator.generatePassword();
@@ -393,6 +393,13 @@ public class ClusterKeyGenerator {
         JcaPEMWriter pemWriter;
         pemWriter = new JcaPEMWriter(keyWriter);
         pemWriter.writeObject(keyPair);
+        pemWriter.close();
+    }
+
+    public static void saveCSR(PKCS10CertificationRequest csr, Writer keyWriter) throws IOException {
+        JcaPEMWriter pemWriter;
+        pemWriter = new JcaPEMWriter(keyWriter);
+        pemWriter.writeObject(csr);
         pemWriter.close();
     }
 

@@ -179,7 +179,7 @@ jobs:
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
-      - uses: docker/setup-quemu-action@v4
+        uses: docker/setup-quemu-action@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
