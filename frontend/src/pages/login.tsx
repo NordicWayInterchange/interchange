@@ -49,17 +49,6 @@ export default function Login({providers}: InferGetServerSidePropsType<
                 </StyledButton>
             </div>
         ))}
-
-      {/*<StyledButton*/}
-      {/*  variant="contained"*/}
-      {/*  color={"buttonThemeColor"}*/}
-      {/*  sx={{ textTransform: "none", width: 200, alignSelf: "center" }}*/}
-      {/*  onClick={() => {*/}
-      {/*    void signIn("auth0");*/}
-      {/*  }}*/}
-      {/*>*/}
-      {/*  <Typography>Sign in</Typography>*/}
-      {/*</StyledButton>*/}
     </Card>
   );
 }

@@ -1,6 +1,6 @@
 import fs from "fs"
 
-const CONFIG_PATH = "/frontend/auth.config.json"
+const CONFIG_PATH = "../auth.config.json"
 
 export interface AuthProviderConfig {
     type: "keycloak" | "auth0"
