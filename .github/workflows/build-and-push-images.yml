@@ -184,7 +184,7 @@ jobs:
           docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
 
       - name: Login to Github container registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.0.0
         with:
           registry: ghcr.io
           username: "Github Actions"
