@@ -15,7 +15,9 @@ import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 export default function Login({providers}: InferGetServerSidePropsType<
   typeof getServerSideProps
 >) {
-  return (
+    console.log(providers)
+
+    return (
     <Card
       variant="outlined"
       sx={{
@@ -35,22 +37,18 @@ export default function Login({providers}: InferGetServerSidePropsType<
         christian.berg.skjetne@vegvesen.no requesting access.
       </Typography>
 
-      <Typography variant="body1">
-        Sign in.
-      </Typography>
-
-    {providers && Object.values(providers).map((provider) => (
-          <div key={provider.id}>
-            <StyledButton
-                variant="contained"
-                color={"buttonThemeColor"}
-                sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
-                onClick={() => signIn(provider.id)}
-            >
-              <Typography>Sign in</Typography>
-            </StyledButton>
-          </div>
-      ))}
+        {providers && Object.values(providers).map((provider) => (
+            <div key={provider.id}>
+                <StyledButton
+                    variant="contained"
+                    color="buttonThemeColor"
+                    sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
+                    onClick={() => signIn(provider.id)}
+                >
+                    <Typography>Sign in with {provider.name}</Typography>
+                </StyledButton>
+            </div>
+        ))}
 
       {/*<StyledButton*/}
       {/*  variant="contained"*/}

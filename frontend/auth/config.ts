@@ -1,6 +1,6 @@
 import fs from "fs"
 
-const CONFIG_PATH = "/etc/napcore/auth.config.json"
+const CONFIG_PATH = "/frontend/auth.config.json"
 
 export interface AuthProviderConfig {
     type: "keycloak" | "auth0"
@@ -25,7 +25,19 @@ export function loadAuthConfig(): AuthConfig {
     try {
         if (fs.existsSync(CONFIG_PATH)) {
             const raw = fs.readFileSync(CONFIG_PATH, "utf8")
-            return JSON.parse(raw)
+            const config = JSON.parse(raw)
+
+            config.providers = config.providers.map((p: AuthProviderConfig) => ({
+                ...p,
+                clientId: resolveEnv(p.clientId),
+                clientSecret: resolveEnv(p.clientSecret),
+                issuer: resolveEnv(p.issuer),
+                realm: resolveEnv(p.realm),
+                externalUrl: resolveEnv(p.externalUrl),
+                internalUrl: resolveEnv(p.internalUrl),
+            }))
+
+            return config
         }
     } catch (err) {
         console.error("Failed to load auth config:", err)
@@ -47,4 +59,15 @@ export function loadAuthConfig(): AuthConfig {
             }
         ]
     }
+}
+
+function resolveEnv(value?: string) {
+    if (!value) return value
+
+    if (value.startsWith("$")) {
+        const envName = value.substring(1)
+        return process.env[envName]
+    }
+
+    return value
 }

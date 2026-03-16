@@ -59,6 +59,5 @@ export const authOptions = {
     signIn: "/login",
   },
 };
-export default NextAuth({
-  providers: buildProviders(),
-})
+
+export default NextAuth(authOptions);
