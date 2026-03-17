@@ -80,6 +80,13 @@ public class LocalSubscription {
         this.connections.addAll(connections);
         this.localEndpoints.addAll(localEndpoints);
     }
+    public LocalSubscription(LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
+        this.status = status;
+        this.selector = selector;
+        this.consumerCommonName = consumerCommonName;
+        this.connections.addAll(connections);
+        this.localEndpoints.addAll(localEndpoints);
+    }
 
     public LocalSubscription(String uuid, LocalSubscriptionStatus status, String selector, String consumerCommonName, Set<LocalConnection> connections, Set<LocalEndpoint> localEndpoints) {
         this.uuid = uuid;

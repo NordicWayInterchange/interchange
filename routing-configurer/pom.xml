@@ -83,6 +83,12 @@
             <artifactId>local-delivery-service</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>local-subscription-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
