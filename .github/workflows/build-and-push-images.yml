@@ -198,6 +198,6 @@ jobs:
 
       - name: Push docker image to Github container registry
         run: |
-          #docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
           docker image push ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
 
