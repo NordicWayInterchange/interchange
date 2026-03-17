@@ -1,6 +1,8 @@
 import fs from "fs"
 
-const CONFIG_PATH = "../auth.config.json"
+import path from "path";
+
+const CONFIG_PATH = path.join(process.cwd(), "auth.config.json");
 
 export interface AuthProviderConfig {
     type: "keycloak" | "auth0"
@@ -26,7 +28,7 @@ export function loadAuthConfig(): AuthConfig {
         if (fs.existsSync(CONFIG_PATH)) {
             const raw = fs.readFileSync(CONFIG_PATH, "utf8")
             const config = JSON.parse(raw)
-
+            console.log("config", config)
             config.providers = config.providers.map((p: AuthProviderConfig) => ({
                 ...p,
                 clientId: resolveEnv(p.clientId),
@@ -40,7 +42,7 @@ export function loadAuthConfig(): AuthConfig {
             return config
         }
     } catch (err) {
-        console.error("Failed to load auth config:", err)
+        throw new Error("Auth config failed to load");
     }
 
     // Default fallback (Keycloak)
