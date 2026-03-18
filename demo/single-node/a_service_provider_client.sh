@@ -1,22 +1,16 @@
 #!/bin/bash
 
-SERVICE_PROVIDER="king_olav.interchangedomain.com"
-URL=""
-
-if [ "$1" == 'messages' ]; then
-URL="amqps://a.qpid.interchangedomain.com"
-
-else
+SERVICE_PROVIDER="a.interchangedomain.lookupdomain.king_olav@slottet.no"
 URL="https://a.interchangedomain.com:8797/"
-fi
+VOLUME_NAME=single-node-keys-volume
 
 docker run \
   -it \
   --rm \
   --network=single-node_singletest \
   --dns=172.28.1.1 \
-  -v $PWD/../keys/a:/keys \
-  -v $PWD:/work \
-  --link a_onboard_server:a.interchangedomain.com \
-  --link a_qpid:a.qpid.interchangedomain.com \
-  ghcr.io/nordicwayinterchange/service-provider-client:$(<version) -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.interchangedomain.com.jks -w password $URL -u ${SERVICE_PROVIDER} "$@"
+  -v ${VOLUME_NAME}:/keys \
+  -v ${PWD}:/work \
+  --link a-onboard-server:a.interchangedomain.com \
+  --link a-qpid:a.qpid.interchangedomain.com \
+  ghcr.io/nordicwayinterchange/service-provider-client:$(<version) -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.interchangedomain.com.jks -w password ${URL} -u ${SERVICE_PROVIDER} "$@"

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -23,7 +22,6 @@ public class LocalDeliveryEndpoint {
 
     private Integer maxMessageRate;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String dlqName;
 
     public LocalDeliveryEndpoint() {
