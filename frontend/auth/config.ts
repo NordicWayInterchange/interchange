@@ -1,6 +1,7 @@
 import fs from "fs"
 
 import path from "path";
+import { z } from "zod";
 
 const CONFIG_PATH = path.join(process.cwd(), "auth.config.json");
 
@@ -22,6 +23,27 @@ export interface AuthConfig {
     defaultProvider: string
     providers: AuthProviderConfig[]
 }
+
+const envSchema = z.object({
+    KEYCLOAK_CLIENT_ID: z.string().min(1),
+    KEYCLOAK_CLIENT_SECRET: z.string().min(1),
+    KEYCLOAK_REALM: z.string().min(1),
+    EXTERNAL_KEYCLOAK_URL: z.string(),
+    INTERNAL_KEYCLOAK_URL: z.string(),
+});
+
+const env = envSchema.parse(process.env);
+
+const providerSchema = z.object({
+    type: z.literal("keycloak"),
+    id: z.literal("keycloak"),
+    name: z.string(),
+    clientId: z.string(),
+    clientSecret: z.string(),
+    realm: z.string(),
+    externalUrl: z.string(),
+    internalUrl: z.string(),
+});
 
 export function loadAuthConfig(): AuthConfig {
     try {
@@ -52,13 +74,13 @@ export function loadAuthConfig(): AuthConfig {
                 type: "keycloak",
                 id: "keycloak",
                 name: "Login",
-                clientId: process.env.KEYCLOAK_CLIENT_ID!,
-                clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
-                realm: process.env.KEYCLOAK_REALM!,
-                externalUrl: process.env.EXTERNAL_KEYCLOAK_URL!,
-                internalUrl: process.env.INTERNAL_KEYCLOAK_URL!,
-            }
-        ]
+                clientId: env.KEYCLOAK_CLIENT_ID,
+                clientSecret: env.KEYCLOAK_CLIENT_SECRET,
+                realm: env.KEYCLOAK_REALM,
+                externalUrl: env.EXTERNAL_KEYCLOAK_URL,
+                internalUrl: env.INTERNAL_KEYCLOAK_URL,
+            },
+        ],
     }
 }
 
