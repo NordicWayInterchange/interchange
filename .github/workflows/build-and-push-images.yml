@@ -148,15 +148,14 @@ jobs:
           registry: ghcr.io
           username: "Github Actions"
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
       - name: Build the Docker image
         run: |
           cd ./frontend
-          docker build . -t napcore-frontend
-      - name: Push docker image to Github container registry
-        run: |
-          docker tag napcore-frontend ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }}
-          docker push --all-tags ghcr.io/nordicwayinterchange/napcore-frontend
-
+          docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }} --push
 
   docker-push-svv:
     runs-on: ubuntu-latest
@@ -195,5 +194,4 @@ jobs:
         run: |
           cd ./${{ matrix.Images }}          
           docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout) --push
-          # docker image push ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
 
