@@ -225,7 +225,9 @@
         <profile>
             <id>versions</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>!project.version.endsWith('-SNAPSHOT')</name>
+                </property>
             </activation>
             <build>
                 <plugins>
