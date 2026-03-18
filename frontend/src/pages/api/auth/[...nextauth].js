@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
-import Auth0Provider from "next-auth/providers/auth0";
 import { escapeString } from "@/lib/escapeString";
-import {buildProviders} from "../../../../auth/providers";
+import buildProviders from "../../../../auth/providers";
 const logger = require("../../../lib/logger");
 
 export const authOptions = {

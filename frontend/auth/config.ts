@@ -28,7 +28,6 @@ export function loadAuthConfig(): AuthConfig {
         if (fs.existsSync(CONFIG_PATH)) {
             const raw = fs.readFileSync(CONFIG_PATH, "utf8")
             const config = JSON.parse(raw)
-            console.log("config", config)
             config.providers = config.providers.map((p: AuthProviderConfig) => ({
                 ...p,
                 clientId: resolveEnv(p.clientId),
