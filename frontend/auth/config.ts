@@ -32,19 +32,6 @@ const envSchema = z.object({
     INTERNAL_KEYCLOAK_URL: z.string(),
 });
 
-const env = envSchema.parse(process.env);
-
-const providerSchema = z.object({
-    type: z.literal("keycloak"),
-    id: z.literal("keycloak"),
-    name: z.string(),
-    clientId: z.string(),
-    clientSecret: z.string(),
-    realm: z.string(),
-    externalUrl: z.string(),
-    internalUrl: z.string(),
-});
-
 export function loadAuthConfig(): AuthConfig {
     try {
         if (fs.existsSync(CONFIG_PATH)) {
@@ -65,6 +52,8 @@ export function loadAuthConfig(): AuthConfig {
     } catch (err) {
         throw new Error("Auth config failed to load");
     }
+
+    const env = envSchema.parse(process.env);
 
     // Default fallback (Keycloak)
     return {
