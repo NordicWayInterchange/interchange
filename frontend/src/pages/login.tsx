@@ -37,12 +37,16 @@ export default function Login({providers}: InferGetServerSidePropsType<
         christian.berg.skjetne@vegvesen.no requesting access.
       </Typography>
 
+        <Typography variant="body1">
+            Sign in will redirect you to Keycloak or Auth0 provider.
+        </Typography>
+
         {providers && Object.values(providers).map((provider) => (
             <div key={provider.id}>
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
-                    sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
+                    sx={{ textTransform: "none", width: 250, alignSelf: "center" }}
                     onClick={() => signIn(provider.id)}
                 >
                     <Typography>Sign in with {provider.name}</Typography>
