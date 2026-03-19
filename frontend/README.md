@@ -98,6 +98,13 @@ We use the JavaScript library PKI.js to create a CSR. The CSR is created client-
 
 ---
 
+Napcore supports both keycloak and Auth0.
+
+Keycloak is an open source identity and access management solution. It adds authentication to applications and secure services. https://www.keycloak.org/
+
+```example_auth_config.json``` file provides an example of the expected structure for auth_config.json which is loaded using ```CONFIG_PATH = path.join(process.cwd(), "auth_config.json")``` in config.ts.
+Please add your Keycloak or Auth0 configuration to this file.
+
 NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
 
 Other providers can be added in […nextAuth].js
@@ -105,9 +112,9 @@ Other providers can be added in […nextAuth].js
 ```jsx
 providers: [
     Auth0Provider({
-      clientId: process.env.AUTH0_CLIENT_ID,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET,
-      issuer: process.env.AUTH0_ISSUER,
+      clientId: AUTH0_CLIENT_ID,
+      clientSecret: AUTH0_CLIENT_SECRET,
+      issuer: AUTH0_ISSUER,
     })
   ]
 ```

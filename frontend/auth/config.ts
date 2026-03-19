@@ -3,7 +3,7 @@ import fs from "fs"
 import path from "path";
 import { z } from "zod";
 
-const CONFIG_PATH = path.join(process.cwd(), "auth.config.json");
+const CONFIG_PATH = path.join(process.cwd(), "auth_config.json");
 
 export interface AuthProviderConfig {
     type: "keycloak" | "auth0"

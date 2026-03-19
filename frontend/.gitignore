@@ -28,8 +28,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
+# local env and json files
 .env.*
+auth_config.json
 
 # vercel
 .vercel
