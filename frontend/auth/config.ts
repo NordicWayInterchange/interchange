@@ -53,7 +53,14 @@ export function loadAuthConfig(): AuthConfig {
         throw new Error("Auth config failed to load");
     }
 
-    const env = envSchema.parse(process.env);
+    const result = envSchema.safeParse(process.env);
+    if (!result.success) {
+        return {
+            defaultProvider: "keycloak",
+            providers: [],
+        };
+    }
+    const env = result.data;
 
     // Default fallback (Keycloak)
     return {
