@@ -2,15 +2,15 @@ package no.vegvesen.ixn.federation.discoverer;
 
 import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.service.NeighbourSubscriptionDeleteService;
+import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -45,9 +45,7 @@ public class NeighbourDiscoverer {
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
-	private final MatchDiscoveryService matchDiscoveryService;
 	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
-	private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
 
 
 	@Autowired
@@ -56,17 +54,13 @@ public class NeighbourDiscoverer {
 						ServiceProviderService serviceProviderService,
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
-						MatchDiscoveryService matchDiscoveryService,
-						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
-						OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
+						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService) {
 		this.neighbourService = neighbourService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
-		this.matchDiscoveryService = matchDiscoveryService;
 		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
-		this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
 	}
 
@@ -124,7 +118,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
 	public void syncServiceProviders() {
-		serviceProviderService.syncServiceProviders(interchangeNodeProperties.getBrokerExternalName(), Integer.parseInt(interchangeNodeProperties.getMessageChannelPort()));
+		serviceProviderService.syncServiceProviders();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -137,25 +131,6 @@ public class NeighbourDiscoverer {
 		neigbourDiscoveryService.setGiveUpSubscriptionsToTearDownForRemoval();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void createMatches() {
-		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderService.getServiceProviders(), neighbourService.findAllNeighboursByIgnoreIs(false));
-	}
-
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void createOutgoingMatches() {
-		outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(serviceProviderService.getServiceProviders());
-	}
-
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void updateOutgoingMatchesToTearDown() {
-		outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
-	}
-
-	@Scheduled(fixedRateString = "${discoverer.match-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void syncMatchesToDelete() {
-		matchDiscoveryService.syncMatchesToDelete();
-	}
 
 	@Scheduled(fixedRateString = "10000", initialDelayString = "8000")
 	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();}

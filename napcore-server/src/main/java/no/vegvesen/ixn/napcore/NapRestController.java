@@ -246,7 +246,11 @@ public class NapRestController {
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
         }
 
-        LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(deliveryRequest);
+        LocalDelivery localDelivery = typeTransformer.transformNapDeliveryToLocalDelivery(
+                deliveryRequest,
+                napCoreProperties.getBrokerExternalName(),
+                Integer.parseInt(napCoreProperties.getMessageChannelPort())
+        );
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
         if(serviceProvider.getDeliveries().contains(localDelivery)){

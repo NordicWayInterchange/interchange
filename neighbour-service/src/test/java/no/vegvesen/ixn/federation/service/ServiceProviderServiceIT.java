@@ -74,13 +74,13 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
@@ -116,7 +116,7 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         Match match = new Match(localSubscription, subscription);
         matchRepository.save(match);
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
@@ -125,57 +125,11 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         matchRepository.deleteAll();
         neighbourRepository.deleteAll();
 
-        service.syncServiceProviders("my-node", 5671);
+        service.syncServiceProviders();
 
         ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
         assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);
     }
-
-
-    @Test
-    public void deliveryReceivesExchangeNameWhenItDoesNotExist(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-
-        // Will only receive Exchange Name if outgoing match(es) exist
-        OutgoingMatch outgoingMatch = new OutgoingMatch(delivery, null, serviceProvider.getName());
-        outgoingMatchRepository.save(outgoingMatch);
-
-        repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName(), "my-interchange", 5671);
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
-
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getEndpoints()).hasSize(1);
-    }
-
-    @Test
-    public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExist(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'",  LocalDeliveryStatus.CREATED, "Description", false);
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-        repository.save(serviceProvider);
-
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
-    }
-
-    @Test
-    public void deliveryStatusIsSetToNo_OverlapWhenNoMatchesExistAndNoMatchingCapabilitiesExists(){
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
-        LocalDelivery delivery = new LocalDelivery();
-        serviceProvider.addDeliveries(new HashSet<>(Arrays.asList(delivery)));
-
-        repository.save(serviceProvider);
-        service.updateDeliveryStatus(serviceProvider.getName(), "our-node", 5671);
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProvider.getName());
-        assertThat(savedServiceProvider.getDeliveries().stream().findFirst().get().getStatus()).isEqualTo(LocalDeliveryStatus.NO_OVERLAP);
-    }
-
 
     @Test
     public void capabilityIsNotRemovedWhenThereAreOutgoingMatches(){
@@ -261,18 +215,5 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
         assertThat(savedServiceProvider.getCapabilities().getCapabilities()).hasSize(1);
     }
 
-    @Test
-    public void deliveryWithErrorGetsRemovedFromServiceProvider(){
-        String serviceProviderName = "my-service-provider";
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
-        LocalDelivery delivery = new LocalDelivery("originatingCountry='NO'", LocalDeliveryStatus.ERROR, "description", false);
-        serviceProvider.addDeliveries(Set.of(delivery));
-
-        repository.save(serviceProvider);
-        service.removeTearDownIllegalAndErrorDeliveries(serviceProviderName);
-
-        ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
-        assertThat(savedAgainServiceProvider.getDeliveries()).hasSize(0);
-    }
 
 }

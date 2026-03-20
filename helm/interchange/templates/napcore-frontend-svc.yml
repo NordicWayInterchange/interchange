@@ -15,8 +15,8 @@ spec:
     component: napcore-frontend
     release: {{ .Release.Name }}
   ports:
-  - name: nap-frontend
-    port: 3000 # TODO externalize
-    targetPort: 3000  # TODO externalize
-    protocol: TCP
+    - name: nap-frontend
+      port: 3000           # TODO externalize
+      targetPort: 3000     # TODO externalize
+      protocol: TCP
 {{- end }}

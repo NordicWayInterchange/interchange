@@ -29,9 +29,9 @@ spec:
             - name: POSTGRES_URI
               value: jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres_user }}
+              value: {{ .Values.postgres_user | quote }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgres_password }}
+              value: {{ .Values.postgres_password | quote }}
             - name: SERVER_NAME
               value: {{ .Values.external_name | quote }}
             - name: NAP_NAME
@@ -49,9 +49,9 @@ spec:
             - name: SIGN_STORE
               value: "{{ .Values.napcore_server.mount_path }}sign_keystore.p12"
             - name: SIGN_STORE_PASSWORD
-              value: {{ .Values.napcore_server_sign_store_password }}
+              value: {{ .Values.napcore_server_sign_store_password | quote }}
             - name: SIGN_STORE_ALIAS
-              value: {{ .Values.napcore_server.sign_store_alias }}
+              value: {{ .Values.napcore_server.sign_store_alias | quote }}
             - name: BROKER_EXTERNAL_NAME
               value: {{ .Values.broker_external_name }}
             - name: LOG_LEVELS

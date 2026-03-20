@@ -10,12 +10,16 @@
     },{
       "name": "a.qpid.interchangedomain.com"
     }, {
-        "name": "a_qpid"
+        "name": "a-qpid"
     } ],
     "clientRequests" : [ {
-      "name" : "king_olav.interchangedomain.com",
+      "name" : "a.interchangedomain.lookupdomain.king_olav@slottet.no",
       "country" : "NO",
-      "email" : "post@slottet.no"
+      "email" : "king_olav@slottet.no"
+    },{
+      "name" : "nap.a.interchangedomain.com",
+      "country" : "NO",
+      "email" : "nap@a.interchangedomain.com"
     } ]
   }],
   "hostRequests" : [ ],

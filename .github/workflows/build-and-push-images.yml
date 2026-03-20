@@ -127,12 +127,43 @@ jobs:
           name: interchange
           path: ./
 
+  build-napcore:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download persisted workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: interchange
+      - name: Tags to variables
+        run: |
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+          echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
+      - name: Login to Github container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Build the Docker image
+        run: |
+          cd ./frontend
+          docker build . -t napcore-frontend
+      - name: Push docker image to Github container registry
+        run: |
+          docker tag napcore-frontend ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }}
+          docker push --all-tags ghcr.io/nordicwayinterchange/napcore-frontend
+
+
   docker-push-svv:
     runs-on: ubuntu-latest
     needs: build
     strategy:
       matrix:
-        Images: [qpid,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
+        Images: [message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
     defaults:
       run:
         shell: bash

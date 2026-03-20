@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.model;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ConnectionTest {
     private GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
@@ -67,16 +67,16 @@ class ConnectionTest {
     public void canBeContactedWhenConnectionStatusIsCONNECTED() {
         Connection connection = new Connection();
         connection.okConnection();
-        Assert.assertTrue(connection.canBeContacted(backoffProperties));
-        Assert.assertEquals(connection.getConnectionStatus(), ConnectionStatus.CONNECTED);
+        assertTrue(connection.canBeContacted(backoffProperties));
+        assertEquals(ConnectionStatus.CONNECTED, connection.getConnectionStatus());
     }
 
     @Test
     public void canBeContactedWhenConnectionStatusIsFAILED() {
         Connection connection = new Connection();
         connection.failedConnection(4);
-        Assert.assertFalse(connection.canBeContacted(backoffProperties));
-        Assert.assertEquals(connection.getConnectionStatus(), ConnectionStatus.FAILED);
+        assertFalse(connection.canBeContacted(backoffProperties));
+        assertEquals(ConnectionStatus.FAILED, connection.getConnectionStatus());
     }
 
     @Test
@@ -85,14 +85,14 @@ class ConnectionTest {
         connection.setBackoffStart(LocalDateTime.now());
         connection.setBackoffAttempts(4);
         connection.failedConnection(4);
-        Assert.assertFalse(connection.canBeContacted(backoffProperties));
-        Assert.assertEquals(connection.getConnectionStatus(), ConnectionStatus.UNREACHABLE);
+        assertFalse(connection.canBeContacted(backoffProperties));
+        assertEquals(ConnectionStatus.UNREACHABLE, connection.getConnectionStatus());
     }
 
     @Test
     public void canBeContactedWhenLastFailedConnectionAttemptIsNull() {
         Connection connection = new Connection();
         connection.setConnectionStatus(ConnectionStatus.UNREACHABLE);
-        Assert.assertTrue(connection.canBeContacted(backoffProperties));
+        assertTrue(connection.canBeContacted(backoffProperties));
     }
 }

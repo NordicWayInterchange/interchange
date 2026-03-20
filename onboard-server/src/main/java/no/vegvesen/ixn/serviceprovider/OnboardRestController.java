@@ -411,7 +411,7 @@ public class OnboardRestController {
 			PrivateChannel newPrivateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, privateChannelToAdd.getDescription(), serviceProviderName);
 
 			String queueName = "priv-"+UUID.randomUUID();
-			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
+			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
 			newPrivateChannel.setEndpoint(endpoint);
 
 			PrivateChannel savedChannel = privateChannelRepository.save(newPrivateChannel);
@@ -594,10 +594,15 @@ public class OnboardRestController {
 		logger.info("Service provider {} Incoming delivery selector {}", serviceProviderName, request.getDeliveries());
 
 
+		//TODO test the new functionality
 		Set<LocalDelivery> localDeliveries = new HashSet<>();
         Set<LocalDelivery> errorDeliveries = new HashSet<>();
 		for(AddDelivery delivery : request.getDeliveries()) {
-			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(delivery);
+			LocalDelivery localDelivery = typeTransformer.transformDeliveryToLocalDelivery(
+					delivery,
+					nodeProperties.getBrokerExternalName(),
+					Integer.parseInt(nodeProperties.getMessageChannelPort())
+			);
 			String selector = localDelivery.getSelector();
 			if (selector == null) {
 				localDelivery.setStatus(LocalDeliveryStatus.ERROR);
