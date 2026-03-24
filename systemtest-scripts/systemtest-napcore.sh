@@ -8,10 +8,12 @@ if [ ! -f napcoresettings ]; then
         exit 1
 fi
 . napcoresettings
-echo Running system test on branch $BRANCH with tag $BRANCH_TAG
 export JAR_VERSION=$(mvn -f .. org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
-
+echo "Running system test on branch $BRANCH with tag $BRANCH_TAG, jar version $JAR_VERSION"
 docker build ../service-provider-client -t onboard_rest_client --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../napcore-rest-client -t napcore_rest_client --build-arg JAR_VERSION=$JAR_VERSION
-[ -f ../tmp/keys/a.bouvetinterchange.eu.p12 ] || ./systemtest-keys.sh
+docker build ../keys-generator -t keys-generator --build-arg JAR_VERSION=$JAR_VERSION
+VOLUME_NAME=systemtest-keys-volume
+VOL_EXISTS=$( docker volume ls --format '{{.Name}}' -f name=${VOLUME_NAME})
+[ -n "$VOL_EXISTS" ] || ./systemtest-keys.sh
 docker-compose -f systemtest.yml -f systemtest-napcore.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker-compose -f systemtest.yml -f systemtest-napcore.yml up

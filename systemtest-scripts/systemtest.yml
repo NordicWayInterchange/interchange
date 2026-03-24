@@ -1,4 +1,3 @@
-version: '3'
 services:
 
 # Note: now all the containers are on the same network - testing_net
@@ -46,7 +45,7 @@ services:
     ports:
       - 32665:8899
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - BASE_URL=https://a.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
@@ -56,9 +55,9 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8899
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - ADMIN_NAME=admin.a.bouvetinterchange.eu
     networks:
@@ -74,7 +73,7 @@ services:
     ports:
       - 32666:8797
     volumes:
-    - "../tmp:/jks"
+    - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
@@ -82,9 +81,9 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
@@ -99,7 +98,7 @@ services:
     ports:
       - 32777:8898
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
@@ -108,11 +107,11 @@ services:
       - NAP_NAME=nap.a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - SIGN_STORE=/jks/keys/ca.a.bouvetinterchange.eu.p12
+      - SIGN_STORE=/keys/ca.a.bouvetinterchange.eu.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
@@ -129,13 +128,13 @@ services:
       - 5672
     volumes:
       - "../qpid/a:/qpid-broker-j/work-override"
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - INTERNAL_KEY_STORE=/jks/keys/a_qpid.p12
+      - INTERNAL_KEY_STORE=/keys/a_qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.qpid.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
@@ -153,7 +152,7 @@ services:
     ports:
       - 8090
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
@@ -161,9 +160,9 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
     - testing_net
@@ -177,16 +176,16 @@ services:
     depends_on:
       - a_db
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a_qpid
       - SERVER_NAME=a.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
@@ -202,7 +201,7 @@ services:
     links:
      - "b_neighbour_server:b.bouvetinterchange.eu"
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
@@ -210,9 +209,9 @@ services:
       - SERVER_NAME=a.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     dns: 172.28.1.1
@@ -230,15 +229,15 @@ services:
     - "a_qpid:a.qpid.bouvetinterchange.eu"
     - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
-    - "../tmp:/jks"
+    - "systemtest-keys-volume:/keys"
     environment:
     - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
-    - KEY_STORE=/jks/keys/a.bouvetinterchange.eu.p12
+    - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+    - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=password
     - TRUST_STORE_TYPE=JKS
     - SERVER_NAME=a.bouvetinterchange.eu
@@ -272,7 +271,7 @@ services:
     ports:
       - 32667:8899
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - BASE_URL=https://b.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
@@ -282,9 +281,9 @@ services:
       - SERVER_NAME=b.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - SP_CHNL_PORT=8899
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - ADMIN_NAME=admin.b.bouvetinterchange.eu
     networks:
@@ -300,7 +299,7 @@ services:
     ports:
     - 32555:8696
     volumes:
-    - "../tmp:/jks"
+    - "systemtest-keys-volume:/keys"
     environment:
     - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
     - POSTGRES_USER=federation
@@ -308,9 +307,9 @@ services:
     - SERVER_NAME=b.bouvetinterchange.eu
     - DOMAIN_NAME=bouvetinterchange.eu
     - SP_CHNL_PORT=8696
-    - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+    - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
     - TRUST_STORE_PASSWORD=password
-    - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+    - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
     - KEY_STORE_PASSWORD=password
     - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
@@ -326,7 +325,7 @@ services:
     ports:
       - 8090
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
@@ -334,9 +333,9 @@ services:
       - SERVER_NAME=b.bouvetinterchange.eu
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
@@ -352,7 +351,7 @@ services:
     links:
       - "a_neighbour_server:a.bouvetinterchange.eu"
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
@@ -361,9 +360,9 @@ services:
       #- NODE_PROVIDER_NAME=b.bouvetinterchange.eu # "my name"
       - DOMAIN_NAME=bouvetinterchange.eu
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
     networks:
@@ -380,13 +379,13 @@ services:
       - 5672
     volumes:
       - "../qpid/b:/qpid-broker-j/work-override"
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.qpid.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.qpid.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - INTERNAL_KEY_STORE=/jks/keys/b_qpid.p12
+      - INTERNAL_KEY_STORE=/keys/b_qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
       - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
@@ -402,16 +401,16 @@ services:
     depends_on:
       - b_db
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://b_qpid
       - SERVER_NAME=b.bouvetinterchange.eu
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=b.qpid.bouvetinterchange.eu
 
@@ -429,15 +428,15 @@ services:
       - "a_qpid:a.qpid.bouvetinterchange.eu"
       - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
-      - "../tmp:/jks"
+      - "systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://b_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - KEY_STORE=/jks/keys/b.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/b.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE=/jks/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=b.bouvetinterchange.eu
@@ -453,4 +452,7 @@ networks:
       config:
       - subnet: 172.28.0.0/16
 
+volumes:
+  systemtest-keys-volume:
+    external: true
 
