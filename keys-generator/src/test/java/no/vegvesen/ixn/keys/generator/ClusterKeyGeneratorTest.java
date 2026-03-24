@@ -306,23 +306,6 @@ public class ClusterKeyGeneratorTest {
         sp.certificate().verify(topCa.keyPair().getPublic());
     }
 
-
-    @Test
-    public void generateKeys() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException {
-        List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : CA_REQUESTS) {
-            responses.add(ClusterKeyGenerator.generate(request));
-        }
-        Writer responseWriter = new StringWriter();
-        ClusterKeyGenerator.writeCaReponsesToJson(responseWriter, responses);
-        String responseJson = responseWriter.toString();
-        Reader responseReader = new StringReader(responseJson);
-        List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);
-        assertThat(result).hasSize(CA_REQUESTS.size());
-        System.out.println(responseJson);
-    }
-
-
     @Test
     public void requests() throws IOException {
         Path outPath = Paths.get("").toAbsolutePath().getParent().resolve("target").resolve("test-keys").resolve(ClusterKeyGeneratorTest.class.getSimpleName());

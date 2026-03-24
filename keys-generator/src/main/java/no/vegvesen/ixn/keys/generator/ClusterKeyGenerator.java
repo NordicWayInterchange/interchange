@@ -1,9 +1,5 @@
 package no.vegvesen.ixn.keys.generator;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.cert.CsrGenerator;
 import no.vegvesen.ixn.cert.KeyPairAndCsr;
@@ -55,7 +51,6 @@ import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -102,6 +97,7 @@ public class ClusterKeyGenerator {
         return new CaResponse(ca, caRequest.name(), hostResponses, clientResponses,responses);
     }
 
+    /*
     public static void storePems(CaResponse response, Path basePath) throws IOException {
         saveKeyPair(response.details().keyPair(), Files.newBufferedWriter(basePath.resolve(response.name() + ".pem")));
         for (HostResponse hostResponse : response.hostResponses()) {
@@ -114,7 +110,7 @@ public class ClusterKeyGenerator {
             storePems(caResponse, basePath);
         }
     }
-
+*/
     /**
      * Makes a keystore and truststore for the CA (truststore containing the CA cert),
      * and keystores for each host and client in the chain
@@ -159,7 +155,7 @@ public class ClusterKeyGenerator {
         return new CaStore(response.name(), truststorePath, truststorePassword,keystorePath,keystorePassword);
     }
 
-    private static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    public static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         List<HostStore> hostStores = new ArrayList<>();
         for (HostResponse hostResponse : hostResponses) {
             String hostPassword = randomPasswordGenerator.generatePassword();
@@ -173,7 +169,7 @@ public class ClusterKeyGenerator {
         return hostStores;
     }
     
-    private static List<ClientStore> storeClientStores(Path basePath, PasswordGenerator randomPasswordGenerator, List<ClientResponse> clientResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    public static List<ClientStore> storeClientStores(Path basePath, PasswordGenerator randomPasswordGenerator, List<ClientResponse> clientResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         List<ClientStore> clientStores = new ArrayList<>();
         for (ClientResponse clientResponse : clientResponses) {
             String clientPassword = randomPasswordGenerator.generatePassword();
@@ -192,6 +188,12 @@ public class ClusterKeyGenerator {
 
     public static ClientStore getClientStore(String serviceProviderName, Stream<ClientStore> stream) {
         return stream.filter(c -> c.clientName().equals(serviceProviderName)).findAny().orElseThrow(() -> new RuntimeException("No client store found for " + serviceProviderName));
+    }
+
+    public static void saveCSR(PKCS10CertificationRequest csr, Writer writer) throws IOException {
+        JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
+        pemWriter.writeObject(csr);
+        pemWriter.close();
     }
 
 
@@ -222,7 +224,7 @@ public class ClusterKeyGenerator {
         return clientResponses;
     }
 
-    private static List<HostResponse> getHostResponses(List<HostRequest> hosts, CertificateCertificateChainAndKeys issuer, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public static List<HostResponse> getHostResponses(List<HostRequest> hosts, CertificateCertificateChainAndKeys issuer, SecureRandom random) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
         List<HostResponse> hostResponses = new ArrayList<>();
         for (HostRequest hostRequest : hosts) {
             CertificateCertificateChainAndKeys hostDetails = generateServerCertForHost(hostRequest.name(), issuer.certificate(), issuer.certificateChain(), issuer.keyPair().getPrivate(), random);
@@ -476,32 +478,6 @@ public class ClusterKeyGenerator {
         return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) parser.readObject());
     }
 
-    public static List<CaResponse> readCaResponsesFromJson(Reader reader) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(
-                CertificateCertificateChainAndKeys.class,
-                new CertificateCertificateChainAndKeysDeserializer()
-        );
-        mapper.registerModule(module);
-        return mapper.readerForListOf(CaResponse.class).readValue(reader);
-    }
-
-    public static void writeCaReponsesToJson(Writer writer, List<CaResponse> responses) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(
-                CertificateCertificateChainAndKeys.class,
-                new CertificateCertificateChainAndKeysSerializer()
-        );
-        mapper.registerModule(module);
-        mapper.writerWithDefaultPrettyPrinter().writeValue(
-                writer,
-                responses
-        );
-    }
-
-
     public record KeyPairAndCertificate(KeyPair keyPair, X509Certificate certificate) {
     }
 
@@ -550,54 +526,4 @@ public class ClusterKeyGenerator {
     public record CertificateCertificateChainAndKeys(KeyPair keyPair, X509Certificate certificate, List<X509Certificate> certificateChain) {
     }
 
-    public static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<CertificateCertificateChainAndKeys> {
-
-        @Override
-        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeStartObject();
-            StringWriter keyWriter = new StringWriter();
-            Base64.Encoder encoder = Base64.getEncoder();
-            saveKeyPair(value.keyPair(), keyWriter);
-            String keypairString = encoder.encodeToString(keyWriter.toString().getBytes());
-            gen.writeStringField("keypair", keypairString);
-            StringWriter certWriter = new StringWriter();
-            saveCert(value.certificate(), certWriter);
-            String certString = encoder.encodeToString(certWriter.toString().getBytes());
-            gen.writeStringField("cert",certString);
-            StringWriter certChainWriter = new StringWriter();
-            saveCertChain(value.certificateChain(), certChainWriter);
-            String certChainString = encoder.encodeToString(certChainWriter.toString().getBytes());
-            gen.writeStringField("certChain",certChainString);
-            gen.writeEndObject();
-        }
-    }
-
-    public static class CertificateCertificateChainAndKeysDeserializer extends JsonDeserializer<CertificateCertificateChainAndKeys> {
-
-        @Override
-        public CertificateCertificateChainAndKeys deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            Base64.Decoder decoder = Base64.getDecoder();
-            JsonNode node = p.readValueAsTree();
-            String encodedKeyPair = node.get("keypair").asText();
-            String decodedKeyPair = new String(decoder.decode(encodedKeyPair));
-            KeyPair keyPair = loadKeyPair(new StringReader(decodedKeyPair));
-            String encodedCert = node.get("cert").asText();
-            String decodedCert = new String(decoder.decode(encodedCert));
-            X509Certificate certificate;
-            try {
-                certificate = loadSingleCertificate(new StringReader(decodedCert));
-            } catch (CertificateException e) {
-                throw new RuntimeException(e);
-            }
-            String encodedCertChain = node.get("certChain").asText();
-            String decodedCertChain = new String(decoder.decode(encodedCertChain));
-            List<X509Certificate> certificateChain;
-            try {
-                certificateChain = loadCertificateChain(new StringReader(decodedCertChain));
-            } catch (CertificateException e) {
-                throw new RuntimeException(e);
-            }
-            return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
-        }
-    }
 }
