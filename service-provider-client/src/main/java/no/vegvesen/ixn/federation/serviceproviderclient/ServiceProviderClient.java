@@ -174,6 +174,12 @@ public class ServiceProviderClient {
         restTemplate.delete(url);
     }
 
+
+    public PeerPrivateChannelApi getPeerPrivateChannelById(String privateChannelId){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server,user, privateChannelId);
+        return restTemplate.getForEntity(url, PeerPrivateChannelApi.class).getBody();
+    }
+
     public void peerDeletePeerFromPrivateChannel(String privateChannelId){
         String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         restTemplate.delete(url);
