@@ -7,8 +7,8 @@ export default function buildProviders() {
         const baseInternal = `${process.env.INTERNAL_KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`;
 
         return Keycloak({
-            clientId: process.env.KEYCLOAK_CLIENT_ID,
-            clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+            clientId: process.env.KEYCLOAK_CLIENT_ID ?? "clientId is not defined in environment variables",
+            clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "clientSecret is not defined in environment variables",
             issuer: baseExternal,
             authorization: {
                 url: `${baseExternal}/protocol/openid-connect/auth`,
@@ -21,8 +21,8 @@ export default function buildProviders() {
 
     } else {
         Auth0Provider({
-            clientId: process.env.AUTH0_CLIENT_ID,
-            clientSecret: process.env.AUTH0_CLIENT_SECRET,
+            clientId: process.env.AUTH0_CLIENT_ID ?? "clientId is not defined in environment variables",
+            clientSecret: process.env.AUTH0_CLIENT_SECRET ?? "clientSecret is not defined in environment variables",
             issuer: process.env.AUTH0_ISSUER,
             authorization: {
                 params: {
