@@ -437,7 +437,8 @@ public class QpidClient {
 			List<Queue> allQueues = getAllQueues();
 			List<Exchange> allExchanges = getAllExchanges();
 			List<PrivateChannelMember> privateChannelUsers = getPrivateChannelGroupMembers();
-			return new QpidDelta(allExchanges,allQueues, privateChannelUsers);
+			List<BiConsumerMember> biConsumerMembers = getBiConsumerMembers();
+			return new QpidDelta(allExchanges,allQueues, privateChannelUsers, biConsumerMembers);
 
 		} catch (JsonProcessingException e) {
 			logger.error("Could not parse qpid delta");

@@ -13,10 +13,7 @@ import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeTransformer {
@@ -49,8 +46,23 @@ public class TypeTransformer {
         return new LocalSubscription(subscription.getSelector(), nodeName, subscription.getDescription());
     }
 
-    public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery){
-        return new LocalDelivery(delivery.getSelector(), delivery.getDescription(), delivery.isDlqueue());
+    public LocalDelivery transformNapDeliveryToLocalDelivery(DeliveryRequest delivery, String hostname, int port){
+        Boolean dlqueue = delivery.isDlqueue();
+        return new LocalDelivery(
+                UUID.randomUUID().toString(),
+                Set.of(
+                        new LocalDeliveryEndpoint(
+                                hostname,
+                                port,
+                                "del-" + UUID.randomUUID(),
+                                Objects.equals(dlqueue,Boolean.TRUE) ? "dlq-" + UUID.randomUUID() : null
+                        )
+                ),
+                delivery.getSelector(),
+                LocalDeliveryStatus.REQUESTED,
+                delivery.getDescription(),
+                dlqueue
+        );
     }
 
     public Delivery transformLocalDeliveryToNapDelivery(LocalDelivery localDelivery){

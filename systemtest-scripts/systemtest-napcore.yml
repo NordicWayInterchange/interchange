@@ -10,9 +10,9 @@ services:
     links:
       - "a_napcore_server:a.bouvetinterchange.eu"
     volumes:
-      - "../tmp/keys/nap.bouvetinterchange.eu.p12:/app/nap.bouvetinterchange.eu.p12"
+      - "systemtest-keys-volume:/app/keys"
     environment:
-      - PFX_KEY_FILENAME=nap.bouvetinterchange.eu.p12
+      - PFX_KEY_FILENAME=/keys/nap.bouvetinterchange.eu.p12
       - PFX_PASSPHRASE=password
       - INTERCHANGE_URI=https://a.bouvetinterchange.eu:8898/nap/
       - INTERCHANGE_PREFIX=a.bouvetinterchange.eu.nap.

@@ -1,6 +1,8 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class QpidDelta {
 
@@ -9,16 +11,19 @@ public class QpidDelta {
     List<Queue> queues = new ArrayList<>();
 
     List<PrivateChannelMember> privateChannelUsers = new ArrayList<>();
+    List<BiConsumerMember> biConsumerMembers = new ArrayList<>();
 
     public QpidDelta(List<Exchange> exchanges, List<Queue> queues) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
     }
 
-    public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<PrivateChannelMember> privateChannelUsers) {
+    public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<PrivateChannelMember> privateChannelUsers,
+                     List<BiConsumerMember> biConsumerMembers) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
         this.privateChannelUsers.addAll(privateChannelUsers);
+        this.biConsumerMembers.addAll(biConsumerMembers);
     }
 
     public void addExchange(Exchange exchange) {
@@ -69,6 +74,24 @@ public class QpidDelta {
 
     public void addPrivateChannelUser(PrivateChannelMember privateChannelUser) {
         privateChannelUsers.add(privateChannelUser);
+    }
+
+    public BiConsumerMember findBiConsumerMemberByName(String biConsumerMemberName) {
+        return findBiConsumerMemberIfExists(biConsumerMemberName).orElse(null);
+    }
+
+    private Optional<BiConsumerMember> findBiConsumerMemberIfExists(String biConsumerMemberName) {
+        return biConsumerMembers.stream()
+                .filter(u -> u.name().equals(biConsumerMemberName))
+                .findFirst();
+    }
+
+    public void addBiConsumerMember(BiConsumerMember biConsumerMember) {
+        biConsumerMembers.add(biConsumerMember);
+    }
+
+    public void removeBiConsumerMember(BiConsumerMember biConsumerMember) {
+        biConsumerMembers.remove(biConsumerMember);
     }
 
     public Exchange findByExchangeName(String exchangeName) {
