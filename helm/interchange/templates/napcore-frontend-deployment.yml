@@ -29,7 +29,7 @@ spec:
             - name: PFX_KEY_FILENAME
               value: {{ .Values.napcore_frontend.keystore_file_name | quote }}
             - name: PFX_PASSPHRASE
-              value: {{ .Values.napcore_keystore_password | quote }}
+              value: {{ .Values.napcore_client_keystore_password | quote }}
             - name: INTERCHANGE_URI
               value: "https://{{ .Release.Name }}-napcore-server:{{ .Values.self.nap_provider_port}}/nap/"
             - name: INTERCHANGE_PREFIX
