@@ -313,6 +313,10 @@ public class TypeTransformer {
         }
     }
 
+    public PeerPrivateChannelApi PrivateChannelToPeerPrivateChannelResponse(PrivateChannel privateChannel) {
+        return new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
+    }
+
     public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList) {
         AddPrivateChannelResponse response = new AddPrivateChannelResponse(serviceProviderName);
         for(PrivateChannel privateChannel : privateChannelList){

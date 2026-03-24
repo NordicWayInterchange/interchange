@@ -502,6 +502,25 @@ public class OnboardRestController {
 		logger.debug("Saved updated private channel {}", updatedPrivateChannel);
 	}
 
+
+	@RequestMapping(method = RequestMethod.GET, path = {"/{serviceProviderName}/privatechannels/peer/{privateChannelId}"})
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Get private channel with service provider as peer by private channel Id")
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPEERPRIVATECHANNELSRESPONSE)))})
+	public PeerPrivateChannelApi getPeerPrivateChannelById(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
+		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
+		logger.info("Service provider {} GET from private channel {} where you are peer", serviceProviderName, privateChannelId);
+		validatePathVariable(serviceProviderName);
+		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+
+		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
+		if(privateChannel == null){
+			throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, serviceProviderName));
+		}
+
+		return typeTransformer.PrivateChannelToPeerPrivateChannelResponse(privateChannel);
+	}
+
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/privatechannels/{privateChannelId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
 	@Tag(name = "Private Channel")
