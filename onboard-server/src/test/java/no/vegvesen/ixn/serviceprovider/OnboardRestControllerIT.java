@@ -1136,7 +1136,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 new PrivateChannelEndpoint("test", 1337, "test"), privateChannelOwner);
         String uuid = privateChannelRepository.save(privateChannel).getUuid();
         PeerPrivateChannelApi peerChannel = restController.getPeerPrivateChannelById(peerName, uuid);
-        assertThat(peerChannel.getServiceProviderName()).isEqualTo(privateChannelOwner);
+        assertThat(peerChannel.getOwner()).isEqualTo(privateChannelOwner);
     }
 
     @Test
