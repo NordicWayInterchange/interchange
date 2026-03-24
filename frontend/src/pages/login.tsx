@@ -15,7 +15,6 @@ import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 export default function Login({providers}: InferGetServerSidePropsType<
   typeof getServerSideProps
 >) {
-    console.log(providers)
 
     return (
     <Card
