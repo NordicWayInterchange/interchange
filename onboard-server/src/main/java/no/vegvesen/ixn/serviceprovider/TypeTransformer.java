@@ -314,7 +314,26 @@ public class TypeTransformer {
     }
 
     public PeerPrivateChannelApi PrivateChannelToPeerPrivateChannelResponse(PrivateChannel privateChannel) {
-        return new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated()));
+        if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
+            return new PeerPrivateChannelApi(
+                    privateChannel.getUuid(),
+                    privateChannel.getServiceProviderName(),
+                    PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()),
+                    transformPrivateChannelEndpointToPrivateChannelEndpointApi(privateChannel.getEndpoint()),
+                    transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())
+            );
+        } else {
+            return new PeerPrivateChannelApi(
+                    privateChannel.getUuid(),
+                    privateChannel.getServiceProviderName(),
+                    PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()),
+                    transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())
+            );
+        }
+    }
+
+    private PrivateChannelEndpointApi transformPrivateChannelEndpointToPrivateChannelEndpointApi(PrivateChannelEndpoint endpoint) {
+        return new PrivateChannelEndpointApi(endpoint.getHost(),endpoint.getPort(),endpoint.getQueueName());
     }
 
     public AddPrivateChannelResponse transformPrivateChannelListToAddPrivateChannelsResponse(String serviceProviderName, List<PrivateChannel> privateChannelList) {
