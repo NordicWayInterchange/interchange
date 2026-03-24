@@ -21,16 +21,16 @@ jobs:
 
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout (Latest)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: github.event.inputs.git-ref == ''
       - name: Checkout (Custom commit or branch)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: github.event.inputs.git-ref != ''
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Setup helm
-        uses: azure/setup-helm@v4.2.0
+        uses: azure/setup-helm@v4.3.1
 
       - name: Templating Interchange helm chart
         working-directory: ./helm/interchange
@@ -48,16 +48,16 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout (Latest)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: github.event.inputs.git-ref == ''
       - name: Checkout (Custom commit or branch)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         if: github.event.inputs.git-ref != ''
         with:
           ref: ${{ github.event.inputs.git-ref }}
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -66,7 +66,7 @@ jobs:
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Checkout to interchange-swagger-docs
         if: github.ref == 'refs/heads/federation-master'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: NordicWayInterchange/interchange-swagger-docs
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
@@ -103,7 +103,7 @@ jobs:
 
       - name: checkout to client docs project
         if: github.ref == 'refs/heads/federation-master'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: NordicWayInterchange/serviceprovider-client-documentation
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
@@ -122,7 +122,7 @@ jobs:
         working-directory: ./
 
       - name: Persist to workspace
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: interchange
           path: ./
@@ -135,7 +135,7 @@ jobs:
         shell: bash
     steps:
       - name: Download persisted workspace
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: interchange
       - name: Tags to variables
@@ -143,7 +143,7 @@ jobs:
           echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
       - name: Login to Github container registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4.0.0
         with:
           registry: ghcr.io
           username: "Github Actions"
@@ -168,7 +168,7 @@ jobs:
         shell: bash
     steps:
       - name: Download persisted workspace
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: interchange
 
@@ -178,7 +178,7 @@ jobs:
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
 
       - name: Login to Github container registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@v4.0.0
         with:
           registry: ghcr.io
           username: "Github Actions"
