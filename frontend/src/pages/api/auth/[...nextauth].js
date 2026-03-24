@@ -7,7 +7,7 @@ export const authOptions = {
   /**
    * @Description Providers client id/secret
    */
-  providers: buildProviders(),
+  providers: [buildProviders()],
 
   session: {
     maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,
@@ -47,5 +47,4 @@ export const authOptions = {
     signIn: "/login",
   },
 };
-
 export default NextAuth(authOptions);
