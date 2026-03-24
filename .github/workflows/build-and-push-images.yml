@@ -148,15 +148,14 @@ jobs:
           registry: ghcr.io
           username: "Github Actions"
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
       - name: Build the Docker image
         run: |
           cd ./frontend
-          docker build . -t napcore-frontend
-      - name: Push docker image to Github container registry
-        run: |
-          docker tag napcore-frontend ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }}
-          docker push --all-tags ghcr.io/nordicwayinterchange/napcore-frontend
-
+          docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/napcore-frontend:${{ env.IMAGE_TAG }} --push
 
   docker-push-svv:
     runs-on: ubuntu-latest
@@ -178,19 +177,21 @@ jobs:
           echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
 
-      - name: Build the Docker image
-        run: |
-          cd ./${{ matrix.Images }}          
-          docker build . -t ${{ matrix.Images }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout)
-
       - name: Login to Github container registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: "Github Actions"
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
 
-      - name: Push docker image to Github container registry
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build the Docker image
         run: |
-          docker tag ${{ matrix.Images }} ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}
-          docker push --all-tags ghcr.io/nordicwayinterchange/${{ matrix.Images }}
+          cd ./${{ matrix.Images }}          
+          docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout) --push
+
