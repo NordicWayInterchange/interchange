@@ -24,6 +24,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import ArticleIcon from '@mui/icons-material/Article';
 import LockIcon from '@mui/icons-material/Lock';
 import TableRowsIcon from '@mui/icons-material/TableRows';
+import Version from "@/components/layout/Version";
 
 const MAIN_PAGES: Array<IPages> = [
   {
@@ -132,6 +133,7 @@ export default function Sidebar() {
         <Box sx={{ marginTop: "auto", padding: 2 }}>
           <List>{mapPages(SECONDARY_PAGES)}</List>
         </Box>
+        <Version></Version>
       </StyledDrawer>
     </Box>
   );
