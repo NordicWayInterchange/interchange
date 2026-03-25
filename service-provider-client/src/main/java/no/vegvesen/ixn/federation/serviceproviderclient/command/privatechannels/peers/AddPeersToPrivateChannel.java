@@ -40,7 +40,6 @@ public class AddPeersToPrivateChannel implements Callable<Integer> {
         ObjectMapper mapper = new ObjectMapper();
         AddPeersRequest request = mapper.readValue(file, AddPeersRequest.class);
         client.addPeersToPrivateChannel(privateChannelId, request);
-        System.out.printf("successfully added %s to private channel with id %s", request.getPeersToAdd(), privateChannelId);
         return 0;
     }
 }
