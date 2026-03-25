@@ -9,8 +9,7 @@ spec:
       containers:
         - name: import-export
           image: import-export-service:v2
-          args:
-            - "/backup/export.json"
+          args: ["export", "/backup/export.json" ]
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-db:5432/federation
