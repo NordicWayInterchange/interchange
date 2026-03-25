@@ -1,0 +1,44 @@
+{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak_enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-keycloak-db
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: keycloak-db
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: keycloak-db
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: keycloak-db
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keycloak-db
+          image: "postgres:18.1"
+          env:
+            - name: POSTGRES_USER
+              value: "keycloak"
+            - name: POSTGRES_PASSWORD
+              value: "keycloak" # Password must be changed
+            - name: POSTGRES_DB
+              value: "keycloak"
+          ports:
+            - containerPort: 5432
+              name: DB
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql/data"
+              name: postgres_data
+      volumes:
+        - name: postgres_data
+          emptyDir: {}
+{{- end }}
