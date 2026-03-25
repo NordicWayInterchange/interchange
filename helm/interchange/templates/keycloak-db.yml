@@ -34,7 +34,7 @@ spec:
               value: "keycloak"
           ports:
             - containerPort: 5432
-              name: DB
+              name: db
           volumeMounts:
             - mountPath: "/var/lib/postgresql/data"
               name: postgres_data
