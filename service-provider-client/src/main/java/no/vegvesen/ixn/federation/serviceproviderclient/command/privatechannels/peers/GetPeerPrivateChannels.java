@@ -32,7 +32,6 @@ public class GetPeerPrivateChannels implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
         PeerPrivateChannelApi result = client.getPeerPrivateChannelById(privateChannelId);
-        System.out.printf("successfully got private channel peer with id %s", privateChannelId);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         return 0;
     }
