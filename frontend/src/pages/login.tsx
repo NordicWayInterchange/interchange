@@ -37,7 +37,7 @@ export default function Login({providers}: InferGetServerSidePropsType<
       </Typography>
 
         <Typography variant="body1">
-            Sign in will redirect you to Keycloak or Auth0 provider.
+            Sign in will redirect you to authentication provider.
         </Typography>
 
         {providers && Object.values(providers).map((provider) => (
