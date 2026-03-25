@@ -357,13 +357,7 @@ public class TypeTransformer {
         List<PeerPrivateChannelApi> privateChannelsApis = new ArrayList<>();
 
         for (PrivateChannel privateChannel : privateChannelList) {
-            if(privateChannel.getEndpoint() != null) {
-                PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi(privateChannel.getEndpoint().getHost(), privateChannel.getEndpoint().getPort(), privateChannel.getEndpoint().getQueueName());
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), endpoint, transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
-            }
-            else{
-                privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
-            }
+            privateChannelsApis.add(new PeerPrivateChannelApi(privateChannel.getUuid(), privateChannel.getServiceProviderName(), PrivateChannelStatusApi.valueOf(privateChannel.getStatus().toString()), transformLocalDateTimeToEpochMili(privateChannel.getLastUpdated())));
         }
         return new ListPeerPrivateChannels(serviceProviderName, privateChannelsApis);
     }
