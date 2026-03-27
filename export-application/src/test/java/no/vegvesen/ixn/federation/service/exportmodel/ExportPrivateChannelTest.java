@@ -1,4 +1,4 @@
-package no.vegvesen.ix.federation.service.exportmodel;
+package no.vegvesen.ixn.federation.service.exportmodel;
 
 import no.vegvesen.ixn.federation.model.PrivateChannel;
 import no.vegvesen.ixn.federation.model.PrivateChannelEndpoint;
