@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.service.importmodel.*;
@@ -43,19 +44,19 @@ public class ImportTransformer {
 
     public LocalSubscriptionStatus transformLocalSubscriptionStatusImportApiToLocalSubscriptionStatus(LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi status) {
         switch (status) {
-            case CREATED -> {
+            case LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi.CREATED -> {
                 return LocalSubscriptionStatus.CREATED;
             }
-            case ILLEGAL -> {
+            case LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi.ILLEGAL -> {
                 return LocalSubscriptionStatus.ILLEGAL;
             }
-            case TEAR_DOWN -> {
+            case LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi.TEAR_DOWN -> {
                 return LocalSubscriptionStatus.TEAR_DOWN;
             }
-            case RESUBSCRIBE -> {
+            case LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi.RESUBSCRIBE -> {
                 return LocalSubscriptionStatus.RESUBSCRIBE;
             }
-            case ERROR -> {
+            case LocalSubscriptionImportApi.LocalSubscriptionStatusImportApi.ERROR -> {
                 return LocalSubscriptionStatus.ERROR;
             }
             default -> {
@@ -88,10 +89,10 @@ public class ImportTransformer {
 
     public CapabilityStatus transformCapabilityStatusImportApiToCapabilityStatus(CapabilityImportApi.CapabilityStatusImportApi status) {
         switch (status) {
-            case CREATED -> {
+            case CapabilityImportApi.CapabilityStatusImportApi.CREATED -> {
                 return CapabilityStatus.CREATED;
             }
-            case TEAR_DOWN -> {
+            case CapabilityImportApi.CapabilityStatusImportApi.TEAR_DOWN -> {
                 return CapabilityStatus.TEAR_DOWN;
             }
             default -> {
@@ -111,10 +112,10 @@ public class ImportTransformer {
 
     public RedirectStatus transformRedirectStatusImportApiToRedirectStatus(MetadataImportApi.RedirectStatusImportApi redirectStatus) {
         switch (redirectStatus) {
-            case MANDATORY -> {
+            case MetadataImportApi.RedirectStatusImportApi.MANDATORY -> {
                 return RedirectStatus.MANDATORY;
             }
-            case NOT_AVAILABLE -> {
+            case MetadataImportApi.RedirectStatusImportApi.NOT_AVAILABLE -> {
                 return RedirectStatus.NOT_AVAILABLE;
             }
             default -> {
@@ -152,19 +153,19 @@ public class ImportTransformer {
 
     public LocalDeliveryStatus transformLocalDeliveryStatusImportApiToLocalDeliveryStatus(DeliveryImportApi.DeliveryStatusImportApi status) {
         switch (status) {
-            case CREATED -> {
+            case DeliveryImportApi.DeliveryStatusImportApi.CREATED -> {
                 return LocalDeliveryStatus.CREATED;
             }
-            case ILLEGAL -> {
+            case DeliveryImportApi.DeliveryStatusImportApi.ILLEGAL -> {
                 return LocalDeliveryStatus.ILLEGAL;
             }
-            case NOT_VALID -> {
+            case DeliveryImportApi.DeliveryStatusImportApi.NOT_VALID -> {
                 return LocalDeliveryStatus.NOT_VALID;
             }
-            case NO_OVERLAP -> {
+            case DeliveryImportApi.DeliveryStatusImportApi.NO_OVERLAP -> {
                 return LocalDeliveryStatus.NO_OVERLAP;
             }
-            case ERROR -> {
+            case DeliveryImportApi.DeliveryStatusImportApi.ERROR -> {
                 return LocalDeliveryStatus.ERROR;
             }
             default -> {
@@ -201,10 +202,10 @@ public class ImportTransformer {
 
     public CapabilitiesStatus transformCapabilitiesStatusImportApiToCapabilitiesStatus(NeighbourCapabilitiesImportApi.CapabilitiesStatusImportApi status) {
         switch (status) {
-            case KNOWN -> {
+            case NeighbourCapabilitiesImportApi.CapabilitiesStatusImportApi.KNOWN -> {
                 return CapabilitiesStatus.KNOWN;
             }
-            case FAILED -> {
+            case NeighbourCapabilitiesImportApi.CapabilitiesStatusImportApi.FAILED -> {
                 return CapabilitiesStatus.FAILED;
             }
             default -> {
@@ -227,22 +228,22 @@ public class ImportTransformer {
 
     public NeighbourSubscriptionStatus transformNeighbourSubscriptionStatusImportApiToNeighbourSubscriptionStatus(NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi status) {
         switch (status) {
-            case ACCEPTED -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.ACCEPTED -> {
                 return NeighbourSubscriptionStatus.ACCEPTED;
             }
-            case CREATED -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.CREATED -> {
                 return NeighbourSubscriptionStatus.CREATED;
             }
-            case ILLEGAL -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.ILLEGAL -> {
                 return NeighbourSubscriptionStatus.ILLEGAL;
             }
-            case NOT_VALID -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.NOT_VALID -> {
                 return NeighbourSubscriptionStatus.NOT_VALID;
             }
-            case NO_OVERLAP -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.NO_OVERLAP -> {
                 return NeighbourSubscriptionStatus.NO_OVERLAP;
             }
-            case TEAR_DOWN -> {
+            case NeighbourSubscriptionImportApi.NeighbourSubscriptionStatusImportApi.TEAR_DOWN -> {
                 return NeighbourSubscriptionStatus.TEAR_DOWN;
             }
             default -> {
@@ -271,25 +272,25 @@ public class ImportTransformer {
 
     public SubscriptionStatus transformSubscriptionStatusImportApiToSubscriptionStatus(SubscriptionImportApi.SubscriptionStatusImportApi status) {
         switch (status) {
-            case CREATED -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.CREATED -> {
                 return SubscriptionStatus.CREATED;
             }
-            case ILLEGAL -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.ILLEGAL -> {
                 return SubscriptionStatus.ILLEGAL;
             }
-            case NO_OVERLAP -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.NO_OVERLAP -> {
                 return SubscriptionStatus.NO_OVERLAP;
             }
-            case GIVE_UP -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.GIVE_UP -> {
                 return SubscriptionStatus.GIVE_UP;
             }
-            case FAILED -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.FAILED -> {
                 return SubscriptionStatus.FAILED;
             }
-            case TEAR_DOWN -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.TEAR_DOWN -> {
                 return SubscriptionStatus.TEAR_DOWN;
             }
-            case RESUBSCRIBE -> {
+            case SubscriptionImportApi.SubscriptionStatusImportApi.RESUBSCRIBE -> {
                 return SubscriptionStatus.RESUBSCRIBE;
             }
             default -> {
@@ -328,10 +329,10 @@ public class ImportTransformer {
 
     public PrivateChannelStatus transformPrivateChannelStatusImportApiToPrivateChannelStatus(PrivateChannelImportApi.PrivateChannelStatusImportApi status) {
         switch(status) {
-            case CREATED -> {
+            case PrivateChannelImportApi.PrivateChannelStatusImportApi.CREATED -> {
                 return PrivateChannelStatus.CREATED;
             }
-            case TEAR_DOWN -> {
+            case PrivateChannelImportApi.PrivateChannelStatusImportApi.TEAR_DOWN -> {
                 return PrivateChannelStatus.TEAR_DOWN;
             }
             default -> {

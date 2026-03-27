@@ -264,5 +264,6 @@
         <module>csr-generator</module>
         <module>shared-api-model</module>
         <module>local-delivery-service</module>
+        <module>import-application</module>
     </modules>
 </project>

@@ -48,12 +48,12 @@ public class ImportExportApplication implements CommandLineRunner {
             if (args.length != 2) {
                 System.out.println("No output path provided. Exiting.");
             }
-            ExportApplication exportApplication = new ExportApplication(
+           /* ExportApplication exportApplication = new ExportApplication(
                     neighbourRepository,
                     serviceProviderRepository,
                     privateChannelRepository
             );
-            exportApplication.run(args[1]);
+            exportApplication.run(args[1]);*/
         }
     }
 }
