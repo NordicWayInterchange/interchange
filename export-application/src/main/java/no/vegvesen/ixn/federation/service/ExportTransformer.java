@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
+
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.service.exportmodel.*;
@@ -42,19 +43,19 @@ public class ExportTransformer {
 
     public LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi transformLocalSubscriptionStatusToLocalSubscriptionStatusExportApi(LocalSubscriptionStatus status) {
         switch (status) {
-            case CREATED -> {
+            case LocalSubscriptionStatus.CREATED -> {
                 return LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi.CREATED;
             }
-            case ILLEGAL -> {
+            case LocalSubscriptionStatus.ILLEGAL -> {
                 return LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi.ILLEGAL;
             }
-            case TEAR_DOWN -> {
+            case LocalSubscriptionStatus.TEAR_DOWN -> {
                 return LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi.TEAR_DOWN;
             }
-            case RESUBSCRIBE -> {
+            case LocalSubscriptionStatus.RESUBSCRIBE -> {
                 return LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi.RESUBSCRIBE;
             }
-            case ERROR -> {
+            case LocalSubscriptionStatus.ERROR -> {
                 return LocalSubscriptionExportApi.LocalSubscriptionStatusExportApi.ERROR;
             }
             default -> {
@@ -87,10 +88,10 @@ public class ExportTransformer {
 
     public CapabilityExportApi.CapabilityStatusExportApi transformCapabilityStatusToCapabilityStatusExportApi(CapabilityStatus status) {
         switch (status) {
-            case CREATED -> {
+            case CapabilityStatus.CREATED -> {
                 return CapabilityExportApi.CapabilityStatusExportApi.CREATED;
             }
-            case TEAR_DOWN -> {
+            case CapabilityStatus.TEAR_DOWN -> {
                 return CapabilityExportApi.CapabilityStatusExportApi.TEAR_DOWN;
             }
             default -> {
@@ -111,10 +112,10 @@ public class ExportTransformer {
 
     public MetadataExportApi.RedirectStatusExportApi transformRedirectStatusToRedirectStatusExportApi(RedirectStatus status) {
         switch (status) {
-            case MANDATORY -> {
+            case RedirectStatus.MANDATORY -> {
                 return MetadataExportApi.RedirectStatusExportApi.MANDATORY;
             }
-            case NOT_AVAILABLE -> {
+            case RedirectStatus.NOT_AVAILABLE -> {
                 return MetadataExportApi.RedirectStatusExportApi.NOT_AVAILABLE;
             }
             default -> {
@@ -152,19 +153,19 @@ public class ExportTransformer {
 
     public DeliveryExportApi.DeliveryStatusExportApi transformDeliveryStatusToDeliveryStatusExportApi(LocalDeliveryStatus status) {
         switch(status) {
-            case CREATED -> {
+            case LocalDeliveryStatus.CREATED -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.CREATED;
             }
-            case ILLEGAL -> {
+            case LocalDeliveryStatus.ILLEGAL -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.ILLEGAL;
             }
-            case NOT_VALID -> {
+            case LocalDeliveryStatus.NOT_VALID -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.NOT_VALID;
             }
-            case NO_OVERLAP -> {
+            case LocalDeliveryStatus.NO_OVERLAP -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.NO_OVERLAP;
             }
-            case ERROR -> {
+            case LocalDeliveryStatus.ERROR -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.ERROR;
             }
             default -> {
@@ -198,10 +199,10 @@ public class ExportTransformer {
 
     public NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi transformCapabilitiesStatusToCapabilitiesStatusExportApi(CapabilitiesStatus status) {
         switch (status) {
-            case KNOWN -> {
+            case CapabilitiesStatus.KNOWN -> {
                 return NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi.KNOWN;
             }
-            case FAILED -> {
+            case CapabilitiesStatus.FAILED -> {
                 return NeighbourCapabilitiesExportApi.NeighbourCapabilitiesStatusExportApi.FAILED;
             }
             default -> {
@@ -223,22 +224,22 @@ public class ExportTransformer {
 
     public NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi transformNeighbourSubscriptionStatusToNeighbourSubscriptionStatusExportApi(NeighbourSubscriptionStatus status) {
         switch (status) {
-            case ACCEPTED -> {
+            case NeighbourSubscriptionStatus.ACCEPTED -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.ACCEPTED;
             }
-            case CREATED -> {
+            case NeighbourSubscriptionStatus.CREATED -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.CREATED;
             }
-            case ILLEGAL -> {
+            case NeighbourSubscriptionStatus.ILLEGAL -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.ILLEGAL;
             }
-            case NOT_VALID -> {
+            case NeighbourSubscriptionStatus.NOT_VALID -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.NOT_VALID;
             }
-            case NO_OVERLAP -> {
+            case NeighbourSubscriptionStatus.NO_OVERLAP -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.NO_OVERLAP;
             }
-            case TEAR_DOWN -> {
+            case NeighbourSubscriptionStatus.TEAR_DOWN -> {
                 return NeighbourSubscriptionExportApi.NeighbourSubscriptionStatusExportApi.TEAR_DOWN;
             }
             default -> {
@@ -266,25 +267,25 @@ public class ExportTransformer {
 
     public SubscriptionExportApi.SubscriptionStatusExportApi transformSubscriptionStatusToSubscriptionStatusExportApi(SubscriptionStatus status) {
         switch (status) {
-            case CREATED -> {
+            case SubscriptionStatus.CREATED -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.CREATED;
             }
-            case ILLEGAL -> {
+            case SubscriptionStatus.ILLEGAL -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.ILLEGAL;
             }
-            case NO_OVERLAP -> {
+            case SubscriptionStatus.NO_OVERLAP -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.NO_OVERLAP;
             }
-            case  GIVE_UP -> {
+            case SubscriptionStatus.GIVE_UP -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.GIVE_UP;
             }
-            case FAILED -> {
+            case SubscriptionStatus.FAILED -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.FAILED;
             }
-            case TEAR_DOWN -> {
+            case SubscriptionStatus.TEAR_DOWN -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.TEAR_DOWN;
             }
-            case RESUBSCRIBE -> {
+            case SubscriptionStatus.RESUBSCRIBE -> {
                 return SubscriptionExportApi.SubscriptionStatusExportApi.RESUBSCRIBE;
             }
             default -> {
@@ -323,10 +324,10 @@ public class ExportTransformer {
 
     public PrivateChannelExportApi.PrivateChannelStatusExportApi transformPrivateChannelStatusToPrivateChannelStatusExportApi(PrivateChannelStatus status) {
         switch (status) {
-            case CREATED -> {
+            case PrivateChannelStatus.CREATED -> {
                 return PrivateChannelExportApi.PrivateChannelStatusExportApi.CREATED;
             }
-            case TEAR_DOWN -> {
+            case PrivateChannelStatus.TEAR_DOWN -> {
                 return PrivateChannelExportApi.PrivateChannelStatusExportApi.TEAR_DOWN;
             }
             default -> {
