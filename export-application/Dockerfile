@@ -5,6 +5,6 @@ RUN apk add --no-cache bash alpine-conf \
 WORKDIR /app
 ARG JAR_VERSION
 
-COPY target/import-export-service-${JAR_VERSION}.jar import-export.jar
+COPY target/export-application-${JAR_VERSION}.jar export.jar
 
-ENTRYPOINT ["java", "-jar", "/app/import-export.jar"]
+ENTRYPOINT ["java", "-jar", "/app/export.jar"]

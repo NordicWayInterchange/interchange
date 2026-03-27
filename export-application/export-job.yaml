@@ -7,8 +7,8 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-        - name: import-export
-          image: import-export-service:v2
+        - name: export
+          image: export-service:v2
           args: ["export", "/backup/export.json" ]
           env:
             - name: SPRING_DATASOURCE_URL
