@@ -29,6 +29,12 @@ public class ExportApplication implements CommandLineRunner {
     @Autowired
     private PrivateChannelRepository privateChannelRepository;
 
+    public ExportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository) {
+        this.neighbourRepository = neighbourRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.privateChannelRepository = privateChannelRepository;
+    }
+
 
     public static void main(String[] args) {
         SpringApplication.run(ExportApplication.class, args);
@@ -40,6 +46,18 @@ public class ExportApplication implements CommandLineRunner {
         if (args.length == 0) {
             System.out.println("No output path provided. Exiting.");
             return;
+        }
+
+        if (args[0].equals("export")) {
+            if (args.length != 2) {
+                System.out.println("No output path provided. Exiting.");
+            }
+            ExportApplication exportApplication = new ExportApplication(
+                    neighbourRepository,
+                    serviceProviderRepository,
+                    privateChannelRepository
+            );
+            exportApplication.run(args[1]);
         }
 
         String outputFilePath = args[0];
