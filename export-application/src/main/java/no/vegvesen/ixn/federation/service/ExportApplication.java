@@ -5,6 +5,9 @@ import no.vegvesen.ixn.federation.service.exportmodel.ExportApi;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -14,21 +17,23 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
 
-@Component
+@SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class ExportApplication implements CommandLineRunner {
 
-    private final NeighbourRepository neighbourRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final PrivateChannelRepository privateChannelRepository;
+    @Autowired
+    private NeighbourRepository neighbourRepository;
 
-    public ExportApplication(
-            NeighbourRepository neighbourRepository,
-            ServiceProviderRepository serviceProviderRepository,
-            PrivateChannelRepository privateChannelRepository) {
-        this.neighbourRepository = neighbourRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.privateChannelRepository = privateChannelRepository;
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private PrivateChannelRepository privateChannelRepository;
+
+
+    public static void main(String[] args) {
+        SpringApplication.run(ExportApplication.class, args);
     }
+
 
     @Override
     public void run(String... args) throws Exception {
