@@ -52,16 +52,13 @@ public class ExportApplication implements CommandLineRunner {
             if (args.length != 2) {
                 System.out.println("No output path provided. Exiting.");
             }
-            ExportApplication exportApplication = new ExportApplication(
-                    neighbourRepository,
-                    serviceProviderRepository,
-                    privateChannelRepository
-            );
-            exportApplication.run(args[1]);
+
+            String outputFilePath = args[1];
+            exportData(outputFilePath);
         }
+    }
 
-        String outputFilePath = args[0];
-
+    private void exportData(String outputFilePath) throws Exception {
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -82,8 +79,7 @@ public class ExportApplication implements CommandLineRunner {
             Files.createDirectories(filePath.getParent());
         }
 
-        mapper.writerWithDefaultPrettyPrinter()
-                .writeValue(filePath.toFile(), exportModel);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), exportModel);
 
         System.out.println("Export saved to: " + filePath.toAbsolutePath());
     }

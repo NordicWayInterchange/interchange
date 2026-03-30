@@ -43,24 +43,23 @@ public class ImportApplication implements CommandLineRunner {
             System.out.println("usage ...");
             System.exit(1);
         }
+
         if (args[0].equals("import")) {
             if (args.length != 2) {
                 System.out.println("usage ...");
                 System.exit(2);
             }
-            ImportApplication importApplication = new ImportApplication(
-                    neighbourRepository,
-                    serviceProviderRepository,
-                    privateChannelRepository
-            );
-            importApplication.run(String.valueOf(Paths.get(args[1])));
         }
-        String outputFilePath = args[1];
-        Path filePath = Paths.get(outputFilePath);
+
+        String inputFilePath = args[1];
+        Path filePath = Paths.get(inputFilePath);
 
         ImportApi importModel = mapper.readValue(filePath.toFile(), ImportApi.class);
 
         serviceProviderRepository.saveAll(importModel.getServiceProviders().stream().map(importTransformer::transformServiceProviderImportApiToServiceProvider).collect(Collectors.toSet()));
         privateChannelRepository.saveAll(importModel.getPrivateChannels().stream().map(importTransformer::transformPrivateChannelImportApiToPrivateChannel).collect(Collectors.toSet()));
+
+        System.out.println("Import completed successfully from file: " + inputFilePath);
+
     }
 }
