@@ -20,14 +20,11 @@ import org.springframework.boot.CommandLineRunner;
 @SpringBootApplication(scanBasePackages = "no.vegvesen.ixn")
 public class ExportApplication implements CommandLineRunner {
 
-    @Autowired
-    private NeighbourRepository neighbourRepository;
+    private final NeighbourRepository neighbourRepository;
 
-    @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
-    @Autowired
-    private PrivateChannelRepository privateChannelRepository;
+    private final PrivateChannelRepository privateChannelRepository;
 
     public ExportApplication(NeighbourRepository neighbourRepository, ServiceProviderRepository serviceProviderRepository, PrivateChannelRepository privateChannelRepository) {
         this.neighbourRepository = neighbourRepository;
