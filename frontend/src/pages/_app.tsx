@@ -12,7 +12,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { trafficdata, transportportal } from "@/theme";
 import { useRouter } from "next/router";
-import Version from "@/components/layout/Version";
+import Version from "@/components/shared/Version";
 
 export default function App({
   Component,
