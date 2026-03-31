@@ -1,4 +1,5 @@
 import {Typography} from "@mui/material";
+import {VERSION} from "@/generated/version";
 
 export default function Version() {
 return (
@@ -12,7 +13,7 @@ return (
                 fontSize: "0.85em",
             }}
         >
-            version
+            <p>Version: {VERSION}</p>;
         </Typography>
     </>
 )

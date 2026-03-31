@@ -240,11 +240,14 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>frontend/resources</outputDirectory>
+                                    <outputDirectory>frontend/src/generated</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>frontend/filtered-resources</directory>
                                             <filtering>true</filtering>
+                                            <includes>
+                                                <include>version.js</include>
+                                            </includes>
                                         </resource>
                                     </resources>
                                 </configuration>
