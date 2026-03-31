@@ -225,9 +225,7 @@
         <profile>
             <id>versions</id>
             <activation>
-                <property>
-                    <name>!project.version.endsWith('-SNAPSHOT')</name>
-                </property>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -242,10 +240,10 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>demo/single-node</outputDirectory>
+                                    <outputDirectory>frontend/resources</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>project-resources</directory>
+                                            <directory>frontend/filtered-resources</directory>
                                             <filtering>true</filtering>
                                         </resource>
                                     </resources>
