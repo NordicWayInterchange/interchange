@@ -14,6 +14,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -47,7 +48,8 @@ import static org.mockito.Mockito.when;
         RoutingConfigurerProperties.class,
         InterchangeNodeProperties.class,
         ServiceProviderRouter.class,
-        LocalDeliveryService.class
+        LocalDeliveryService.class,
+        LocalSubscriptionService.class
         })
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 

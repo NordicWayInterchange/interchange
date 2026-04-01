@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.35-SNAPSHOT</version>
+    <version>1.0.36-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -264,5 +264,6 @@
         <module>csr-generator</module>
         <module>shared-api-model</module>
         <module>local-delivery-service</module>
+        <module>local-subscription-service</module>
     </modules>
 </project>
