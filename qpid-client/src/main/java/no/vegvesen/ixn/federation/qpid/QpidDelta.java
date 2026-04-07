@@ -12,6 +12,7 @@ public class QpidDelta {
 
     List<PrivateChannelMember> privateChannelUsers = new ArrayList<>();
     List<BiConsumerMember> biConsumerMembers = new ArrayList<>();
+    List<ServiceProviderMember> serviceProviderMembers = new ArrayList<>();
 
     public QpidDelta(List<Exchange> exchanges, List<Queue> queues) {
         this.exchanges.addAll(exchanges);
@@ -19,11 +20,12 @@ public class QpidDelta {
     }
 
     public QpidDelta(List<Exchange> exchanges, List<Queue> queues, List<PrivateChannelMember> privateChannelUsers,
-                     List<BiConsumerMember> biConsumerMembers) {
+                     List<BiConsumerMember> biConsumerMembers, List<ServiceProviderMember> serviceProviderMembers) {
         this.exchanges.addAll(exchanges);
         this.queues.addAll(queues);
         this.privateChannelUsers.addAll(privateChannelUsers);
         this.biConsumerMembers.addAll(biConsumerMembers);
+        this.serviceProviderMembers.addAll(serviceProviderMembers);
     }
 
     public void addExchange(Exchange exchange) {
