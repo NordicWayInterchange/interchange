@@ -36,6 +36,7 @@ qpid:
 
   ## admin credentials
   admin_user: qpid-admin
+  expose_amqps: true
 
 admin_server:
   replicas: 1

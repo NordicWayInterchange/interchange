@@ -105,7 +105,7 @@ public class CertSigner {
                 csrSubject,
                 csrWrapper.getPublicKey()
         );
-        //NOTE basic constraints are not critical. Should they be?
+        //NOTE basic constraints are not critical. Should they be? //TODO yes, it should
         certificateBuilder.addExtension(Extension.basicConstraints,false,new BasicConstraints(false));
 
         //NOTE this only gives the keyId for the key identifier. Could also use the cert,
