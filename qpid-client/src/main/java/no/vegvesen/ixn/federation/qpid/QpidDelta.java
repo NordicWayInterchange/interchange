@@ -96,6 +96,24 @@ public class QpidDelta {
         biConsumerMembers.remove(biConsumerMember);
     }
 
+    public ServiceProviderMember findServiceProviderMemberByName(String serviceProviderUserName) {
+        return findServiceProviderMemberIfExists(serviceProviderUserName).orElse(null);
+    }
+
+    public Optional<ServiceProviderMember> findServiceProviderMemberIfExists(String serviceProviderUserName) {
+        return serviceProviderMembers.stream()
+                .filter(u -> u.getName().equals(serviceProviderUserName))
+                .findFirst();
+    }
+
+    public void removeServiceProviderMember(ServiceProviderMember serviceProviderMember) {
+        serviceProviderMembers.remove(serviceProviderMember);
+    }
+
+    public void addServiceProviderMember(ServiceProviderMember serviceProviderMember) {
+        serviceProviderMembers.add(serviceProviderMember);
+    }
+
     public Exchange findByExchangeName(String exchangeName) {
         return findExchangeByName(exchangeName).orElse(null);
     }

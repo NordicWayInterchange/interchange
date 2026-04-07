@@ -79,14 +79,16 @@ public class ServiceProviderRouter {
             serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName,messageChannelPort,serviceProvider, delta);
             serviceProvider = localSubscriptionService.removeUnwantedSubscriptions(serviceProvider);
 
-            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
+            ServiceProviderMember groupMember = delta.findServiceProviderMemberByName(serviceProvider.getName());
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
                     qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
+                    delta.addServiceProviderMember(new ServiceProviderMember(serviceProvider.getName()));
                 }
             } else {
                 if (groupMember != null) {
                     qpidClient.removeServiceProviderMemberFromGroup(groupMember);
+                    delta.removeServiceProviderMember(groupMember);
                 }
             }
 
