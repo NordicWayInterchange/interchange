@@ -1,7 +1,9 @@
 package no.vegvesen.ixn.federation.service.routing.match;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -22,6 +24,12 @@ public class MatchDiscoveryServiceTest {
 
     @MockitoBean
     private MatchRepository matchRepository;
+
+    @MockitoBean
+    private ServiceProviderRepository serviceProviderRepository;
+
+    @MockitoBean
+    private QpidClient qpidClient;
 
     @Autowired
     private MatchDiscoveryService matchDiscoveryService;
