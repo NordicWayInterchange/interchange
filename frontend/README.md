@@ -52,16 +52,25 @@ PFX_PASSPHRASE=
 # Interchange
 INTERCHANGE_URI=
 NEXT_PUBLIC_INTERCHANGE_PREFIX=
+INTERCHANGE_PREFIX=
 
 # NextAuth
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=
 SESSION_MAXAGE_SECONDS= # Optional value, will fallback to one day
 
-# Auth0
+# Auth0 (Or other authentication providers can be added here)
 AUTH0_CLIENT_ID=
 AUTH0_CLIENT_SECRET=
 AUTH0_ISSUER=
+
+# KeyCloak
+USE_KEYCLOAK=
+KEYCLOAK_REALM=
+KEYCLOAK_CLIENT_ID=
+KEYCLOAK_CLIENT_SECRET=
+EXTERNAL_KEYCLOAK_URL=
+INTERNAL_KEYCLOAK_URL=
 ```
 
 ### Docker
@@ -79,7 +88,7 @@ docker run \
               -e PFX_PASSPHRASE=<PASSPHRASE> \
               -e INTERCHANGE_URI=<URI> \
               -e INTERCHANGE_PREFIX=<PREFIX> \
-              -e NEXTAUTH_SECRET=<SECRET> \
+              -e NEXTAUTH_SECRET=<SECRET> \  # Other authentication providers can be added here, e.g., Keycloak.
               -e AUTH0_CLIENT_ID=<CLIENT_ID> \
               -e AUTH0_CLIENT_SECRET=<CLIENT_SECRET> \
               -e AUTH0_ISSUER=<ISSUER> \
@@ -98,16 +107,32 @@ We use the JavaScript library PKI.js to create a CSR. The CSR is created client-
 
 ---
 
+Napcore supports both keycloak and Auth0 as authentication providers.
+
+Keycloak is an open source identity and access management solution. It adds authentication to applications and secure services. https://www.keycloak.org/
+
 NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
 
-Other providers can be added in […nextAuth].js
+Other providers can be added in buildProviders() in […nextAuth].js
 
+Auth0 example:
 ```jsx
 providers: [
     Auth0Provider({
       clientId: process.env.AUTH0_CLIENT_ID,
       clientSecret: process.env.AUTH0_CLIENT_SECRET,
       issuer: process.env.AUTH0_ISSUER,
+    })
+  ]
+```
+
+Keycloak example:
+```jsx
+providers: [
+    Keycloak({
+        clientId: process.env.KEYCLOAK_CLIENT_ID,
+        clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+        issuer: process.env.KEYCLOAK_REALM,
     })
   ]
 ```
