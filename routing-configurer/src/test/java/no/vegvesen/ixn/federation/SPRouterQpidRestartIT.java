@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
 
 
 
-@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, InterchangeNodeProperties.class, QpidClientConfig.class, LocalDeliveryService.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
+@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, InterchangeNodeProperties.class, QpidClientConfig.class, LocalDeliveryService.class, LocalSubscriptionService.class, TestSSLContextConfig.class, TestSSLProperties.class, ServiceProviderRouter.class})
 public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     public static final String HOST_NAME = getDockerHost();

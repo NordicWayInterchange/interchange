@@ -21,6 +21,7 @@ spec:
       port: {{ .Values.qpid.https_qpid_rest.port }}
       targetPort: https-qpid-rest
 ---
+{{- if .Values.qpid.expose_amqps }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -44,3 +45,4 @@ spec:
     - name: amqps
       protocol: TCP
       port: {{ .Values.qpid.amqps.port }}
+{{- end }}

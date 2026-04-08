@@ -33,7 +33,6 @@ public class DeletePeerFromPrivateChannel implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
         client.deletePeerFromPrivateChannel(privateChannelId, peerName);
-        System.out.printf("Successfully deleted peer with name %s from private channel with id %s", peerName, privateChannelId);
         return 0;
     }
 }

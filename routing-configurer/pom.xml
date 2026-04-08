@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0.35-SNAPSHOT</version>
+        <version>1.0.36-SNAPSHOT</version>
     </parent>
 
     <artifactId>routing-configurer</artifactId>
@@ -82,6 +82,12 @@
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>local-delivery-service</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>local-subscription-service</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

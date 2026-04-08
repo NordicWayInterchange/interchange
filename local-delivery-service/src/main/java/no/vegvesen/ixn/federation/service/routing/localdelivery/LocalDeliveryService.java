@@ -24,9 +24,9 @@ public class LocalDeliveryService {
     private static final Logger logger = LoggerFactory.getLogger(LocalDeliveryService.class);
 
 
-    private ServiceProviderRepository serviceProviderRepository;
-    private OutgoingMatchRepository outgoingMatchRepository;
-    private  QpidClient qpidClient;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final OutgoingMatchRepository outgoingMatchRepository;
+    private final QpidClient qpidClient;
 
 
     @Autowired
