@@ -46,6 +46,8 @@ spec:
               value: "{{ .Values.self.secret_mount_path }}key_store.p12"
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
+            - name: KEY_ALIAS
+              value: {{ .Values.napcore_server.key_alias | quote }}
             - name: SIGN_STORE
               value: "{{ .Values.napcore_server.mount_path }}sign_keystore.p12"
             - name: SIGN_STORE_PASSWORD
