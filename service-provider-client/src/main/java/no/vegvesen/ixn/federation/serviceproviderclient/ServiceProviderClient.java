@@ -139,6 +139,11 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
 
+    public PeerPrivateChannelApi getPrivateChannelPeerById(String privateChannelId){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user,privateChannelId);
+        return restTemplate.getForEntity(url, PeerPrivateChannelApi.class).getBody();
+    }
+
     public ListPeerPrivateChannels getPeerPrivateChannels(){
         String url = String.format("%s/%s/privatechannels/peer", server,user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();

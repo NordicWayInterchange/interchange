@@ -5,7 +5,7 @@ import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
-import no.vegvesen.ixn.serviceprovider.model.GetPrivateChannelResponse;
+import no.vegvesen.ixn.serviceprovider.model.PeerPrivateChannelApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;
 import org.apache.qpid.jms.message.JmsMessage;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
         customSynopsis = {
                 """
                         Examples: \n
-                        serviceproviderclient peers send -m myMessages.json 5d16cb60-0534-4469-b525-f92a5953322c \n
+                        serviceproviderclient privatechannels peers send -m myMessages.json 5d16cb60-0534-4469-b525-f92a5953322c \n
                         """
         })
 public class Send implements Callable<Integer> {
@@ -36,7 +36,7 @@ public class Send implements Callable<Integer> {
     File messageFile;
 
     @CommandLine.Parameters(index = "0", description = "The ID of peer to send a message to")
-    String peerId;
+    String privateChannelId;
 
 
     @Override
@@ -44,24 +44,24 @@ public class Send implements Callable<Integer> {
 
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-        GetPrivateChannelResponse privateChannel = client.getPrivateChannel(peerId);
+        PeerPrivateChannelApi privateChannelPeer = client.getPrivateChannelPeerById(privateChannelId);
 
         int maxRetries = 10;
         int retries = 0;
-        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
+        while (privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
             TimeUnit.SECONDS.sleep(3);
-            privateChannel = client.getPrivateChannel(peerId);
+            privateChannelPeer = client.getPrivateChannelPeerById(privateChannelId);
             retries++;
         }
 
-        if (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED)) {
-            throw new RuntimeException(String.format("Private channel %s is still in REQUESTED state after the timeout", privateChannel.getId()));
+        if (privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.REQUESTED)) {
+            throw new RuntimeException(String.format("Private channel %s is still in REQUESTED state after the timeout", privateChannelPeer.getId()));
         }
-        if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
+        if (!privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannelPeer.getStatus(), privateChannelPeer.getId()));
         }
 
-        PrivateChannelEndpointApi privateChannelEndpoint = privateChannel.getEndpoint();
+        PrivateChannelEndpointApi privateChannelEndpoint = privateChannelPeer.getEndpoint();
         if (privateChannelEndpoint == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }

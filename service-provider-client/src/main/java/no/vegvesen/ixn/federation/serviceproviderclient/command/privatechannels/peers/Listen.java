@@ -6,7 +6,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.WriteToFileMessageListener;
 import no.vegvesen.ixn.WriteToScreenMessageListener;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.GetPrivateChannelResponse;
+import no.vegvesen.ixn.serviceprovider.model.PeerPrivateChannelApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;
 import picocli.CommandLine;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
         customSynopsis = {
                 """ 
                         Examples: \n
-                        serviceproviderclient peers listen -d directory 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
+                        serviceproviderclient privatechannels peers listen -d directory 5a56dbcb-af41-4950-81f2-953e5cfcc4f9 \n
                         # -d is optional
                         """
         })
@@ -44,14 +44,14 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-        GetPrivateChannelResponse privateChannel = client.getPrivateChannel(id);
+        PeerPrivateChannelApi privateChannel = client.getPrivateChannelPeerById(id);
 
         int maxRetries = 10;
         int retries = 0;
 
         while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
             TimeUnit.SECONDS.sleep(3);
-            privateChannel = client.getPrivateChannel(privateChannel.getId());
+            privateChannel = client.getPrivateChannelPeerById(privateChannel.getId());
             retries++;
         }
 
