@@ -1,18 +1,17 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.messages;
+package no.vegvesen.ixn.federation.serviceproviderrestclient.messages;
 
 import no.vegvesen.ixn.shared.Constants;
 
-public class DenmMessage extends Message {
+public class SremMessage extends Message {
 
-    private Integer causeCode;
+    private String id;
 
-    private Integer subCauseCode;
 
-    public DenmMessage() {
+    public SremMessage() {
 
     }
 
-    public DenmMessage(String messageText,
+    public SremMessage(String messageText,
                        String userId,
                        String publisherId,
                        String publicationId,
@@ -25,8 +24,7 @@ public class DenmMessage extends Message {
                        String quadTree,
                        Integer shardId,
                        Integer shardCount,
-                       Integer causeCode,
-                       Integer subCauseCode) {
+                       String id) {
         super(messageText,
                 userId,
                 publisherId,
@@ -35,29 +33,20 @@ public class DenmMessage extends Message {
                 protocolVersion,
                 serviceType,
                 baselineVersion,
-                Constants.DENM,
+                Constants.SREM,
                 longitude,
                 latitude,
                 quadTree,
                 shardId,
                 shardCount);
-        this.causeCode = causeCode;
-        this.subCauseCode = subCauseCode;
+        this.id = id;
     }
 
-    public Integer getCauseCode() {
-        return causeCode;
+    public String getId() {
+        return id;
     }
 
-    public void setCauseCode(Integer causeCode) {
-        this.causeCode = causeCode;
-    }
-
-    public Integer getSubCauseCode() {
-        return subCauseCode;
-    }
-
-    public void setSubCauseCode(Integer subCauseCode) {
-        this.subCauseCode = subCauseCode;
+    public void setId(String id) {
+        this.id = id;
     }
 }
