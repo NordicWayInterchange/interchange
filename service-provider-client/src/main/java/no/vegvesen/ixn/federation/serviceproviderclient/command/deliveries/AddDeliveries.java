@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.AddDelivery;
