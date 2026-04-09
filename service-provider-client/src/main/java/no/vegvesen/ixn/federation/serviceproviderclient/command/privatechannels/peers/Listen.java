@@ -35,7 +35,7 @@ public class Listen implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--directory"}, description = "directory to save messages")
     String directory;
 
-    @CommandLine.Parameters(index = "0", description = "The ID of peer to listen to")
+    @CommandLine.Parameters(index = "0", description = "The ID of private channel to listen to")
     String id;
 
     private final CountDownLatch counter = new CountDownLatch(1);
@@ -44,22 +44,22 @@ public class Listen implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
 
-        PeerPrivateChannelApi privateChannel = client.getPrivateChannelPeerById(id);
+        PeerPrivateChannelApi privateChannelPeer = client.getPrivateChannelPeerById(id);
 
         int maxRetries = 10;
         int retries = 0;
 
-        while (privateChannel.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
+        while (privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.REQUESTED) && retries < maxRetries) {
             TimeUnit.SECONDS.sleep(3);
-            privateChannel = client.getPrivateChannelPeerById(privateChannel.getId());
+            privateChannelPeer = client.getPrivateChannelPeerById(privateChannelPeer.getId());
             retries++;
         }
 
-        if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected private channel status %s for private channel %s", privateChannel.getStatus(), privateChannel.getId()));
+        if (!privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
+            throw new RuntimeException(String.format("Unexpected private channel status %s for private channel %s", privateChannelPeer.getStatus(), privateChannelPeer.getId()));
         }
 
-        PrivateChannelEndpointApi endpointApi = privateChannel.getEndpoint();
+        PrivateChannelEndpointApi endpointApi = privateChannelPeer.getEndpoint();
         if (endpointApi == null) {
             throw new RuntimeException("Could not determine private channel endpoint from response ");
         }
