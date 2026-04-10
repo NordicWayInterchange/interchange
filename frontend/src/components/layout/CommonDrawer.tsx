@@ -19,7 +19,6 @@ import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { styled } from "@mui/material/styles";
 import { StyledButton, drawerStyle } from "@/components/shared/styles/StyledSelectorBuilder";
 import { StyledHeaderBox } from "@/components/shared/styles/StyledHeaderBox";
-import {end} from "@popperjs/core";
 
 type Props = {
   item: ExtendedSubscription | ExtendedDelivery;
@@ -108,7 +107,7 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                 <StyledCard variant={"outlined"}>
                   <Typography>Endpoints</Typography>
                   <FormControl fullWidth>
-                    {item.endpoints.map((endpoint, index) => (
+                    {item.endpoints.map((endpoint) => (
                         <TextField
                             value={endpoint.host || ""}
                             label="Host"
@@ -138,7 +137,7 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                         },
                       }}
                     />
-                    {item.endpoints.map((endpoint, index) => (
+                    {item.endpoints.map((endpoint) => (
                         <TextField
                             value={endpoint.port || ""}
                             label="Port"
@@ -156,22 +155,25 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                             }}
                         />
                     ))}
-                    {label == "Delivery" && item.endpoints[0].dlqName?.toString() && (
-                      <TextField
-                        value={item.endpoints[0].dlqName?.toString() || ""}
-                        label= "Dead letter queue"
-                        margin="normal"
-                        slotProps={{
-                          input: {
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <ContentCopy value={item.endpoints[0].dlqName} />
-                              </InputAdornment>
-                            ),
-                          },
-                        }}
-                      />
-                    )}
+                    {label == "Delivery" && item.endpoints.map((endpoint) => endpoint.dlqName?.toString() ? (
+                            <TextField
+                                value={endpoint.dlqName?.toString() ? endpoint.dlqName?.toString() : ""}
+                                label="Dead letter queue"
+                                margin="normal"
+                                slotProps={{
+                                  input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                          <ContentCopy
+                                              value={endpoint.dlqName?.toString() ? endpoint.dlqName?.toString() : ""}/>
+                                        </InputAdornment>
+                                    ),
+                                  },
+                                }}
+                            />
+                        ) : null
+                    )
+                    }
                   </FormControl>
                 </StyledCard>
               </ListItem>
