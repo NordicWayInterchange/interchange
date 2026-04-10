@@ -1,24 +1,13 @@
 import NextAuth from "next-auth";
-import Auth0Provider from "next-auth/providers/auth0";
 import { escapeString } from "@/lib/escapeString";
+import buildProviders from "../../../../auth/providers";
 const logger = require("../../../lib/logger");
 
 export const authOptions = {
   /**
    * @Description Providers client id/secret
    */
-  providers: [
-    Auth0Provider({
-      clientId: process.env.AUTH0_CLIENT_ID,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET,
-      issuer: process.env.AUTH0_ISSUER,
-      authorization: {
-        params: {
-          prompt: "login",
-        },
-      },
-    }),
-  ],
+  providers: [buildProviders()],
 
   session: {
     maxAge: parseInt(process.env.SESSION_MAXAGE_SECONDS) || 24 * 60 * 60,

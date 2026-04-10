@@ -9,9 +9,9 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.service.MatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
+import no.vegvesen.ixn.federation.service.routing.match.MatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -365,6 +365,12 @@ public class RoutingConfigurer {
 	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void createMatches() {
 		matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(serviceProviderRouter.findServiceProvidersAsList(), neighbourService.findAllNeighboursByIgnoreIs(false));
+	}
+
+
+	@Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
+	public void createBindingsWithMatches() {
+		matchDiscoveryService.createBindingsWithMatches();
 	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")

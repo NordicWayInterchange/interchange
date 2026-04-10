@@ -2,7 +2,7 @@ import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
-import { signIn } from "next-auth/react";
+import {getProviders, signIn} from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Image from "next/image";
@@ -12,10 +12,11 @@ import * as React from "react";
 import { Box } from "@mui/system";
 import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 
-export default function Login({}: InferGetServerSidePropsType<
+export default function Login({providers}: InferGetServerSidePropsType<
   typeof getServerSideProps
 >) {
-  return (
+
+    return (
     <Card
       variant="outlined"
       sx={{
@@ -35,33 +36,34 @@ export default function Login({}: InferGetServerSidePropsType<
         christian.berg.skjetne@vegvesen.no requesting access.
       </Typography>
 
-      <Typography variant="body1">
-        Sign in will redirect you to our authentication provider.
-      </Typography>
+        <Typography variant="body1">
+            Sign in will redirect you to authentication provider.
+        </Typography>
 
-      <StyledButton
-        variant="contained"
-        color={"buttonThemeColor"}
-        sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
-        onClick={() => {
-          /*TODO: get from props*/
-          void signIn("auth0");
-        }}
-      >
-        <Typography>Sign in</Typography>
-      </StyledButton>
+        {providers && Object.values(providers).map((provider) => (
+            <div key={provider.id}>
+                <StyledButton
+                    variant="contained"
+                    color="buttonThemeColor"
+                    sx={{ textTransform: "none", width: 250, alignSelf: "center" }}
+                    onClick={() => signIn(provider.id)}
+                >
+                    <Typography>Sign in with {provider.name}</Typography>
+                </StyledButton>
+            </div>
+        ))}
     </Card>
   );
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
+    const session = await getServerSession(context.req as any, context.res as any, authOptions as any);
 
   if (session) {
     return { redirect: { destination: "/" } };
   }
 
-  return {
-    props: {},
-  };
+  const providers = await getProviders()
+  return { props: { providers } }
+
 }
