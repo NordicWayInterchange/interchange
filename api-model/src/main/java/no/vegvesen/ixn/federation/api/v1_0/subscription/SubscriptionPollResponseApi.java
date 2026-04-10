@@ -14,7 +14,8 @@ import java.util.Objects;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         visible = true,
-        property = "version"
+        property = "version",
+        defaultImpl = SubscriptionPollResponseApiV1.class
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SubscriptionPollResponseApiV1.class, name = ApiVersion.VERSION_1_2),
