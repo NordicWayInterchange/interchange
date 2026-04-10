@@ -81,20 +81,11 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
     @Autowired
     private RoutingConfigurerProperties routingConfigurerProperties;
 
-    private MatchDiscoveryService matchDiscoveryService;
+    @Autowired
     private QpidClient client;
 
-    @BeforeEach
-    public void setup() {
-        client = new QpidClient(
-                new QpidClientConfig(
-                        QpidDockerBaseIT.sslClientContext(stores,"routing_configurer")
-                ).qpidRestTemplate(),
-                routingConfigurerProperties
-        );
-        matchDiscoveryService = new MatchDiscoveryService(matchRepository,serviceProviderRepository,client);
-
-    }
+    @Autowired
+    private MatchDiscoveryService matchDiscoveryService;
 
     @Test
     public void matchDiscovereryServiceIsAutowired() {
