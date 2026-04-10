@@ -53,6 +53,8 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
@@ -61,6 +63,10 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
         registry.add("routing-configurer.interval",()->"999");
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost",() -> HOST_NAME);
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
     }
 
     @Autowired
