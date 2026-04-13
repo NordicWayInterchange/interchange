@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.match.MatchDiscoveryService;
@@ -41,7 +42,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(classes = {QpidClient.class, RoutingConfigurerProperties.class, MatchDiscoveryService.class, OutgoingMatchDiscoveryService.class, QpidClientConfig.class, TestSSLContextConfig.class, TestSSLProperties.class, RoutingConfigurer.class})
+@SpringBootTest(classes = {
+        QpidClient.class,
+        RoutingConfigurerProperties.class,
+        MatchDiscoveryService.class,
+        OutgoingMatchDiscoveryService.class,
+        ServiceProviderRepository.class,
+        QpidClientConfig.class,
+        TestSSLContextConfig.class,
+        TestSSLProperties.class,
+        RoutingConfigurer.class
+})
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
@@ -102,7 +113,12 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
     QpidClient client;
 
     @MockitoBean
+    ServiceProviderRepository serviceProviderRepository;
+
+    /*
+    @MockitoBean
     ServiceProviderRouter serviceProviderRouter;
+     */
 
     @MockitoBean
     OutgoingMatchRepository outgoingMatchRepository;
@@ -146,7 +162,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
         when(neighbourService.getMessagePort()).thenReturn("5671");
-        when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(sub.getEndpoints()).isEmpty();
@@ -188,7 +204,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
         when(neighbourService.getMessagePort()).thenReturn("5671");
-        when(serviceProviderRouter.findServiceProviders()).thenReturn(Collections.singletonList(serviceProvider));
+        when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(sub.getEndpoints()).isEmpty();
