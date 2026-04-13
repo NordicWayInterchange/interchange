@@ -1,0 +1,35 @@
+{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak_enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-keycloak
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: keycloak
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: keycloak
+    release: {{ .Release.Name }}
+  ports:
+    - protocol: TCP
+      port: 8443
+      targetPort: https
+      name: https
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+  name: {{ .Release.Name }}-keycloak-discovery
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  clusterIP: None
+  type: ClusterIP
+
+{{- end }}

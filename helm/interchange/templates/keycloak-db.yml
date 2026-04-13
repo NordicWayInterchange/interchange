@@ -27,11 +27,12 @@ spec:
           image: "postgres:18.1"
           env:
             - name: POSTGRES_USER
-              value: "keycloak"
+              value: {{ .Values.napcore_frontend.keycloak.postgres_user }}
             - name: POSTGRES_PASSWORD
-              value: "keycloak" # Password must be changed
+              value: {{ .Values.napcore_frontend.keycloak.postgres_password }}
             - name: POSTGRES_DB
-              value: "keycloak"
+              value: {{ .Values.napcore_frontend.keycloak.postgres_db }}
+
           ports:
             - containerPort: 5432
               name: db

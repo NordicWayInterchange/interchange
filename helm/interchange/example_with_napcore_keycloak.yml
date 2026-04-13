@@ -109,8 +109,15 @@ napcore_frontend:
   keystore_file_name: napcore_frontend.p12
   generated_username_prefix: nap.example-node.itsinterchange.eu.
   napcore_auth0_issuer: my_auth0_issuer
-  #TODO share with ingress config
+  certmanager_enabled: true
   home_url: https://portal.example-node.itsinterchange.eu
+  keycloak_enabled: true
+  keycloak:
+    postgres_user: keycloak
+    postgres_password: keycloak
+    postgres_db: keycloak
+    admin_name: admin
+    admin_password: admin
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
