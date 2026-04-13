@@ -112,9 +112,9 @@ services:
       - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a.bouvetinterchange.eu
-      - SIGN_STORE=/keys/ca.a.bouvetinterchange.eu.p12
+      - SIGN_STORE=/keys/ca.internal.a.bouvetinterchange.eu.p12
       - SIGN_STORE_PASSWORD=password
-      - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
+      - SIGN_STORE_ALIAS=ca.internal.a.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
     networks:
       - testing_net
