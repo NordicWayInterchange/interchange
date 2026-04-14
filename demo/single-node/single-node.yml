@@ -203,6 +203,7 @@ services:
       - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
       - INTERCHANGE_PREFIX=a.interchangedomain.lookupdomain.
       - NEXTAUTH_SECRET=supersecret
+      - USE_KEYCLOAK=true
       - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
       - KEYCLOAK_REALM=a.interchangedomain.com
