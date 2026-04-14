@@ -15,7 +15,10 @@ napcore_auth0_client_id: my_client
 napcore_auth0_client_secret: my_secret
 napcore_server_sign_store: "base64 encoded keystore file used for signing"
 napcore_server_sign_store_password: secret_password
-
+keycloak_postgres_user: keycloak
+keycloak_postgres_password: keycloak
+keycloak_admin_name: admin
+keycloak_admin_password: admin
 
 # Values:
 external_name: example-node.itsinterchange.eu
@@ -113,11 +116,7 @@ napcore_frontend:
   home_url: https://portal.example-node.itsinterchange.eu
   keycloak_enabled: true
   keycloak:
-    postgres_user: keycloak
-    postgres_password: keycloak
     postgres_db: keycloak
-    admin_name: admin
-    admin_password: admin
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
