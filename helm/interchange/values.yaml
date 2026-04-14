@@ -67,7 +67,8 @@ napcore_server:
 napcore_frontend:
   enabled: false
   certmanager_enabled: false
-  keycloak_enabled: false
+  keycloak:
+    enabled: false
 
 admin_frontend:
   enabled: false

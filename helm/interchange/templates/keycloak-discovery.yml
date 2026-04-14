@@ -1,4 +1,4 @@
-{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak_enabled }}
+{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

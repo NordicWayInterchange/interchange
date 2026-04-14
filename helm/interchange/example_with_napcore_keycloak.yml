@@ -114,8 +114,8 @@ napcore_frontend:
   napcore_auth0_issuer: my_auth0_issuer
   certmanager_enabled: true
   home_url: https://portal.example-node.itsinterchange.eu
-  keycloak_enabled: true
   keycloak:
+    enabled: true
     postgres_db: keycloak
 letsencrypt:
   server: https://letsencrypt-server

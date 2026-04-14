@@ -23,7 +23,7 @@ spec:
                 port:
                   number: 3000
     {{- end}}
-    {{ if .Values.napcore_frontend.keycloak_enabled }}
+    {{ if .Values.napcore_frontend.keycloak.enabled }}
     - host: login.{{ .Values.external_name }}
       http:
         - paths:
@@ -59,7 +59,7 @@ spec:
         - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-admin-cert
     {{- end}}
-    {{- if .Values.napcore_frontend.keycloak_enabled }}
+    {{- if .Values.napcore_frontend.keycloak.enabled }}
     - hosts:
         - login.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-keycloak-cert
