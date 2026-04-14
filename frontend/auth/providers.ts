@@ -3,16 +3,15 @@ import Keycloak from "next-auth/providers/keycloak";
 
 export default function buildProviders() {
     if (process.env.USE_KEYCLOAK === "true") {
-        const baseExternal = `${process.env.EXTERNAL_KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`;
         const baseInternal = `${process.env.INTERNAL_KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`;
 
         return Keycloak({
             clientId: process.env.KEYCLOAK_CLIENT_ID ?? "clientId is not defined in environment variables",
             clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "clientSecret is not defined in environment variables",
-            issuer: baseExternal,
+            issuer: baseInternal,
             authorization: {
-                url: `${baseExternal}/protocol/openid-connect/auth`,
-                params: {prompt: "login"},
+                url: `${baseInternal}/protocol/openid-connect/auth`,
+                params: { prompt: "login" },
             },
             name: `Keycloak (${process.env.KEYCLOAK_REALM})`,
             token: `${baseInternal}/protocol/openid-connect/token`,

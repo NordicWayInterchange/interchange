@@ -204,6 +204,7 @@ services:
       - INTERCHANGE_PREFIX=a.interchangedomain.lookupdomain.
       - NEXTAUTH_SECRET=supersecret
       - USE_KEYCLOAK=true
+      - AUTH0_ISSUER=https://dev-fua4j76kahupdlii.eu.auth0.com
       - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
       - KEYCLOAK_REALM=a.interchangedomain.com
