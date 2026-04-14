@@ -25,17 +25,17 @@ spec:
           args: ["start"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
-              value: {{ .Values.keycloak_admin_name }}
+              value: {{ .Values.keycloak_admin_name | quote }}
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
-              value: {{ .Values.keycloak_admin_password }}
+              value: {{ .Values.keycloak_admin_password | quote }}
             - name: KC_DB_URL_HOST
               value: {{ .Release.Name }}-keycloak-db
             - name: KC_DB
-              value: {{ .Values.napcore_frontend.keycloak.postgres_db }}
+              value: {{ .Values.napcore_frontend.keycloak.postgres_db | quote }}
             - name: KC_DB_PASSWORD
-              value: {{ .Values.keycloak_postgres_password }}
+              value: {{ .Values.keycloak_postgres_password  | quote}}
             - name: KC_DB_USERNAME
-              value: {{ .Values.keycloak_postgres_user }}
+              value: {{ .Values.keycloak_postgres_user | quote }}
             - name: KC_HOSTNAME
               value: login.{{ .Values.external_name }}
 {{- end }}
