@@ -88,7 +88,7 @@ public class ClusterKeyGeneratorTest {
                     "NO",
                     List.of(
                             new CARequest(
-                                    "ca.internal.a.bouvetinterchange.eu",
+                                    "ca.a.bouvetinterchange.eu",
                                     "NO",
                                     List.of(),
                                     List.of(
@@ -105,7 +105,7 @@ public class ClusterKeyGeneratorTest {
                                     )
                             ),
                             new CARequest(
-                                    "ca.internal.b.bouvetinterchange",
+                                    "ca.b.bouvetinterchange.eu",
                                     "SE",
                                     List.of(),
                                     List.of(
