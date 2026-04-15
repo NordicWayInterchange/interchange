@@ -11,7 +11,7 @@ import { Box } from "@mui/system";
 import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 
 export default function Login(isKeycloak: any) {
-
+    console.log(isKeycloak)
     return (
     <Card
       variant="outlined"
