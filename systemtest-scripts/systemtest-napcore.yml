@@ -3,7 +3,7 @@ services:
     build:
       context: ../frontend
     depends_on:
-      - a_napcore_server
+      - a-napcore-server
     ports:
       - 3000:3000
     volumes:
