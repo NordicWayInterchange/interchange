@@ -11,16 +11,11 @@
 
     <artifactId>service-provider-rest-client</artifactId>
 
-    <properties>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>shared-api-model</artifactId>
-            <version>1.0.36-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -34,7 +29,7 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>onboard-rest-api</artifactId>
-            <version>1.0.36-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
