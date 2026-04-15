@@ -176,17 +176,18 @@ public class OnboardRestController {
 		validatePathVariable(serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}",serviceProviderName);
+		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+				.map(OutgoingMatch::getCapability)
+				.collect(Collectors.toSet());
 		Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
 		if (selector != null) {
 			if (!selector.isEmpty()) {
+				localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
 				neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
 			}
 		}
-		Set<Capability> capabilities = outgoingMatchRepository.findAll().stream()
-				.map(OutgoingMatch::getCapability)
-				.collect(Collectors.toSet());
 
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, capabilities, neighbourCapabilities);
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, localCapabilities, neighbourCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
