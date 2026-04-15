@@ -35,9 +35,9 @@
   "country" : "NO",
   "subCaRequests" : [ ],
   "hostRequests" : [ {
-    "name" : "a-napcore-server.bouvetinterchange.eu"
+    "name" : "a-napcore-server"
   }, {
-    "name" : "a-admin.bouvetinterchange.eu"
+    "name" : "a-admin"
   },{
     "name" : "a_qpid"
   }],
