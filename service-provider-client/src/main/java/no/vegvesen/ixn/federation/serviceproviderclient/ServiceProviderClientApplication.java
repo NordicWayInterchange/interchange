@@ -108,7 +108,7 @@ public class ServiceProviderClientApplication{
                         user,
                         "",
                         ClusterKeyGenerator.loadCertificateChain(Files.newBufferedReader(tlsArgs.pemArgs.certificatePath)),
-                        ClusterKeyGenerator.loadKeyPair(Files.newBufferedReader(tlsArgs.pemArgs.privateKeyPath)).getPrivate()
+                        ClusterKeyGenerator.loadPrivateKey(Files.newBufferedReader(tlsArgs.pemArgs.privateKeyPath))
                 );
             } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
                 throw new InvalidSSLConfig("Could not load key store",e);
