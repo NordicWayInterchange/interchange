@@ -5,16 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.keys.generator.CARequest;
 import no.vegvesen.ixn.keys.generator.CaResponse;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
-import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.PasswordGenerator;
+import no.vegvesen.ixn.keys.generator.PasswordGenerator;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -43,8 +41,8 @@ public class KeysGeneratorApplication {
         @Option(names = "-o", required = true, description = "Folder for created key and truststores")
         private Path outputFolder;
 
-        //TODO option to use RandomPasswordGenerator
-        private final PasswordGenerator passwordGenerator = () -> "password";
+        private final PasswordGenerator passwordGenerator =
+                PasswordGenerator.random(new SecureRandom(), 12);
 
         @Override
         public Integer call() throws Exception {
