@@ -6,13 +6,7 @@ const withTM = require('next-transpile-modules')([
 const nextConfig = withTM({
   reactStrictMode: false, // speeds up dev + build slightly
   output: 'standalone',
-  swcMinify: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  swcMinify: true
 });
 
 module.exports = nextConfig;
