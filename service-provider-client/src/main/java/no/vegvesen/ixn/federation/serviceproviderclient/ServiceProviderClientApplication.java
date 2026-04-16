@@ -40,49 +40,35 @@ public class ServiceProviderClientApplication{
     @Option(names = {"-u", "--user"}, required = false, description = "The service provider user")
     private String user;
 
-    @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
-    private Path keystorePath;
+    static class KeystoreArgs {
+        @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
+        private Path keystorePath;
 
-    @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
-    String keystorePassword;
+        @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
+        String keystorePassword;
 
-    @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
-    Path trustStorePath;
+        @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
+        Path trustStorePath;
 
-    @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
-    String trustStorePassword;
+        @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
+        String trustStorePassword;
+
+    }
+
+    @ArgGroup(exclusive = false)
+    private KeystoreArgs keystoreArgs;
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new ServiceProviderClientApplication()).execute(args);
         System.exit(exitCode);
     }
 
-    public String getUrl() {
-        return server;
-    }
-
-    public Path getKeystorePath() {
-        return keystorePath;
-    }
-
-    public String getKeystorePassword() {
-        return keystorePassword;
-    }
-
-    public Path getTrustStorePath() {
-        return trustStorePath;
-    }
-
-    public String getTrustStorePassword() {
-        return trustStorePassword;
-    }
-
     public SSLContext createSSLContext() {
-        KeystoreDetails keystoreDetails = new KeystoreDetails(keystorePath.toString(),
-                keystorePassword,
+        KeystoreDetails keystoreDetails = new KeystoreDetails(keystoreArgs.keystorePath.toString(),
+                keystoreArgs.keystorePassword,
                 KeystoreType.PKCS12);
-        KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath.toString(),
-                trustStorePassword,KeystoreType.JKS);
+        KeystoreDetails trustStoreDetails = new KeystoreDetails(keystoreArgs.trustStorePath.toString(),
+                keystoreArgs.trustStorePassword,KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
 
