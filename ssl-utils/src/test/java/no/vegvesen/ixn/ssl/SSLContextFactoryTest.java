@@ -29,7 +29,7 @@ public class SSLContextFactoryTest {
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.PKCS12);
 
-		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
+		assertThatExceptionOfType(InvalidSSLConfig.class).isThrownBy(() -> {
 			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
 		});
 	}
@@ -42,7 +42,7 @@ public class SSLContextFactoryTest {
 		String filePath = getFilePath("jks/truststore.jks");
 		KeystoreDetails truststoreDetails = new KeystoreDetails(filePath, "password", KeystoreType.JKS);
 
-		assertThatExceptionOfType(SSLContextFactory.InvalidSSLConfig.class).isThrownBy(() -> {
+		assertThatExceptionOfType(InvalidSSLConfig.class).isThrownBy(() -> {
 			SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, truststoreDetails);
 		});
 	}

@@ -48,7 +48,7 @@ public class SSLContextFactory {
 		return keyStore;
 	}
 
-	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
+	public static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
 		final KeyManagerFactory kmf;
 		final TrustManagerFactory tmf;
 		try {
@@ -72,13 +72,4 @@ public class SSLContextFactory {
 		}
 	}
 
-	public static class InvalidSSLConfig extends RuntimeException {
-		InvalidSSLConfig(String message, Throwable t) {
-			super(message,t);
-		}
-
-		InvalidSSLConfig(Throwable e) {
-			super(e);
-		}
-	}
 }
