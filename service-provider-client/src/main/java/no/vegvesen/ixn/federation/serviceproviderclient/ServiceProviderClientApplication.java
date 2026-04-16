@@ -55,7 +55,7 @@ public class ServiceProviderClientApplication{
 
     }
 
-    @ArgGroup(exclusive = false)
+    @ArgGroup(exclusive = false, heading = "Arguments for using keystores (keystore is p12, truststore jks)\n")
     private KeystoreArgs keystoreArgs;
 
     public static void main(String[] args) {
