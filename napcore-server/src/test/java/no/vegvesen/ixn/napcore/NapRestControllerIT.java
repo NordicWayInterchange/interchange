@@ -6,8 +6,8 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
@@ -825,6 +825,55 @@ public class NapRestControllerIT extends PostgresContainerBase {
         Assertions.assertEquals("myBroker", datex.getBiqueueEndpointResponse().getBrokerExternalName()); //from test/resources/application.properties
         Assertions.assertEquals(5671, datex.getBiqueueEndpointResponse().getMessageChannelPort());
         Assertions.assertEquals("bi-datex", datex.getBiqueueEndpointResponse().getQueueName());
+    }
+
+
+    @Test
+    public void testGetMatchingSubscriptionCapabilities() {
+        String actorCommonName = "actor";
+        String selector = "originatingCountry='NO'";
+
+        Neighbour neighbour = new Neighbour(
+                "Neighbour",
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
+                        Set.of(
+                                new NeighbourCapability(
+                                        new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
+                                                "situationPublication", "bouvet"),
+                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                )
+                        )),
+                new NeighbourSubscriptionRequest(Set.of(
+                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
+                )),
+                new no.vegvesen.ixn.federation.model.SubscriptionRequest(),
+                new Connection()
+        );
+        neighbourRepository.save(neighbour);
+
+
+        List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, selector);
+        List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, "originatingCountry='SE'");
+
+        assertThat(response1).hasSize(1);
+        assertThat(response2).hasSize(0);
+
+
+        DenmApplication app = new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1));
+
+        Metadata meta =  new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0);
+
+        Capability cap = new Capability(app, meta);
+
+        LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
+
+        ServiceProvider serviceProvider = new ServiceProvider("sp", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
+
+        serviceProviderRepository.save(serviceProvider);
+
+        List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, selector);
+
+        assertThat(response).hasSize(1);
     }
 
     @Autowired
