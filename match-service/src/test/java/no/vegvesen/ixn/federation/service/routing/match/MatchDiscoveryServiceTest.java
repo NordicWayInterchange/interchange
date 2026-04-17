@@ -1,8 +1,12 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.federation.service.routing.match;
 
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,14 +25,20 @@ public class MatchDiscoveryServiceTest {
     @MockitoBean
     private MatchRepository matchRepository;
 
+    @MockitoBean
+    private ServiceProviderRepository serviceProviderRepository;
+
+    @MockitoBean
+    private QpidClient qpidClient;
+
     @Autowired
     private MatchDiscoveryService matchDiscoveryService;
 
     @Test
     public void noServiceProvidersAndNoNeighboursShouldNotCreateMatches() {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(Collections.emptyList(),Collections.emptyList());
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.never()).findAllBySubscriptionId(ArgumentMatchers.any());
+        Mockito.verify(matchRepository, Mockito.never()).save(ArgumentMatchers.any(Match.class));
 
     }
 
@@ -40,8 +50,8 @@ public class MatchDiscoveryServiceTest {
                 new NeighbourSubscriptionRequest(),
                 new SubscriptionRequest()
         )));
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.never()).findAllBySubscriptionId(ArgumentMatchers.any());
+        Mockito.verify(matchRepository, Mockito.never()).save(ArgumentMatchers.any(Match.class));
     }
 
     @Test
@@ -49,8 +59,8 @@ public class MatchDiscoveryServiceTest {
         matchDiscoveryService.syncLocalSubscriptionAndSubscriptionsToCreateMatch(
                 Collections.singletonList(new ServiceProvider("SP")),
                 Collections.emptyList());
-        verify(matchRepository,never()).findAllBySubscriptionId(any());
-        verify(matchRepository,never()).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.never()).findAllBySubscriptionId(ArgumentMatchers.any());
+        Mockito.verify(matchRepository, Mockito.never()).save(ArgumentMatchers.any(Match.class));
     }
 
     @Test
@@ -84,8 +94,8 @@ public class MatchDiscoveryServiceTest {
                         new Connection()
                 ))
         );
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any()); //TODO should check against the actual subscriptionId
-        verify(matchRepository,times(1)).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(ArgumentMatchers.any(), ArgumentMatchers.any()); //TODO should check against the actual subscriptionId
+        Mockito.verify(matchRepository, Mockito.times(1)).save(ArgumentMatchers.any(Match.class));
     }
 
     //NOTE A localsubscription matching several capabilities at neighbour will only create one subscription on the neighbour.
@@ -137,8 +147,8 @@ public class MatchDiscoveryServiceTest {
                Collections.singletonList(sp),
                Arrays.asList(neighbour,otherNeighbour)
        );
-       verify(matchRepository,times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
-       verify(matchRepository,times(2)).save(any(Match.class));
+       Mockito.verify(matchRepository, Mockito.times(2)).findBySubscriptionIdAndAndLocalSubscriptionId(ArgumentMatchers.any(), ArgumentMatchers.any());
+       Mockito.verify(matchRepository, Mockito.times(2)).save(ArgumentMatchers.any(Match.class));
     }
 
     @Test
@@ -176,8 +186,8 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(any(), any());
-        verify(matchRepository,times(1)).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.times(1)).findBySubscriptionIdAndAndLocalSubscriptionId(ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.verify(matchRepository, Mockito.times(1)).save(ArgumentMatchers.any(Match.class));
     }
 
     @Test
@@ -215,8 +225,8 @@ public class MatchDiscoveryServiceTest {
                 Collections.singletonList(neighbour)
         );
 
-        verify(matchRepository,times(0)).findAllBySubscriptionId(any());
-        verify(matchRepository,times(0)).save(any(Match.class));
+        Mockito.verify(matchRepository, Mockito.times(0)).findAllBySubscriptionId(ArgumentMatchers.any());
+        Mockito.verify(matchRepository, Mockito.times(0)).save(ArgumentMatchers.any(Match.class));
     }
 
 }

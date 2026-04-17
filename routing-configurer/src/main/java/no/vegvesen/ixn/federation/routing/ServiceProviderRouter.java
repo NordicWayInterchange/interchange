@@ -1,8 +1,6 @@
 package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -37,8 +34,6 @@ public class ServiceProviderRouter {
 
     private final QpidClient qpidClient;
 
-    private final MatchRepository matchRepository;
-
     private final InterchangeNodeProperties nodeProperties;
 
     private final LocalDeliveryService localDeliveryService;
@@ -46,11 +41,10 @@ public class ServiceProviderRouter {
     private final LocalSubscriptionService localSubscriptionService;
 
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
-        this.matchRepository = matchRepository;
         this.nodeProperties = nodeProperties;
         this.localDeliveryService = localDeliveryService;
         this.localSubscriptionService = localSubscriptionService;
@@ -325,43 +319,5 @@ public class ServiceProviderRouter {
         }
         return serviceProvider;
     }
-
-    //TODO This should be tested and moved to matchDiscoveryService (renamed to MatchService).
-    @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
-    public void createBindingsWithMatches() {
-        List<ServiceProvider> serviceProviders = repository.findAll();
-        QpidDelta delta = qpidClient.getQpidDelta();
-        for (ServiceProvider serviceProvider : serviceProviders) {
-            for (LocalSubscription localSubscription : serviceProvider.wantedNonRedirectSubscriptions()) {
-                if (!localSubscription.getLocalEndpoints().isEmpty()) {
-                    List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                    for (Match match : matches) {
-                        Subscription subscription = match.getSubscription();
-                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                            for (Endpoint endpoint : subscription.getEndpoints()) {
-                                if (endpoint.hasShard()) {
-                                    Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
-                                    if (exchange != null) {
-                                        for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                            Queue queue = delta.findByQueueName(queueName);
-                                            if (queue != null && !exchange.isBoundTo(queue.getName())) {
-                                                String exchangeName = exchange.getName();
-                                                logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-                                                Binding binding = new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector()));
-                                                qpidClient.addBinding(exchangeName, binding);
-                                                exchange.addBinding(binding);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
 
 }

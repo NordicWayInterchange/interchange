@@ -553,10 +553,7 @@ or VmsPublication" placement="top"    slotProps={{
                               </IconButton>
                             </Tooltip>
                           </InputAdornment>
-                        ),
-                        inputProps: {
-                          maxLength: 255,
-                        }
+                        )
                         }
                     } as any}
                   />

@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0.36-SNAPSHOT</version>
+        <version>1.0.37-SNAPSHOT</version>
     </parent>
 
     <artifactId>routing-configurer</artifactId>
@@ -71,6 +71,11 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>qpid-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>match-service</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

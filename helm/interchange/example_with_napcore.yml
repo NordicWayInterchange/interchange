@@ -92,6 +92,7 @@ onboard_server:                                                     # Java appli
 napcore_server:
   enabled: true
   replicas: 1
+  key_alias: itsinterchange.eu
   image:
     repository: ghcr.io/nordicwayinterchange/napcore-server-app
     tag: "c6b1cf8"
