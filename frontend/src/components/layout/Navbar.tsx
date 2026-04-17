@@ -23,7 +23,7 @@ export default function Navbar() {
         <Typography variant="h6" noWrap component="div" sx={{ marginRight: "auto" }}>
           {process.env.NEXT_PUBLIC_THEME_PROVIDER == "trafficdata"
             ? "Trafficdata"
-            : "Transportportal"}
+            : "Interchange Portal"}
         </Typography>
         {showLogoutIcon && (
           <StyledSignOutBox>
