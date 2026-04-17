@@ -12,7 +12,6 @@ import picocli.CommandLine.Option;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,8 +40,7 @@ public class KeysGeneratorApplication {
         @Option(names = "-o", required = true, description = "Folder for created key and truststores")
         private Path outputFolder;
 
-        private final PasswordGenerator passwordGenerator =
-                PasswordGenerator.random(new SecureRandom(), 12);
+        private final PasswordGenerator passwordGenerator = PasswordGenerator.staticPassword("password");
 
         @Override
         public Integer call() throws Exception {
