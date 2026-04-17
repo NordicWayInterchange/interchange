@@ -198,7 +198,7 @@ public class QpidClient {
 
 	public ServiceProviderMember getServiceProviderMember(String memberName) {
 		try {
-			String url = groupMembersURL + "/" + SERVICE_PROVIDERS_GROUP_NAME + "/" + memberName;
+			String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME + "/" + memberName;
 			logger.debug("GETting from {}", url);
 			return restTemplate.getForEntity(url, ServiceProviderMember.class).getBody();
 		} catch (HttpClientErrorException.NotFound e) {
