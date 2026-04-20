@@ -829,7 +829,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
 
     @Test
-    public void testGetMatchingSubscriptionCapabilities() {
+    public void testGetMatchingLocalSubscriptionCapabilities() {
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
 
