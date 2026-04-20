@@ -6,7 +6,7 @@ import {getProviders, signIn} from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Image from "next/image";
-import logo from "@/../public/napcore-logo.png";
+import logo from "@/../public/interchange-logo.png";
 import { Card, Typography } from "@mui/material";
 import * as React from "react";
 import { Box } from "@mui/system";
@@ -45,7 +45,7 @@ export default function Login({providers}: InferGetServerSidePropsType<
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
-                    sx={{ textTransform: "none", width: 250, alignSelf: "center" }}
+                    sx={{ textTransform: "none", width: 250, alignSelf: "center", ml:10}}
                     onClick={() => signIn(provider.id)}
                 >
                     <Typography>Sign in with {provider.name}</Typography>

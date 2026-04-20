@@ -18,6 +18,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
+import TableRowsIcon from "@mui/icons-material/TableRows";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -26,42 +27,48 @@ export default function Home() {
   );
 
   const shortcuts = [
-    {
-      header: "Subscriptions",
-      description: "View subscriptions",
-      url: "/subscriptions",
-      icon: <SubscriptionsIcon />
-    },
-    {
-      header: "Network capabilities",
-      description: "View all capabilities",
-      url: "network-capabilities",
-      icon: <CellTowerIcon />
-    },
-    {
-      header: "My capabilities",
-      description: "View my capabilities",
-      url: "capabilities",
-      icon: <PersonIcon />
-    },
-    {
-      header: "Deliveries",
-      description: "View deliveries",
-      url: "/deliveries",
-      icon: <LocalPostOfficeIcon />
-    },
-    {
-      header: "Private channels",
-      description: "View my private channels",
-      url: "/private-channels",
-      icon: <LockIcon />
-    },
-    {
-      header: "Certificate",
-      description: "Generate certificate",
-      url: "/certificate",
-      icon: <SettingsIcon />
-    },
+      {
+          header: "Subscriptions",
+          description: "View subscriptions",
+          url: "/subscriptions",
+          icon: <SubscriptionsIcon/>
+      },
+      {
+          header: "Network capabilities",
+          description: "View all capabilities",
+          url: "network-capabilities",
+          icon: <CellTowerIcon/>
+      },
+      {
+          header: "My capabilities",
+          description: "View my capabilities",
+          url: "capabilities",
+          icon: <PersonIcon/>
+      },
+      {
+          header: "Deliveries",
+          description: "View deliveries",
+          url: "/deliveries",
+          icon: <LocalPostOfficeIcon/>
+      },
+      {
+          header: "Private channels",
+          description: "View my private channels",
+          url: "/private-channels",
+          icon: <LockIcon/>
+      },
+      {
+          header: "Bi-queues",
+          description: "View bi-queues",
+          url: "/bi-queues",
+          icon: <TableRowsIcon/>
+      },
+      {
+          header: "Certificate",
+          description: "Generate certificate",
+          url: "/certificate",
+          icon: <SettingsIcon/>
+      },
   ];
 
   return (
