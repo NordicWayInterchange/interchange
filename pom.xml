@@ -91,7 +91,7 @@
         <testcontainers.version>2.0.3</testcontainers.version>
         <dnsjava.version>3.6.3</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <postgresql.version>42.7.7</postgresql.version>
         <junit-jupiter.version>5.12.2</junit-jupiter.version>
         <swagger-annotations-jakarta.version>2.2.34</swagger-annotations-jakarta.version>
