@@ -27,8 +27,8 @@ export default function Login({providers}: InferGetServerSidePropsType<
         width: "500px",
       }}
     >
-      <Box sx={{ alignSelf: "center", mb: 3 }}>
-        <Image src={logo} alt="Nordic Way logo" width={150} priority={true} />
+      <Box sx={{ alignSelf: "center", mb: -1}}>
+        <Image src={logo} alt="Nordic Way logo" width={170} priority={true} />
       </Box>
       <Typography variant="body1">
         Access to this application is restricted to authorized users only. If
