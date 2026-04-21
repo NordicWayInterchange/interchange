@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient;
+package no.vegvesen.ixn.federation.serviceproviderrestclient;
 
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;

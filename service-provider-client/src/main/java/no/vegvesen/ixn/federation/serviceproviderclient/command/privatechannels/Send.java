@@ -1,19 +1,15 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.jms.InvalidDestinationException;
-import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;

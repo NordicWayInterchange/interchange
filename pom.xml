@@ -301,5 +301,6 @@
         <module>local-delivery-service</module>
         <module>local-subscription-service</module>
         <module>match-service</module>
+        <module>service-provider-rest-client</module>
     </modules>
 </project>

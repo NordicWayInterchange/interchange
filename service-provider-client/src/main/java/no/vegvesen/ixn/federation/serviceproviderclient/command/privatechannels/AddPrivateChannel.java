@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelRequestApi;
