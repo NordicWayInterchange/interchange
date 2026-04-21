@@ -4,8 +4,9 @@ const withTM = require('next-transpile-modules')([
 
 /** @type {import('next').NextConfig} */
 const nextConfig = withTM({
-  reactStrictMode: true,
+  reactStrictMode: false, // speeds up dev + build slightly
   output: 'standalone',
+  swcMinify: true
 });
 
 module.exports = nextConfig;
