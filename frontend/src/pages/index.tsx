@@ -106,7 +106,7 @@ export default function Home() {
               href={shortcut.url}
               style={{
                 textDecoration: "none",
-                marginRight: 15,
+                marginRight: 12,
                 marginTop: 10,
               }}
             >
