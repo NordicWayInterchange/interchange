@@ -3,12 +3,13 @@ package no.vegvesen.ixn.federation.routing;
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.qpid.Queue;
-import no.vegvesen.ixn.federation.repository.*;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper;
@@ -19,14 +20,17 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
 
@@ -73,14 +77,16 @@ public class ServiceProviderRouter {
             serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName,messageChannelPort,serviceProvider, delta);
             serviceProvider = localSubscriptionService.removeUnwantedSubscriptions(serviceProvider);
 
-            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
+            ServiceProviderMember groupMember = delta.findServiceProviderMemberByName(serviceProvider.getName());
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
                     qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
+                    delta.addServiceProviderMember(new ServiceProviderMember(serviceProvider.getName()));
                 }
             } else {
                 if (groupMember != null) {
                     qpidClient.removeServiceProviderMemberFromGroup(groupMember);
+                    delta.removeServiceProviderMember(groupMember);
                 }
             }
 
