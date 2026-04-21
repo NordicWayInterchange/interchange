@@ -5,7 +5,7 @@ import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.WriteToFileMessageListener;
 import no.vegvesen.ixn.WriteToScreenMessageListener;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.PeerPrivateChannelApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;
