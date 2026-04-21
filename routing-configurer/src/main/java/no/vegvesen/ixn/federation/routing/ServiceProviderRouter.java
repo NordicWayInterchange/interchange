@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -44,14 +46,25 @@ public class ServiceProviderRouter {
 
     private final LocalSubscriptionService localSubscriptionService;
 
+    private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
         this.nodeProperties = nodeProperties;
         this.localDeliveryService = localDeliveryService;
         this.localSubscriptionService = localSubscriptionService;
+        this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
+
+    }
+
+    @Scheduled(fixedRateString = "${service-provider-router.interval}")
+    public void checkForServiceProvidersToSetupRoutingFor() {
+        logger.debug("Checking for new service providers to setup routing");
+        Iterable<ServiceProvider> serviceProviders = repository.findAll();
+        syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
     }
 
     public Iterable<ServiceProvider> findServiceProviders() {
@@ -60,6 +73,16 @@ public class ServiceProviderRouter {
 
     public List<ServiceProvider> findServiceProvidersAsList() {
         return repository.findAll();
+    }
+
+    @Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
+    public void createOutgoingMatches() {
+        outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(repository.findAll());
+    }
+
+    @Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
+    public void updateOutgoingMatchesToTearDown() {
+        outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
@@ -77,16 +100,14 @@ public class ServiceProviderRouter {
             serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName,messageChannelPort,serviceProvider, delta);
             serviceProvider = localSubscriptionService.removeUnwantedSubscriptions(serviceProvider);
 
-            ServiceProviderMember groupMember = delta.findServiceProviderMemberByName(serviceProvider.getName());
+            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
                     qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
-                    delta.addServiceProviderMember(new ServiceProviderMember(serviceProvider.getName()));
                 }
             } else {
                 if (groupMember != null) {
                     qpidClient.removeServiceProviderMemberFromGroup(groupMember);
-                    delta.removeServiceProviderMember(groupMember);
                 }
             }
 
