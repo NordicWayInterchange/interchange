@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
 import picocli.CommandLine;
 
 import java.io.IOException;

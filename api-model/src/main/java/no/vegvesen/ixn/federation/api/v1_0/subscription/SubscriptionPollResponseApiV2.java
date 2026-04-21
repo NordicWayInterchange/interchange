@@ -4,7 +4,6 @@ import no.vegvesen.ixn.federation.api.v1_0.ApiVersion;
 import no.vegvesen.ixn.federation.api.v1_0.EndpointApiV2;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionStatusApi;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 

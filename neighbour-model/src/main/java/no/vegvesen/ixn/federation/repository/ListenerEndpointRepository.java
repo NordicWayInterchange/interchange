@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.repository;
 
-import no.vegvesen.ixn.federation.model.ConnectionStatus;
 import no.vegvesen.ixn.federation.model.ListenerEndpoint;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

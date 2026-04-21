@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.model;
 
-import no.vegvesen.ixn.federation.model.Neighbour;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
