@@ -81,7 +81,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
         }
         CaStores stores;
 		try {
-            stores = store(response,outputPath, () -> "password");
+            stores = store(response,outputPath, PasswordGenerator.staticPassword("password"));
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
