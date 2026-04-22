@@ -129,6 +129,15 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void testGetServiceProviderGroupMembers() {
+		ServiceProviderMember serviceProviderMember1 = client.addServiceProviderMemberToGroup("test-service-provider-group-member-1");
+		ServiceProviderMember serviceProviderMember2 = client.addServiceProviderMemberToGroup("test-service-provider-group-member-2");
+		List<ServiceProviderMember> serviceProviderMembers = client.getServiceProviderMembers();
+		assertThat(serviceProviderMembers).hasSize(2);
+		assertThat(serviceProviderMembers).contains(serviceProviderMember1, serviceProviderMember2);
+	}
+
+	@Test
 	public void testGetGroupMemberNonExistingMember() {
 		ServiceProviderMember groupMember = client.getServiceProviderMember("this-group-member-does-not-exist");
 		assertThat(groupMember).isNull();

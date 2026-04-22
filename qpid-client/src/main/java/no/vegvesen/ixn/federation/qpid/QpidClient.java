@@ -207,7 +207,7 @@ public class QpidClient {
 	}
 
 	public List<ServiceProviderMember> getServiceProviderMembers() {
-		String url = groupMembersURL + "/" + SERVICE_PROVIDERS_GROUP_NAME;
+		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME;
 		logger.debug("GETting from {}", url);
 		ResponseEntity<ServiceProviderMember[]> response = restTemplate.getForEntity(url, ServiceProviderMember[].class);
 		return Arrays.asList(response.getBody());
