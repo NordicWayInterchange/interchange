@@ -67,13 +67,6 @@ public class ServiceProviderRouter {
         syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
     }
 
-    public Iterable<ServiceProvider> findServiceProviders() {
-        return repository.findAll();
-    }
-
-    public List<ServiceProvider> findServiceProvidersAsList() {
-        return repository.findAll();
-    }
 
     @Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
     public void createOutgoingMatches() {
