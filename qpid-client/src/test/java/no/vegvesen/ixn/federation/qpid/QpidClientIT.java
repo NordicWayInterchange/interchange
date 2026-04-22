@@ -20,10 +20,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * This is a test for some of the managing of Qpid through the HTTP(S) interface. This test uses a different name for the hostname for the qpid container. We use "testhost", but
- * the actual hostname would normally end up as something like "localhost".
- */
 @Testcontainers
 public class QpidClientIT extends QpidDockerBaseIT {
 
@@ -34,7 +30,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(QpidClientIT.class),"my_ca", HOST_NAME, "routing_configurer");
 
 	@Container
-	public static final QpidContainer qpidContainer = getQpidTestContainer(
+	public final QpidContainer qpidContainer = getQpidTestContainer(
 			stores,
 			HOST_NAME,
 			HOST_NAME,
