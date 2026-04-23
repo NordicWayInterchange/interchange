@@ -25,7 +25,7 @@ You can create a new capability by clicking on the "Add capability" button in th
 page: [Add capability](https://napcore.npra.io/capabilities/new-user-capability). Click on `My capabilities`,
 `Add capability`
 
-![Add capability](images/capabilities.png)
+![Add capability](../demo/images/capabilities.png)
 
 The following fields needs to be filled out:
 
@@ -56,7 +56,7 @@ The following fields needs to be filled out:
 
 Following is an example of how the fields can be filled out.
 
-![Capability details](images/add_capability.png)
+![Capability details](../demo/images/add_capability.png)
 
 | Name                | Value         |
 |---------------------|---------------|
@@ -70,7 +70,7 @@ Following is an example of how the fields can be filled out.
 
 Click the button `Create my capability`, and the capability should appear in the list of capabilities.
 
-![The newly created capability in list](images/capability_list.png)
+![The newly created capability in list](../demo/images/capability_list.png)
 
 ## Subscription
 
@@ -89,13 +89,13 @@ capability, as well as capabilities created by
 other users both on your instance, or any other interchanges in the cluster. In this demo, however, only your own
 capability will be listed.
 
-![Network capabilities](images/network_capabilities.png)
+![Network capabilities](../demo/images/network_capabilities.png)
 
 Click on the three dots on the far right, and you should see the details of this capability. Enter a description for
 your new subscription on the bottom of the
 page, and click `Subscribe`
 
-![Subscribe](images/subscribe.png)
+![Subscribe](../demo/images/subscribe.png)
 
 Click `Subscriptions` on the right-hand menu, and you should see the newly created subscription in the list. The status
 might be `REQUESTED` for a short time, while
@@ -114,15 +114,15 @@ dependent on the Capability they match.
 
 In order to create a delivery, click on the three dots to the far right in the table.
 
-![Dot dot dot](images/dot_dot_dot.png)
+![Dot dot dot](../demo/images/dot_dot_dot.png)
 
 This shows the details of the newly created delivery.
 
-![Capability Details](images/capability_details.png)
+![Capability Details](../demo/images/capability_details.png)
 
 and all the way at the bottom, you can potentially create a description of the the new Delivery, and click `Deliver`
 
-![Deliver](images/deliver.png)
+![Deliver](../demo/images/deliver.png)
 
 Click `Deliveries` on the left-hand menu, and you should see a single row in the table. The status might be `REQUESTED`
 for a short time, while
