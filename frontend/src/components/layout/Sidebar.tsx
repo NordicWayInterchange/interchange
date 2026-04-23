@@ -71,7 +71,7 @@ const SECONDARY_PAGES: Array<IPages> = [
   },
   {
     text: "User help",
-    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/USERHELP.md",
+    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/frontend/USERHELP.md",
     icon: <ArticleIcon />,
   },
 ];
