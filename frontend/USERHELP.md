@@ -144,8 +144,9 @@ queue (dlq) for the delivery you are creating. Messages that cannot be delivered
 
 ## Private channels
 
-Private channel is a secure communication link used exclusively for message exchange. You can create a private channel
-by adding a peer name and description. Name of the private channels' peer is optional but description is
+Private channel is a secure communication used exclusively for message exchange. A service provider can manage their private channels.
+It can display, create and delete peers from private channels they own or remove itself from other private channels that are subscribed to them.
+In the portal you can create a private channel by adding a peer name and description. Name of the private channels' peer is optional but description is
 mandatory. After a private channel is shown up in the list you can click on the three dots on the far right side to see
 the private channel details. The status might be `REQUESTED` for a short time but should end up in a `CREATED` state
 after a few seconds.
