@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient;
+package no.vegvesen.ixn.federation.serviceproviderrestclient;
 
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -137,6 +137,11 @@ public class ServiceProviderClient {
     public GetPrivateChannelResponse getPrivateChannel(String privateChannelId){
         String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
+    }
+
+    public PeerPrivateChannelApi getPrivateChannelPeerById(String privateChannelId){
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user,privateChannelId);
+        return restTemplate.getForEntity(url, PeerPrivateChannelApi.class).getBody();
     }
 
     public ListPeerPrivateChannels getPeerPrivateChannels(){
