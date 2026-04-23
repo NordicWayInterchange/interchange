@@ -71,7 +71,7 @@ and all the way at the bottom, you can potentially create a description of the t
 Click `Deliveries` on the left-hand menu, and you should see a single row in the table. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-Click on the three dots on the fat right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
+Click on the three dots on the far right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
 in order to send messages.
 
 You have to use the service provider client to send messages, as described in [Publishing your first message](#publishing-your-first-message). But first, we need to 
@@ -93,7 +93,7 @@ page, and click `Subscribe`
 Click `Subscriptions` on the right-hand menu, and you should see the newly created subscription in the list. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-Click on the three dots on the fat right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
+Click on the three dots on the far right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to
 in order to receive messages.
 
 You have to use the service provider client to receive messages, as described in [Listening to messages](#listening-to-messages). 

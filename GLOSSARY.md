@@ -5,7 +5,7 @@ Service providers are the users of the system, be it a person or an integrated s
 Onboard API to communicate with the interchange in order to create Subscriptions, Capabilities or Deliveries.
 
 ## Capability
-Capabilities is like a schema for a data stream. It declares the headers of one or more data streams, and values or 
+Capability is like a schema for a data stream. It declares the headers of one or more data streams, and values or 
 range or values for those headers.
 
 ### Creating a new capability
@@ -17,11 +17,11 @@ The following fields needs to be filled out:
 - `Originating country` A two-letter country code (e.g. NO or SE or DK) representing the country where the data originates.
 - `Message type` Type of message for the publication. E.g. DENM, DATEX2, IVIM
   - **Additional fields for DATEX2 publications**
-    - `Publisher name` This is the identifier for the datex message distributer. Obtained from the nationalIdentifier section of the datex document.
+    - `Publisher name` This is the identifier for the datex message distributor. Obtained from the nationalIdentifier section of the datex document.
     - `Publication type` Publication type (only one) E.g: SituationPublication or MeasuredDataPublication or VmsPublication
   - **Additional fields for DENM publications**
     - `Cause codes` select the cause codes this publication supports
-- `Quadtree` Quadtree tiles representing the coverage area of the publication, comma sparated without spaces with a leading and trailing comma. E.g. ,01223,102332,012322, If you click on the "Show map" button it will open a tool to help you create the tiles. Zoom in and click on the tiles to add them to the list. click on the tile again to remove it. click save to return to the "Add capability" screen.
+- `Quadtree` Quadtree tiles representing the coverage area of the publication, comma separated without spaces with a leading and trailing comma. E.g. ,01223,102332,012322, If you click on the "Show map" button it will open a tool to help you create the tiles. Zoom in and click on the tiles to add them to the list. click on the tile again to remove it. click save to return to the "Add capability" screen.
 Once a capability has been created by clicking the "Create my capability" button you should see it in the Capability tab. If you open the capability by clicking on it in the list in the Capability tab, you can use the "Deliver" button to quickly create a [delivery](#delivery) for this specific capability.
 
 
@@ -32,8 +32,8 @@ to can belong to the Service Provider, other Service Providers on the interchang
 over the Improved Interface described in the [specification](https://www.c-roads.eu/). 
 
 ## Delivery
-Deliveries contains a selector that can match to one or more Capabilities thar belong to the same Service Provider, 
-and declares an endpoint for the a client to push messages to. The system then routes messages into datastreams 
+Deliveries contain a selector that can match to one or more Capabilities thar belong to the same Service Provider, 
+and declares an endpoint for the client to push messages to. The system then routes messages into data streams 
 dependent on the Capability they match.
 
 ## Endpoint
