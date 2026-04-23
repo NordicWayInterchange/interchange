@@ -19,11 +19,11 @@ export default function UserAssistance() {
       <Tooltip title={
         <span style={{ fontSize: ".88rem" }}>
           Do you need help with filling out this form? Please visit our  <CustomLink
-          href="https://github.com/NordicWayInterchange/interchange/blob/federation-master/GLOSSARY.md"
+          href="https://github.com/NordicWayInterchange/interchange/blob/federation-master/frontend/USERHELP.md"
           target="_blank"
           rel="noopener noreferrer"
         >
-         glossary
+         user help
       </CustomLink>
         </span>
       } arrow placement="right">

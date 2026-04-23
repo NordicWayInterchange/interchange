@@ -88,8 +88,8 @@ export default function Sidebar() {
           textDecoration: "none",
           color: "inherit",
         }}
-        target={page.text === "Glossary" ? "_blank" : ""}
-        rel={page.text === "Glossary" ?"noopener noreferrer" : ""}
+        target={page.text === "User help" ? "_blank" : ""}
+        rel={page.text === "User help" ?"noopener noreferrer" : ""}
       >
         <ListItem
           sx={{
