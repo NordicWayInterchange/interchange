@@ -11,6 +11,8 @@ import picocli.CommandLine.*;
                 GetPeerPrivateChannels.class,
                 AddPeersToPrivateChannel.class,
                 DeletePeerFromPrivateChannel.class,
+                Listen.class,
+                Send.class,
                 PeerDeletePeerFromPrivateChannel.class
         },
         defaultValueProvider = PropertiesDefaultProvider.class,

@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
@@ -42,7 +43,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, InterchangeNodeProperties.class, RoutingConfigurerProperties.class, LocalDeliveryService.class, LocalSubscriptionService.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {
+		ServiceProviderRouter.class,
+		QpidClient.class,
+		QpidClientConfig.class,
+		InterchangeNodeProperties.class,
+		RoutingConfigurerProperties.class,
+		LocalDeliveryService.class,
+		LocalSubscriptionService.class,
+		TestSSLContextConfig.class,
+		TestSSLProperties.class,
+		OutgoingMatchDiscoveryService.class
+})
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);

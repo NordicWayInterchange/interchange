@@ -34,10 +34,10 @@ services:
     - testing_net
 
 
-  a_admin:
+  a-admin:
     build:
       context: ../admin-server-app
-    container_name: a_admin
+    container_name: a-admin
     depends_on:
       - a_db
     links:
@@ -59,7 +59,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
       - KEY_STORE_PASSWORD=password
-      - ADMIN_NAME=admin.a.bouvetinterchange.eu
+      - ADMIN_NAME=admin.a.internal.bouvetinterchange.eu
     networks:
       - testing_net
 
@@ -89,10 +89,10 @@ services:
     networks:
       - testing_net
 
-  a_napcore_server:
+  a-napcore-server:
     build:
       context: ../napcore-server-app
-    container_name: a_napcore_server
+    container_name: a-napcore-server
     depends_on:
       - a_db
     ports:
@@ -103,15 +103,14 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.bouvetinterchange.eu
-      - NAP_NAME=nap.a.bouvetinterchange.eu
-      - DOMAIN_NAME=bouvetinterchange.eu
       - NAP_CHNL_PORT=8898
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a-napcore-server.p12
       - KEY_STORE_PASSWORD=password
-      - KEY_ALIAS=a.bouvetinterchange.eu
+      - KEY_ALIAS=a-napcore-server
+      - TRUST_STORE=/keys/ca.internal.a.bouvetinterchange.eu.jks
+      - TRUST_STORE_PASSWORD=password
+      - SERVER_NAME=a.bouvetinterchange.eu
+      - NAP_NAME=nap.a.internal.bouvetinterchange.eu
       - SIGN_STORE=/keys/ca.a.bouvetinterchange.eu.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
@@ -261,10 +260,10 @@ services:
     networks:
     - testing_net
 
-  b_admin:
+  b-admin:
     build:
       context: ../admin-server-app
-    container_name: b_admin
+    container_name: b-admin
     depends_on:
       - b_db
     links:
