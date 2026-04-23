@@ -70,8 +70,8 @@ const SECONDARY_PAGES: Array<IPages> = [
     icon: <SettingsIcon />,
   },
   {
-    text: "Glossary",
-    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/GLOSSARY.md",
+    text: "User help",
+    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/USERHELP.md",
     icon: <ArticleIcon />,
   },
 ];
