@@ -142,12 +142,28 @@ delivery by clicking on the listed capabilities. You can also click on advanced 
 provided cheat sheet. While creating a delivery you have the option to enable the dead letter
 queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. 
 
+## Private channels
+
+Private channel is a secure communication link used exclusively for message exchange. You can create a private channel
+by adding a peer name and description. Name of the private channels' peer is optional but description is
+mandatory. After a private channel is shown up in the list you can click on the three dots on the far right side to see
+the private channel details. The status might be `REQUESTED` for a short time but should end up in a `CREATED` state
+after a few seconds.
+You can also add or remove peers or even remove the private channel from the side window.
+The endpoint for the private channel consists of the hostname, port and the private channels' queue name.
+
+![Private channels](../demo/images/privateChannel_details.png)
+
+If another service provider has created a private channel subscribed to yours, it will appear in the `My private channel subscriptions` 
+list. You can use the `common name` of the other service provider which you can copy from `Home` tab as the peer name while creating a private channel.
+
+![My private channel subscriptions](../demo/images/privateChannel_subscription.png)
+
 ## Bi-queues
 
 Bi-queue is an unfiltered queue without any subscriptions. In this tab you can see the list of bi-queues per message type. 
 You can also add or remove access to the bi-consumer's group. By clicking on each bi-queue from the list you can see the
-endpoint details.
-
+bi-queue endpoint details.
 
 ## Certificate
 
