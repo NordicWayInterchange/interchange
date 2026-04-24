@@ -2,7 +2,7 @@
 
 ### Log in to the portal
 
-In a browser, go to [the login page](https://napcore.npra.io/)
+In a browser, go to the [login page](https://napcore.npra.io/)
 and log in to the portal with the provided username and password.
 
 ## Capability
@@ -15,7 +15,7 @@ range or values for those headers.
 In order to be able to publish messages on the node, a capability and a delivery have to be created.
 We'll start by adding a capability.
 
-You can create a new capability by clicking on the "Add capability" button in the capability tab, or by going to this
+You can create a new capability by clicking on the `Add capability` button in the capability tab, or by going to this
 page: [Add capability](https://napcore.npra.io/capabilities/new-user-capability). Click on `My capabilities`,
 `Add capability`
 
@@ -59,15 +59,17 @@ Following is an example of how the fields can be filled out.
 | Cause codes         | 5,6           |
 | Quadtree            | 12003         |
 
-
-Once a capability has been created by clicking the `Create my capability` button you should see it in the list of capabilities, either 
+Once a capability has been created by clicking the `Create my capability` button you should see it in the list of
+capabilities, either
 in `My capabilities` or ` Network capabilities` tab.
 
 ![The newly created capability in list](../demo/images/capability_list.png)
 
 If you open the capability by clicking on it, you can use the `Deliver` button
-to quickly create a [delivery](#delivery) for this specific capability. While creating a delivery you have the option to enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. You can also remove the capability that you
+to quickly create a [delivery](#delivery) for this specific capability. While creating a delivery you have the option to
+enable the dead letter
+queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. You can also remove
+the capability that you
 have just created from the capability details side window.
 
 ![Capability details](../demo/images/capability_details.png)
@@ -78,6 +80,8 @@ Subscriptions are what a client uses to obtain a stream or several streams of da
 Capabilities in the cluster, and creates endpoints for the client to fetch messages from. The Capabilities subscribed
 to can belong to the Service Provider, other Service Providers on the interchange, or to other interchanges, replicated
 over the Improved Interface described in the [specification](https://www.c-roads.eu/).
+Service providers are the users of the system, be it a person or an integrated system. Service Providers use the
+Onboard API to communicate with the interchange in order to create Subscriptions, Capabilities or Deliveries.
 
 ### How to register a Subscription?
 
@@ -104,11 +108,13 @@ the endpoint is being provisioned on the broker, but should end up in a `CREATED
 Click on the subscription or the three dots on the far right side to see the details of the subscription including
 the endpoint to connect to in order to receive messages.
 
-There is also another way of creating a subscription. You can click on `Add subscriotion` from `Subscriptions` tab and create a 
-subscription by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by using a 
-provided cheat sheet. 
+There is also another way of creating a subscription. You can click on `Add subscriotion` from `Subscriptions` tab and
+create a
+subscription by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by
+using a
+provided cheat sheet.
 
-![Cheat sheet](../demo/images/Cheatsheet.png) 
+![Cheat sheet](../demo/images/Cheatsheet.png)
 
 ## Delivery
 
@@ -118,7 +124,8 @@ dependent on the capability they match.
 
 ### How to register a Delivery
 
-In order to create a delivery, in `My capabilities` tab click on the three dots of a capability to the far right in the table.
+In order to create a delivery, in `My capabilities` tab click on the three dots of a capability to the far right in the
+table.
 
 ![Dot dot dot](../demo/images/dot_dot_dot.png)
 
@@ -126,7 +133,8 @@ This shows the details of the newly created delivery.
 
 ![Capability Details](../demo/images/capability_details.png)
 
-and all the way at the bottom, you can potentially create a description of the new Delivery (description is optional), and click `Deliver`
+and all the way at the bottom, you can potentially create a description of the new Delivery (description is optional),
+and click `Deliver`
 
 ![Deliver](../demo/images/deliver.png)
 
@@ -138,16 +146,21 @@ Click on the three dots on the far right to see the details of the delivery incl
 the endpoint to connect to in order to send messages.
 
 There is also another way of creating a delivery. You can click on `Add delivery` from `Deliveries` tab and create a
-delivery by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by using a
+delivery by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by
+using a
 provided cheat sheet. While creating a delivery you have the option to enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. 
+queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq.
 
 ## Private channels
 
-Private channel is a secure communication used exclusively for message exchange. A service provider can manage their private channels.
-It can display, create and delete peers from private channels they own or remove itself from other private channels that are subscribed to them.
-In the portal you can create a private channel by adding a peer name and description. Name of the private channels' peer is optional but description is
-mandatory. After a private channel is shown up in the list you can click on the three dots on the far right side to see
+Private channel is a secure communication used exclusively for message exchange. A service provider can manage their
+private channels.
+It can display, create and delete peers from private channels they own or remove itself from other private channels that
+are subscribed to them.
+In the portal you can add a private channel by clicking on the `Create private channel` button and add a peer name and
+description.
+Name of the private channels' peer is optional but description is mandatory. After a private channel is shown up in the
+list you can click on the three dots on the far right side to see
 the private channel details. The status might be `REQUESTED` for a short time but should end up in a `CREATED` state
 after a few seconds.
 You can also add or remove peers or even remove the private channel from the side window.
@@ -155,18 +168,23 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 ![Private channels](../demo/images/privateChannel_details.png)
 
-If another service provider has created a private channel subscribed to yours, it will appear in the `My private channel subscriptions` 
-list. You can use the `common name` of the other service provider which you can copy from `Home` tab as the peer name while creating a private channel.
+If another service provider has created a private channel subscribed to yours, it will appear in the
+`My private channel subscriptions`
+list. You can use the `common name` of the other service provider which you can copy from `Home` tab as the peer name
+while creating a private channel.
 
 ![My private channel subscriptions](../demo/images/privateChannel_subscription.png)
 
 ## Bi-queues
 
-Bi-queue is an unfiltered queue without any subscriptions. In this tab you can see the list of bi-queues per message type. 
+Bi-queue is an unfiltered queue without any subscriptions. In this tab you can see the list of bi-queues per message
+type.
 You can also add or remove access to the bi-consumer's group. By clicking on each bi-queue from the list you can see the
 bi-queue endpoint details.
 
 ## Certificate
 
-You can generate the key and certificate in the portal in order to generate the key and trust stores for using the Interchange,
-Enter the country code and the organisation name, and click "Generate certificate" and download the private key, chain certificate and root certificate. 
+You can generate the key and certificate in the portal in order to generate the key and trust stores for using the
+Interchange.
+Enter the country code and the organisation name, and click `Generate certificate` and download the private key, chain
+certificate and root certificate. 
