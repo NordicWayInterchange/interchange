@@ -188,3 +188,9 @@ You can generate the key and certificate in the portal in order to generate the 
 Interchange.
 Enter the country code and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate. 
+
+
+## Listen and publish messages
+
+In order to listen and send messages you have to use the service provider client. For more information please take a look at 
+[Listening to messages](https://github.com/NordicWayInterchange/interchange/blob/federation-master/demo/single-node/README.md#Listening-to-messages)

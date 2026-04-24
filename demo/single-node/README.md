@@ -56,6 +56,7 @@ Click the button `Create my capability`, and the capability should appear in the
 ![The newly created capability in list](../images/capability_list.png)
 
 ### Register a Delivery
+
 In order to create a [Delivery](../../GLOSSARY.md#delivery), click on the three dots to the far right in the table. 
 
 ![Dot dot dot](../images/dot_dot_dot.png)
@@ -78,6 +79,7 @@ You have to use the service provider client to send messages, as described in [P
 register a subscription and listen to messages.
 
 ### Register a Subscription
+
 In order to see messages flowing through the system, we can create a [Subscription](../../GLOSSARY.md#subscription) to the data stream, and listen to the associated queue.
 
 In order to create a subscription, click on `Network capabilities` on the right-hand menu, and you should see your capability, as well as capabilities created by 
@@ -99,6 +101,7 @@ in order to receive messages.
 You have to use the service provider client to receive messages, as described in [Listening to messages](#listening-to-messages). 
 
 ## Using the service provider client
+
 The script `./a_service_provider_client.sh` runs the service provider client, a test client we provide for [Service Providers](../../GLOSSARY.md#service-provider)
 Try running `./a_service_provider_client.sh --help` to see the different options. The client can also be used for sending and receiving messages. 
 
@@ -160,7 +163,7 @@ You should now see a message logged on the console of the sink command.
 
 ## Postlude
 
-I you have followed this guide, congratulations! You have now registered a Capability with an associated Delivery, and a Subscription to receive the messages published. 
+If you have followed this guide, congratulations! You have now registered a Capability with an associated Delivery, and a Subscription to receive the messages published. 
 Additionally, you have sent a message on one side, and received it on the other.
 
 This is all done on one interchange, and with a single user. Of course, this being a clustered system, it is fully possible to send data on one node, 
