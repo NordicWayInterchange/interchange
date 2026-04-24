@@ -2,9 +2,9 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.GetPrivateChannelResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;

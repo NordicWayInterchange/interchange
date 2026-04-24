@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.messages;
+package no.vegvesen.ixn.federation.serviceproviderrestclient.messages;
 
 import java.util.List;
 

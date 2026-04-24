@@ -153,12 +153,15 @@ Keep it running, and switch to a new console to publish messages.
 ## Publishing your first message
 
 To send messages, either copy the ID of the delivery from the portal, or use the `./a_service_provider_client.sh deliveries list` command to list your 
-deliveries. Copy the id of the delivery, and use the command 
-Publishing messages is done using the command `./a_service_provider_client.sh messages send -f message_king_olav.json -i <delivery id>`. 
+deliveries. Copy the id of the delivery, and use the command `./a_service_provider_client.sh deliveries send -m message_king_olav.json -i <delivery id>`. 
 This will send a single message, defined in the json file used as an argument. 
 
 You should now see a message logged on the console of the sink command. 
-Congratulations! You have now registered a Capability with an associated Delivery, and a Subscription to receive the messages published.
+
+## Postlude
+
+I you have followed this guide, congratulations! You have now registered a Capability with an associated Delivery, and a Subscription to receive the messages published. 
+Additionally, you have sent a message on one side, and received it on the other.
 
 This is all done on one interchange, and with a single user. Of course, this being a clustered system, it is fully possible to send data on one node, 
 and receive data on another node.
