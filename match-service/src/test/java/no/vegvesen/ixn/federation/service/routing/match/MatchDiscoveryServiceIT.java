@@ -25,7 +25,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Testcontainers
@@ -228,7 +227,7 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
 		client.createHeadersExchange(exchangeName);
 
 
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
 
 		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
@@ -268,7 +267,6 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
                 LocalSubscriptionStatus.CREATED,
                 selector,
                 consumerCommonName,
-                new HashSet<>(),
                 Set.of(
                         new LocalEndpoint(
                                 queueName,
@@ -338,7 +336,7 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
         client.createHeadersExchange(exchangeName);
 
 
-        LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+        LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
         serviceProviderRepository.save(serviceProvider);
 
@@ -371,7 +369,7 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
         client.createHeadersExchange(exchangeName);
 
 
-        LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
+        LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
         serviceProviderRepository.save(serviceProvider);
 
@@ -404,7 +402,6 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
         LocalSubscription localSubscription = new LocalSubscription(
                 UUID.randomUUID().toString(),
                 LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
-                Set.of(),
                 Set.of(new LocalEndpoint(queueName, "my-node", 5671)));
 
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
@@ -433,7 +430,6 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
                 LocalSubscriptionStatus.REQUESTED,
                 "a = b",
                 qpidContainer.getvHostName(),
-                Set.of(),
                 Set.of(
                         new LocalEndpoint(
                                 source,
@@ -482,7 +478,6 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
                 LocalSubscriptionStatus.REQUESTED,
                 "a = b",
                 qpidContainer.getvHostName(),
-                Set.of(),
                 Set.of(
                         new LocalEndpoint(
                                 source,
@@ -534,7 +529,6 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
 
         LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(),
                 LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
-                Set.of(),
                 Set.of(new LocalEndpoint(queueName, "my-node", 5671)));
         ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
         serviceProviderRepository.save(serviceProvider);

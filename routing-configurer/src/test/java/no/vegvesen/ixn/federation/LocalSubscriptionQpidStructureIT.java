@@ -7,6 +7,7 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
+import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
@@ -108,7 +109,6 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         LocalSubscriptionStatus.REQUESTED,
                         "originatingCountry = 'NO'",
                         HOST_NAME,
-                        Collections.emptySet(),
                         Collections.emptySet())
                 ),
                 LocalDateTime.now());

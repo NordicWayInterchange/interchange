@@ -17,21 +17,18 @@ public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
 
     private String consumerCommonName;
 
-    private Set<LocalConnectionApi> connections = new HashSet<>();
-
     private String description;
 
     private String errorMessage;
 
 
     public LocalSubscriptionApi(String id, LocalSubscriptionStatusApi status, String selector, String consumerCommonName,
-                                String description, String errorMessage, Set<LocalConnectionApi> connections, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
+                                String description, String errorMessage, Set<LocalSubscriptionEndpointApi> endpoints, Long lastUpdated) {
         this.id = id;
         this.status = status;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.description = description;
-        this.connections.addAll(connections);
         this.errorMessage = errorMessage;
         this.endpoints = endpoints;
         this.lastUpdated = lastUpdated;
@@ -93,18 +90,6 @@ public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
         this.description = description;
     }
 
-
-    public Set<LocalConnectionApi> getConnections() {
-        return connections;
-    }
-
-    public void setConnections(Set<LocalConnectionApi> connections) {
-        this.connections = connections;
-    }
-
-    public void addConnection(LocalConnectionApi connection) {
-        connections.add(connection);
-    }
 
     public String getErrorMessage() {
         return errorMessage;

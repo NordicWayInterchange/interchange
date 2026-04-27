@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -110,7 +109,6 @@ public class LocalSubscriptionService {
         if (!endpointsToRemove.isEmpty()) {
             subscription.getLocalEndpoints().removeAll(endpointsToRemove);
         }
-        subscription.getConnections().clear();
     }
 
     private void onRequested(String serviceProviderName, LocalSubscription subscription, QpidDelta delta) {
@@ -136,7 +134,6 @@ public class LocalSubscriptionService {
             Set<Capability> allCreatedCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
             Set<LocalSubscription> activeSubscriptions = serviceProvider.activeSubscriptions();
             for (LocalSubscription subscription : activeSubscriptions) {
-                removeUnusedLocalConnectionsFromLocalSubscription(subscription, allCreatedCapabilities);
                 if (!serviceProvider.getName().equals(subscription.getConsumerCommonName())) {
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
@@ -153,10 +150,6 @@ public class LocalSubscriptionService {
                                             qpidClient.addBinding(shard.getExchangeName(), binding);
                                             shardExchange.addBinding(binding);
                                         }
-                                        if (! isExistingConnection(subscription,shard)) {
-                                            LocalConnection connection = new LocalConnection(shard.getExchangeName(), source);
-                                            subscription.addConnection(connection);
-                                        }
                                     } else {
                                         logger.warn("Cound not find endpoint for subscription {}", subscription.getId());
                                     }
@@ -171,28 +164,6 @@ public class LocalSubscriptionService {
             serviceProvider = repository.save(serviceProvider);
         }
         return serviceProvider;
-    }
-
-    private boolean isExistingConnection(LocalSubscription subscription, CapabilityShard shard) {
-        Set<String> existingConnections = subscription.getConnections().stream()
-                .map(LocalConnection::getSource)
-                .collect(Collectors.toSet());
-        return existingConnections.contains(shard.getExchangeName());
-    }
-
-    public void removeUnusedLocalConnectionsFromLocalSubscription(LocalSubscription subscription, Set<Capability> capabilities) {
-        Set<String> existingConnections = new HashSet<>();
-        for (Capability cap : capabilities) {
-            existingConnections.addAll(cap.getExchangesFromShards());
-        }
-
-        Set<LocalConnection> unwantedConnections = new HashSet<>();
-        for (LocalConnection connection : subscription.getConnections()) {
-            if (!existingConnections.contains(connection.getSource())) {
-                unwantedConnections.add(connection);
-            }
-        }
-        subscription.getConnections().removeAll(unwantedConnections);
     }
 
 

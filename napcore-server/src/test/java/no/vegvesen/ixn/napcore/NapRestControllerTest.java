@@ -103,7 +103,6 @@ public class NapRestControllerTest {
                                 LocalSubscriptionStatus.REQUESTED,
                                 "originatingCountry = 'NO'",
                                 serviceProviderName,
-                                Collections.emptySet(),
                                 Collections.singleton(
                                         new LocalEndpoint(
                                                 "my-source",
@@ -160,7 +159,6 @@ public class NapRestControllerTest {
                 LocalSubscriptionStatus.REQUESTED,
                 "originatingCountry = 'NO'",
                 serviceProviderName,
-                Collections.emptySet(),
                 Collections.singleton(
                         new LocalEndpoint(
                                 "my-source",

@@ -36,7 +36,6 @@ public class ExportTransformer {
                 localSubscription.getConsumerCommonName(),
                 transformLocalSubscriptionStatusToLocalSubscriptionStatusExportApi(localSubscription.getStatus()),
                 localSubscription.getLocalEndpoints().stream().map(this::transformLocalEndpointToLocalEndpointExportApi).collect(Collectors.toSet()),
-                localSubscription.getConnections().stream().map(this::transformLocalConnectionToLocalConnectionExportApi).collect(Collectors.toSet()),
                 localSubscription.getDescription()
                 );
     }
@@ -70,11 +69,6 @@ public class ExportTransformer {
                 endpoint.getSource(),
                 endpoint.getMaxBandwidth(),
                 endpoint.getMaxMessageRate());
-    }
-
-    public LocalConnectionExportApi transformLocalConnectionToLocalConnectionExportApi(LocalConnection localConnection) {
-        return new LocalConnectionExportApi(localConnection.getSource(),
-                localConnection.getDestination());
     }
 
     public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {

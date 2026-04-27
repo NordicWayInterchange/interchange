@@ -21,7 +21,6 @@ public class ExportLocalSubscriptionTest {
                 "a = b",
                 "consumer",
                 Set.of(),
-                Set.of(),
                 "This is a description"
         );
         ExportTransformer transformer = new ExportTransformer();

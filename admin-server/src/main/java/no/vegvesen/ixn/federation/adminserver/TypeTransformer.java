@@ -5,7 +5,6 @@ import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateCh
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelStatusApi;
-import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnectionApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.*;
@@ -295,20 +294,11 @@ public class TypeTransformer {
                     subscription.getConsumerCommonName(),
                     subscription.getDescription(),
                     subscription.getErrorMessage(),
-                    localConnectionToLocalConnectionApiSet(subscription.getConnections()),
                     localEndpointSetToEndpointApiSet(subscription.getLocalEndpoints()),
                     localDateTimeToTimestamp(subscription.getLastUpdated())
             ));
         }
         return subscriptionApiList.stream().sorted().toList();
-    }
-
-    public Set<LocalConnectionApi> localConnectionToLocalConnectionApiSet(Set<LocalConnection> localConnectionSet) {
-        Set<LocalConnectionApi> localConnectionApiSet = new HashSet<>();
-        for (LocalConnection localConnection : localConnectionSet) {
-            localConnectionApiSet.add(new LocalConnectionApi(localConnection.getId(), localConnection.getSource(), localConnection.getDestination()));
-        }
-        return localConnectionApiSet;
     }
 
     public List<String> getDeliveryIds(Set<LocalDelivery> deliveriesSet) {

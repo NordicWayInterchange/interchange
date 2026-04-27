@@ -15,8 +15,6 @@ public class LocalSubscriptionExportApi {
 
     private Set<LocalEndpointExportApi> localEndpoints;
 
-    private Set<LocalConnectionExportApi> localConnections;
-
     private String description;
 
     public enum LocalSubscriptionStatusExportApi{
@@ -32,14 +30,12 @@ public class LocalSubscriptionExportApi {
                                       String consumerCommonName,
                                       LocalSubscriptionStatusExportApi status,
                                       Set<LocalEndpointExportApi> localEndpoints,
-                                      Set<LocalConnectionExportApi> localConnections,
                                       String description) {
         this.uuid = uuid;
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.status = status;
         this.localEndpoints = localEndpoints;
-        this.localConnections = localConnections;
         this.description = description;
     }
 
@@ -83,14 +79,6 @@ public class LocalSubscriptionExportApi {
         this.localEndpoints = localEndpoints;
     }
 
-    public Set<LocalConnectionExportApi> getLocalConnections() {
-        return localConnections;
-    }
-
-    public void setLocalConnections(Set<LocalConnectionExportApi> localConnections) {
-        this.localConnections = localConnections;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -103,12 +91,12 @@ public class LocalSubscriptionExportApi {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         LocalSubscriptionExportApi that = (LocalSubscriptionExportApi) o;
-        return Objects.equals(uuid, that.uuid) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints) && Objects.equals(localConnections, that.localConnections) && Objects.equals(description, that.description);
+        return Objects.equals(uuid, that.uuid) && Objects.equals(selector, that.selector) && Objects.equals(consumerCommonName, that.consumerCommonName) && status == that.status && Objects.equals(localEndpoints, that.localEndpoints) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, selector, consumerCommonName, status, localEndpoints, localConnections, description);
+        return Objects.hash(uuid, selector, consumerCommonName, status, localEndpoints, description);
     }
 
     @Override
@@ -119,7 +107,6 @@ public class LocalSubscriptionExportApi {
                 ", consumerCommonName='" + consumerCommonName + '\'' +
                 ", status=" + status +
                 ", localEndpoints=" + localEndpoints +
-                ", localConnections=" + localConnections +
                 ", description='" + description + '\'' +
                 '}';
     }
