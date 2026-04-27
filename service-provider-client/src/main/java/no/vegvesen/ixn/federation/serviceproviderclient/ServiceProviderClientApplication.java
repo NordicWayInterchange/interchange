@@ -7,6 +7,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.Deliv
 import no.vegvesen.ixn.federation.serviceproviderclient.command.keys.PortalStores;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;

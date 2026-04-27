@@ -9,23 +9,12 @@
       "name" : "a.bouvetinterchange.eu"
     }, {
       "name" : "a.qpid.bouvetinterchange.eu"
-    },
-    {
-        "name" : "a_qpid"
     }],
     "clientRequests" : [ {
       "name" : "king_olav.a.bouvetinterchange.eu",
       "country" : "NO",
       "email" : "kongen@slottet.no"
-    }, {
-      "name" : "nap.a.bouvetinterchange.eu",
-      "country" : "NO",
-      "email" : "nap@a.bouvetinterchange.eu"
-    }, {
-      "name" : "admin.a.bouvetinterchange.eu",
-      "country" : "NO",
-      "email" : "admin@a.bouvetinterchange.eu"
-    } ]
+    }]
   }, {
     "name" : "ca.b.bouvetinterchange.eu",
     "country" : "SE",
@@ -34,17 +23,52 @@
       "name" : "b.bouvetinterchange.eu"
     }, {
       "name" : "b.qpid.bouvetinterchange.eu"
-    }, {
-      "name" : "b_qpid"
-    } ],
+    }],
     "clientRequests" : [ {
       "name" : "king_gustaf.b.bouvetinterchange.eu",
       "country" : "SE",
       "email" : "kungen@slottet.se"
+    }]
+},
+{
+  "name" : "ca.internal.a.bouvetinterchange.eu",
+  "country" : "NO",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "a-napcore-server"
+  }, {
+    "name" : "a-admin"
+  },{
+    "name" : "a_qpid"
+  }],
+    "clientRequests" : [ {
+      "name" : "nap.a.internal.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "nap@a.internal.bouvetinterchange.eu"
     }, {
-      "name" : "admin.b.bouvetinterchange.eu",
+      "name" : "admin.a.internal.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "admin@a.internal.bouvetinterchange.eu"
+    } ]
+  }, {
+    "name" : "ca.b.bouvetinterchange.eu",
+    "country" : "SE",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "b-napcore-server"
+    }, {
+      "name" : "b-admin"
+    }, {
+      "name" : "b_qpid"
+    } ],
+    "clientRequests" :  [{
+      "name" : "nap.b.internal.bouvetinterchange.eu",
+      "country" : "NO",
+      "email" : "nap@b.internal.bouvetinterchange.eu"
+    }, {
+      "name" : "admin.b.internal.bouvetinterchange.eu",
       "country" : "SE",
-      "email" : "admin@b.bouvetinterchange.eu"
+      "email" : "admin@b.internal.bouvetinterchange.eu"
     } ]
   } ],
   "hostRequests" : [ ],

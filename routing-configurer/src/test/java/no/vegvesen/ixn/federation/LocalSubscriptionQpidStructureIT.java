@@ -14,11 +14,13 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,8 +52,10 @@ import static org.mockito.Mockito.when;
         InterchangeNodeProperties.class,
         ServiceProviderRouter.class,
         LocalDeliveryService.class,
-        LocalSubscriptionService.class
-        })
+        LocalSubscriptionService.class,
+        OutgoingMatchDiscoveryService.class
+})
+@Disabled("This is better tested in other tests")
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     public static final String CONFIGURER_USER = "routing_configurer";
@@ -92,16 +97,20 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     ServiceProviderRepository serviceProviderRepository;
 
     @MockitoBean
-    MatchRepository matchRepository;
-
-    @MockitoBean
-    OutgoingMatchRepository outgoingMatchRepository;
-
-    @MockitoBean
     PrivateChannelRepository privateChannelRepository;
 
     @Autowired
     QpidClient client;
+
+    @MockitoBean
+    LocalSubscriptionService localSubscriptionService;
+
+    @MockitoBean
+    LocalDeliveryService localDeliveryService;
+
+    @MockitoBean
+    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+
 
     @Autowired
     ServiceProviderRouter router;
@@ -122,9 +131,10 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
                         Collections.emptySet())
                 ),
                 LocalDateTime.now());
+        when(localDeliveryService.tearDownDeliveryQueues(any(),any())).thenReturn(serviceProvider);
         when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         QpidDelta delta = client.getQpidDelta();
-        router.syncServiceProviders(Collections.singleton(serviceProvider), delta);
+        router.syncServiceProviders(List.of(serviceProvider), delta);
         LocalEndpoint actualEndpoint = null;
         for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
             for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {

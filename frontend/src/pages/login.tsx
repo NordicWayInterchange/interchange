@@ -1,8 +1,6 @@
 import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
-import {getProviders, signIn} from "next-auth/react";
+  GetServerSidePropsContext} from "next";
+import {signIn} from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Image from "next/image";
@@ -12,10 +10,8 @@ import * as React from "react";
 import { Box } from "@mui/system";
 import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 
-export default function Login({providers}: InferGetServerSidePropsType<
-  typeof getServerSideProps
->) {
-
+export default function Login(isKeycloak: any) {
+    console.log(isKeycloak)
     return (
     <Card
       variant="outlined"
@@ -40,18 +36,28 @@ export default function Login({providers}: InferGetServerSidePropsType<
             Sign in will redirect you to authentication provider.
         </Typography>
 
-        {providers && Object.values(providers).map((provider) => (
-            <div key={provider.id}>
+        <div>
+            {isKeycloak.isKeycloak ? (
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
                     sx={{ textTransform: "none", width: 250, alignSelf: "center", ml:10}}
-                    onClick={() => signIn(provider.id)}
+                    onClick={() => signIn("keycloak")}
                 >
-                    <Typography>Sign in with {provider.name}</Typography>
+                    <Typography>Sign in with keycloak</Typography>
                 </StyledButton>
-            </div>
-        ))}
+
+            ) : (
+                <StyledButton
+                    variant="contained"
+                    color="buttonThemeColor"
+                    sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                    onClick={() => signIn("auth0")}
+                >
+                    <Typography>Sign in with auth0</Typography>
+                </StyledButton>
+            )}
+        </div>
     </Card>
   );
 }
@@ -62,8 +68,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (session) {
     return { redirect: { destination: "/" } };
   }
-
-  const providers = await getProviders()
-  return { props: { providers } }
+    return {
+        props: {
+            isKeycloak: process.env.USE_KEYCLOAK === "true",
+        },
+    };
 
 }

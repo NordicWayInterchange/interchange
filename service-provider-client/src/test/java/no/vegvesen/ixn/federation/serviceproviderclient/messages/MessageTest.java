@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.messages.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
