@@ -1,22 +1,9 @@
 # User help
 
-### Log in to the portal
-
-In a browser, go to the [login page](https://napcore.npra.io/)
-and log in to the portal with the provided username and password.
-
-## Capability
-
-Capability is like a schema for a data stream. It declares the headers of one or more data streams, and values or
-range or values for those headers.
-
 ### How to register a Capability?
 
-In order to be able to publish messages on the node, a capability and a delivery have to be created.
-We'll start by adding a capability.
-
-You can create a new capability by clicking on the `Add capability` button in the capability tab, or by going to this
-page: [Add capability](https://napcore.npra.io/capabilities/new-user-capability). Click on `My capabilities`,
+You can create a new [Capability](../GLOSSARY.md#capability) by clicking on the `Add capability` button in the capability
+tab. Click on `My capabilities`,
 `Add capability`
 
 ![Add capability](../demo/images/capabilities.png)
@@ -116,16 +103,10 @@ provided cheat sheet.
 
 ![Cheat sheet](../demo/images/Cheatsheet.png)
 
-## Delivery
-
-Deliveries contain a selector that can match to one or more capabilities that belong to the same Service Provider,
-and declares an endpoint for the client to push messages to. The system then routes messages into data streams are
-dependent on the capability they match.
-
 ### How to register a Delivery
 
-In order to create a delivery, in `My capabilities` tab click on the three dots of a capability to the far right in the
-table.
+In order to create a [Delivery](../GLOSSARY.md#delivery), in `My capabilities` tab click on the three dots of a 
+capability to the far right in the table.
 
 ![Dot dot dot](../demo/images/dot_dot_dot.png)
 
