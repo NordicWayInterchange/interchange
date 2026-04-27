@@ -99,4 +99,14 @@ public class SubscriptionPollResponseApiTest {
         System.out.println(result);
 
     }
+
+    @Test
+    public void parseEndpointsToObjectWitMissingVersion() throws JsonProcessingException {
+        String input = "{\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+        ObjectMapper mapper = new ObjectMapper();
+
+        SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+    }
+
 }

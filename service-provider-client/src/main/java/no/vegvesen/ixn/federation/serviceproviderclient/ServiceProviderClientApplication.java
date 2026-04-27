@@ -4,10 +4,10 @@ import no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer.Bicon
 import no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue.BiqueueCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.DeliveriesCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.jms.MessagesCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.keys.PortalStores;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.ssl.KeystoreDetails;
 import no.vegvesen.ixn.ssl.KeystoreType;
 import no.vegvesen.ixn.ssl.SSLContextFactory;
@@ -29,7 +29,6 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                MessagesCommand.class,
                 PortalStores.class
         },
         mixinStandardHelpOptions = true,

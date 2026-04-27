@@ -47,6 +47,14 @@ import { ExtendedDelivery } from "@/types/delivery";
 import { PrivateChannel, PrivateChannelPeers } from "@/types/napcore/privateChannel";
 import { BiQueueEndpointsApi, BiQueueResponse } from "@/types/napcore/biQueueResponse";
 const logger = require("../../../lib/logger");
+import {Session} from "next-auth";
+
+interface CustomSession extends Session {
+  user: {
+    commonName: string;
+    email?: string;
+  };
+}
 
 const fetchCapabilityCounter = async (params: basicGetParams) => {
   const [status, body] = await fetchNetworkCapabilities(params);
@@ -415,14 +423,17 @@ const isAuthenticated = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const secret = process.env.NEXTAUTH_SECRET;
   const token = await getToken({ req, secret, raw: true });
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getServerSession(req as any, res as any, authOptions as any);
+
+  const typedSession = session as CustomSession;
+
 
   return !(
-    !token ||
-    !session ||
-    !req.query.slug ||
-    !session.user ||
-    session.user.commonName !== req.query.slug[0]
+      !token ||
+      !session ||
+      !req.query.slug ||
+      !typedSession.user ||
+      typedSession.user.commonName !== req.query.slug[0]
   );
 };
 
@@ -430,13 +441,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getServerSession(req as any, res as any, authOptions as any);
+  const typedSession = session as CustomSession;
+
+  if (!typedSession?.user?.email) {
+    logger.info("Access denied - No session or user email not available.");
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
   if (!(await isAuthenticated(req, res))) {
     logger.info(
       "Access denied - " +
         "User with email: " +
-        session.user.email +
+        typedSession.user.email +
         ", don't have permission to perform this action"
     );
 
@@ -477,7 +494,7 @@ export default async function handler(
             method: req.method,
             httpStatus: status,
             url: req.url,
-            user: session.user,
+            user: typedSession.user,
             slug: req.query.slug,
           })
           .info();

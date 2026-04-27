@@ -183,6 +183,7 @@ services:
       - TRUST_STORE_PASSWORD=password
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
+      - KEY_ALIAS=a.interchangedomain.com
       - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
@@ -202,6 +203,8 @@ services:
       - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
       - INTERCHANGE_PREFIX=a.interchangedomain.lookupdomain.
       - NEXTAUTH_SECRET=supersecret
+      - NEXTAUTH_URL=http://localhost:3000
+      - USE_KEYCLOAK=true
       - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
       - KEYCLOAK_REALM=a.interchangedomain.com

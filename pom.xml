@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.36-SNAPSHOT</version>
+    <version>1.0.38-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -91,7 +91,7 @@
         <testcontainers.version>2.0.3</testcontainers.version>
         <dnsjava.version>3.6.3</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <postgresql.version>42.7.7</postgresql.version>
         <junit-jupiter.version>5.12.2</junit-jupiter.version>
         <swagger-annotations-jakarta.version>2.2.34</swagger-annotations-jakarta.version>
@@ -222,6 +222,41 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>versions</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>frontend/generated</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>frontend/filtered-resources</directory>
+                                            <filtering>true</filtering>
+                                            <includes>
+                                                <include>version.ts</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 
@@ -266,5 +301,7 @@
         <module>import-application</module>
         <module>export-application</module>
         <module>local-subscription-service</module>
+        <module>match-service</module>
+        <module>service-provider-rest-client</module>
     </modules>
 </project>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0.36-SNAPSHOT</version>
+        <version>1.0.38-SNAPSHOT</version>
     </parent>
     <artifactId>service-provider-client</artifactId>
 
@@ -52,6 +52,12 @@
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>keys-generator</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>service-provider-rest-client</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

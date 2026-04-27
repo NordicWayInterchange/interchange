@@ -1,16 +1,16 @@
 package no.vegvesen.ixn.federation.routing;
 
 import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
-import no.vegvesen.ixn.federation.capability.CapabilityMatcher;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
+import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.qpid.Queue;
-import no.vegvesen.ixn.federation.repository.*;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
+import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.shared.properties.CapabilityMessageTypeQueueMapper;
@@ -18,18 +18,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 @ConfigurationPropertiesScan("no.vegvesen.ixn")
 public class ServiceProviderRouter {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouter.class);
 
     private final ServiceProviderRepository repository;
 
@@ -37,31 +40,42 @@ public class ServiceProviderRouter {
 
     private final QpidClient qpidClient;
 
-    private final MatchRepository matchRepository;
-
     private final InterchangeNodeProperties nodeProperties;
 
     private final LocalDeliveryService localDeliveryService;
 
     private final LocalSubscriptionService localSubscriptionService;
 
+    private final OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
+
     @Autowired
-    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, MatchRepository matchRepository, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService) {
+    public ServiceProviderRouter(ServiceProviderRepository repository, PrivateChannelRepository privateChannelRepository, QpidClient qpidClient, LocalSubscriptionService localSubscriptionService, InterchangeNodeProperties nodeProperties, LocalDeliveryService localDeliveryService, OutgoingMatchDiscoveryService outgoingMatchDiscoveryService) {
         this.repository = repository;
         this.privateChannelRepository = privateChannelRepository;
         this.qpidClient = qpidClient;
-        this.matchRepository = matchRepository;
         this.nodeProperties = nodeProperties;
         this.localDeliveryService = localDeliveryService;
         this.localSubscriptionService = localSubscriptionService;
+        this.outgoingMatchDiscoveryService = outgoingMatchDiscoveryService;
+
     }
 
-    public Iterable<ServiceProvider> findServiceProviders() {
-        return repository.findAll();
+    @Scheduled(fixedRateString = "${service-provider-router.interval}")
+    public void checkForServiceProvidersToSetupRoutingFor() {
+        logger.debug("Checking for new service providers to setup routing");
+        Iterable<ServiceProvider> serviceProviders = repository.findAll();
+        syncServiceProviders(serviceProviders, qpidClient.getQpidDelta());
     }
 
-    public List<ServiceProvider> findServiceProvidersAsList() {
-        return repository.findAll();
+
+    @Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
+    public void createOutgoingMatches() {
+        outgoingMatchDiscoveryService.syncLocalDeliveryAndCapabilityToCreateOutgoingMatch(repository.findAll());
+    }
+
+    @Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
+    public void updateOutgoingMatchesToTearDown() {
+        outgoingMatchDiscoveryService.syncOutgoingMatchesToDelete();
     }
 
     public void syncServiceProviders(Iterable<ServiceProvider> serviceProviders, QpidDelta delta) {
@@ -325,43 +339,5 @@ public class ServiceProviderRouter {
         }
         return serviceProvider;
     }
-
-    //TODO This should be tested and moved to matchDiscoveryService (renamed to MatchService).
-    @Scheduled(fixedRateString = "${create-bindings-subscriptions-exchange.interval}")
-    public void createBindingsWithMatches() {
-        List<ServiceProvider> serviceProviders = repository.findAll();
-        QpidDelta delta = qpidClient.getQpidDelta();
-        for (ServiceProvider serviceProvider : serviceProviders) {
-            for (LocalSubscription localSubscription : serviceProvider.wantedNonRedirectSubscriptions()) {
-                if (!localSubscription.getLocalEndpoints().isEmpty()) {
-                    List<Match> matches = matchRepository.findAllByLocalSubscriptionId(localSubscription.getId());
-                    for (Match match : matches) {
-                        Subscription subscription = match.getSubscription();
-                        if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED)) {
-                            for (Endpoint endpoint : subscription.getEndpoints()) {
-                                if (endpoint.hasShard()) {
-                                    Exchange exchange = delta.findByExchangeName(endpoint.getShard().getExchangeName());
-                                    if (exchange != null) {
-                                        for (String queueName : localSubscription.getLocalEndpoints().stream().map(LocalEndpoint::getSource).collect(Collectors.toSet())) {
-                                            Queue queue = delta.findByQueueName(queueName);
-                                            if (queue != null && !exchange.isBoundTo(queue.getName())) {
-                                                String exchangeName = exchange.getName();
-                                                logger.debug("Adding bindings from queue {} to exchange {}", queueName, exchangeName);
-                                                Binding binding = new Binding(exchangeName, queueName, new Filter(localSubscription.getSelector()));
-                                                qpidClient.addBinding(exchangeName, binding);
-                                                exchange.addBinding(binding);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
 
 }

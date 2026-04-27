@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
 import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
 import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
 import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
@@ -42,7 +43,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {ServiceProviderRouter.class, QpidClient.class, QpidClientConfig.class, InterchangeNodeProperties.class, RoutingConfigurerProperties.class, LocalDeliveryService.class, LocalSubscriptionService.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@SpringBootTest(classes = {
+		ServiceProviderRouter.class,
+		QpidClient.class,
+		QpidClientConfig.class,
+		InterchangeNodeProperties.class,
+		RoutingConfigurerProperties.class,
+		LocalDeliveryService.class,
+		LocalSubscriptionService.class,
+		TestSSLContextConfig.class,
+		TestSSLProperties.class,
+		OutgoingMatchDiscoveryService.class
+})
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
@@ -1042,172 +1054,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
-	@Test
-	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreated() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue";
-		String exchangeName = "sub-exchange";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(localSubscription, subscription);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
-	}
-
-	@Test
-	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionsCreated() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue-1";
-		String exchangeName = "sub-exchange-1";
-		String exchangeName2 = "sub-exchange-2";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-		client.createHeadersExchange(exchangeName2);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider", Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Subscription subscription2 = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint2 = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName2));
-		subscription2.setEndpoints(Collections.singleton(endpoint2));
-
-		Match match = new Match(localSubscription, subscription);
-		Match match2 = new Match(localSubscription, subscription2);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match, match2));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
-	}
-
-	@Test
-	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreatedBindKeyAlreadyExists() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue-4";
-		String exchangeName = "sub-exchange-4";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(localSubscription, subscription);
-
-		//Mocking that binding already exists and isn't created again
-		client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
-	}
-
-	@Test
-	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionTearDown() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue-3";
-		String exchangeName = "sub-exchange-3";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(), LocalSubscriptionStatus.CREATED, selector, consumerCommonName, new HashSet<>(), Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.TEAR_DOWN, consumerCommonName);
-
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(localSubscription, subscription);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(0);
-		assertThat(client.getQueuePublishingLinks(queueName)).noneMatch(b -> b.getBindingKey().equals(exchangeName));
-	}
-
-	@Test
-	public void createBindingsWithMatchesWithLocalSubscriptionCreatedAndSubscriptionCreatedButNoMatchYet() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue-5";
-		String exchangeName = "sub-exchange-5";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(
-				UUID.randomUUID().toString(),
-				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
-				new HashSet<>(),
-				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(localSubscription, subscription);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.singletonList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
-	}
 
 	@Test
 	public void redirectSubscriptionStatusIllegal() {
@@ -1225,136 +1071,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
-	}
-
-	@Test
-	public void createBindingsWithMatchesWhereSubscriptionExchangeIsNotAlreadyCreated() {
-		String name = "service-provider-no-subs-exchange-setup";
-		String source = "no-subs-exchange-setup-local-sub";
-		client.createQueue(source);
-		LocalSubscription localSubscription = new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.REQUESTED,
-				"a = b",
-				qpidContainer.getvHostName(),
-				Collections.emptySet(),
-				Collections.singleton(
-						new LocalEndpoint(
-								source,
-								qpidContainer.getHost(),
-								qpidContainer.getAmqpsPort()
-						)
-				)
-		);
-		ServiceProvider serviceProvider = new ServiceProvider(
-				name,
-				Collections.singleton(
-						localSubscription
-				)
-		);
-		Subscription subscription = new Subscription(
-			SubscriptionStatus.REQUESTED,
-				"a = b",
-				"",
-				"a=b"
-		);
-		String exchangeName = "this-is-my-non-existing-local-exchange";
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(
-				localSubscription,
-				subscription
-		);
-		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.exchangeExists(exchangeName)).isFalse();
-		assertThat(client.getQueuePublishingLinks(source)).doesNotContain(new Binding(source, name, new Filter("a = b")));
-	}
-
-	@Test
-	public void createBindingsWithMatchesWhereLocalSubscriptionQueueIsNotAlreadyCreated() {
-		String name = "service-provider-no-local-subs-queue-setup";
-		String source = "no-local-subs-queue-setup-local-sub";
-		String exchangeName = "this-is-my-existing-local-exchange";
-		client.createHeadersExchange(exchangeName);
-		LocalSubscription localSubscription = new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.REQUESTED,
-				"a = b",
-				qpidContainer.getvHostName(),
-				Collections.emptySet(),
-				Collections.singleton(
-						new LocalEndpoint(
-								source,
-								qpidContainer.getHost(),
-								qpidContainer.getAmqpsPort()
-						)
-				)
-		);
-		ServiceProvider serviceProvider = new ServiceProvider(
-				name,
-				Collections.singleton(
-						localSubscription
-				)
-		);
-		Subscription subscription = new Subscription(
-				SubscriptionStatus.REQUESTED,
-				"a = b",
-				"",
-				"a=b"
-		);
-		Endpoint endpoint = new Endpoint("source", "host", 5671, new SubscriptionShard(exchangeName));
-		subscription.setEndpoints(Collections.singleton(endpoint));
-
-		Match match = new Match(
-				localSubscription,
-				subscription
-		);
-		when(serviceProviderRepository.findAll()).thenReturn(Arrays.asList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(localSubscription.getId())).thenReturn(Arrays.asList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.queueExists(source)).isFalse();
-	}
-
-	@Test
-	public void localSubscriptionWillBindToMultipleEndpointsFromNeighbour() {
-		String selector = "originatingCountry = 'NO' and messageType = 'DENM'";
-		String consumerCommonName = "my-node";
-
-		String queueName = "loc-sub-queue-6";
-		String exchangeName = "sub-exchange-6";
-		String exchangeName2 = "sub-exchange-7";
-
-		client.createQueue(queueName);
-		client.createHeadersExchange(exchangeName);
-		client.createHeadersExchange(exchangeName2);
-
-
-		LocalSubscription localSubscription = new LocalSubscription(UUID.randomUUID().toString(),
-				LocalSubscriptionStatus.CREATED, selector, consumerCommonName,
-				new HashSet<>(),
-				Collections.singleton(new LocalEndpoint(queueName, "my-node", 5671)));
-		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(localSubscription));
-
-		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, consumerCommonName);
-
-		Endpoint endpoint1 = new Endpoint("source1", "host", 5671, new SubscriptionShard(exchangeName));
-		Endpoint endpoint2 = new Endpoint("source2", "host", 5671, new SubscriptionShard(exchangeName2));
-		subscription.setEndpoints(new HashSet<>(Arrays.asList(endpoint1, endpoint2)));
-
-		Match match = new Match(localSubscription, subscription);
-
-		when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
-		router.createBindingsWithMatches();
-
-		assertThat(client.getQueuePublishingLinks(queueName)).hasSize(2);
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName));
-		assertThat(client.getQueuePublishingLinks(queueName)).anyMatch(b -> b.getBindingKey().equals(exchangeName2));
 	}
 
 

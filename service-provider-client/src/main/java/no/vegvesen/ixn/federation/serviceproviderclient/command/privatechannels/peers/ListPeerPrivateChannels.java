@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;

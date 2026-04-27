@@ -507,7 +507,7 @@ public class OnboardRestController {
 	@Tag(name = "Private Channel")
 	@Operation(summary = "Get private channel with service provider as peer by private channel Id")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPEERPRIVATECHANNELSRESPONSE)))})
-	public PeerPrivateChannelApi getPeerPrivateChannelById(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
+	public PeerPrivateChannelApi getPrivateChannelPeerById(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} GET from private channel {} where you are peer", serviceProviderName, privateChannelId);
 		validatePathVariable(serviceProviderName);
