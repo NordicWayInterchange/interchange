@@ -26,14 +26,14 @@ spec:
     {{ if .Values.napcore_frontend.keycloak.enabled }}
     - host: portallogin.{{ .Values.external_name }}
       http:
-        - paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                service:
-                  name: {{ .Release.Name }}-keycloak
-                  port:
-                    number: 8443
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-keycloak
+                port:
+                  number: 8443
     {{- end }}
     {{- if .Values.admin_frontend.enabled}}
     - host: admin.{{ .Values.external_name }}
