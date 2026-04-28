@@ -31,7 +31,7 @@ spec:
             - name: KC_DB_URL_HOST
               value: {{ .Release.Name }}-keycloak-db
             - name: KC_DB
-              value: {{ .Values.napcore_frontend.keycloak.postgres_db | quote }}
+              value: "postgres"
             - name: KC_DB_PASSWORD
               value: {{ .Values.keycloak_postgres_password  | quote}}
             - name: KC_DB_USERNAME
