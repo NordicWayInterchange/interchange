@@ -38,8 +38,8 @@ spec:
               name: db
           volumeMounts:
             - mountPath: "/var/lib/postgresql/data"
-              name: postgres_data
+              name: postgres-data
       volumes:
-        - name: postgres_data
+        - name: postgres-data
           emptyDir: {}
 {{- end }}
