@@ -24,7 +24,7 @@ spec:
                   number: 3000
     {{- end}}
     {{ if .Values.napcore_frontend.keycloak.enabled }}
-    - host: login.{{ .Values.external_name }}
+    - host: portallogin.{{ .Values.external_name }}
       http:
         - paths:
             - path: /
@@ -61,7 +61,7 @@ spec:
     {{- end}}
     {{- if .Values.napcore_frontend.keycloak.enabled }}
     - hosts:
-        - login.{{ .Values.external_name }}
+        - portallogin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-keycloak-cert
     {{- end }}
   {{- end }}
