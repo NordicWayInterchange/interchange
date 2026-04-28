@@ -40,7 +40,7 @@ spec:
               value: {{ .Values.napcore_frontend.home_url | quote }}
 {{- if .Values.napcore_frontend.keycloak.enabled }}
             - name: USE_KEYCLOAK
-              value: true
+              value: "true"
             - name: KEYCLOAK_CLIENT_ID
               value: {{ .Values.napcore_frontend.keycloak.client_id }}
             - name: INTERNAL_KEYCLOAK_URL
