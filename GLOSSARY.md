@@ -65,7 +65,7 @@ A Private channel is a point-to point communication channel between Service Prov
 Channels do not enforce the constraints of Message Types like Capability-based streams do. 
 
 ## Bi-queues
-A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A BI-queue 
-allows Service Providers to connect and receive messages over the Basic Interface as described in the [specification](https://www.c-roads.eu/).
+A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue 
+allows service providers to connect and receive messages over the Basic Interface as described in the [specification](https://www.c-roads.eu/).
 
 

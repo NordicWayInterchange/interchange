@@ -120,15 +120,16 @@ const BiConsumer = () => {
                   >
                     I currently have permission to bi-queue.
                     <Tooltip
-                      slotProps={{
-                        tooltip: {
-                          sx: tooltipFontStyle,
-                        },
-                      }}
-                      title="Bi-queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                        slotProps={{
+                          tooltip: {
+                            sx: tooltipFontStyle,
+                          },
+                        }}
+                        title="A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue
+allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to the bi-consumer's group"
                     >
                       <IconButton size="small">
-                        <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                        <InfoOutlinedIcon fontSize="small" sx={{mt: -2}}/>
                       </IconButton>
                     </Tooltip>
                   </Typography>
@@ -149,15 +150,16 @@ const BiConsumer = () => {
                   >
                     I currently do not have permission to bi-queue.
                     <Tooltip
-                      slotProps={{
-                        tooltip: {
-                          sx: tooltipFontStyle,
-                        },
-                      }}
-                      title="Bi-queue is an unfiltered queue without any subscriptions. You can add or remove access to the bi-consumer's group"
+                        slotProps={{
+                          tooltip: {
+                            sx: tooltipFontStyle,
+                          },
+                        }}
+                        title="A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue
+allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to the bi-consumer's group"
                     >
                       <IconButton size="small">
-                        <InfoOutlinedIcon fontSize="small" sx={{ mt: -2 }} />
+                        <InfoOutlinedIcon fontSize="small" sx={{mt: -2}}/>
                       </IconButton>
                     </Tooltip>
                   </Typography>
