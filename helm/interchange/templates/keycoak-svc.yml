@@ -17,7 +17,7 @@ spec:
     - protocol: TCP
       port: 8443
       targetPort: 8443
-      name: https
+      name: keycloak-port
   type: ClusterIP
 ---
 apiVersion: v1
