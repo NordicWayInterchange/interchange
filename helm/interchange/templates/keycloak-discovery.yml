@@ -39,7 +39,7 @@ spec:
             - name: KC_HOSTNAME
               value: https://portallogin.{{ .Values.external_name }}
             - name: KC_HTTPS_CERTIFICATE_FILE
-              value: /app/cerfificates/tls.crt
+              value: /app/certificates/tls.crt
             - name: KC_HTTPS_CERTIFICATE_KEY_FILE
               value: /app/certificates/tls.key
           volumeMounts:
