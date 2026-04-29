@@ -9,16 +9,16 @@ metadata:
     component: keycloak
     release: {{ .Release.Name }}
 spec:
+  type: ClusterIP
   selector:
     app: {{ .Chart.Name }}
     component: keycloak
     release: {{ .Release.Name }}
   ports:
-    - protocol: TCP
+    - name: keycloak-port
+      protocol: TCP
       port: 8443
       targetPort: 8443
-      name: keycloak-port
-  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service

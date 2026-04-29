@@ -2,11 +2,11 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-keycloak-discovery
+  name: {{ .Release.Name }}-keycloak
   labels:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}{{ .Chart.Version }}
-    component: keycloak-discovery
+    component: keycloak
     release: {{ .Release.Name }}
 spec:
   serviceName: {{ .Release.Name }}-keycloak-discovery
