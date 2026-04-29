@@ -44,7 +44,7 @@ spec:
             - name: KEYCLOAK_CLIENT_ID
               value: {{ .Values.napcore_frontend.keycloak.client_id }}
             - name: INTERNAL_KEYCLOAK_URL
-              value: "https://{{ .Release.Name }}-keycloak:8443"
+              value: "http://{{ .Release.Name }}-keycloak:8080"
             - name: KEYCLOAK_REALM
               value: {{ .Values.napcore_frontend.keycloak.realm }}
             - name: KEYCLOAK_CLIENT_SECRET
