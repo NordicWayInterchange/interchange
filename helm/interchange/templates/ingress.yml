@@ -31,9 +31,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}-keycloak
+                name: {{ .Release.Name }}-keycloak-http
                 port:
-                  number: 8443
+                  number: 8080
     {{- end }}
     {{- if .Values.admin_frontend.enabled}}
     - host: admin.{{ .Values.external_name }}

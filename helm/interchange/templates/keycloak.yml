@@ -40,18 +40,13 @@ spec:
               value: {{ .Values.keycloak_postgres_user | quote }}
             - name: KC_HOSTNAME
               value: https://portallogin.{{ .Values.external_name }}
-            - name: KC_HTTPS_CERTIFICATE_FILE
-              value: /app/certificates/tls.crt
-            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
-              value: /app/certificates/tls.key
-          volumeMounts:
-            - mountPath: /app/certificates
-              name: server-certificates
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
           ports:
             - containerPort: 8443
               name: keycloak-port
-      volumes:
-        - name: server-certificates
-          secret:
-            secretName: {{ .Release.Name }}-keycloak-cert
+            - containerPort: 8080
+              name: keycloak-http
 {{- end }}

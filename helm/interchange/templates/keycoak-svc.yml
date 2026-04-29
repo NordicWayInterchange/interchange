@@ -23,6 +23,27 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ .Release.Name }}-keycloak-http
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: keycloak
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Chart.Name }}
+    component: keycloak
+    release: {{ .Release.Name }}
+  ports:
+    - name: keycloak-http
+      protocol: TCP
+      port:  8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
   labels:
     app: {{ .Release.Name }}
   name: {{ .Release.Name }}-keycloak-discovery
