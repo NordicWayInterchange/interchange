@@ -117,6 +117,10 @@ napcore_frontend:
   keycloak:
     enabled: true
     postgres_db: keycloak
+    client_id: portal.example-node.itsinterchange.eu
+    realm: portal.example-node.itsinterchange.eu
+    external_keycloak_url: https://login.example-node.itsinterchange.eu
+    internal_keycloak_url: https://login.example-node.itsinterchange.eu
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
