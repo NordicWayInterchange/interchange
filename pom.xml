@@ -94,7 +94,7 @@
         <bouncycastle.version>1.84</bouncycastle.version>
         <postgresql.version>42.7.10</postgresql.version>
         <junit-jupiter.version>5.12.2</junit-jupiter.version>
-        <swagger-annotations-jakarta.version>2.2.34</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.48</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.6.0</license-maven-plugin.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
