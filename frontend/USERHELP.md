@@ -1,6 +1,6 @@
 # User help
 
-### How to register a Capability?
+### How to register a Capability
 
 You can create a new [Capability](../GLOSSARY.md#capability) by clicking on the `Add capability` button in the capability
 tab. Click on `My capabilities`,
@@ -70,7 +70,7 @@ over the Improved Interface described in the [specification](https://www.c-roads
 Service providers are the users of the system, be it a person or an integrated system. Service Providers use the
 Onboard API to communicate with the interchange in order to create Subscriptions, Capabilities or Deliveries.
 
-### How to register a Subscription?
+### How to register a Subscription
 
 In order to see messages flowing through the system, we can create a subscription to
 the data stream, and listen to the associated queue.
@@ -134,11 +134,12 @@ queue (dlq) for the delivery you are creating. Messages that cannot be delivered
 
 ## Private channels
 
-Private channel is a secure communication used exclusively for message exchange. A service provider can manage their
-private channels.
-It can display, create and delete peers from private channels they own or remove itself from other private channels that
-are subscribed to them.
-In the portal you can add a private channel by clicking on the `Create private channel` button and add a peer name and
+In [private channels](../GLOSSARY.md#private-channels) tab you can display, create and delete peers from private channels they own 
+or remove them from other private channels that are subscribed to them.
+
+### How to register a Private channel
+
+A private channel can be added by clicking on the `Create private channel` button where you can add a peer name and
 description.
 Name of the private channels' peer is optional but description is mandatory. After a private channel is shown up in the
 list you can click on the three dots on the far right side to see
@@ -151,27 +152,35 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 If another service provider has created a private channel subscribed to yours, it will appear in the
 `My private channel subscriptions`
-list. You can use the `common name` of the other service provider which you can copy from `Home` tab as the peer name
-while creating a private channel.
+list. 
 
 ![My private channel subscriptions](../demo/images/privateChannel_subscription.png)
 
+You can use the `common name` of the other service provider as the peer name while creating a private channel.
+`Common name` can be copied from `My common name` section in `Home` tab.
+
+![Common name](../demo/images/commonName.png)
+
 ## Bi-queues
 
-Bi-queue is an unfiltered queue without any subscriptions. In this tab you can see the list of bi-queues per message
-type.
-You can also add or remove access to the bi-consumer's group. By clicking on each bi-queue from the list you can see the
-bi-queue endpoint details.
+In [Bi-queues](../GLOSSARY.md#bi-queues) tab you can see the list of bi-queues per [message type](../GLOSSARY.md#messagetype-).
+You can also add or remove access to the bi-consumer's group.
+
+![Bi-queues](../demo/images/bi-queues.png)
+
+By clicking on each bi-queue from the list you can see the bi-queue endpoint details. 
+
+![Bi-queue details](../demo/images/bi-queue_details.png)
 
 ## Certificate
 
 You can generate the key and certificate in the portal in order to generate the key and trust stores for using the
 Interchange.
+
+### How to create a Certificate
+
 Enter the country code and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate. 
 
+![Certificate](../demo/images/certificate.png)
 
-## Listen and publish messages
-
-In order to listen and send messages you have to use the service provider client. For more information please take a look at 
-[Listening to messages](https://github.com/NordicWayInterchange/interchange/blob/federation-master/demo/single-node/README.md#Listening-to-messages)
