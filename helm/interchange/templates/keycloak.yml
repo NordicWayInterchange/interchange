@@ -18,6 +18,8 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+        component: keycloak
+        release: {{ .Release.Name }}
     spec:
       containers:
         - name: keycloak
