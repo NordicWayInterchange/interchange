@@ -151,7 +151,7 @@ public class ExportTransformer {
     }
 
     public DeliveryExportApi.DeliveryStatusExportApi transformDeliveryStatusToDeliveryStatusExportApi(LocalDeliveryStatus status) {
-        switch(status) {
+        switch (status) {
             case CREATED -> {
                 return DeliveryExportApi.DeliveryStatusExportApi.CREATED;
             }

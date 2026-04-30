@@ -101,15 +101,15 @@ public class SubscriptionApi implements Comparable<SubscriptionApi> {
 
     @Override
     public int compareTo(SubscriptionApi o) {
-        if(lastUpdatedTimestamp == null && o.getLastUpdatedTimestamp() == null) {
+        if (lastUpdatedTimestamp == null && o.getLastUpdatedTimestamp() == null) {
             return 0;
         }
 
-        if(o.lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null){
             return 1;
         }
 
-        if(lastUpdatedTimestamp == null) {
+        if (lastUpdatedTimestamp == null) {
             return -1;
         }
 

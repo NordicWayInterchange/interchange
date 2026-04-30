@@ -7,6 +7,6 @@ public class SubscriptionRequestException extends RuntimeException{
 	}
 
 	public SubscriptionRequestException(String message, Throwable e) {
-		super(message,e);
+		super(message, e);
 	}
 }

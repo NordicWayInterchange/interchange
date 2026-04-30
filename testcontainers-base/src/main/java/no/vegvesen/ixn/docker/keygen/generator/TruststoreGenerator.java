@@ -35,7 +35,7 @@ public class TruststoreGenerator extends GenericContainer<TruststoreGenerator> {
     @Override
     protected void configure() {
         this.copyFileToContainer(MountableFile.forHostPath(caCertPath.getParent()), "/ca-certs");
-        this.copyFileToContainer(MountableFile.forHostPath(targetPath),"/out");
+        this.copyFileToContainer(MountableFile.forHostPath(targetPath), "/out");
         String certPathInContainer = "/ca-certs/" + caCertPath.getFileName();
         String keystoreInContainer = "/out/" + targetPath.getFileName();
         this.withCommand(certPathInContainer, keystoreInContainer, password);

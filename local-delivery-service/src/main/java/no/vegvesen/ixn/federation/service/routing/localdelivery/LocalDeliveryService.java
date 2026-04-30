@@ -91,7 +91,7 @@ public class LocalDeliveryService {
                                 Queue queue = qpidClient.getQueue(endpoint.getDlqName());
                                 if (queue == null) {
                                     Queue createdDlq = qpidClient.createQueue(endpoint.getDlqName());
-                                    qpidClient.addReadAccess(serviceProvider.getName(),createdDlq.getName());
+                                    qpidClient.addReadAccess(serviceProvider.getName(), createdDlq.getName());
                                     delta.addQueue(createdDlq);
                                 }
                                 exchange = qpidClient.createHeadersExchangeWithDlq(exchangeName, endpoint.getDlqName());
@@ -126,10 +126,10 @@ public class LocalDeliveryService {
                                             }
                                         }
                                     } else {
-                                        logger.info("No shard exchange found in qpid with name {}",shard.getExchangeName());
+                                        logger.info("No shard exchange found in qpid with name {}", shard.getExchangeName());
                                     }
                                 } else {
-                                    logger.info("No delivery endpoint exchange found in qpid with name {}",endpoint.getTarget());
+                                    logger.info("No delivery endpoint exchange found in qpid with name {}", endpoint.getTarget());
                                 }
                             }
                         }

@@ -33,20 +33,20 @@ public class ServiceProviderCSRGenerator extends GenericContainer<ServiceProvide
     @Override
     protected void configure() {
         this.copyFileToContainer(MountableFile.forHostPath(keysPath), KEYS_INTERNAL_FOLDER);
-        this.withCommand(username,countryCode);
+        this.withCommand(username, countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
     public Path getKeyOnHost() {
-        return keysPath.resolve(String.format("%s.key.pem",username));
+        return keysPath.resolve(String.format("%s.key.pem", username));
     }
 
     public Path getCsrOnHost() {
-        return keysPath.resolve(String.format("%s.csr.pem",username));
+        return keysPath.resolve(String.format("%s.csr.pem", username));
     }
 
 
     public CsrKeyPair getCsrKeyPairOnHost() {
-        return new CsrKeyPair(getCsrOnHost(),getKeyOnHost());
+        return new CsrKeyPair(getCsrOnHost(), getKeyOnHost());
     }
 }

@@ -26,10 +26,10 @@ public class MessageCollector {
 
     @Autowired
     public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties) {
-        this(listenerEndpointRepository,collectorCreator,backoffProperties,new HashMap<>());
+        this(listenerEndpointRepository, collectorCreator, backoffProperties, new HashMap<>());
     }
 
-    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, Map<ListenerEndpoint,MessageCollectorListener> listeners) {
+    public MessageCollector(ListenerEndpointRepository listenerEndpointRepository, CollectorCreator collectorCreator, GracefulBackoffProperties backoffProperties, Map<ListenerEndpoint, MessageCollectorListener> listeners) {
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.collectorCreator = collectorCreator;
         this.backoffProperties = backoffProperties;
@@ -87,7 +87,7 @@ public class MessageCollector {
 
     public void setUpConnectionToNeighbour(ListenerEndpoint listenerEndpoint){
         String name = listenerEndpoint.getNeighbourName();
-        if(listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
+        if (listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {
                 logger.info("Setting up connection to ixn with name {}, host {} and port {}", name, listenerEndpoint.getHost(), listenerEndpoint.getPort());
                 MessageCollectorListener messageListener = collectorCreator.setupCollection(listenerEndpoint);

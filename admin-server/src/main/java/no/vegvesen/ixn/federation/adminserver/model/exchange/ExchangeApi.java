@@ -22,7 +22,7 @@ public class ExchangeApi {
     private AlternateBinding alternateBinding;
 
     public ExchangeApi() {
-        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(), null);
+        this(null, null, DEFAULT_DURABILITY, DEFAULT_TYPE, new ArrayList<>(), null);
     }
 
     public ExchangeApi(String name, String id, boolean durable, String type, List<Binding> bindings, AlternateBinding alternateBinding) {

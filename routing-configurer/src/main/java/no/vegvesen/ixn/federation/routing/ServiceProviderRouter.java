@@ -82,14 +82,14 @@ public class ServiceProviderRouter {
         String brokerExternalName = nodeProperties.getBrokerExternalName();
         for (ServiceProvider serviceProvider : serviceProviders) {
             String name = serviceProvider.getName();
-            logger.debug("Checking service provider {}",name);
+            logger.debug("Checking service provider {}", name);
 
             localDeliveryService.removeTearDownIllegalAndErrorDeliveries(serviceProvider);
             addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider, delta);
             syncPrivateChannels(serviceProvider, delta);
             serviceProvider = localDeliveryService.tearDownDeliveryQueues(serviceProvider, delta);
             serviceProvider = tearDownCapabilityExchanges(serviceProvider, delta);
-            serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName,messageChannelPort,serviceProvider, delta);
+            serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName, messageChannelPort, serviceProvider, delta);
             serviceProvider = localSubscriptionService.removeUnwantedSubscriptions(serviceProvider);
 
             ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());

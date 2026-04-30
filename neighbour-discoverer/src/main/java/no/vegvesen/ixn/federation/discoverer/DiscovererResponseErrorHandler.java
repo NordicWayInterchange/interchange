@@ -24,9 +24,9 @@ public class DiscovererResponseErrorHandler implements ResponseErrorHandler {
 	@Override
 	public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
 
-		if(clientHttpResponse.getStatusCode().is5xxServerError()){
+		if (clientHttpResponse.getStatusCode().is5xxServerError()){
 			logger.error("Response was in 500 series: {}", clientHttpResponse.getStatusCode());
-		}else if(clientHttpResponse.getStatusCode().is4xxClientError()){
+		}else if (clientHttpResponse.getStatusCode().is4xxClientError()){
 			logger.error("Response was in 400 series: {}", clientHttpResponse.getStatusCode());
 		}
 	}

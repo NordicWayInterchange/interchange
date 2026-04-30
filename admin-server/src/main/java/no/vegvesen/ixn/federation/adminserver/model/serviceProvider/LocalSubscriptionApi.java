@@ -116,13 +116,13 @@ public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
 
     @Override
     public int compareTo(LocalSubscriptionApi o) {
-        if(o.lastUpdated == null && lastUpdated == null) {
+        if (o.lastUpdated == null && lastUpdated == null) {
             return 0;
         }
-        if(lastUpdated == null) {
+        if (lastUpdated == null) {
             return -1;
         }
-        if(o.lastUpdated == null){
+        if (o.lastUpdated == null){
             return 1;
         }
         return Long.compare(lastUpdated, o.lastUpdated);

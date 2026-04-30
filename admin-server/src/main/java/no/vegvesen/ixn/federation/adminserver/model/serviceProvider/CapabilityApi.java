@@ -104,15 +104,15 @@ public class CapabilityApi implements Comparable<CapabilityApi> {
 
     @Override
     public int compareTo(CapabilityApi o) {
-        if(createdTimestamp == null && o.createdTimestamp == null) {
+        if (createdTimestamp == null && o.createdTimestamp == null) {
             return 0;
         }
 
-        if(o.createdTimestamp == null){
+        if (o.createdTimestamp == null){
             return 1;
         }
 
-        if(createdTimestamp == null) {
+        if (createdTimestamp == null) {
             return -1;
         }
         return Long.compare(createdTimestamp, o.createdTimestamp);

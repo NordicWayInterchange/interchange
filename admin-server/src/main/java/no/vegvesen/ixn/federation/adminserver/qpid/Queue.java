@@ -29,19 +29,19 @@ public class Queue {
     }
 
     public Queue(String name) {
-        this(name, null,null,null, null);
+        this(name, null, null, null, null);
     }
 
     public Queue(String name, long maximumMessageTtl) {
-        this(name,null,null,maximumMessageTtl, null);
+        this(name, null, null, maximumMessageTtl, null);
     }
 
     public Queue(String name, String id) {
-        this(name, id, null,null, null);
+        this(name, id, null, null, null);
     }
 
     public Queue(String name, boolean durable) {
-        this(name,null,durable,null, null);
+        this(name, null, durable, null, null);
     }
 
     public String getName() {

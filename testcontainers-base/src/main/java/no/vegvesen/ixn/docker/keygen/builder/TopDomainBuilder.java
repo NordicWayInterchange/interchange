@@ -38,7 +38,7 @@ public class TopDomainBuilder {
     }
 
     public ClusterBuilder done() {
-        TopDomain topDomain = new TopDomain(domainName, ownerCountry,intermediateDomains);
+        TopDomain topDomain = new TopDomain(domainName, ownerCountry, intermediateDomains);
         parent.addTopDomain(topDomain);
         return parent;
     }

@@ -51,7 +51,7 @@ public class PrivateChannelResponseApi {
     }
 
     public PrivateChannelEndpointApi getEndpoint() {
-        if(endpoint != null) {
+        if (endpoint != null) {
             return endpoint;
         }
         else return null;

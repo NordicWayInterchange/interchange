@@ -56,7 +56,7 @@ public class KeysGeneratorApplication {
                 caResponses.add(response);
             }
             for (CaResponse response : caResponses) {
-                ClusterKeyGenerator.store(response,outputFolder,passwordGenerator);
+                ClusterKeyGenerator.store(response, outputFolder, passwordGenerator);
             }
             return 0;
         }

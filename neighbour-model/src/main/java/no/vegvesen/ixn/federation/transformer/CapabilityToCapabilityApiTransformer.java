@@ -50,7 +50,7 @@ public class CapabilityToCapabilityApiTransformer {
 
 	public Set<NeighbourCapability> capabilityApiToNeighbourCapabilities(Set<CapabilityApi> capabilityApis){
 		Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
-		for(CapabilityApi capabilityApi : capabilityApis){
+		for (CapabilityApi capabilityApi : capabilityApis){
 			neighbourCapabilities.add(new NeighbourCapability(
 					applicationApiToApplication(capabilityApi.getApplication()),
 					metadataApiToMetadata(capabilityApi.getMetadata())

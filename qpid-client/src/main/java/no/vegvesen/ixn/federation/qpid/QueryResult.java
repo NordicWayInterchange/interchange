@@ -11,7 +11,7 @@ import java.util.Map;
 public class QueryResult {
 
 
-    private List<Map<String,Object>> results;
+    private List<Map<String, Object>> results;
 
     private Integer total;
 

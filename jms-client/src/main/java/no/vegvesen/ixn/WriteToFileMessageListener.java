@@ -22,7 +22,7 @@ public class WriteToFileMessageListener implements MessageListener {
 
     public WriteToFileMessageListener(String directoryName) {
         this.directory = new File(directoryName);
-        if(!directory.exists()){
+        if (!directory.exists()){
             throw new DirectoryDoesNotExistException("Directory does not exist: " + directoryName);
         }
     }

@@ -40,15 +40,15 @@ public class NeighbourSubscriptionDeleteService {
                     if (SubscriptionStatus.shouldTearDown(subscription.getSubscriptionStatus())) {
                         List<Match> matches = matchRepository.findAllBySubscriptionId(subscription.getId());
                         if (matches.isEmpty()) {
-                            try{
+                            try {
                                 if (subscription.getEndpoints().isEmpty()) {
                                     neighbourFacade.deleteSubscription(neighbour, subscription);
                                     subscriptionsToDelete.add(subscription);
                                 }
-                            } catch(SubscriptionDeleteException e) {
+                            } catch (SubscriptionDeleteException e) {
                                 neighbour.getControlConnection().failedConnection(backoffProperties.getNumberOfAttempts());
                                 logger.warn("Exception when deleting subscription {} to neighbour {}. Starting backoff", subscription.getId(), neighbour.getName(), e);
-                            } catch(SubscriptionNotFoundException e) {
+                            } catch (SubscriptionNotFoundException e) {
                                 logger.warn("Subscription {} gone from neighbour {}. Deleting subscription", subscription.getId(), neighbour.getName(), e);
                             } finally {
                                 if (subscription.getEndpoints().isEmpty()) {

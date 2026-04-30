@@ -56,17 +56,17 @@ public class Send implements Callable<Integer> {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String deliveryId;
-        if(option.file != null){
+        if (option.file != null){
             ObjectMapper mapper = new ObjectMapper();
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
             AddDeliveriesResponse response = client.addDeliveries(request);
             deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
-        else if(option.selector != null){
+        else if (option.selector != null){
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
             deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
-        else{
+        else {
             deliveryId = option.id;
         }
 
@@ -77,19 +77,19 @@ public class Send implements Callable<Integer> {
             delivery = client.getDelivery(deliveryId);
         }
         if (! delivery.getStatus().equals(DeliveryStatus.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(),delivery.getId()));
+            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(), delivery.getId()));
         }
         DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not determine delivery endpoint from response"));
         String queueName = deliveryEndpoint.getTarget();
         String url = "amqps://" + deliveryEndpoint.getHost();
 
-        System.out.printf("Sending message from file %s%n",messageFile);
+        System.out.printf("Sending message from file %s%n", messageFile);
         ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(messageFile, Messages.class);
         validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
 
-            while(true) {
+            while (true) {
              try {
                  source.start();
                  break;
@@ -189,17 +189,17 @@ public class Send implements Callable<Integer> {
     }
 
     private void validateInput(Messages messages) throws Exception {
-        for(Message message : messages.getMessages()){
-            if(binary) {
-                if(message.getMessageType().equals(DATEX_2)){
+        for (Message message : messages.getMessages()){
+            if (binary) {
+                if (message.getMessageType().equals(DATEX_2)){
                     throw new Exception("DATEX messages can not be sent binary.");
                 }
                 if (message.getFile() == null) {
                     throw new Exception("Message does not contain file");
                 }
             }
-            else{
-                if(message.getMessageText() == null){
+            else {
+                if (message.getMessageText() == null){
                     throw new Exception("Message does not contain messageText");
                 }
             }

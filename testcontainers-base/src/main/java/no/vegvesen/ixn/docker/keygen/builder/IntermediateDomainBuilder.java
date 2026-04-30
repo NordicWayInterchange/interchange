@@ -35,7 +35,7 @@ public class IntermediateDomainBuilder {
     }
 
     public TopDomainBuilder done() {
-        return parent.addIntermediateDomain(new IntermediateDomain(domainName,owningCountry,interchange));
+        return parent.addIntermediateDomain(new IntermediateDomain(domainName, owningCountry, interchange));
     }
 
 }

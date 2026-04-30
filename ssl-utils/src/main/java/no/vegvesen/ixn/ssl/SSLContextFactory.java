@@ -28,7 +28,7 @@ public class SSLContextFactory {
 			InputStream stream = new FileInputStream(keystoreDetails.getFileName());
 			keystore = loadKeystoreFromStream(stream, keystoreDetails.getType(), keystoreDetails.getPassword());
 		} catch (FileNotFoundException e) {
-			throw new InvalidSSLConfig(String.format("Could not load store from %s, of type %s",keystoreDetails.getFileName(),keystoreDetails.getType()), e);
+			throw new InvalidSSLConfig(String.format("Could not load store from %s, of type %s", keystoreDetails.getFileName(), keystoreDetails.getType()), e);
 		}
 		return keystore;
 	}
@@ -38,12 +38,12 @@ public class SSLContextFactory {
 		try {
 			keyStore = KeyStore.getInstance(type.toString());
 		} catch (KeyStoreException e) {
-			throw new InvalidSSLConfig("Could not get Keystore instance",e);
+			throw new InvalidSSLConfig("Could not get Keystore instance", e);
 		}
 		try {
 			keyStore.load(stream, password.toCharArray());
 		} catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-			throw new InvalidSSLConfig("Could not load keystore",e);
+			throw new InvalidSSLConfig("Could not load keystore", e);
 		}
 		return keyStore;
 	}
@@ -54,7 +54,7 @@ public class SSLContextFactory {
 		try {
 			// Get a KeyManager and initialize it
 			kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			kmf.init(ks,keyPassword.toCharArray());
+			kmf.init(ks, keyPassword.toCharArray());
 		} catch (final GeneralSecurityException e) {
 			throw new InvalidSSLConfig(e);
 		}
@@ -74,7 +74,7 @@ public class SSLContextFactory {
 
 	public static class InvalidSSLConfig extends RuntimeException {
 		InvalidSSLConfig(String message, Throwable t) {
-			super(message,t);
+			super(message, t);
 		}
 
 		InvalidSSLConfig(Throwable e) {

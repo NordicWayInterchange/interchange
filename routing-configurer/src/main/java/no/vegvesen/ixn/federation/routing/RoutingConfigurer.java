@@ -74,15 +74,15 @@ public class RoutingConfigurer {
 	void tearDownNeighbourRouting(Neighbour neighbour) {
 		String name = neighbour.getName();
 		Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getNeighbourSubscriptionsByStatus(NeighbourSubscriptionStatus.TEAR_DOWN);
-		if(neighbour.isIgnore()){
+		if (neighbour.isIgnore()){
 			Set<NeighbourSubscription> neighbourSubscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
-			if(neighbourSubscriptions.isEmpty()){
+			if (neighbourSubscriptions.isEmpty()){
 				neighbour.getControlConnection().unreachable();
 				neighbourService.saveNeighbour(neighbour);
 				return;
 			}
-			else{
-				neighbourSubscriptions.forEach(s->s.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN));
+			else {
+				neighbourSubscriptions.forEach(s-> s.setSubscriptionStatus(NeighbourSubscriptionStatus.TEAR_DOWN));
 				neighbour.getControlConnection().unreachable();
 				subscriptions.addAll(neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 			}
@@ -153,21 +153,21 @@ public class RoutingConfigurer {
 
 		setUpRedirectedRouting(acceptedRedirectSubscriptions, capabilities, delta);
 		allAcceptedSubscriptions.removeAll(acceptedRedirectSubscriptions);
-		if(!allAcceptedSubscriptions.isEmpty()){
+		if (!allAcceptedSubscriptions.isEmpty()){
 			setUpRegularRouting(allAcceptedSubscriptions, capabilities, neighbour.getName(), delta);
 		}
 		neighbourService.saveSetupRouting(neighbour);
 	}
 
 	public void setUpRegularRouting(Set<NeighbourSubscription> allAcceptedSubscriptions, Set<Capability> capabilities, String neighbourName, QpidDelta delta) {
-		for(NeighbourSubscription subscription : allAcceptedSubscriptions){
+		for (NeighbourSubscription subscription : allAcceptedSubscriptions){
 			logger.debug("Checking subscription {}", subscription);
 			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.MANDATORY)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
 
 				NeighbourEndpoint endpoint = subscription.getEndpoints().stream().findFirst().orElse(null);
-				if(endpoint == null) {
+				if (endpoint == null) {
 					String queueName = "sub-" + UUID.randomUUID();
 					logger.debug("Creating endpoint {} for subscription with id {}", queueName, subscription.getId());
 					endpoint = createEndpoint(neighbourService.getBrokerExternalName(), neighbourService.getMessagePort(), queueName);
@@ -214,7 +214,7 @@ public class RoutingConfigurer {
 	}
 
 	private void setUpRedirectedRouting(Set<NeighbourSubscription> redirectSubscriptions, Set<Capability> capabilities, QpidDelta delta) {
-		for(NeighbourSubscription subscription : redirectSubscriptions){
+		for (NeighbourSubscription subscription : redirectSubscriptions){
 			Set<Capability> matchingCaps = CapabilityMatcher.matchCapabilitiesToSelector(capabilities, subscription.getSelector()).stream().filter(s -> !s.getMetadata().getRedirectPolicy().equals(RedirectStatus.NOT_AVAILABLE)).collect(Collectors.toSet());
 			if (!matchingCaps.isEmpty()) {
 				logger.debug("Subscription matches {} caps", matchingCaps.size());
@@ -276,9 +276,9 @@ public class RoutingConfigurer {
 									logger.info("Set up exchange for subscription with id {}", subscription.getId());
 									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName(), endpoint.getDynamicFilter());
 								}
-								else{
+								else {
 									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
-									if(exchange == null){
+									if (exchange == null){
 										qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
 										logger.info("Set up exchange for subscription with id {}", subscription.getId());
 									}
@@ -293,7 +293,7 @@ public class RoutingConfigurer {
 	}
 
 	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName, String dynamicFilter) {
-		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
+		if (listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
 			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName, dynamicFilter));
 			logger.info("ListenerEndpoint was created: {}", savedListenerEndpoint);
 		}
@@ -306,8 +306,8 @@ public class RoutingConfigurer {
 		for (Neighbour neighbour : neighbours) {
 			if (!neighbour.getOurRequestedSubscriptions().getSubscriptions().isEmpty()) {
 				Set<Subscription> ourSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN);
-				if(neighbour.isIgnore()){
-					neighbour.getOurRequestedSubscriptions().getSubscriptions().forEach(s->s.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN));
+				if (neighbour.isIgnore()){
+					neighbour.getOurRequestedSubscriptions().getSubscriptions().forEach(s-> s.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN));
 					ourSubscriptions.addAll(neighbour.getOurRequestedSubscriptions().getSubscriptions());
 				}
 				for (Subscription subscription : ourSubscriptions) {

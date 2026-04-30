@@ -77,7 +77,7 @@ public class CertSigner {
         return certificateChain;
     }
 
-    public List<String> sign(String csrAsString,String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
+    public List<String> sign(String csrAsString, String cn) throws IOException, OperatorCreationException, CertificateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchProviderException {
 
         PKCS10CertificationRequest csr = getPkcs10CertificationRequest(csrAsString);
         List<X509Certificate> certificates = sign(csr, cn);
@@ -106,13 +106,13 @@ public class CertSigner {
                 csrWrapper.getPublicKey()
         );
         //NOTE basic constraints are not critical. Should they be? //TODO yes, it should
-        certificateBuilder.addExtension(Extension.basicConstraints,false,new BasicConstraints(false));
+        certificateBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
 
         //NOTE this only gives the keyId for the key identifier. Could also use the cert,
         //which gives keyid, dirname (subject) and serial number of signee
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerCertificate.getPublicKey());
-        certificateBuilder.addExtension(Extension.authorityKeyIdentifier,false, authorityKeyIdentifier);
+        certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, authorityKeyIdentifier);
         /*
             X509v3 Key Usage: critical
                 Digital Signature, Non Repudiation, Key Encipherment
@@ -120,14 +120,14 @@ public class CertSigner {
                 Obtained by ORing the ints together.
          */
         KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
-        certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
+        certificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
 
         KeyPurposeId keyPurpose = KeyPurposeId.id_kp_clientAuth;
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurpose);
-        certificateBuilder.addExtension(Extension.extendedKeyUsage,false,extendedKeyUsage);
+        certificateBuilder.addExtension(Extension.extendedKeyUsage, false, extendedKeyUsage);
 
         SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(csrWrapper.getPublicKey());
-        certificateBuilder.addExtension(Extension.subjectKeyIdentifier,false, subjectKeyIdentifier);
+        certificateBuilder.addExtension(Extension.subjectKeyIdentifier, false, subjectKeyIdentifier);
 
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA512withRSA");
 
@@ -184,7 +184,7 @@ public class CertSigner {
 
     public static KeyStore loadKeyStore(String keystoreLocation, String keyStorePassword, String storeType) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         KeyStore keyStore = KeyStore.getInstance(storeType);
-        keyStore.load(new FileInputStream(keystoreLocation),keyStorePassword.toCharArray());
+        keyStore.load(new FileInputStream(keystoreLocation), keyStorePassword.toCharArray());
         return keyStore;
     }
 

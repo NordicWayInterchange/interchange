@@ -106,11 +106,11 @@ public class NapRestController {
         List<String> certs;
         String csr = new String(Base64.getDecoder().decode(signRequest.getCsr()));
         try {
-            certs = certSigner.sign(csr,actorCommonName);
+            certs = certSigner.sign(csr, actorCommonName);
         } catch (IOException | OperatorCreationException | CertificateException | NoSuchAlgorithmException |
                  SignatureException | InvalidKeyException | NoSuchProviderException e) {
             logger.info("Error signing CSR for Service Provider {}, {}", actorCommonName, e);
-            throw new SignExeption("Could not sign csr",e);
+            throw new SignExeption("Could not sign csr", e);
         }
         List<String> encodedCerts = certs.stream().map(s -> Base64.getEncoder().encodeToString(s.getBytes())).collect(Collectors.toList());
         return new CertificateSignResponse(encodedCerts);
@@ -131,7 +131,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
 
-        if(serviceProvider.getSubscriptions().contains(localSubscription)){
+        if (serviceProvider.getSubscriptions().contains(localSubscription)){
             throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
         }
 
@@ -218,7 +218,7 @@ public class NapRestController {
     public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingSubscriptionCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        logger.info("List network capabilities for serivce provider {}",actorCommonName);
+        logger.info("List network capabilities for serivce provider {}", actorCommonName);
 
         Set<Capability> localCapabilities = getAllLocalCapabilities();
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
@@ -242,7 +242,7 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
-        if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
+        if (Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
         }
 
@@ -253,14 +253,14 @@ public class NapRestController {
         );
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
-        if(serviceProvider.getDeliveries().contains(localDelivery)){
+        if (serviceProvider.getDeliveries().contains(localDelivery)){
             throw new AlreadyExistsException(String.format("Delivery %s already exists", deliveryRequest));
         }
 
-        if(JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
+        if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
             localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
         }
-        else{
+        else {
             localDelivery.setStatus(LocalDeliveryStatus.ILLEGAL);
         }
 
@@ -290,7 +290,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
-                .filter(d->d.getUuid().equals(deliveryId))
+                .filter(d-> d.getUuid().equals(deliveryId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with Id %s for service provider %s", deliveryId, actorCommonName)));
 
@@ -339,8 +339,8 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if(selector != null){
-            if(!selector.isEmpty()){
+        if (selector != null){
+            if (!selector.isEmpty()){
                 allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
@@ -358,27 +358,27 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
-        if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
+        if (Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
             throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
         }
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
-        if(allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
+        if (allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
             throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         Set<String> capabilityProperties = CapabilityValidator.napcoreCapabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
-        if(!capabilityProperties.isEmpty()){
+        if (!capabilityProperties.isEmpty()){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
         List<CapabilityErrorMessage> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
-        if(!validatedCapability.isEmpty()){
+        if (!validatedCapability.isEmpty()){
             throw new CapabilityNotValidException(String.format("Bad api object. Capability: %s", capabilityToAdd), validatedCapability);
         }
 
-        if(!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
+        if (!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
         }
 
@@ -386,7 +386,7 @@ public class NapRestController {
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
                 .stream()
-                .filter(a->a.equals(capabilityToAdd))
+                .filter(a-> a.equals(capabilityToAdd))
                 .findFirst().get();
 
         logger.info("Returning updated Service Provider: {}", savedServiceProvider);
@@ -581,7 +581,7 @@ public class NapRestController {
             throw new PrivateChannelException("Cannot add peer when request is empty");
         }
 
-        if(request.getPeerToAdd().equals(actorCommonName)){
+        if (request.getPeerToAdd().equals(actorCommonName)){
             throw new PrivateChannelException("Private channel can not have actorCommonName as peer");
         }
 
@@ -702,7 +702,7 @@ public class NapRestController {
 
     private void validatePathVariable(String pathVariable){
         Matcher matcher = pattern.matcher(pathVariable);
-        if(!matcher.matches()){
+        if (!matcher.matches()){
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
     }

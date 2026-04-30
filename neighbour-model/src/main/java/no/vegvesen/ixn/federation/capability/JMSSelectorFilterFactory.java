@@ -24,7 +24,7 @@ public class JMSSelectorFilterFactory {
 		try {
 			filter = new JMSSelectorFilter(selector);
 		} catch (ParseException | TokenMgrError | SelectorParsingException e) {
-			throw new InvalidSelectorException(String.format("Could not parse selector \"%s\"",selector));
+			throw new InvalidSelectorException(String.format("Could not parse selector \"%s\"", selector));
 		}
 		notAlwaysTrue(filter);
 		return filter;

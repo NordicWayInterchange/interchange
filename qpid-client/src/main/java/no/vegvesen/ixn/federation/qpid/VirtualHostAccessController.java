@@ -36,14 +36,14 @@ public class VirtualHostAccessController {
     public static AclRule createQueueReadAccessRule(String memberOrGroupName, String queueName) {
         Map<String, String> props = new HashMap<>();
         props.put("NAME", queueName);
-        return new AclRule(memberOrGroupName,"CONSUME","ALLOW_LOG","QUEUE",props);
+        return new AclRule(memberOrGroupName, "CONSUME", "ALLOW_LOG", "QUEUE", props);
     }
 
     public static AclRule createExchangeWriteAccessRule(String memberOrGroupName, String queue)  {
-        Map<String,String> props = new HashMap<>();
-        props.put("ROUTING_KEY",queue);
-        props.put("NAME","");
-        return new AclRule(memberOrGroupName,"PUBLISH","ALLOW_LOG","EXCHANGE",props);
+        Map<String, String> props = new HashMap<>();
+        props.put("ROUTING_KEY", queue);
+        props.put("NAME", "");
+        return new AclRule(memberOrGroupName, "PUBLISH", "ALLOW_LOG", "EXCHANGE", props);
     }
 
     public String getId() {
@@ -55,19 +55,19 @@ public class VirtualHostAccessController {
     }
 
     public void addQueueReadAccess(String subscriberName, String queue) {
-        rules.add(rules.size() - 1, createQueueReadAccessRule(subscriberName,queue));
+        rules.add(rules.size() - 1, createQueueReadAccessRule(subscriberName, queue));
     }
 
     public void addExchangeWriteAccess(String subscriberName, String queue) {
-        rules.add(rules.size() -1, createExchangeWriteAccessRule(subscriberName,queue));
+        rules.add(rules.size() -1, createExchangeWriteAccessRule(subscriberName, queue));
     }
 
     public void removeQueueReadAccess(String subscriberName, String queue) {
-        rules.remove(createQueueReadAccessRule(subscriberName,queue));
+        rules.remove(createQueueReadAccessRule(subscriberName, queue));
     }
 
     public void removeQueueWriteAccess(String subscriberName, String queue) {
-        rules.remove(createExchangeWriteAccessRule(subscriberName,queue));
+        rules.remove(createExchangeWriteAccessRule(subscriberName, queue));
     }
 
     public boolean containsRule(AclRule rule) {

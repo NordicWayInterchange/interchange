@@ -62,7 +62,7 @@ public class Delivery implements Comparable<Delivery>{
 
     public void setEndpoints(List<DeliveryEndpoint> endpoints) {
         this.endpoints.clear();
-        if(endpoints != null){
+        if (endpoints != null){
             this.endpoints.addAll(endpoints);
         }
     }
@@ -106,10 +106,10 @@ public class Delivery implements Comparable<Delivery>{
 
     @Override
     public int compareTo(Delivery o) {
-        if(o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null){
             return 0;
         }
-        if(o.lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null){
             return 1;
         }
         else if (lastUpdatedTimestamp == null){

@@ -88,15 +88,15 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
 
     @Override
     public int compareTo(ServiceProviderApi serviceProviderApi) {
-        if(id == null && serviceProviderApi.id == null) {
+        if (id == null && serviceProviderApi.id == null) {
             return 0;
         }
 
-        if(serviceProviderApi.id == null){
+        if (serviceProviderApi.id == null){
             return 1;
         }
 
-        if(id == null) {
+        if (id == null) {
             return -1;
         }
         return Long.compare(id, serviceProviderApi.id);

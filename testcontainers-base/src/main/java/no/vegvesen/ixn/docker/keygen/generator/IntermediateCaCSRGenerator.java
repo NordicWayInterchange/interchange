@@ -35,19 +35,19 @@ public class IntermediateCaCSRGenerator extends GenericContainer<IntermediateCaC
     @Override
     protected void configure() {
         this.copyFileToContainer(MountableFile.forHostPath(keysFolder), KEYS_INTERNAL_FOLDER);
-        this.withCommand(intermediateDomain,countryCode);
+        this.withCommand(intermediateDomain, countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
     public Path getCsrOnHost() {
-        return keysFolder.resolve(String.format("int.%s.csr",intermediateDomain));
+        return keysFolder.resolve(String.format("int.%s.csr", intermediateDomain));
     }
 
     public Path getKeyOnHost() {
-        return keysFolder.resolve(String.format("int.%s.key.pem",intermediateDomain));
+        return keysFolder.resolve(String.format("int.%s.key.pem", intermediateDomain));
     }
 
     public CsrKeyPair getCsrKeyPairOnHost() {
-        return new CsrKeyPair(getCsrOnHost(),getKeyOnHost());
+        return new CsrKeyPair(getCsrOnHost(), getKeyOnHost());
     }
 }

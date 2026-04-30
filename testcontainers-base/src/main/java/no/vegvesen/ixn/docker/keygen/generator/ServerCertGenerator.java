@@ -62,24 +62,24 @@ public class ServerCertGenerator extends GenericContainer<ServerCertGenerator> {
 
     @Override
     public void configure() {
-        this.withFileSystemBind(caCertOnHost,caCertInContainer, BindMode.READ_ONLY);
-        this.withFileSystemBind(caKeyOnHost,caKeyInContainer,BindMode.READ_ONLY);
-        this.withFileSystemBind(chainOnHost,chainInContainer,BindMode.READ_ONLY);
-        this.withFileSystemBind(targetPath.toString(),KEYS_OUT_FOLDER,BindMode.READ_WRITE);
+        this.withFileSystemBind(caCertOnHost, caCertInContainer, BindMode.READ_ONLY);
+        this.withFileSystemBind(caKeyOnHost, caKeyInContainer, BindMode.READ_ONLY);
+        this.withFileSystemBind(chainOnHost, chainInContainer, BindMode.READ_ONLY);
+        this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER, BindMode.READ_WRITE);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
-        this.withCommand(domainName,caKeyInContainer,caCertInContainer,chainInContainer,countryCode);
+        this.withCommand(domainName, caKeyInContainer, caCertInContainer, chainInContainer, countryCode);
     }
 
     public Path getKeyOnHost() {
-        return targetPath.resolve(String.format("%s.key.pem",domainName));
+        return targetPath.resolve(String.format("%s.key.pem", domainName));
     }
 
     public Path getCertOnHost() {
-        return targetPath.resolve(String.format("%s.crt.pem",domainName));
+        return targetPath.resolve(String.format("%s.crt.pem", domainName));
     }
 
     public Path getCertChainOnHost() {
-        return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
+        return targetPath.resolve(String.format("chain.%s.crt.pem", domainName));
     }
 
 }

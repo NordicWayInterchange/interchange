@@ -79,7 +79,7 @@ public class CapabilityValidator {
             switch (property) {
                 case "publisherId" -> {
                     Matcher publisherIdMatcher = publisherIdRegex.matcher(value);
-                    if(!publisherIdMatcher.matches()) {
+                    if (!publisherIdMatcher.matches()) {
                         errorList.add(String.format("%s must contain exactly two uppercase letters followed by five digits in the format <country code><5 numbers>", property));
                     }
                 }
@@ -114,9 +114,9 @@ public class CapabilityValidator {
     }
 
     public static boolean isQuadTreeValid(List<String> quadTreeTiles){
-        for(String quadTile : quadTreeTiles){
-            for(char nextNumber : quadTile.toCharArray()){
-                if(Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
+        for (String quadTile : quadTreeTiles){
+            for (char nextNumber : quadTile.toCharArray()){
+                if (Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
                     return false;
                 }
             }

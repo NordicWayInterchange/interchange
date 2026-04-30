@@ -69,26 +69,26 @@ public class IntermediateCACertGenerator extends GenericContainer<IntermediateCA
                 BindMode.READ_ONLY);
         this.withFileSystemBind(caKey.toString(), caKeyPathInContainer,
                 BindMode.READ_ONLY);
-        this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER,BindMode.READ_WRITE);
+        this.withFileSystemBind(targetPath.toString(), KEYS_OUT_FOLDER, BindMode.READ_WRITE);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
-        this.withCommand(csrPathInContainer,domainName,caCertPathInContainer,caKeyPathInContainer,countryCode);
+        this.withCommand(csrPathInContainer, domainName, caCertPathInContainer, caKeyPathInContainer, countryCode);
     }
 
 
     public Path getSingleCertOnHost() {
-        return targetPath.resolve(String.format("int.%s.crt.pem",domainName));
+        return targetPath.resolve(String.format("int.%s.crt.pem", domainName));
     }
 
     public Path getIntermediateKeyOnHost() {
-        return targetPath.resolve(String.format("int.%s.key.pem",domainName));
+        return targetPath.resolve(String.format("int.%s.key.pem", domainName));
     }
 
     public Path getChainCertOnHost() {
-        return targetPath.resolve(String.format("chain.%s.crt.pem",domainName));
+        return targetPath.resolve(String.format("chain.%s.crt.pem", domainName));
     }
 
     public CertChainAndKey getCertChainAndKeyOnHost() {
-        return new CertChainAndKey(getSingleCertOnHost(),getChainCertOnHost(),getIntermediateKeyOnHost());
+        return new CertChainAndKey(getSingleCertOnHost(), getChainCertOnHost(), getIntermediateKeyOnHost());
     }
 
 }

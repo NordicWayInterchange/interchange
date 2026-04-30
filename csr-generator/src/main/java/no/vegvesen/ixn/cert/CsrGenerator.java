@@ -28,6 +28,6 @@ public class CsrGenerator {
         JcaContentSignerBuilder signBuilder = new JcaContentSignerBuilder(signAlgorithm);
         ContentSigner signer = signBuilder.build(keyPair.getPrivate());
         PKCS10CertificationRequest csr = builder.build(signer);
-        return new KeyPairAndCsr(keyPair,csr);
+        return new KeyPairAndCsr(keyPair, csr);
     }
 }

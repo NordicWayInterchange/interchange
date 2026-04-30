@@ -87,7 +87,7 @@ public class LocalSubscriptionService {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        }else if(subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+        }else if (subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
@@ -153,7 +153,7 @@ public class LocalSubscriptionService {
                                             qpidClient.addBinding(shard.getExchangeName(), binding);
                                             shardExchange.addBinding(binding);
                                         }
-                                        if (! isExistingConnection(subscription,shard)) {
+                                        if (! isExistingConnection(subscription, shard)) {
                                             LocalConnection connection = new LocalConnection(shard.getExchangeName(), source);
                                             subscription.addConnection(connection);
                                         }

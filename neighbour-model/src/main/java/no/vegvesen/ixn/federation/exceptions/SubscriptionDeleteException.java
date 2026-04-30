@@ -7,6 +7,6 @@ public class SubscriptionDeleteException extends RuntimeException {
     }
 
     public SubscriptionDeleteException(String message, Throwable e) {
-        super(message,e);
+        super(message, e);
     }
 }

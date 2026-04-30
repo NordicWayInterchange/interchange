@@ -7,6 +7,6 @@ public class PrivateChannelException extends RuntimeException{
     }
 
     public PrivateChannelException(String message, Throwable e) {
-        super(message,e);
+        super(message, e);
     }
 }

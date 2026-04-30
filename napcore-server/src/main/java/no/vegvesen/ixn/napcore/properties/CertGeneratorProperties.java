@@ -33,11 +33,11 @@ public class CertGeneratorProperties {
     @Bean
     public CertSigner createBean() {
         try {
-            KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation,keyStorePassword,"PKCS12");
+            KeyStore keyStore = CertSigner.loadKeyStore(keystoreLocation, keyStorePassword, "PKCS12");
             PrivateKey issuerPrivateKey = CertSigner.getKey(keyStore, keyAlias, keyStorePassword);
             X509Certificate issuerCertificate = CertSigner.getCertificate(keyStore, keyAlias);
             List<X509Certificate> certificateChain = CertSigner.getCertificateChain(keyStore, keyAlias);
-            return new CertSigner(issuerPrivateKey,issuerCertificate,certificateChain);
+            return new CertSigner(issuerPrivateKey, issuerCertificate, certificateChain);
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
                  UnrecoverableKeyException e) {
             throw new RuntimeException(e);

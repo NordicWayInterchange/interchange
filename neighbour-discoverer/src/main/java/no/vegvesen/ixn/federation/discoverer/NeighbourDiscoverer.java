@@ -133,5 +133,5 @@ public class NeighbourDiscoverer {
 
 
 	@Scheduled(fixedRateString = "10000", initialDelayString = "8000")
-	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();}
+	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours(); }
 }

@@ -37,19 +37,19 @@ public class LocalDeliveryEndpoint {
         this.dlqName = dlqName;
     }
     public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
-        this(null,host,port,target,maxBandwidth,maxMessageRate,dlqName);
+        this(null, host, port, target, maxBandwidth, maxMessageRate, dlqName);
     }
 
     public LocalDeliveryEndpoint(String host, int port, String target, Integer maxBandwidth, Integer maxMessageRate) {
-        this(null,host,port,target,maxBandwidth,maxMessageRate, null);
+        this(null, host, port, target, maxBandwidth, maxMessageRate, null);
     }
 
     public LocalDeliveryEndpoint(String host, int port, String target) {
-        this(null,host,port,target, null,null, null);
+        this(null, host, port, target, null, null, null);
     }
 
     public LocalDeliveryEndpoint(String host, int port, String target, String dlqName) {
-        this(null,host,port,target, null,null, dlqName);
+        this(null, host, port, target, null, null, dlqName);
     }
 
     public String getHost() {

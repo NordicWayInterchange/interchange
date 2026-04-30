@@ -23,7 +23,7 @@ public class SubscriptionPollResponseApiV1 extends SubscriptionPollResponseApi {
                                          String consumerCommonName,
                                          Set<EndpointApiV1> endpoints,
                                          long lastUpdatedTimestamp) {
-        super(ApiVersion.VERSION_1_2,id, selector, path, status, consumerCommonName,lastUpdatedTimestamp);
+        super(ApiVersion.VERSION_1_2, id, selector, path, status, consumerCommonName, lastUpdatedTimestamp);
         this.endpoints = endpoints;
     }
 

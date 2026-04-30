@@ -22,10 +22,10 @@ public class CreateKeys implements Callable<Integer> {
     @ParentCommand
     KeysCommand  parentCommand;
 
-    @Parameters(index = "0", paramLabel = "SERVICE_PROVIDER_NAME",description = "Service Provider name")
+    @Parameters(index = "0", paramLabel = "SERVICE_PROVIDER_NAME", description = "Service Provider name")
     String spName;
 
-    @Parameters(index = "1", paramLabel = "SERVICE_PROVIDER_COUNTRY",description = "Service Provider country code")
+    @Parameters(index = "1", paramLabel = "SERVICE_PROVIDER_COUNTRY", description = "Service Provider country code")
     String countryCode;
 
     @Override
@@ -36,7 +36,7 @@ public class CreateKeys implements Callable<Integer> {
         CertificateSignResponse certificateSignResponse = client.requestCertificate(new CertificateSignRequest(Base64.getEncoder().encodeToString(csrAsPem.getBytes())));
         System.out.println(csr.privateKeyToPem());
         List<String> decodedChain = certificateSignResponse.getChain().stream().map(s -> new String(Base64.getDecoder().decode(s.getBytes()))).collect(Collectors.toList());
-        System.out.println(String.join("",decodedChain));
+        System.out.println(String.join("", decodedChain));
         return 0;
     }
 }

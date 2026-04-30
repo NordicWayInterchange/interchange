@@ -11,7 +11,7 @@ public class IvimApplicationApi extends ApplicationApi {
     }
 
     public IvimApplicationApi(String publisherId, String publicationId, String originatingCountry, String protocolVersion, List<String> quadTree) {
-        super(Constants.IVIM,publisherId, publicationId, originatingCountry,protocolVersion,quadTree);
+        super(Constants.IVIM, publisherId, publicationId, originatingCountry, protocolVersion, quadTree);
     }
 
     @Override

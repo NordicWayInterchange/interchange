@@ -85,8 +85,8 @@ public class NapRESTClient {
 
     public List<Capability> getMatchingCapabilities(String selector) throws JsonProcessingException {
         String url = String.format("%s/nap/%s/subscriptions/capabilities?selector={selector}", server, user);
-        Map<String,String> parameters = new HashMap<>();
-        parameters.put("selector",selector);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("selector", selector);
         ResponseEntity<Capability[]> response = restTemplate.getForEntity(url, Capability[].class, parameters);
         return Arrays.asList(response.getBody());
     }
@@ -211,7 +211,7 @@ public class NapRESTClient {
                             country
                     )
             );
-            return new CsrGenerator("RSA",2048,"SHA512withRSA").generateKeyPairAndCsr(x500Name);
+            return new CsrGenerator("RSA", 2048, "SHA512withRSA").generateKeyPairAndCsr(x500Name);
         } catch (NoSuchAlgorithmException | OperatorCreationException e) {
             throw new RuntimeException(e);
         }

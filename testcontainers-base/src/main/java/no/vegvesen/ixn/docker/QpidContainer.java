@@ -40,8 +40,8 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         this.trustStore = trustStore;
         this.trustStorePassword = trustStorePassword;
         this.vHostName = vHostName;
-        this.waitingFor(Wait.forLogMessage(".*BRK-1004.*\\n",1));
-        this.withExposedPorts(AMQP_PORT,AMQPS_PORT,HTTP_PORT,HTTPS_PORT);
+        this.waitingFor(Wait.forLogMessage(".*BRK-1004.*\\n", 1));
+        this.withExposedPorts(AMQP_PORT, AMQPS_PORT, HTTP_PORT, HTTPS_PORT);
     }
 
 
@@ -50,15 +50,15 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
         String configPathInContainer = "/qpid-broker-j/work-override/";
         String workConfigInContainer = "/qpid-broker-j/work/";
         this.withClasspathResourceMapping(configPathFromClasspath.toString(), configPathInContainer, BindMode.READ_ONLY);
-        this.withFileSystemBind(keysBasePath.toString(),"/jks",BindMode.READ_ONLY);
+        this.withFileSystemBind(keysBasePath.toString(), "/jks", BindMode.READ_ONLY);
         String keystoreLocation = "/jks/" + keyStore;
         this.withEnv("KEY_STORE", keystoreLocation);
         this.withEnv("KEY_STORE_PASSWORD", keyStorePassword);
         this.withEnv("TRUST_STORE", "/jks/" + trustStore);
         this.withEnv("TRUST_STORE_PASSWORD", trustStorePassword);
         this.withEnv("VHOST_FILE", workConfigInContainer + "default.json");
-        this.withEnv("VHOST_NAME",vHostName);
-        this.withEnv("GROUPS_FILE",workConfigInContainer + "groups");
+        this.withEnv("VHOST_NAME", vHostName);
+        this.withEnv("GROUPS_FILE", workConfigInContainer + "groups");
         this.withEnv("INTERNAL_KEY_STORE", keystoreLocation); //for testing locally we use the same internal and external keystores
         this.withEnv("INTERNAL_KEY_STORE_PASSWORD", keyStorePassword);
     }
@@ -81,16 +81,16 @@ public class QpidContainer extends GenericContainer<QpidContainer> {
     }
 
     public String getAmqpsUrl() {
-        return String.format("amqps://%s:%d",getHost(),getMappedPort(AMQPS_PORT));
+        return String.format("amqps://%s:%d", getHost(), getMappedPort(AMQPS_PORT));
     }
 
 
     public String getHttpsUrl() {
-        return String.format("https://%s:%d",getHost(),getMappedPort(HTTPS_PORT));
+        return String.format("https://%s:%d", getHost(), getMappedPort(HTTPS_PORT));
     }
 
     public String getHttpUrl() {
-        return String.format("http://%s:%d",getHost(),getMappedPort(HTTP_PORT));
+        return String.format("http://%s:%d", getHost(), getMappedPort(HTTP_PORT));
     }
 
     public String getvHostName() {

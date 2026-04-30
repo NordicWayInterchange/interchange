@@ -89,7 +89,7 @@ public class SelectorBuilder {
 		} else if (MessageProperty.QUAD_TREE == property) {
 			return String.format("%s like '%%,%s%%'", property.getName(), propertyValue);
 		} else if (MessagePropertyType.STRING_ARRAY == property.getMessagePropertyType()) {
-			return String.format("%s like '%%,%s,%%'",property.getName(),propertyValue);
+			return String.format("%s like '%%,%s,%%'", property.getName(), propertyValue);
 		}
 		return String.format("%s = '%s'", property.getName(), propertyValue);
 	}
@@ -108,12 +108,12 @@ public class SelectorBuilder {
 	}
 
 	public SelectorBuilder originatingCountry(String country) {
-		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(),country);
+		values.put(MessageProperty.ORIGINATING_COUNTRY.getName(), country);
 		return this;
 	}
 
 	public SelectorBuilder messageType(String messageType) {
-		values.put(MessageProperty.MESSAGE_TYPE.getName(),messageType);
+		values.put(MessageProperty.MESSAGE_TYPE.getName(), messageType);
 		return this;
 	}
 
@@ -123,7 +123,7 @@ public class SelectorBuilder {
 	 * @return
 	 */
 	public SelectorBuilder quadTree(String quadTree) {
-		values.put(MessageProperty.QUAD_TREE.getName(),quadTree);
+		values.put(MessageProperty.QUAD_TREE.getName(), quadTree);
 		return this;
 	}
 
@@ -133,7 +133,7 @@ public class SelectorBuilder {
 	 * @return
 	 */
 	public SelectorBuilder quadTree(List<String> quadTrees) {
-		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",",quadTrees));
+		values.put(MessageProperty.QUAD_TREE.getName(), String.join(",", quadTrees));
 		return this;
 	}
 
@@ -153,7 +153,7 @@ public class SelectorBuilder {
 	}
 
 	public SelectorBuilder iviTypes(Set<String> iviTypes) {
-		values.put(MessageProperty.IVI_TYPE.getName(), String.join(",",iviTypes));
+		values.put(MessageProperty.IVI_TYPE.getName(), String.join(",", iviTypes));
 		return this;
 	}
 

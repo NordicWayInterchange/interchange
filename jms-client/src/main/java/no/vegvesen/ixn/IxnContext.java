@@ -38,7 +38,7 @@ public class IxnContext {
 	}
 
 	public IxnContext(Object URI, String sendQueue, String receiveQueue, Integer prefetch) throws NamingException {
-		this(URI,sendQueue,receiveQueue);
+		this(URI, sendQueue, receiveQueue);
 		this.prefetch = prefetch;
 	}
 

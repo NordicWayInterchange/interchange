@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"source","host","port"}, name = "uc_endpoint"))
+@Table(name = "endpoints", uniqueConstraints = @UniqueConstraint(columnNames = {"source", "host", "port"}, name = "uc_endpoint"))
 public class Endpoint {
 
     @Id
@@ -37,28 +37,28 @@ public class Endpoint {
         this.dynamicFilter = dynamicFilter;
     }
     public Endpoint(String source, String host, Integer port, Integer maxMessageRate, Integer maxBandwidth,  String dynamicFilter) {
-        this(null,source,host,port,maxMessageRate,maxBandwidth,dynamicFilter);
+        this(null, source, host, port, maxMessageRate, maxBandwidth, dynamicFilter);
     }
 
     public Endpoint(String source, String host, Integer port) {
-        this(null,source,host,port,null,null,null);
+        this(null, source, host, port, null, null, null);
     }
 
     public Endpoint(String source, String host, Integer port, String dynamicFilter) {
-        this(null,source,host,port,null,null, dynamicFilter);
+        this(null, source, host, port, null, null, dynamicFilter);
     }
 
     public Endpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
-        this(null,source,host,port,maxMessageRate,maxBandwidth,null);
+        this(null, source, host, port, maxMessageRate, maxBandwidth, null);
     }
 
     public Endpoint(String source, String host, Integer port, SubscriptionShard shard) {
-        this(null,source,host,port,null,null,null);
+        this(null, source, host, port, null, null, null);
         this.setShard(shard);
     }
 
     public Endpoint(Integer id, String source, String host, Integer port) {
-        this(id,source,host,port,null,null,null);
+        this(id, source, host, port, null, null, null);
     }
 
     public String getSource() {

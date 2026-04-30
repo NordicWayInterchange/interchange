@@ -29,7 +29,7 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({SelectorAlwaysTrueException.class})
     public ResponseEntity<ErrorDetails> handleSelectorAleaysTrueException(SelectorAlwaysTrueException e) {
-        return error(BAD_REQUEST,e);
+        return error(BAD_REQUEST, e);
     }
 
     @ExceptionHandler({RuntimeException.class})
@@ -64,7 +64,7 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({NothingToDeleteException.class})
     public ResponseEntity<ErrorDetails> handleNoDeliveryToDeleteException(NothingToDeleteException e) {
-        return error(BAD_REQUEST,e);
+        return error(BAD_REQUEST, e);
     }
 
     @ExceptionHandler({NotFoundException.class})
@@ -74,12 +74,12 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({IllegalSubjectException.class})
     public ResponseEntity<ErrorDetails> illegalCsr(IllegalSubjectException e) {
-        return error(BAD_REQUEST,e);
+        return error(BAD_REQUEST, e);
     }
 
     @ExceptionHandler({SignExeption.class})
     public ResponseEntity<ErrorDetails> cannotSign(SignExeption e) {
-        return error(INTERNAL_SERVER_ERROR,e);
+        return error(INTERNAL_SERVER_ERROR, e);
     }
 
     @ExceptionHandler({PrivateChannelException.class})

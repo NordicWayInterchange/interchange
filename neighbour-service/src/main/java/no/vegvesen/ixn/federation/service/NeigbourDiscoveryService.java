@@ -60,7 +60,7 @@ public class NeigbourDiscoveryService {
 
                 // Found a new Neighbour. Set capabilities status of neighbour to UNKNOWN to trigger capabilities exchange.
                 neighbour.getCapabilities().setStatus(CapabilitiesStatus.UNKNOWN);
-                logger.info("Found new neighbour {}. Saving in database",neighbourName);
+                logger.info("Found new neighbour {}. Saving in database", neighbourName);
                 neighbourRepository.save(neighbour);
             }
             NeighbourMDCUtil.removeLogVariables();
@@ -138,7 +138,7 @@ public class NeigbourDiscoveryService {
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-            if(neighbour.isIgnore()){
+            if (neighbour.isIgnore()){
                 logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
                 continue;
             }
@@ -177,7 +177,7 @@ public class NeigbourDiscoveryService {
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
         Set<Subscription> wantedSubscriptions = SubscriptionCalculator.calculateCustomSubscriptionForNeighbour(localSubscriptions, neighbourCapabilities, interchangeNodeProperties.getName());
         Set<Subscription> existingSubscriptions = ourRequestedSubscriptionsFromNeighbour.getSubscriptions();
-        SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions,wantedSubscriptions);
+        SubscriptionPostCalculator subscriptionPostCalculator = new SubscriptionPostCalculator(existingSubscriptions, wantedSubscriptions);
         if (!wantedSubscriptions.equals(existingSubscriptions)) {
             for (Subscription subscription : subscriptionPostCalculator.getSubscriptionsToRemove()) {
                 if (!subscription.getEndpoints().isEmpty()) {
@@ -202,7 +202,7 @@ public class NeigbourDiscoveryService {
                     controlConnection.okConnection();
                     logger.info("Successfully posted subscription request to {}", neighbourName);
                 } else {
-                    logger.info("Too soon to post subscription request to neighbour {} when backing off",neighbourName);
+                    logger.info("Too soon to post subscription request to neighbour {} when backing off", neighbourName);
                 }
             } catch (SubscriptionRequestException e) {
                 controlConnection.failedConnection(backoffProperties.getNumberOfAttempts());
@@ -228,7 +228,7 @@ public class NeigbourDiscoveryService {
                 }
                 //TODO find a better solution to this
             } catch (Exception e) {
-                logger.error("Unknown error while polling subscriptions for one neighbour",e);
+                logger.error("Unknown error while polling subscriptions for one neighbour", e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
@@ -247,7 +247,7 @@ public class NeigbourDiscoveryService {
                     pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbourFacade);
                 }
             } catch (Exception e) {
-                logger.error("Unknown error while polling subscription with status CREATED",e);
+                logger.error("Unknown error while polling subscription with status CREATED", e);
             }
             finally {
                 NeighbourMDCUtil.removeLogVariables();
@@ -294,7 +294,7 @@ public class NeigbourDiscoveryService {
                         tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-                    logger.error("Subscription {} is gone from neighbour", subscription,e);
+                    logger.error("Subscription {} is gone from neighbour", subscription, e);
                 }
             }
         } finally {
@@ -342,7 +342,7 @@ public class NeigbourDiscoveryService {
                         tearDownListenerEndpointsFromEndpointsList(neighbour.getName(), subscription.getEndpoints());
                     }
                     subscription.setSubscriptionStatus(SubscriptionStatus.TEAR_DOWN);
-                    logger.error("Subscription {} is gone from neighbour {}", subscription,neighbour.getName());
+                    logger.error("Subscription {} is gone from neighbour {}", subscription, neighbour.getName());
                 }
             }
         }
@@ -369,15 +369,15 @@ public class NeigbourDiscoveryService {
 
     public void tearDownListenerEndpointsFromIgnoredNeighbours(){
         List<String> ignoredNeighbours = neighbourRepository.findAllByIgnoreIs(true).stream().map(Neighbour::getName).toList();
-        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a->ignoredNeighbours.contains(a.getNeighbourName())).toList();
-        for(ListenerEndpoint listenerEndpoint : endpointsToDelete){
+        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a-> ignoredNeighbours.contains(a.getNeighbourName())).toList();
+        for (ListenerEndpoint listenerEndpoint : endpointsToDelete){
             listenerEndpointRepository.delete(listenerEndpoint);
             logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getSource());
         }
     }
 
     public void tearDownListenerEndpointsFromEndpointsList(String neighbourName, Set<Endpoint> endpoints) {
-        for(Endpoint endpoint : endpoints) {
+        for (Endpoint endpoint : endpoints) {
             SubscriptionShard shard = endpoint.getShard();
             if (shard != null) {
                 ListenerEndpoint listenerEndpoint = listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(shard.getExchangeName(), endpoint.getSource(), neighbourName);

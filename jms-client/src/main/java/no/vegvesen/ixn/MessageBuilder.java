@@ -148,7 +148,7 @@ public class MessageBuilder {
         return this;
     }
     public MessageBuilder publisherName(String publisherName) throws JMSException{
-        if(publisherName != null){
+        if (publisherName != null){
             message.setStringProperty(MessageProperty.PUBLISHER_NAME.getName(), publisherName);
         }
         return this;
@@ -228,7 +228,7 @@ public class MessageBuilder {
     }
 
     public MessageBuilder ttl(long ttl) throws JMSException {
-        message.setLongProperty(AmqpMessageSupport.JMS_AMQP_TTL,ttl);
+        message.setLongProperty(AmqpMessageSupport.JMS_AMQP_TTL, ttl);
         return this;
     }
 }

@@ -91,7 +91,7 @@ public class Sink implements AutoCloseable {
 	}
 
 	public MessageConsumer createConsumerWithPrefetch(Integer prefetch) throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName, prefetch);
+		IxnContext ixnContext = new IxnContext(this.url, null, this.queueName, prefetch);
 		connection = ixnContext.createConnection(sslContext);
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();
@@ -102,7 +102,7 @@ public class Sink implements AutoCloseable {
 	}
 
 	public MessageConsumer createConsumer() throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
+		IxnContext ixnContext = new IxnContext(this.url, null, this.queueName);
 		connection = ixnContext.createConnection(sslContext);
 		Destination destination = ixnContext.getReceiveQueue();
 		connection.start();

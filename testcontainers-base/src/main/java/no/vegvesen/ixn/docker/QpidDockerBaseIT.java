@@ -60,7 +60,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
         }
         List<ClientRequest> clientRequests = new ArrayList<>();
 		for (String serviceProvider : serviceProviders) {
-			clientRequests.add(new ClientRequest(serviceProvider,"NO", serviceProvider + "@" + server));
+			clientRequests.add(new ClientRequest(serviceProvider, "NO", serviceProvider + "@" + server));
 		}
 		CARequest request = new CARequest(
 				ca,
@@ -80,7 +80,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
         }
         CaStores stores;
 		try {
-            stores = store(response,outputPath, PasswordGenerator.staticPassword("password"));
+            stores = store(response, outputPath, PasswordGenerator.staticPassword("password"));
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -110,7 +110,7 @@ public class QpidDockerBaseIT extends DockerBaseIT {
 	}
 
 	public static String getClientStorePath(String clientName, List<ClientStore> clientStores) {
-		return getClientStore(clientName,clientStores.stream()).path().toString();
+		return getClientStore(clientName, clientStores.stream()).path().toString();
 
 	}
 

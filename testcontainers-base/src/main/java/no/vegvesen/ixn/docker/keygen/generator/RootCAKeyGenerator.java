@@ -25,14 +25,14 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
     public RootCAKeyGenerator(Path keysFolder, String caDomain, String countryCode) {
         this(new ImageFromDockerfile("vinz-clortho")
                 .withFileFromClasspath(".", "rootca/newca"),
-                keysFolder,caDomain,countryCode);
+                keysFolder, caDomain, countryCode);
 
     }
 
     @Override
     protected void configure() {
         this.copyFileToContainer(MountableFile.forHostPath(keysFolder), "/ca_keys");
-        this.withCommand(caDomain,countryCode);
+        this.withCommand(caDomain, countryCode);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
     }
 
@@ -41,16 +41,16 @@ public class RootCAKeyGenerator  extends GenericContainer<RootCAKeyGenerator> {
     }
 
     public Path getCaKeyOnHost() {
-        return keysFolder.resolve(String.format("ca.%s.key.pem",caDomain));
+        return keysFolder.resolve(String.format("ca.%s.key.pem", caDomain));
     }
 
     public Path getCaCertOnHost() {
-        return keysFolder.resolve(String.format("ca.%s.crt.pem",caDomain));
+        return keysFolder.resolve(String.format("ca.%s.crt.pem", caDomain));
     }
 
 
     public CertKeyPair getCertKeyPairOnHost() {
-        return new CertKeyPair(getCaCertOnHost(),getCaKeyOnHost());
+        return new CertKeyPair(getCaCertOnHost(), getCaKeyOnHost());
     }
 
 }

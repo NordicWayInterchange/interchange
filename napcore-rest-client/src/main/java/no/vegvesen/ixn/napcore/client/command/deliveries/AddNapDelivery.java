@@ -33,7 +33,7 @@ public class AddNapDelivery implements Callable<Integer> {
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        if(option.file != null) {
+        if (option.file != null) {
             DeliveryRequest request = mapper.readValue(option.file, DeliveryRequest.class);
             Delivery response = client.addDelivery(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));

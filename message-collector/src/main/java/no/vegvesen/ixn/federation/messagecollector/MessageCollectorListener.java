@@ -54,7 +54,7 @@ public class MessageCollectorListener implements MessageListener, ExceptionListe
 
     @Override
     public void onException(JMSException e) {
-        log.error("Exception caught",e);
+        log.error("Exception caught", e);
         this.teardown();
     }
 

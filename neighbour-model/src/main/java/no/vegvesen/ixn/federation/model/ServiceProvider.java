@@ -274,7 +274,7 @@ public class ServiceProvider {
 
 	public Capability getCreatedCapability(String capabilityId){
 		return getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED).stream()
-				.filter(c->c.getUuid().equals(capabilityId))
+				.filter(c-> c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
@@ -284,7 +284,7 @@ public class ServiceProvider {
 				.stream()
 				.filter(s -> s.getUuid().equals(subscriptionId))
 				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s",subscriptionId,name)));
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s", subscriptionId, name)));
 	}
 
 	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries){
@@ -299,7 +299,7 @@ public class ServiceProvider {
 				.stream()
 				.filter(d -> d.getUuid().equals(deliveryId))
 				.findFirst()
-				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s",deliveryId,name)));
+				.orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with ID %s for service provider %s", deliveryId, name)));
 	}
 
     public Set<LocalSubscription> wantedNonRedirectSubscriptions() {

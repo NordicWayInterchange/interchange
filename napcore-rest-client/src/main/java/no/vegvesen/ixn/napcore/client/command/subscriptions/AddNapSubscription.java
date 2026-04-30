@@ -33,12 +33,12 @@ public class AddNapSubscription implements Callable<Integer> {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         ObjectMapper mapper = new ObjectMapper();
 
-        if(option.file != null) {
+        if (option.file != null) {
             SubscriptionRequest request = mapper.readValue(option.file, SubscriptionRequest.class);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
+        else {
             SubscriptionRequest request = new SubscriptionRequest(option.selector, description);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));

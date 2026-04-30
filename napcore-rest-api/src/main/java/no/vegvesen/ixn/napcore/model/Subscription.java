@@ -90,13 +90,13 @@ public class Subscription implements Comparable<Subscription> {
 
     @Override
     public int compareTo(Subscription o) {
-        if(o.lastStatusChange == null && lastStatusChange == null) {
+        if (o.lastStatusChange == null && lastStatusChange == null) {
             return 0;
         }
-        if(o.lastStatusChange == null){
+        if (o.lastStatusChange == null){
             return 1;
         }
-        if(lastStatusChange == null){
+        if (lastStatusChange == null){
             return -1;
         }
         return Long.compare(o.lastStatusChange, lastStatusChange);

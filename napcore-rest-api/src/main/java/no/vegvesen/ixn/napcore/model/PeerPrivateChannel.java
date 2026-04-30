@@ -107,13 +107,13 @@ public class PeerPrivateChannel implements Comparable<PeerPrivateChannel>{
 
     @Override
     public int compareTo(PeerPrivateChannel p) {
-        if(p.lastUpdated == null && lastUpdated == null){
+        if (p.lastUpdated == null && lastUpdated == null){
             return 0;
         }
-        if(p.lastUpdated == null){
+        if (p.lastUpdated == null){
             return 1;
         }
-        if(lastUpdated == null){
+        if (lastUpdated == null){
             return -1;
         }
         return Long.compare(p.lastUpdated, lastUpdated);

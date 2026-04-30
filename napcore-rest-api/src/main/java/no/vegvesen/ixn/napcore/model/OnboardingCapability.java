@@ -68,13 +68,13 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
 
     @Override
     public int compareTo(OnboardingCapability o) {
-        if(o.createdTimestamp == null && createdTimestamp == null){
+        if (o.createdTimestamp == null && createdTimestamp == null){
             return 0;
         }
-        if(o.createdTimestamp == null){
+        if (o.createdTimestamp == null){
             return 1;
         }
-        if(createdTimestamp == null){
+        if (createdTimestamp == null){
             return -1;
         }
 

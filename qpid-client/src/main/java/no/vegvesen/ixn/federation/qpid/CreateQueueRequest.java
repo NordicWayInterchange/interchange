@@ -26,7 +26,7 @@ public class CreateQueueRequest {
     }
 
    public CreateQueueRequest(String name) {
-        this(name,null);
+        this(name, null);
    }
 
 

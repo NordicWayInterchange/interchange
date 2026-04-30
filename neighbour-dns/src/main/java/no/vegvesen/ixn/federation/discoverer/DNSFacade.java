@@ -41,7 +41,7 @@ public class DNSFacade {
 			List<Neighbour> neighbours = new LinkedList<>();
 			for (String nodeName : controlChannelPorts.keySet()) {
 				String controlChannelPort = controlChannelPorts.get(nodeName);
-				Neighbour neighbour = new Neighbour(nodeName,controlChannelPort);
+				Neighbour neighbour = new Neighbour(nodeName, controlChannelPort);
 				logger.debug("DNS server {} has control channel port {} for node {}",
 						getDnsServerName(),
 						neighbour.getControlChannelPort(),

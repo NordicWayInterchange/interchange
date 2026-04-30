@@ -42,12 +42,12 @@ public class AddSubscriptions implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
 
-        if(option.file != null) {
+        if (option.file != null) {
             AddSubscriptionsRequest requestApi = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
+        else {
             AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));

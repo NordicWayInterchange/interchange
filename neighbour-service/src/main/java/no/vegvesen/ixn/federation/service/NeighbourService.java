@@ -67,7 +67,7 @@ public class NeighbourService {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
-		if(neighbourToUpdate.isIgnore()){
+		if (neighbourToUpdate.isIgnore()){
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on neighbour %s, will not process request.", neighbourToUpdate.getName()));
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
@@ -132,15 +132,15 @@ public class NeighbourService {
 		if (incomingRequest.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
-		if(neighbour.isIgnore()){
+		if (neighbour.isIgnore()){
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 		}
 
 		NeighbourSubscriptionRequest persistentRequest = neighbour.getNeighbourRequestedSubscriptions();
 
 		Set<NeighbourSubscription> processedSubscriptionRequest = processSubscriptionRequest(incomingRequest.getSubscriptions());
-		logger.info("Neighbour {} requested {} subscriptions, of which {} is processed", neighbour.getName(),incomingRequest.getSubscriptions().size(), processedSubscriptionRequest.size());
-		logger.debug("Processed requests: {}",processedSubscriptionRequest);
+		logger.info("Neighbour {} requested {} subscriptions, of which {} is processed", neighbour.getName(), incomingRequest.getSubscriptions().size(), processedSubscriptionRequest.size());
+		logger.debug("Processed requests: {}", processedSubscriptionRequest);
 		persistentRequest.addNewSubscriptions(processedSubscriptionRequest);
 		logger.debug("Processed subscription request: {}", persistentRequest);
 
@@ -161,7 +161,7 @@ public class NeighbourService {
 		// Save neighbour again, with generated paths.
 		neighbourRepository.save(neighbour);
 		logger.info("Saving updated Neighbour: {}", neighbour.toString());
-		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(),neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
+		return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), neighbour.getNeighbourRequestedSubscriptions().getSubscriptions());
 	}
 
 	public SubscriptionPollResponseApi incomingSubscriptionPoll(String ixnName, String subscriptionId) {
@@ -169,7 +169,7 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-			if(neighbour.isIgnore()){
+			if (neighbour.isIgnore()){
 				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 			}
 			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(subscriptionId);
@@ -182,14 +182,14 @@ public class NeighbourService {
 			return subscriptionApi;
 		}
 		else {
-			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.", ixnName));
 		}
 	}
 
 
 	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		if(neighbour.isIgnore()){
+		if (neighbour.isIgnore()){
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 		}
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
@@ -235,13 +235,13 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-			if(neighbour.isIgnore()){
+			if (neighbour.isIgnore()){
 				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 			}
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();
 			return subscriptionRequestTransformer.subscriptionsToSubscriptionResponseApi(neighbour.getName(), subscriptions);
 		} else {
-			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.",ixnName));
+			throw new InterchangeNotFoundException(String.format("The requested Neighbour %s is not known to this interchange node.", ixnName));
 		}
 	}
 

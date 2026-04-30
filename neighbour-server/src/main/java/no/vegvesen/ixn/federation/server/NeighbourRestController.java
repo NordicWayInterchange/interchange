@@ -71,7 +71,7 @@ public class NeighbourRestController {
 	@Operation(summary="List subscriptions")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE)))})
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
-	    NeighbourMDCUtil.setLogVariables(properties.getName(),ixnName);
+	    NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 	    logger.info("Received request for subscriptions for neighbour {}", ixnName);
 	    certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
@@ -88,7 +88,7 @@ public class NeighbourRestController {
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE)))})
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received poll of subscription {} from neighbour {}.",subscriptionId, ixnName);
+		logger.info("Received poll of subscription {} from neighbour {}.", subscriptionId, ixnName);
 
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");
@@ -137,7 +137,7 @@ public class NeighbourRestController {
 	@Operation(summary="Delete subscription")
 	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
-		logger.info("Received request to delete subscription {} from neighbour {}.",subscriptionId, ixnName);
+		logger.info("Received request to delete subscription {} from neighbour {}.", subscriptionId, ixnName);
 
 		certService.checkIfCommonNameMatchesNameInApiObject(ixnName);
 		logger.debug("Common name matches Neighbour name in path.");

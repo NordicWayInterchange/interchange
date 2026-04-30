@@ -36,7 +36,7 @@ public class TypeTransformer {
 
     public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
         List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
-        for(no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities){
+        for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities){
             onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capability));
         }
         return onboardingCapabilities;
@@ -55,7 +55,7 @@ public class TypeTransformer {
                                 hostname,
                                 port,
                                 "del-" + UUID.randomUUID(),
-                                Objects.equals(dlqueue,Boolean.TRUE) ? "dlq-" + UUID.randomUUID() : null
+                                Objects.equals(dlqueue, Boolean.TRUE) ? "dlq-" + UUID.randomUUID() : null
                         )
                 ),
                 delivery.getSelector(),
@@ -79,14 +79,14 @@ public class TypeTransformer {
 
     public List<Delivery> transformLocalDeliveriesToNapDeliveries(Set<LocalDelivery> localDeliveries){
         List<Delivery> deliveries = new ArrayList<>();
-        for(LocalDelivery localDelivery : localDeliveries){
+        for (LocalDelivery localDelivery : localDeliveries){
             deliveries.add(transformLocalDeliveryToNapDelivery(localDelivery));
         }
         return deliveries;
     }
 
     public DeliveryStatus transformLocalDeliveryStatusToNapDeliveryStatus(LocalDeliveryStatus localDeliveryStatus){
-        return switch(localDeliveryStatus){
+        return switch (localDeliveryStatus){
             case REQUESTED -> DeliveryStatus.REQUESTED;
             case CREATED -> DeliveryStatus.CREATED;
             case ILLEGAL -> DeliveryStatus.ILLEGAL;
@@ -100,7 +100,7 @@ public class TypeTransformer {
     // TODO change empty string to LocalDeliveryEndpoint's selector when object is changed
     public List<DeliveryEndpoint> transformLocalDeliveryEndpointsToNapEndpoints(Set<LocalDeliveryEndpoint> localDeliveryEndpoints){
         List<DeliveryEndpoint> endpoints = new ArrayList<>();
-        for(LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
+        for (LocalDeliveryEndpoint endpoint : localDeliveryEndpoints){
             endpoints.add(new DeliveryEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getTarget(), null, endpoint.getMaxBandwidth(), endpoint.getMaxMessageRate(), endpoint.getDlqName()));
         }
         return endpoints;

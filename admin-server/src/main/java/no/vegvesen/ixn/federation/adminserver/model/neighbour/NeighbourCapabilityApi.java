@@ -58,13 +58,13 @@ public class NeighbourCapabilityApi implements Comparable<NeighbourCapabilityApi
 
     @Override
     public int compareTo(NeighbourCapabilityApi o) {
-        if(this.createdTimestamp == null && o.createdTimestamp == null) {
+        if (this.createdTimestamp == null && o.createdTimestamp == null) {
             return 0;
         }
-        if(o.createdTimestamp == null){
+        if (o.createdTimestamp == null){
             return 1;
         }
-        if(this.createdTimestamp == null){
+        if (this.createdTimestamp == null){
             return -1;
         }
         return Long.compare(this.createdTimestamp, o.createdTimestamp);

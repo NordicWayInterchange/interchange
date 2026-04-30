@@ -36,12 +36,12 @@ public class AddPrivateChannel implements Callable<Integer> {
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         ObjectMapper mapper = new ObjectMapper();
-        if(option.file != null) {
+        if (option.file != null) {
             AddPrivateChannelRequest privateChannel = mapper.readValue(option.file, AddPrivateChannelRequest.class);
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
+        else {
             AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(
                     List.of(new PrivateChannelRequestApi(
                             Set.of(),

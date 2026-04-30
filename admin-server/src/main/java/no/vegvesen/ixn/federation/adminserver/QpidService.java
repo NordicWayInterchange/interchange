@@ -96,7 +96,7 @@ public class QpidService {
                 }
             }
         }
-        return new CapabilitiesLinkedDeliveryApi(uuid,capabilityMatches);
+        return new CapabilitiesLinkedDeliveryApi(uuid, capabilityMatches);
     }
 
     public List<Exchange> getAllExchanges() {

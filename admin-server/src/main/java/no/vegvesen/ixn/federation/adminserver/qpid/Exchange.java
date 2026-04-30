@@ -27,7 +27,7 @@ public class Exchange {
 
 
     public Exchange() {
-        this(null,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(), null);
+        this(null, null, DEFAULT_DURABILITY, DEFAULT_TYPE, new ArrayList<>(), null);
     }
 
     public Exchange(String name, String id, boolean durable, String type, List<Binding> bindings, AlternateBinding alternateBinding) {
@@ -41,15 +41,15 @@ public class Exchange {
     }
 
     public Exchange(String name) {
-        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,new ArrayList<>(), null);
+        this(name, null, DEFAULT_DURABILITY, DEFAULT_TYPE, new ArrayList<>(), null);
     }
 
     public Exchange(String name, String type) {
-        this(name,null,DEFAULT_DURABILITY,type,new ArrayList<>(), null);
+        this(name, null, DEFAULT_DURABILITY, type, new ArrayList<>(), null);
     }
 
     public Exchange(String name, List<Binding> bindings) {
-        this(name,null,DEFAULT_DURABILITY,DEFAULT_TYPE,bindings, null);
+        this(name, null, DEFAULT_DURABILITY, DEFAULT_TYPE, bindings, null);
     }
 
     public String getName() {

@@ -64,7 +64,7 @@ public class NeighbourRESTClient {
                 throw new CapabilityPostException(name, errorDetails);
             } catch (IOException ioe) {
                 logger.debug("Unable to cast error response as ErrorDetails object.", ioe);
-                throw new CapabilityPostException(name, e.getStatusCode().value(),e);
+                throw new CapabilityPostException(name, e.getStatusCode().value(), e);
             }
         } catch (RestClientException e) {
             logger.debug("Failed post of capabilities to neighbour, network layer error", e);
@@ -106,7 +106,7 @@ public class NeighbourRESTClient {
             logHttpEntity(response, "Received");
 
             if (response.getBody() == null) {
-                throw new SubscriptionRequestException(String.format("%s returned empty response from subscription request",neighbourName));
+                throw new SubscriptionRequestException(String.format("%s returned empty response from subscription request", neighbourName));
             }
             responseApi = response.getBody();
             logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
@@ -130,10 +130,10 @@ public class NeighbourRESTClient {
             try {
                 ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
                 logger.debug("Received error object from server: {}", errorDetails.toString());
-                throw new SubscriptionRequestException(String.format("Subscription request to %s failed. Received error object from server: %s",neighbourName,errorDetails),e);
+                throw new SubscriptionRequestException(String.format("Subscription request to %s failed. Received error object from server: %s", neighbourName, errorDetails), e);
             } catch (IOException ioe) {
                 logger.debug("Unable to cast response as ErrorDetails object.", ioe);
-                throw new SubscriptionRequestException(String.format("Subscription request to %s failed.",neighbourName),e);
+                throw new SubscriptionRequestException(String.format("Subscription request to %s failed.", neighbourName), e);
             }
         } catch (RestClientException e) {
             logger.debug("Received network layer error", e);
@@ -158,7 +158,7 @@ public class NeighbourRESTClient {
 
 
             byte[] errorResponse = e.getResponseBodyAsByteArray();
-            logger.debug(String.format("Response has length %d",errorResponse.length));
+            logger.debug(String.format("Response has length %d", errorResponse.length));
             if (errorResponse.length > 0 ) {
                 try {
                     ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);

@@ -100,15 +100,15 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
 
     @Override
     public int compareTo(PrivateChannelApi privateChannelApi) {
-        if(lastUpdated == null && privateChannelApi.lastUpdated == null) {
+        if (lastUpdated == null && privateChannelApi.lastUpdated == null) {
             return 0;
         }
 
-        if(privateChannelApi.lastUpdated == null){
+        if (privateChannelApi.lastUpdated == null){
             return 1;
         }
 
-        if(lastUpdated == null) {
+        if (lastUpdated == null) {
             return -1;
         }
         return  Long.compare(privateChannelApi.lastUpdated, lastUpdated);

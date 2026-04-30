@@ -27,7 +27,7 @@ public class LocalConnection {
     }
 
     public LocalConnection(String source, String destination) {
-        this(null,source,destination);
+        this(null, source, destination);
     }
 
     public String getSource() {

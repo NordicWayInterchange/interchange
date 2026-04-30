@@ -150,7 +150,7 @@ public class Subscription {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Subscription that)) return false;
-        return Objects.equals(selector,that.selector) &&
+        return Objects.equals(selector, that.selector) &&
 				Objects.equals(consumerCommonName, that.consumerCommonName);
 	}
 

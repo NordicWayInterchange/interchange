@@ -41,16 +41,16 @@ public class ServiceProviderClientApplication{
     @Option(names = {"-u", "--user"}, required = false, description = "The service provider user")
     private String user;
 
-    @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
+    @Option(names = {"-k", "--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
     private Path keystorePath;
 
-    @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
+    @Option(names = {"-s", "--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
+    @Option(names = {"-t", "--truststorepath"}, required = true, description = "The path of the jks trust store")
     Path trustStorePath;
 
-    @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
+    @Option(names = {"-w", "--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
     public static void main(String[] args) {
@@ -83,11 +83,11 @@ public class ServiceProviderClientApplication{
                 keystorePassword,
                 KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath.toString(),
-                trustStorePassword,KeystoreType.JKS);
+                trustStorePassword, KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
 
     public ServiceProviderClient createClient() {
-        return new ServiceProviderClient(createSSLContext(),server,user);
+        return new ServiceProviderClient(createSSLContext(), server, user);
     }
 }

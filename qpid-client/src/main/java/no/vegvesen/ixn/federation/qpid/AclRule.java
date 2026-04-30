@@ -17,14 +17,15 @@ public class AclRule {
 
     private String objectType;
 
-    private Map<String,String> attributes;
+    private Map<String, String> attributes;
 
 
     public AclRule() {
 
     }
 
-    public AclRule(String identity, String operation, String outcome, String objectType, Map<String,String> attributes) {
+    public AclRule(String identity, String operation, String outcome, String objectType,
+                   Map<String, String> attributes) {
         this.identity = identity;
         this.operation = operation;
         this.outcome = outcome;

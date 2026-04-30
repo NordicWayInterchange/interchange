@@ -327,7 +327,7 @@ public class ImportTransformer {
     }
 
     public PrivateChannelStatus transformPrivateChannelStatusImportApiToPrivateChannelStatus(PrivateChannelImportApi.PrivateChannelStatusImportApi status) {
-        switch(status) {
+        switch (status) {
             case CREATED -> {
                 return PrivateChannelStatus.CREATED;
             }

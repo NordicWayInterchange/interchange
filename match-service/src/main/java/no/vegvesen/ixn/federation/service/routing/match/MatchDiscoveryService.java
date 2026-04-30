@@ -39,8 +39,8 @@ public class MatchDiscoveryService {
                 for (Neighbour neighbour : neighbours) {
                     for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptions()) {
                         if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.CREATED) && localSubscription.getStatus().equals(LocalSubscriptionStatus.CREATED)) {
-                            if (Objects.equals(localSubscription.getSelector(),subscription.getSelector()) &&
-                                    Objects.equals(localSubscription.getConsumerCommonName(),subscription.getConsumerCommonName())) {
+                            if (Objects.equals(localSubscription.getSelector(), subscription.getSelector()) &&
+                                    Objects.equals(localSubscription.getConsumerCommonName(), subscription.getConsumerCommonName())) {
                                 if (matchRepository.findBySubscriptionIdAndAndLocalSubscriptionId(subscription.getId(), localSubscription.getId()) == null) {
                                     Match newMatch = new Match(localSubscription, subscription);
                                     matchRepository.save(newMatch);

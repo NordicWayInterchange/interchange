@@ -2,4 +2,4 @@ package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels
 
 import java.util.Map;
 
-public record PrivateTextMessage(String messageText, Map<String,Object> messageProperties) { }
+public record PrivateTextMessage(String messageText, Map<String, Object> messageProperties) { }

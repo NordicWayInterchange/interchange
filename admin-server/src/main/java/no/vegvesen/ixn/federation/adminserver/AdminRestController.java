@@ -165,8 +165,8 @@ public class AdminRestController {
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if(selector != null){
-            if(!selector.isEmpty()){
+        if (selector != null){
+            if (!selector.isEmpty()){
                 allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
@@ -391,10 +391,10 @@ public class AdminRestController {
             CapabilityShard capabilityShard = shard.get();
             String exchangeName = capabilityShard.getExchangeName();
             exchangeExists = qpidService.exchangeExists(exchangeName);
-            return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(capabilityShard,exchangeExists);
+            return typeTransformer.capabilitiesMatchedDeliveryBasedOnShardId(capabilityShard, exchangeExists);
         } else {
-            logger.info("Shard {} for capability {} is not found",shardId,capabilityId);
-            throw new NotFoundException(String.format("Shard %s for capability %s is not found",shardId,capabilityId));
+            logger.info("Shard {} for capability {} is not found", shardId, capabilityId);
+            throw new NotFoundException(String.format("Shard %s for capability %s is not found", shardId, capabilityId));
         }
 
     }
@@ -440,7 +440,7 @@ public class AdminRestController {
 
     private void validatePathVariable(String pathVariable){
         Matcher matcher = pattern.matcher(pathVariable);
-        if(!matcher.matches()){
+        if (!matcher.matches()){
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
     }

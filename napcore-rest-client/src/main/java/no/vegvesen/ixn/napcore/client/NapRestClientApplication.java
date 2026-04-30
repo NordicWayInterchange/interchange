@@ -41,16 +41,16 @@ public class NapRestClientApplication implements Callable<Integer> {
     @Parameters(index = "2", paramLabel = "NAP", description = "The name of the NAP")
     private String nap;
 
-    @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
+    @Option(names = {"-k", "--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
     private Path keystorePath;
 
-    @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
+    @Option(names = {"-s", "--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
     String keystorePassword;
 
-    @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
+    @Option(names = {"-t", "--truststorepath"}, required = true, description = "The path of the jks trust store")
     Path trustStorePath;
 
-    @Option(names = {"-w","--truststorepassword"}, required = true, description = "The password of the jks trust store")
+    @Option(names = {"-w", "--truststorepassword"}, required = true, description = "The password of the jks trust store")
     String trustStorePassword;
 
     public static void main(String[] args) {
@@ -68,7 +68,7 @@ public class NapRestClientApplication implements Callable<Integer> {
                 keystorePassword,
                 KeystoreType.PKCS12);
         KeystoreDetails trustStoreDetails = new KeystoreDetails(trustStorePath.toString(),
-                trustStorePassword,KeystoreType.JKS);
+                trustStorePassword, KeystoreType.JKS);
         return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
     }
 

@@ -42,8 +42,8 @@ public class ListPeerPrivateChannels {
 
     @Override
     public boolean equals(Object o){
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ListPeerPrivateChannels that = (ListPeerPrivateChannels) o;
         return Objects.equals(name, that.name) && Objects.equals(version, that.version) && Objects.equals(privateChannels, that.privateChannels);
     }

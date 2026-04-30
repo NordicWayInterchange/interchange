@@ -14,12 +14,12 @@ public class QuadTreeTool {
     public static final double FOUR_PI = 4 * Math.PI;
 
     public static String lonLatToQuadTree(double lon, double lat) {
-        return lonLatToQuadTree(lon,lat,18);
+        return lonLatToQuadTree(lon, lat, 18);
     }
 
     public static String lonLatToQuadTree(double lon, double lat, int zoom) {
         //lon lat to pixelXY
-        double latitude = clip(lat, MIN_LATITUDE,MAX_LATITUDE);
+        double latitude = clip(lat, MIN_LATITUDE, MAX_LATITUDE);
         double longitude = clip(lon, MIN_LONGITUDE, MAX_LONGITUDE);
 
         double x = (longitude + 180) / 360;
@@ -33,8 +33,8 @@ public class QuadTreeTool {
 
         double scaledX = x * mapSize;
         double scaledY = y * mapSize;
-        int pixelX = (int) clip(scaledX + 0.5,0, mapSize - 1);
-        int pixelY = (int) clip(scaledY + 0.5,0, mapSize - 1);
+        int pixelX = (int) clip(scaledX + 0.5, 0, mapSize - 1);
+        int pixelY = (int) clip(scaledY + 0.5, 0, mapSize - 1);
 
         //pixelXY to tile X Y
         int tileX = pixelX / 256;
@@ -60,7 +60,7 @@ public class QuadTreeTool {
 
 
     static double clip(double n, double minValue, double maxValue) {
-        return Math.min(Math.max(n,minValue),maxValue);
+        return Math.min(Math.max(n, minValue), maxValue);
     }
 
 }

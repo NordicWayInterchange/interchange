@@ -7,6 +7,6 @@ public class SubscriptionPollException extends RuntimeException {
 	}
 
     public SubscriptionPollException(String message, Throwable e) {
-		super(message,e);
+		super(message, e);
     }
 }

@@ -48,7 +48,7 @@ public class MessageValidator {
 				mandatoryPropertyNames = MessageProperty.mandatoryCamPropertyNames;
 				break;
 			default:
-				logger.warn("MessageType '{}' is not valid",messageType);
+				logger.warn("MessageType '{}' is not valid", messageType);
 				return false;
 		}
 		return validProperties(message, mandatoryPropertyNames);
@@ -58,8 +58,8 @@ public class MessageValidator {
 		boolean valid = true;
 		for (String propertyName : propertyNames) {
 			if (!propertyExistsValidator.validateProperty(message, propertyName)) {
-				logger.warn("propertyName '{}' does not exist on message",propertyName);
-				valid =  false;
+				logger.warn("propertyName '{}' does not exist on message", propertyName);
+				valid = false;
 			}
 		}
 		return valid;
@@ -69,7 +69,7 @@ public class MessageValidator {
 		try {
 			return message.getStringProperty(MessageProperty.MESSAGE_TYPE.getName());
 		} catch (JMSException e) {
-			logger.error("Could not get message type due to exception",e);
+			logger.error("Could not get message type due to exception", e);
 			return null;
 		}
 	}

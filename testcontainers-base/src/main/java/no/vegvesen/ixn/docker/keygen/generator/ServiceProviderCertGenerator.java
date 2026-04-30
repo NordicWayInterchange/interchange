@@ -68,26 +68,26 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
 
     @Override
     public void configure() {
-        this.withFileSystemBind(hostCsrPath,containerCsrPath, BindMode.READ_ONLY);
-        this.withFileSystemBind(hostCaCertPath,containerCaCertPath,BindMode.READ_ONLY);
-        this.withFileSystemBind(hostCaKeyPath,containerCaKeyPath,BindMode.READ_ONLY);
-        this.withFileSystemBind(intermediateCaCertChainPath.toString(),containerCertChainPath,BindMode.READ_ONLY);
-        this.withFileSystemBind(hostOutputPath,containerOutputPath,BindMode.READ_WRITE);
-        this.withCommand(containerCsrPath,clientName,containerCaCertPath,containerCaKeyPath,containerCertChainPath);
+        this.withFileSystemBind(hostCsrPath, containerCsrPath, BindMode.READ_ONLY);
+        this.withFileSystemBind(hostCaCertPath, containerCaCertPath, BindMode.READ_ONLY);
+        this.withFileSystemBind(hostCaKeyPath, containerCaKeyPath, BindMode.READ_ONLY);
+        this.withFileSystemBind(intermediateCaCertChainPath.toString(), containerCertChainPath, BindMode.READ_ONLY);
+        this.withFileSystemBind(hostOutputPath, containerOutputPath, BindMode.READ_WRITE);
+        this.withCommand(containerCsrPath, clientName, containerCaCertPath, containerCaKeyPath, containerCertChainPath);
         this.withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(Duration.ofSeconds(30)));
 
     }
 
     public Path getCertOnHost() {
-        return outputPath.resolve(String.format("%s.crt.pem",clientName));
+        return outputPath.resolve(String.format("%s.crt.pem", clientName));
     }
 
     public Path getCertChainOnHost() {
-        return outputPath.resolve(String.format("chain.%s.crt.pem",clientName));
+        return outputPath.resolve(String.format("chain.%s.crt.pem", clientName));
     }
 
     public CertAndCertChain getCertAndCertChainOnHost() {
-        return new CertAndCertChain(getCertOnHost(),getCertChainOnHost());
+        return new CertAndCertChain(getCertOnHost(), getCertChainOnHost());
 
     }
 }

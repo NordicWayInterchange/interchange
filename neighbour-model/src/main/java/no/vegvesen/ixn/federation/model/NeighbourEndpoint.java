@@ -32,15 +32,15 @@ public class NeighbourEndpoint {
     }
 
     public NeighbourEndpoint(String source, String host, Integer port) {
-        this(null,source,host,port,null,null);
+        this(null, source, host, port, null, null);
     }
 
     public NeighbourEndpoint(String source, String host, Integer port, Integer maxBandwidth, Integer maxMessageRate) {
-        this(null,source,host,port,maxMessageRate,maxBandwidth);
+        this(null, source, host, port, maxMessageRate, maxBandwidth);
     }
 
     public NeighbourEndpoint(Integer id, String source, String host, Integer port) {
-        this(id,source,host,port,null,null);
+        this(id, source, host, port, null, null);
     }
 
     public String getSource() {

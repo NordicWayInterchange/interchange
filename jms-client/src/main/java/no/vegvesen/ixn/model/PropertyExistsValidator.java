@@ -15,7 +15,7 @@ public class PropertyExistsValidator implements MessagePropertyValidator {
 		try {
 			return message.propertyExists(propertyName);
 		} catch (JMSException e) {
-			logger.error("Could not determine if property {} exists", propertyName,e);
+			logger.error("Could not determine if property {} exists", propertyName, e);
 			return false;
 		}
 	}

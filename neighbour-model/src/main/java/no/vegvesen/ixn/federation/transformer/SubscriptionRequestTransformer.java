@@ -31,7 +31,7 @@ public class SubscriptionRequestTransformer {
 
 	public SubscriptionResponseApi subscriptionsToSubscriptionResponseApi(String name, Set<NeighbourSubscription> subscriptions) {
 	    Set<RequestedSubscriptionResponseApi> subscriptionResponseApis = subscriptionTransformer.subscriptionToRequestedSubscriptionResponseApi(subscriptions);
-	    return new SubscriptionResponseApi(name,subscriptionResponseApis);
+	    return new SubscriptionResponseApi(name, subscriptionResponseApis);
 	}
 
 
@@ -90,7 +90,7 @@ public class SubscriptionRequestTransformer {
 	public SubscriptionPollResponseApiV1 neighbourSubscriptionToSubscriptionPollResponseApiV1(NeighbourSubscription subscription) {
         Set<EndpointApiV1> newEndpoints = new HashSet<>();
         if (subscription.getSubscriptionStatus().equals(NeighbourSubscriptionStatus.CREATED)) {
-            for(NeighbourEndpoint endpoint : subscription.getEndpoints()) {
+            for (NeighbourEndpoint endpoint : subscription.getEndpoints()) {
                 EndpointApiV1 endpointApi = new EndpointApiV1(
                         endpoint.getSource(),
                         endpoint.getHost(),

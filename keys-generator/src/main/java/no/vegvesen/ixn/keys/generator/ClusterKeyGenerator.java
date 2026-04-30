@@ -89,7 +89,7 @@ public class ClusterKeyGenerator {
     private static CaResponse generate(CARequest caRequest, CertificateCertificateChainAndKeys parentCa, SecureRandom random) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
         CertificateCertificateChainAndKeys intermediateCa = generateIntermediateCA(caRequest.name(), caRequest.country(), parentCa.certificateChain(), parentCa.certificate(), parentCa.keyPair().getPrivate(), random);
         List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), intermediateCa);
-        List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(),intermediateCa,random);
+        List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(), intermediateCa, random);
         return generateSubCaResponses(caRequest, random, intermediateCa, hostResponses, clientResponses);
     }
 
@@ -99,7 +99,7 @@ public class ClusterKeyGenerator {
             CaResponse response = generate(request, ca, random);
             responses.add(response);
         }
-        return new CaResponse(ca, caRequest.name(), hostResponses, clientResponses,responses);
+        return new CaResponse(ca, caRequest.name(), hostResponses, clientResponses, responses);
     }
 
     public static void storePems(CaResponse response, Path basePath) throws IOException {
@@ -134,7 +134,7 @@ public class ClusterKeyGenerator {
 
     private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         String truststorePassword = passwordGenerator.generatePassword();
-        Files.writeString(basePath.resolve(response.name() + ".jks.txt"),truststorePassword);
+        Files.writeString(basePath.resolve(response.name() + ".jks.txt"), truststorePassword);
         Path truststorePath = basePath.resolve(response.name() + ".jks");
         try (OutputStream outputStream = Files.newOutputStream(truststorePath)) {
             makeTrustStore(
@@ -144,7 +144,7 @@ public class ClusterKeyGenerator {
                     "myKey");
         }
         String keystorePassword = passwordGenerator.generatePassword();
-        Files.writeString(basePath.resolve(response.name() + ".p12.txt"),keystorePassword);
+        Files.writeString(basePath.resolve(response.name() + ".p12.txt"), keystorePassword);
         Path keystorePath = basePath.resolve(response.name() + ".p12");
         try (OutputStream outputStream = Files.newOutputStream(keystorePath)) {
             makeKeystore(
@@ -156,7 +156,7 @@ public class ClusterKeyGenerator {
             );
 
         }
-        return new CaStore(response.name(), truststorePath, truststorePassword,keystorePath,keystorePassword);
+        return new CaStore(response.name(), truststorePath, truststorePassword, keystorePath, keystorePassword);
     }
 
     public static List<HostStore> storeHostResponses(Path basePath, PasswordGenerator randomPasswordGenerator, List<HostResponse> hostResponses) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
@@ -165,10 +165,10 @@ public class ClusterKeyGenerator {
             String hostPassword = randomPasswordGenerator.generatePassword();
             //TODO should we write the string password to file or not?
             //TODO we could also create the store as a stream, and not use files at all...
-            Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
+            Files.writeString(basePath.resolve(hostResponse.host() + ".txt"), hostPassword);
             Path outputPath = basePath.resolve(hostResponse.host() + ".p12");
             makeKeystore(hostResponse.host(), hostPassword, Files.newOutputStream(outputPath), hostResponse.keyDetails().certificateChain(), hostResponse.keyDetails().keyPair().getPrivate());
-            hostStores.add(new HostStore(hostResponse.host(),outputPath,hostPassword));
+            hostStores.add(new HostStore(hostResponse.host(), outputPath, hostPassword));
         }
         return hostStores;
     }
@@ -178,10 +178,10 @@ public class ClusterKeyGenerator {
         for (ClientResponse clientResponse : clientResponses) {
             String clientPassword = randomPasswordGenerator.generatePassword();
             String name = clientResponse.name();
-            Files.writeString(basePath.resolve(name + ".txt"),clientPassword);
+            Files.writeString(basePath.resolve(name + ".txt"), clientPassword);
             Path path = basePath.resolve(name + ".p12");
             makeKeystore(name, clientPassword, Files.newOutputStream(path), clientResponse.clientDetails().certificateChain(), clientResponse.clientDetails().keyPair().getPrivate());
-            clientStores.add(new ClientStore(name, path,clientPassword));
+            clientStores.add(new ClientStore(name, path, clientPassword));
         }
         return clientStores;
     }
@@ -217,7 +217,7 @@ public class ClusterKeyGenerator {
         ArrayList<ClientResponse> clientResponses = new ArrayList<>();
         for (ClientRequest clientRequest : clients) {
             CertificateCertificateChainAndKeys clientDetails = generateSPKeys(clientRequest.name(), clientRequest.country(), clientRequest.email(), issuer.certificate(), issuer.keyPair().getPrivate(), issuer.certificateChain());
-            clientResponses.add(new ClientResponse(clientRequest.name(),clientDetails));
+            clientResponses.add(new ClientResponse(clientRequest.name(), clientDetails));
         }
         return clientResponses;
     }
@@ -244,7 +244,7 @@ public class ClusterKeyGenerator {
                 .generateKeyPairAndCsr(x500Name);
         CertSigner certSigner = new CertSigner(issuerPrivateKey, issuerCertificate, issuerCertChain);
         List<X509Certificate> newCertChain = certSigner.sign(spCsr.csr(), commonName);
-        return new CertificateCertificateChainAndKeys(spCsr.keyPair(), newCertChain.get(0),newCertChain);
+        return new CertificateCertificateChainAndKeys(spCsr.keyPair(), newCertChain.get(0), newCertChain);
     }
 
     public static CertificateCertificateChainAndKeys generateServerCertForHost(String hostname, X509Certificate issuerCertificate, List<X509Certificate> issuerCertificateChain, PrivateKey issuerPrivateKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException {
@@ -272,17 +272,17 @@ public class ClusterKeyGenerator {
                 csrSubject,
                 subjectPublicKey
         );
-        certificateBuilder.addExtension(Extension.basicConstraints,true,new BasicConstraints(false));
+        certificateBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
         KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.nonRepudiation | KeyUsage.keyEncipherment);
-        certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
+        certificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerCertificate.getPublicKey());
-        certificateBuilder.addExtension(Extension.authorityKeyIdentifier,false, authorityKeyIdentifier);
+        certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, authorityKeyIdentifier);
         SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(subjectPublicKey);
-        certificateBuilder.addExtension(Extension.subjectKeyIdentifier,false, subjectKeyIdentifier);
+        certificateBuilder.addExtension(Extension.subjectKeyIdentifier, false, subjectKeyIdentifier);
         KeyPurposeId[] keyPurposeIds = new KeyPurposeId[] {KeyPurposeId.id_kp_serverAuth, KeyPurposeId.id_kp_clientAuth};
         ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(keyPurposeIds);
-        certificateBuilder.addExtension(Extension.extendedKeyUsage,false,extendedKeyUsage);
+        certificateBuilder.addExtension(Extension.extendedKeyUsage, false, extendedKeyUsage);
 
         //if (! "localhost".equals(hostname)) {
             ArrayList<GeneralName> names = new ArrayList<>();
@@ -300,23 +300,23 @@ public class ClusterKeyGenerator {
         List<X509Certificate> certificateChain = new ArrayList<>();
         certificateChain.add(certificate);
         certificateChain.addAll(issuerCertificateChain);
-        return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
+        return new CertificateCertificateChainAndKeys(keyPair, certificate, certificateChain);
 
     }
 
     public static void makeKeystore(String name, String password, OutputStream outputStream, List<X509Certificate> certificateChain, PrivateKey aPrivate) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         X509Certificate[] certificates = certificateChain.toArray(new X509Certificate[0]);
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(null,null);
-        keyStore.setKeyEntry(name, aPrivate,password.toCharArray(),certificates);
-        keyStore.store(outputStream,password.toCharArray());
+        keyStore.load(null, null);
+        keyStore.setKeyEntry(name, aPrivate, password.toCharArray(), certificates);
+        keyStore.store(outputStream, password.toCharArray());
     }
 
     public static void makeTrustStore(String truststorePassword, OutputStream outputStream, X509Certificate certificate, String myKey) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
-        trustStore.load(null,null);
+        trustStore.load(null, null);
         trustStore.setCertificateEntry(myKey, certificate);
-        trustStore.store(outputStream,truststorePassword.toCharArray());
+        trustStore.store(outputStream, truststorePassword.toCharArray());
     }
 
     public static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
@@ -334,7 +334,7 @@ public class ClusterKeyGenerator {
     }
 
 
-    public static CertificateAndCertificateChain signIntermediateCsr(X509Certificate caCert, List<X509Certificate> certChain,PrivateKey caPrivateKey, PKCS10CertificationRequest csr, SecureRandom secureRandom) throws NoSuchAlgorithmException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, OperatorCreationException {
+    public static CertificateAndCertificateChain signIntermediateCsr(X509Certificate caCert, List<X509Certificate> certChain, PrivateKey caPrivateKey, PKCS10CertificationRequest csr, SecureRandom secureRandom) throws NoSuchAlgorithmException, CertIOException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, OperatorCreationException {
         JcaPKCS10CertificationRequest csrWrapper = new JcaPKCS10CertificationRequest(csr);
         PublicKey subjectPublicKey = csrWrapper.getPublicKey();
         X500Name issuerSubject = JcaX500NameUtil.getSubject(caCert);
@@ -367,17 +367,17 @@ public class ClusterKeyGenerator {
         //RFC 5280: Trust anchor Basic contraints must assert CA
         BasicConstraints basicContraints = new BasicConstraints(true);
         //RFC 5280: Trust anchor must contain basic constraints section marked critical
-        certificateBuilder.addExtension(Extension.basicConstraints,true, basicContraints);
+        certificateBuilder.addExtension(Extension.basicConstraints, true, basicContraints);
 
         //RFC 5280: Trust anchor keyUsage must have keyCertSign, cRLsign
         KeyUsage keyUsage = new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign);
         //RFC 5280: Trust anchor must contain key usage section marked critical
-        certificateBuilder.addExtension(Extension.keyUsage,true,keyUsage);
+        certificateBuilder.addExtension(Extension.keyUsage, true, keyUsage);
         JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
         AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils.createAuthorityKeyIdentifier(issuerPublicKey);
-        certificateBuilder.addExtension(Extension.authorityKeyIdentifier,false, authorityKeyIdentifier);
+        certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, authorityKeyIdentifier);
         SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils.createSubjectKeyIdentifier(subjectPublicKey);
-        certificateBuilder.addExtension(Extension.subjectKeyIdentifier,false, subjectKeyIdentifier);
+        certificateBuilder.addExtension(Extension.subjectKeyIdentifier, false, subjectKeyIdentifier);
 
         ContentSigner signer = signerBuilder.build(issuerPrivateKey);
 
@@ -429,15 +429,15 @@ public class ClusterKeyGenerator {
         );
         PublicKey publicKey = keyPair.getPublic();
 
-        X509Certificate cert = signX509CaCertificate(subject, publicKey, subject, publicKey, keyPair.getPrivate(),secureRandom);
+        X509Certificate cert = signX509CaCertificate(subject, publicKey, subject, publicKey, keyPair.getPrivate(), secureRandom);
         KeyPairAndCertificate details = new KeyPairAndCertificate(keyPair, cert);
         ArrayList<X509Certificate> certificates = new ArrayList<>();
         certificates.add(details.certificate());
-        return new CertificateCertificateChainAndKeys(details.keyPair(), details.certificate(),certificates);
+        return new CertificateCertificateChainAndKeys(details.keyPair(), details.certificate(), certificates);
     }
 
     public static CertificateCertificateChainAndKeys generateIntermediateCA(String commonName, String country, List<X509Certificate> issuerCertChain, X509Certificate issuerCert, PrivateKey issuerKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, CertIOException {
-        CsrGenerator generator = new CsrGenerator("RSA",4096,"SHA512withRSA");
+        CsrGenerator generator = new CsrGenerator("RSA", 4096, "SHA512withRSA");
         if (country == null) {
             country = "NO";
         }
@@ -450,8 +450,8 @@ public class ClusterKeyGenerator {
 
         );
         KeyPairAndCsr intermediateCsr = generator.generateKeyPairAndCsr(x500Name);
-        CertificateAndCertificateChain intermediateCert = signIntermediateCsr(issuerCert, issuerCertChain,issuerKey, intermediateCsr.csr(), secureRandom);
-        return new CertificateCertificateChainAndKeys(intermediateCsr.keyPair(),intermediateCert.certificate(),intermediateCert.chain());
+        CertificateAndCertificateChain intermediateCert = signIntermediateCsr(issuerCert, issuerCertChain, issuerKey, intermediateCsr.csr(), secureRandom);
+        return new CertificateCertificateChainAndKeys(intermediateCsr.keyPair(), intermediateCert.certificate(), intermediateCert.chain());
     }
 
     public static X509Certificate loadSingleCertificate(Reader reader) throws IOException, CertificateException {
@@ -541,11 +541,11 @@ public class ClusterKeyGenerator {
             StringWriter certWriter = new StringWriter();
             saveCert(value.certificate(), certWriter);
             String certString = encoder.encodeToString(certWriter.toString().getBytes());
-            gen.writeStringField("cert",certString);
+            gen.writeStringField("cert", certString);
             StringWriter certChainWriter = new StringWriter();
             saveCertChain(value.certificateChain(), certChainWriter);
             String certChainString = encoder.encodeToString(certChainWriter.toString().getBytes());
-            gen.writeStringField("certChain",certChainString);
+            gen.writeStringField("certChain", certChainString);
             gen.writeEndObject();
         }
     }
@@ -575,7 +575,7 @@ public class ClusterKeyGenerator {
             } catch (CertificateException e) {
                 throw new RuntimeException(e);
             }
-            return new CertificateCertificateChainAndKeys(keyPair,certificate,certificateChain);
+            return new CertificateCertificateChainAndKeys(keyPair, certificate, certificateChain);
         }
     }
 }

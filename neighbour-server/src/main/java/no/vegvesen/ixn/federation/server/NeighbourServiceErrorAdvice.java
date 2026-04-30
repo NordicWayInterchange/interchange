@@ -49,7 +49,7 @@ public class NeighbourServiceErrorAdvice {
 
 	@ExceptionHandler({SubscriptionRequestException.class})
 	public ResponseEntity<ErrorDetails> subscriptionRequestError(SubscriptionRequestException e) {
-		return error(BAD_REQUEST,e);
+		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({HttpMessageNotReadableException.class})
