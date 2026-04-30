@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.selector;
 
 
 import org.junit.jupiter.api.Test;

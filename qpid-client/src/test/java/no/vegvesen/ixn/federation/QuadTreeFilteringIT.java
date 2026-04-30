@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.routing;
+package no.vegvesen.ixn.federation;
 
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
@@ -10,11 +10,8 @@ import no.vegvesen.ixn.shared.Constants;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -25,7 +22,7 @@ import static no.vegvesen.ixn.docker.QpidDockerBaseIT.*;
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest//(classes = {QpidClient.class, QpidClientConfig.class, RoutingConfigurerProperties.class, TestSSLContextConfig.class, TestSSLProperties.class})
+@Testcontainers
 public class QuadTreeFilteringIT {
 
     public static final String HOST_NAME = getDockerHost();
@@ -40,30 +37,21 @@ public class QuadTreeFilteringIT {
 			Path.of("qpid")
 			);
 
-	@DynamicPropertySource
-	static void datasourceProperties(DynamicPropertyRegistry registry) {
-		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.keystore-password", () -> stores.trustStore().truststorePassword());
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
-	}
 
-	@Autowired
 	private QpidClient qpidClient;
 
 	@BeforeAll
-	static void setup(){
-		qpidContainer.start();
+	public static void reportContainerUrl() {
+		System.out.println(qpidContainer.getHttpUrl());
 	}
 
 	@BeforeEach
 	public void setUp() {
-		//It is not normal for a service provider to be administrator - just to avoid setting up InterchangeApp by letting service provider send to outgoingExchange
-		GroupMember groupMember = qpidClient.getGroupMember("king_gustaf", "administrators");
-		if (groupMember == null) {
-			qpidClient.addMemberToGroup("king_gustaf", "administrators");
-		}
+		qpidClient = new QpidClient(
+				qpidContainer.getHttpsUrl(),
+				qpidContainer.getvHostName(),
+				new QpidClientConfig(sslClientContext(stores,"routing_configurer")).qpidRestTemplate()
+		);
 	}
 
 	@Test
@@ -71,74 +59,75 @@ public class QuadTreeFilteringIT {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefgh%')";
 		String kingGustaf = "king_gustaf";
-		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue1","exchange1");
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue1","exchange1");
 		assertThat(receivedMessage).isNotNull();
 	}
-/*
+
 	@Test
 	public void matchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
 		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
 		String selector = "(originatingCountry = 'NO') and (quadTree like '%,cdefghij%')";
 		String kingGustaf = "king_gustaf";
-        Message message = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue2","exchange2");
+        Message message = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue2","exchange2");
 		assertThat(message).isNull();
 	}
 
-	@Test
-	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
-		String messageQuadTreeTiles = ",abcdefghijklmnop";
-		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
-		String kingGustaf = "king_gustaf";
-		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue3","exchange3");
-		assertThat(receivedMessage).isNotNull();
-	}
+        @Test
+        public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
+            String messageQuadTreeTiles = ",abcdefghijklmnop";
+            String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
+            String kingGustaf = "king_gustaf";
+            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue3","exchange3");
+            assertThat(receivedMessage).isNotNull();
+        }
 
-	@Test
-	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-		String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
-		String kingGustaf = "king_gustaf";
-		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue4","exchange4");
-		assertThat(receivedMessage).isNull();
-	}
+        @Test
+        public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
+            String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+            String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
+            String kingGustaf = "king_gustaf";
+            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue4","exchange4");
+            assertThat(receivedMessage).isNull();
+        }
 
-	@Test
-	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-		String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
-		String kingGustaf = "king_gustaf";
-		Message receivedMessage = sendNeighbourMessage(messageQuadTreeTiles, selector, kingGustaf,"queue5","exchange5" );
-		assertThat(receivedMessage).isNull();
-	}
+        @Test
+        public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
+            String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+            String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
+            String kingGustaf = "king_gustaf";
+            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue5","exchange5" );
+            assertThat(receivedMessage).isNull();
+        }
 
-	@Test
-	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-		SelectorBuilder datexNoAbcdef = new SelectorBuilder()
-				.messageType("DATEX2")
-				.originatingCountry("NO")
-				.quadTree("abcdef");
-		String dataTypeSelector = datexNoAbcdef.toSelector();
-		String kingGustaf = "king_gustaf";
-		String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
-		Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles,"spQ1","spEx1");
-		assertThat(receivedMessage).isNotNull();
-	}
+		/*
+        @Test
+        public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
+            SelectorBuilder datexNoAbcdef = new SelectorBuilder()
+                    .messageType("DATEX2")
+                    .originatingCountry("NO")
+                    .quadTree("abcdef");
+            String dataTypeSelector = datexNoAbcdef.toSelector();
+            String kingGustaf = "king_gustaf";
+            String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
+            Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles,"spQ1","spEx1");
+            assertThat(receivedMessage).isNotNull();
+        }
 
-	@Test
-	public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
-		SelectorBuilder datexNoAbcdef = new SelectorBuilder()
-				.messageType("DATEX2")
-				.originatingCountry("NO")
-				.quadTree("abcdefghijklmnopqrs");
-		String selector = datexNoAbcdef.toSelector();
-		String kingGustaf = "king_gustaf";
-		String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
-		Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles, "spQ2","spEx2");
-		assertThat(receivedMessage).isNotNull();
-	}
+        @Test
+        public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
+            SelectorBuilder datexNoAbcdef = new SelectorBuilder()
+                    .messageType("DATEX2")
+                    .originatingCountry("NO")
+                    .quadTree("abcdefghijklmnopqrs");
+            String selector = datexNoAbcdef.toSelector();
+            String kingGustaf = "king_gustaf";
+            String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
+            Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles, "spQ2","spEx2");
+            assertThat(receivedMessage).isNotNull();
+        }
 
 
- */
+     */
 	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String queueName, String exchangeName) throws Exception {
 		qpidClient.createQueue(queueName);
 		qpidClient.addReadAccess(serviceProviderName, queueName);
@@ -175,11 +164,12 @@ public class QuadTreeFilteringIT {
 		return receivedMessage;
 	}
 
-	private Message sendNeighbourMessage(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
+	private Message sendAndReceive(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
 		qpidClient.createQueue(queueName);
 		qpidClient.addReadAccess(spName, queueName);
 		qpidClient.createHeadersExchange(exchangeName);
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
+		qpidClient.addWriteAccess(spName, exchangeName);
 
 		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
 
