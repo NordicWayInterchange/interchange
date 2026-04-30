@@ -61,7 +61,7 @@ public class AddDeliveries implements Callable<Integer> {
         return 0;
     }
 
-    private static class AddDeliveriesOption{
+    private static class AddDeliveriesOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
         File file;
 

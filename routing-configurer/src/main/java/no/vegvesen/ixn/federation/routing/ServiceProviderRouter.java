@@ -273,7 +273,7 @@ public class ServiceProviderRouter {
 
                     String capabilitySelector;
                     if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
+                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i + 1);
                     } else {
                         capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
                     }

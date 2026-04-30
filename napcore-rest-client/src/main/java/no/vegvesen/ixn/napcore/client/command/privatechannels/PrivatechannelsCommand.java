@@ -8,7 +8,7 @@ import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.PropertiesDefaultProvider;
 
 @Command(
-        name="privatechannels",
+        name = "privatechannels",
         description = "Get, add, list or delete private channels",
         subcommands = {
                 AddPrivateChannel.class,
@@ -25,7 +25,7 @@ public class PrivatechannelsCommand {
     @ParentCommand
     NapRestClientApplication parentCommand;
 
-    public NapRestClientApplication getParentCommand(){
+    public NapRestClientApplication getParentCommand() {
         return parentCommand;
     }
 }

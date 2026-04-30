@@ -5,7 +5,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.ParentCommand;
 
 @CommandLine.Command(
-        name="peers",
+        name = "peers",
         description = "Get, add and delete peers from private channels you own. Remove yourself from other private channels",
         subcommands = {
                 GetPeerPrivateChannels.class,
@@ -19,7 +19,7 @@ public class PeersCommand {
     @ParentCommand
     PrivatechannelsCommand parentCommand;
 
-    public PrivatechannelsCommand getParent(){
+    public PrivatechannelsCommand getParent() {
         return parentCommand;
     }
 }

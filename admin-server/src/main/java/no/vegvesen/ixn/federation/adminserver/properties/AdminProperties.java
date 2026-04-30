@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix="admin")
+@ConfigurationProperties(prefix = "admin")
 public class AdminProperties {
 
     private String name;

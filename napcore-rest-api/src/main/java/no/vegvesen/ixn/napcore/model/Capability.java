@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.vegvesen.ixn.shared.capability.ApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 
-@JsonIgnoreProperties(value={"createdTimestamp"})
+@JsonIgnoreProperties(value = {"createdTimestamp"})
 public class Capability implements Comparable<Capability> {
 
     ApplicationApi application;
@@ -61,13 +61,13 @@ public class Capability implements Comparable<Capability> {
 
     @Override
     public int compareTo(Capability o) {
-        if (o.createdTimestamp == null && createdTimestamp == null){
+        if (o.createdTimestamp == null && createdTimestamp == null) {
             return 0;
         }
-        if (o.createdTimestamp == null){
+        if (o.createdTimestamp == null) {
             return 1;
         }
-        if (createdTimestamp == null){
+        if (createdTimestamp == null) {
             return -1;
         }
 

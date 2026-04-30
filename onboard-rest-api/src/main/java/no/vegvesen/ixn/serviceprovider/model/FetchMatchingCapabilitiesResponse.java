@@ -15,16 +15,16 @@ public class FetchMatchingCapabilitiesResponse {
 
     private String version = "1.0";
 
-    public FetchMatchingCapabilitiesResponse(){
+    public FetchMatchingCapabilitiesResponse() {
 
     }
 
-    public FetchMatchingCapabilitiesResponse(String name, Set<CapabilityApi> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(String name, Set<CapabilityApi> fetchCapabilities) {
         this.name = name;
         this.capabilities = fetchCapabilities;
     }
 
-    public FetchMatchingCapabilitiesResponse(String name, String selector, Set<CapabilityApi> fetchCapabilities){
+    public FetchMatchingCapabilitiesResponse(String name, String selector, Set<CapabilityApi> fetchCapabilities) {
         this.name = name;
         this.selector = selector;
         this.capabilities = fetchCapabilities;

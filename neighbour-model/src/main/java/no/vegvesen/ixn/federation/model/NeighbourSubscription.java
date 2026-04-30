@@ -20,12 +20,12 @@ public class NeighbourSubscription {
     @Enumerated(EnumType.STRING)
     private NeighbourSubscriptionStatus subscriptionStatus;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String selector;
 
     private String path;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

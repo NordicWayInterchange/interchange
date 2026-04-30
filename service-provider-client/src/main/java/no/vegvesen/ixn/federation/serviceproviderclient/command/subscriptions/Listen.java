@@ -55,7 +55,7 @@ public class Listen implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
         String id;
-        if (option.file != null){
+        if (option.file != null) {
             ObjectMapper mapper = new ObjectMapper();
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
@@ -65,7 +65,7 @@ public class Listen implements Callable<Integer> {
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
         }
-        else if (option.selector != null){
+        else if (option.selector != null) {
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description))));
             id = addSubscriptionsResponse.getSubscriptions().stream()
                     .findFirst()
@@ -95,7 +95,7 @@ public class Listen implements Callable<Integer> {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s", id)));
-        String url = "amqps://"+endpointApi.getHost();
+        String url = "amqps://" + endpointApi.getHost();
 
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
         ExceptionListener exceptionListener = e -> {

@@ -87,7 +87,7 @@ public class LocalSubscriptionService {
         } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ILLEGAL)) {
             subscription.getLocalEndpoints().clear();
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
-        }else if (subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)){
+        } else if (subscription.getStatus().equals(LocalSubscriptionStatus.ERROR)) {
             subscription.setStatus(LocalSubscriptionStatus.TEAR_DOWN);
         } else {
             throw new IllegalStateException("Unknown subscription status encountered");
@@ -141,7 +141,7 @@ public class LocalSubscriptionService {
                     Set<Capability> matchingCapabilities = CapabilityMatcher.matchCapabilitiesToSelector(allCreatedCapabilities, subscription.getSelector());
                     for (Capability capability : matchingCapabilities) {
                         for (CapabilityShard shard : capability.getShards()) {
-                            if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())){
+                            if (CapabilityMatcher.matchCapabilityApplicationWithShardToSelector(capability.getApplication(), shard.getShardId(), subscription.getSelector())) {
                                 Exchange shardExchange = delta.findByExchangeName(shard.getExchangeName());
                                 if (shardExchange != null) {
                                     //TODO need a better way of getting the endpoint

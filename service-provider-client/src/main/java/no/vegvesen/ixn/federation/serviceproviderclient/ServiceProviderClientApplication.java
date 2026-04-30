@@ -33,7 +33,7 @@ import static picocli.CommandLine.*;
         },
         mixinStandardHelpOptions = true,
         version = "1.0")
-public class ServiceProviderClientApplication{
+public class ServiceProviderClientApplication {
 
     @Parameters(index = "0", paramLabel = "SERVER", description = "URL to connect to")
     private String server;

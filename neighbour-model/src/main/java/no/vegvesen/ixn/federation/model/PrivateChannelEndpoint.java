@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name="private_channel_endpoints")
+@Table(name = "private_channel_endpoints")
 public class PrivateChannelEndpoint {
 
     @Id

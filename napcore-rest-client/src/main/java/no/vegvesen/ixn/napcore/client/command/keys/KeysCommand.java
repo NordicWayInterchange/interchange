@@ -17,7 +17,7 @@ public class KeysCommand {
     @ParentCommand
     NapRestClientApplication parentCommand;
 
-    public NapRestClientApplication getParentCommand(){
+    public NapRestClientApplication getParentCommand() {
         return parentCommand;
     }
 }

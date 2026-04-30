@@ -10,7 +10,7 @@ public class SubscriptionRequest {
 
     }
 
-    public SubscriptionRequest(String selector){
+    public SubscriptionRequest(String selector) {
         this.selector = selector;
     }
 

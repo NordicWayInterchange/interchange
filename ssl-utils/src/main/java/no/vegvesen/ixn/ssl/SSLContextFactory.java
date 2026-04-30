@@ -16,7 +16,7 @@ import java.security.cert.CertificateException;
 @SuppressWarnings("WeakerAccess")
 public class SSLContextFactory {
 	public static SSLContext sslContextFromKeyAndTrustStores(KeystoreDetails keystoreDetails,
-															 KeystoreDetails truststoreDetails){
+															 KeystoreDetails truststoreDetails) {
 		KeyStore keystore = getKeyStore(keystoreDetails);
 		KeyStore truststore = getKeyStore(truststoreDetails);
 		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);

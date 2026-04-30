@@ -22,7 +22,7 @@ public class WriteToFileMessageListener implements MessageListener {
 
     public WriteToFileMessageListener(String directoryName) {
         this.directory = new File(directoryName);
-        if (!directory.exists()){
+        if (!directory.exists()) {
             throw new DirectoryDoesNotExistException("Directory does not exist: " + directoryName);
         }
     }
@@ -36,8 +36,8 @@ public class WriteToFileMessageListener implements MessageListener {
             Map<String, Object> metadataContent = createMetadataContentMap(message);
 
             messages += 1;
-            File messageFile = new File(directory, "file-"+messages);
-            File metadataFile = new File(directory, "file-"+messages+"-metadata.txt");
+            File messageFile = new File(directory, "file-" + messages);
+            File metadataFile = new File(directory, "file-" + messages + "-metadata.txt");
 
             switch (message) {
                 case JmsBytesMessage bytesMessage -> {

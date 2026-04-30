@@ -4,7 +4,7 @@ import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
 import static picocli.CommandLine.*;
 
 @Command(name = "capabilities",
-        description="List, get, add or delete capabilities for the current Service Provider",
+        description = "List, get, add or delete capabilities for the current Service Provider",
         subcommands = {
                 AddNapCapability.class,
                 GetNapCapability.class,
@@ -20,7 +20,7 @@ public class CapabilitiesCommand {
     @ParentCommand
     NapRestClientApplication parentCommand;
 
-    public NapRestClientApplication getParentCommand(){
+    public NapRestClientApplication getParentCommand() {
         return parentCommand;
     }
 }

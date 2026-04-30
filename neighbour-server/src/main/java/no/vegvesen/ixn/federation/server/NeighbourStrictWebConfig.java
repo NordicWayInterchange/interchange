@@ -15,7 +15,7 @@ import java.util.List;
 @EnableWebMvc
 @Configuration
 @ComponentScan({ "no.vegvesen.ixn.federation.server" })
-public class NeighbourStrictWebConfig implements WebMvcConfigurer{
+public class NeighbourStrictWebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(

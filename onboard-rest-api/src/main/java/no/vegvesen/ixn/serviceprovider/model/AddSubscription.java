@@ -14,13 +14,13 @@ public class AddSubscription {
 
     String description;
 
-    public AddSubscription(){}
+    public AddSubscription() {}
 
-    public AddSubscription(String selector){
+    public AddSubscription(String selector) {
         this.selector = selector;
     }
 
-    public AddSubscription(String selector, String description){
+    public AddSubscription(String selector, String description) {
         this.selector = selector;
         this.description = description;
     }

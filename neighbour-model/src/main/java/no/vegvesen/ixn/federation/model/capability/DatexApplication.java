@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @DiscriminatorValue(Constants.DATEX_2)
-public class DatexApplication extends Application{
+public class DatexApplication extends Application {
 
     private String publicationType;
 

@@ -18,7 +18,7 @@ public class Capabilities {
 	private Integer id;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name="fk_dat_cap"))
+	@JoinColumn(name = "cap_id", foreignKey = @ForeignKey(name = "fk_dat_cap"))
 	private Set<Capability> capabilities = new HashSet<>();
 
 	@Column
@@ -27,9 +27,7 @@ public class Capabilities {
 
 	private LocalDateTime lastCapabilityExchange;
 
-	public Capabilities(){
-
-	}
+	public Capabilities() {}
 
 	public Capabilities(Set<Capability> capabilities) {
 		setCapabilities(capabilities);
@@ -88,7 +86,7 @@ public class Capabilities {
 		toDelete.setStatus(CapabilityStatus.TEAR_DOWN);
 	}
 
-	public void removeCapabilities(Collection<Capability> capabilitiesToRemove){
+	public void removeCapabilities(Collection<Capability> capabilitiesToRemove) {
 		this.capabilities.removeAll(capabilitiesToRemove);
 		setLastCapabilityExchange(LocalDateTime.now());
 	}

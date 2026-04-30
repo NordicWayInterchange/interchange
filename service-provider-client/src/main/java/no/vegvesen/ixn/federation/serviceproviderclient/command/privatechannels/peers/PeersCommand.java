@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.
 import picocli.CommandLine.*;
 
 @Command(
-        name="peers",
+        name = "peers",
         description = "get, add and delete peers from private channels you own. Remove yourself from other private channels",
         subcommands = {
                 ListPeerPrivateChannels.class,
@@ -24,7 +24,7 @@ public class PeersCommand {
     @ParentCommand
     PrivateChannelsCommand parentCommand;
 
-    public PrivateChannelsCommand getParent(){
+    public PrivateChannelsCommand getParent() {
         return parentCommand;
     }
 }

@@ -18,7 +18,7 @@ public class SubscriptionRequestTransformer {
 	private final SubscriptionTransformer subscriptionTransformer;
 
 	@Autowired
-	public SubscriptionRequestTransformer(SubscriptionTransformer subscriptionTransformer){
+	public SubscriptionRequestTransformer(SubscriptionTransformer subscriptionTransformer) {
 		this.subscriptionTransformer = subscriptionTransformer;
 	}
 

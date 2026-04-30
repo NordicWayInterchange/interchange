@@ -59,7 +59,7 @@ public class LocalDeliveryApi implements Comparable<LocalDeliveryApi> {
 
     public void setEndpoints(Set<LocalDeliveryEndpointApi> endpoints) {
         this.endpoints.clear();
-        if (endpoints != null){
+        if (endpoints != null) {
             this.endpoints.addAll(endpoints);
         }
     }
@@ -82,15 +82,15 @@ public class LocalDeliveryApi implements Comparable<LocalDeliveryApi> {
 
     @Override
     public int compareTo(LocalDeliveryApi o) {
-        if (lastUpdatedTimestamp == null && o.lastUpdatedTimestamp == null){
+        if (lastUpdatedTimestamp == null && o.lastUpdatedTimestamp == null) {
             return 0;
         }
 
-        if (o.lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null) {
             return -1;
         }
 
-        if (lastUpdatedTimestamp == null){
+        if (lastUpdatedTimestamp == null) {
             return 1;
         }
         return Long.compare(lastUpdatedTimestamp, o.lastUpdatedTimestamp);

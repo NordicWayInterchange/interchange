@@ -104,7 +104,7 @@ public class PrivateChannelApi implements Comparable<PrivateChannelApi> {
             return 0;
         }
 
-        if (privateChannelApi.lastUpdated == null){
+        if (privateChannelApi.lastUpdated == null) {
             return 1;
         }
 

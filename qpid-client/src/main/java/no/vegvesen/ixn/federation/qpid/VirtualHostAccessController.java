@@ -59,7 +59,7 @@ public class VirtualHostAccessController {
     }
 
     public void addExchangeWriteAccess(String subscriberName, String queue) {
-        rules.add(rules.size() -1, createExchangeWriteAccessRule(subscriberName, queue));
+        rules.add(rules.size() - 1, createExchangeWriteAccessRule(subscriberName, queue));
     }
 
     public void removeQueueReadAccess(String subscriberName, String queue) {

@@ -59,7 +59,7 @@ public class AddPrivateChannelResponse {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "AddPrivateChannelResponse{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +

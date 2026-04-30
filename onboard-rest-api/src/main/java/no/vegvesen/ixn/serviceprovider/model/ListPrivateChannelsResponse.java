@@ -57,7 +57,7 @@ public class ListPrivateChannelsResponse {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "ListPrivateChannelsResponse{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +

@@ -21,7 +21,7 @@ public class GetNapDelivery implements Callable<Integer> {
     String deliveryId;
 
     @Override
-    public Integer call() throws Exception{
+    public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         Delivery delivery = client.getDelivery(deliveryId);
         ObjectMapper mapper = new ObjectMapper();

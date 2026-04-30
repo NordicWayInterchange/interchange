@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.shared.Constants.*;
 
-@Command(name="send",
+@Command(name = "send",
         description = "Add delivery and send message",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
@@ -56,13 +56,13 @@ public class Send implements Callable<Integer> {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String deliveryId;
-        if (option.file != null){
+        if (option.file != null) {
             ObjectMapper mapper = new ObjectMapper();
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
             AddDeliveriesResponse response = client.addDeliveries(request);
             deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
-        else if (option.selector != null){
+        else if (option.selector != null) {
             AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
             deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
@@ -94,7 +94,7 @@ public class Send implements Callable<Integer> {
                  source.start();
                  break;
              }
-             catch (InvalidDestinationException e){
+             catch (InvalidDestinationException e) {
                  System.out.println("\nRetrying\n");
                  TimeUnit.SECONDS.sleep(3);
              }
@@ -102,7 +102,7 @@ public class Send implements Callable<Integer> {
 
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
-                switch (message){
+                switch (message) {
                     case DenmMessage ignored -> {
                         messageBuilder
                                 .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
@@ -189,9 +189,9 @@ public class Send implements Callable<Integer> {
     }
 
     private void validateInput(Messages messages) throws Exception {
-        for (Message message : messages.getMessages()){
+        for (Message message : messages.getMessages()) {
             if (binary) {
-                if (message.getMessageType().equals(DATEX_2)){
+                if (message.getMessageType().equals(DATEX_2)) {
                     throw new Exception("DATEX messages can not be sent binary.");
                 }
                 if (message.getFile() == null) {
@@ -199,14 +199,14 @@ public class Send implements Callable<Integer> {
                 }
             }
             else {
-                if (message.getMessageText() == null){
+                if (message.getMessageText() == null) {
                     throw new Exception("Message does not contain messageText");
                 }
             }
         }
     }
 
-    private static class DeliveriesOption{
+    private static class DeliveriesOption {
         @Option(names = {"-f", "--file"}, required = true, description = "The deliveries json file")
         File file;
 

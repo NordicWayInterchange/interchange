@@ -88,7 +88,7 @@ public class NeighbourSubscriptionRequest {
     }
     public Set<NeighbourSubscription> getNeighbourSubscriptionsByStatusIn(NeighbourSubscriptionStatus ... status) {
         Set<NeighbourSubscription> neighbourSubscriptions = new HashSet<>();
-        for (NeighbourSubscriptionStatus neighbourStatus : status){
+        for (NeighbourSubscriptionStatus neighbourStatus : status) {
             neighbourSubscriptions.addAll(getSubscriptions().stream().filter(s -> s.getSubscriptionStatus().equals(neighbourStatus)).collect(Collectors.toSet()));
         }
         return neighbourSubscriptions;

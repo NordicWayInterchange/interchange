@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.api.v1_0;
 
 import java.time.LocalDateTime;
 
-public class ErrorDetails{
+public class ErrorDetails {
 
 	private String timestamp;
 	private String errorCode;

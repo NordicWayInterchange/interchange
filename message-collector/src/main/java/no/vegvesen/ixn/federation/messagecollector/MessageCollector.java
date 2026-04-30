@@ -85,7 +85,7 @@ public class MessageCollector {
         listeners.keySet().removeAll(listenerKeysToRemove);
     }
 
-    public void setUpConnectionToNeighbour(ListenerEndpoint listenerEndpoint){
+    public void setUpConnectionToNeighbour(ListenerEndpoint listenerEndpoint) {
         String name = listenerEndpoint.getNeighbourName();
         if (listenerEndpoint.getMessageConnection().canBeContacted(backoffProperties)) {
             try {

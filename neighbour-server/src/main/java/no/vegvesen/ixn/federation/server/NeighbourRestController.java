@@ -68,7 +68,7 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, path = "/{ixnName}/subscriptions", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	@Operation(summary="List subscriptions")
+	@Operation(summary = "List subscriptions")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTSUBSCRIPTIONSRESPONSE)))})
 	public SubscriptionResponseApi listSubscriptions(@PathVariable(name = "ixnName") String ixnName) {
 	    NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
@@ -84,7 +84,7 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.GET, value = "/{ixnName}/subscriptions/{subscriptionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	@Operation(summary="Poll subscription")
+	@Operation(summary = "Poll subscription")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.POLLSUBSCRIPTIONSRESPONSE)))})
 	public SubscriptionPollResponseApi pollSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
@@ -99,19 +99,19 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.POST, value = "/capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Secured("ROLE_USER")
-	@Operation(summary="Update capabilities")
+	@Operation(summary = "Update capabilities")
 	@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Required attributes for a capability object's 'application' is dependent on it's messageType. To review attributes for the different message types, click the dropdown below. metadata is optional.",
 			content = @Content(examples = {
-			@ExampleObject(name="messageType DENM", value = ExampleAPIObjects.DENM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType DATEX", value = ExampleAPIObjects.DATEX_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType IVIM", value = ExampleAPIObjects.IVIM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType CAM", value = ExampleAPIObjects.CAM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType MAPEM", value = ExampleAPIObjects.MAPEM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType SPATEM", value = ExampleAPIObjects.SPATEM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType SREM", value = ExampleAPIObjects.SREM_CAPABILITY_REQUEST),
-			@ExampleObject(name="messageType SSEM", value = ExampleAPIObjects.SSEM_CAPABILITY_REQUEST)
+			@ExampleObject(name = "messageType DENM", value = ExampleAPIObjects.DENM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType DATEX", value = ExampleAPIObjects.DATEX_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType IVIM", value = ExampleAPIObjects.IVIM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType CAM", value = ExampleAPIObjects.CAM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType MAPEM", value = ExampleAPIObjects.MAPEM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType SPATEM", value = ExampleAPIObjects.SPATEM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType SREM", value = ExampleAPIObjects.SREM_CAPABILITY_REQUEST),
+			@ExampleObject(name = "messageType SSEM", value = ExampleAPIObjects.SSEM_CAPABILITY_REQUEST)
 	}))
-	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples ={
+	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = {
 		@ExampleObject(value = ExampleAPIObjects.UPDATECAPABILITIESRESPONSE),
 	}
 	))})
@@ -134,7 +134,7 @@ public class NeighbourRestController {
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{ixnName}/subscriptions/{subscriptionId}")
 	@Secured("ROLE_USER")
-	@Operation(summary="Delete subscription")
+	@Operation(summary = "Delete subscription")
 	public void deleteSubscription(@PathVariable(name = "ixnName") String ixnName, @PathVariable(name = "subscriptionId") String subscriptionId) {
 		NeighbourMDCUtil.setLogVariables(properties.getName(), ixnName);
 		logger.info("Received request to delete subscription {} from neighbour {}.", subscriptionId, ixnName);

@@ -216,7 +216,7 @@ public class Message {
         this.file = file;
     }
 
-    public String getFileName(){
+    public String getFileName() {
         return file != null ? file.getName() : null;
     }
 }

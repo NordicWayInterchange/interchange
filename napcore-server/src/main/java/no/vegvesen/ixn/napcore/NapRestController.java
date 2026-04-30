@@ -131,7 +131,7 @@ public class NapRestController {
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalSubscription localSubscription = typeTransformer.transformNapSubscriptionToLocalSubscription(subscriptionRequest, napCoreProperties.getName());
 
-        if (serviceProvider.getSubscriptions().contains(localSubscription)){
+        if (serviceProvider.getSubscriptions().contains(localSubscription)) {
             throw new AlreadyExistsException(String.format("Subscription %s already exists", subscriptionRequest));
         }
 
@@ -167,7 +167,7 @@ public class NapRestController {
         logger.info("Listing subscription for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<Subscription> subscriptions= typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
+        List<Subscription> subscriptions = typeTransformer.transformLocalSubscriptionsToNapSubscriptions(serviceProvider.getSubscriptions());
         Collections.sort(subscriptions);
         return subscriptions;
     }
@@ -237,12 +237,12 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Add delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDDELIVERIESRESPONSE)))})
-    public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest){
+    public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
-        if (Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
+        if (Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())) {
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
         }
 
@@ -253,11 +253,11 @@ public class NapRestController {
         );
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
 
-        if (serviceProvider.getDeliveries().contains(localDelivery)){
+        if (serviceProvider.getDeliveries().contains(localDelivery)) {
             throw new AlreadyExistsException(String.format("Delivery %s already exists", deliveryRequest));
         }
 
-        if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())){
+        if (JMSSelectorFilterFactory.isValidSelector(localDelivery.getSelector())) {
             localDelivery.setStatus(LocalDeliveryStatus.REQUESTED);
         }
         else {
@@ -279,18 +279,18 @@ public class NapRestController {
         return typeTransformer.transformLocalDeliveryToNapDelivery(savedDelivery);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/deliveries/{deliveryId}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Deliveries")
     @Operation(summary = "Get delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERYRESPONSE)))})
-    public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+    public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", deliveryId, actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
-                .filter(d-> d.getUuid().equals(deliveryId))
+                .filter(d -> d.getUuid().equals(deliveryId))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find delivery with Id %s for service provider %s", deliveryId, actorCommonName)));
 
@@ -301,7 +301,7 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Get deliveries")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERIESRESPONSE)))})
-    public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName){
+    public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing deliveries for service provider {}", actorCommonName);
@@ -312,11 +312,11 @@ public class NapRestController {
         return deliveries;
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path={"/nap/{actorCommonName}/deliveries/{deliveryId}"})
+    @RequestMapping(method = RequestMethod.DELETE, path = {"/nap/{actorCommonName}/deliveries/{deliveryId}"})
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Deliveries")
     @Operation(summary = "Delete delivery")
-    public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+    public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
@@ -332,15 +332,15 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Get capabilities matching delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERYCAPABILITYRESPONSE)))})
-    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector){
+    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List local capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if (selector != null){
-            if (!selector.isEmpty()){
+        if (selector != null) {
+            if (!selector.isEmpty()) {
                 allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
@@ -353,32 +353,32 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Add capability")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDCAPABILITYRESPONSE)))})
-    public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest){
+    public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
-        if (Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
+        if (Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())) {
             throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
         }
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         Capability capabilityToAdd = typeTransformer.transformCapabilitiesRequestToCapability(capabilitiesRequest);
-        if (allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())){
+        if (allPublicationIds().contains(capabilityToAdd.getApplication().getPublicationId())) {
             throw new AlreadyExistsException(String.format("Bad api object. The publicationId for capability %s already exists", capabilitiesRequest));
         }
 
         Set<String> capabilityProperties = CapabilityValidator.napcoreCapabilityIsValid(capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capabilityToAdd));
-        if (!capabilityProperties.isEmpty()){
+        if (!capabilityProperties.isEmpty()) {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s is missing properties %s", capabilitiesRequest, capabilityProperties));
         }
 
         List<CapabilityErrorMessage> validatedCapability = CapabilityValidator.napcoreCapabilityHasValidProperties(new CapabilityApi(capabilitiesRequest.getApplication(), capabilitiesRequest.getMetadata()));
-        if (!validatedCapability.isEmpty()){
+        if (!validatedCapability.isEmpty()) {
             throw new CapabilityNotValidException(String.format("Bad api object. Capability: %s", capabilityToAdd), validatedCapability);
         }
 
-        if (!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())){
+        if (!CapabilityValidator.isShardCountValid(capabilitiesRequest.getMetadata())) {
             throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capabilityToAdd));
         }
 
@@ -386,7 +386,7 @@ public class NapRestController {
         ServiceProvider savedServiceProvider = serviceProviderRepository.save(serviceProviderToUpdate);
         Capability savedCapability = savedServiceProvider.getCapabilities().getCapabilities()
                 .stream()
-                .filter(a-> a.equals(capabilityToAdd))
+                .filter(a -> a.equals(capabilityToAdd))
                 .findFirst().get();
 
         logger.info("Returning updated Service Provider: {}", savedServiceProvider);
@@ -397,7 +397,7 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Get capabilities")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.LISTCAPABILITIESRESPONSE)))})
-    public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName){
+    public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
@@ -412,7 +412,7 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Get capability")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETCAPABILITYRESPONSE)))})
-    public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+    public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
@@ -422,11 +422,11 @@ public class NapRestController {
         return typeTransformer.transformCapabilityToOnboardingCapability(capability);
     }
 
-    @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
     @Tag(name = "Capabilities")
     @Operation(summary = "Get publicationIds")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPUBLICATIONIDSRESPONSE)))})
-    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName){
+    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
@@ -438,7 +438,7 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Capabilities")
     @Operation(summary = "Delete capability")
-    public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+    public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
@@ -474,7 +474,7 @@ public class NapRestController {
         Set<Peer> peers = request.getPeers().stream().map(Peer::new).collect(Collectors.toSet());
         PrivateChannel privateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, request.getDescription(), actorCommonName);
 
-        String queueName = "priv-"+UUID.randomUUID();
+        String queueName = "priv-" + UUID.randomUUID();
         PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(napCoreProperties.getName(), Integer.parseInt(napCoreProperties.getMessageChannelPort()), queueName);
         privateChannel.setEndpoint(endpoint);
         privateChannel.setLastUpdated(LocalDateTime.now());
@@ -571,7 +571,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.PATCH, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
-    @Operation(summary="Add peer to existing private channel")
+    @Operation(summary = "Add peer to existing private channel")
     public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
@@ -581,7 +581,7 @@ public class NapRestController {
             throw new PrivateChannelException("Cannot add peer when request is empty");
         }
 
-        if (request.getPeerToAdd().equals(actorCommonName)){
+        if (request.getPeerToAdd().equals(actorCommonName)) {
             throw new PrivateChannelException("Private channel can not have actorCommonName as peer");
         }
 
@@ -604,7 +604,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}/{peerName}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
-    @Operation(summary="Delete peer from existing private channel")
+    @Operation(summary = "Delete peer from existing private channel")
     public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
         validatePathVariable(actorCommonName);
         validatePathVariable(peerName);
@@ -631,7 +631,7 @@ public class NapRestController {
     @RequestMapping(method = RequestMethod.DELETE, path = "/nap/{actorCommonName}/privatechannels/peer/{privateChannelId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
-    @Operation(summary="Remove yourself from private channel where you are member")
+    @Operation(summary = "Remove yourself from private channel where you are member")
     public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
@@ -700,9 +700,9 @@ public class NapRestController {
                         .collect(Collectors.toList());
     }
 
-    private void validatePathVariable(String pathVariable){
+    private void validatePathVariable(String pathVariable) {
         Matcher matcher = pattern.matcher(pathVariable);
-        if (!matcher.matches()){
+        if (!matcher.matches()) {
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
     }
@@ -710,7 +710,7 @@ public class NapRestController {
     private List<String> transformToUuidList(String uuids) {
         return Arrays.stream(uuids.split(","))
                 .map(String::trim)
-                .filter(uuid-> !uuid.isEmpty())
+                .filter(uuid -> !uuid.isEmpty())
                 .collect(Collectors.toList());
     }
 

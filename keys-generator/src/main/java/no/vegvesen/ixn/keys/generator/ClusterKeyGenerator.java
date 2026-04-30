@@ -320,7 +320,7 @@ public class ClusterKeyGenerator {
     }
 
     public static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {
-        try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)){
+        try (JcaPEMWriter pemWriter = new JcaPEMWriter(writer)) {
             for (X509Certificate cert : certificateChain) {
                 pemWriter.writeObject(cert);
             }

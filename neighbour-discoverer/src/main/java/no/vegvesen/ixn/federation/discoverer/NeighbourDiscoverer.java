@@ -127,11 +127,11 @@ public class NeighbourDiscoverer {
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
-	public void setGiveUpSubscriptionsToTearDownForRemoval(){
+	public void setGiveUpSubscriptionsToTearDownForRemoval() {
 		neigbourDiscoveryService.setGiveUpSubscriptionsToTearDownForRemoval();
 	}
 
 
 	@Scheduled(fixedRateString = "10000", initialDelayString = "8000")
-	public void tearDownListenerEndpointsForIgnoredNeighbours(){neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours(); }
+	public void tearDownListenerEndpointsForIgnoredNeighbours() { neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours(); }
 }

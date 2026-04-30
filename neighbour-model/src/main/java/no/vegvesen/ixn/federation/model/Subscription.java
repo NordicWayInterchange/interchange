@@ -17,14 +17,14 @@ public class Subscription {
 	@Enumerated(EnumType.STRING)
 	private SubscriptionStatus subscriptionStatus;
 
-	@Column(columnDefinition="TEXT")
+	@Column(columnDefinition = "TEXT")
 	private String selector;
 
 	private String path;
 
 	private int numberOfPolls = 0;
 
-	@Column(columnDefinition="TEXT")
+	@Column(columnDefinition = "TEXT")
 	private String consumerCommonName;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)

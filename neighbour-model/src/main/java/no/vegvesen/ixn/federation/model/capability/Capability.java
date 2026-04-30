@@ -33,7 +33,7 @@ public class Capability {
     private CapabilityStatus status = CapabilityStatus.REQUESTED;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name="fk_cap_shard"))
+    @JoinColumn(name = "cap_shard_id", foreignKey = @ForeignKey(name = "fk_cap_shard"))
     private List<CapabilityShard> shards = new ArrayList<>();
 
     private LocalDateTime createdTimestamp;
@@ -152,7 +152,7 @@ public class Capability {
                 .findFirst();
     }
 
-    public void addShards(List<CapabilityShard> shards){
+    public void addShards(List<CapabilityShard> shards) {
         this.shards.addAll(shards);
     }
 
@@ -189,7 +189,7 @@ public class Capability {
     public String toString() {
         return "Capability{" +
                 "id=" + id +
-                "uuid="+uuid +
+                "uuid=" + uuid +
                 ", application=" + application +
                 ", metadata=" + metadata +
                 ", status=" + status +

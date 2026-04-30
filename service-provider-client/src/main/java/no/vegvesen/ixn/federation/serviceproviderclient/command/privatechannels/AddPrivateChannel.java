@@ -55,7 +55,7 @@ public class AddPrivateChannel implements Callable<Integer> {
 
     }
 
-    static class AddPrivateChannelOption{
+    static class AddPrivateChannelOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 

@@ -136,7 +136,7 @@ public class AdminRestController {
     @Tag(name = "Service providers")
     @Operation(summary = "Get capabilities matching subscription")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETSUBSCRIPTIONCAPABILITYRESPONSE)))})
-    public List<MatchingCapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector){
+    public List<MatchingCapabilityApi> getMatchingSubscriptionCapabilities(@PathVariable("adminUser") String adminUser, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
 
@@ -156,7 +156,7 @@ public class AdminRestController {
     @Tag(name = "Service providers")
     @Operation(summary = "Get capabilities matching delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETDELIVERYCAPABILITYRESPONSE)))})
-    public List<MatchingCapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector){
+    public List<MatchingCapabilityApi> getMatchingDeliveryCapabilities(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name = "selector") String selector) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
@@ -165,8 +165,8 @@ public class AdminRestController {
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if (selector != null){
-            if (!selector.isEmpty()){
+        if (selector != null) {
+            if (!selector.isEmpty()) {
                 allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
@@ -178,7 +178,7 @@ public class AdminRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get private channels for the specified service provider")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETPRIVATECHANNELSRESPONSE)))})
-    public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+    public List<PrivateChannelApi> getPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
@@ -193,7 +193,7 @@ public class AdminRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get private channels with actorCommonName as peer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAdminApiObjects.GETPEERPRIVATECHANNELS)))})
-    public List<PeerPrivateChannelApi> getPeerPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName){
+    public List<PeerPrivateChannelApi> getPeerPrivateChannels(@PathVariable("adminUser") String adminUser, @PathVariable("actorCommonName") String actorCommonName) {
         this.certService.checkIfCommonNameMatchesNameInApiObject(adminProperties.getName());
         validatePathVariable(adminUser);
         validatePathVariable(actorCommonName);
@@ -438,9 +438,9 @@ public class AdminRestController {
         return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
     }
 
-    private void validatePathVariable(String pathVariable){
+    private void validatePathVariable(String pathVariable) {
         Matcher matcher = pattern.matcher(pathVariable);
-        if (!matcher.matches()){
+        if (!matcher.matches()) {
             throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
         }
     }

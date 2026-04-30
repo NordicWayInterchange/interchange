@@ -122,7 +122,7 @@ public class LocalSubscriptionApi implements Comparable<LocalSubscriptionApi> {
         if (lastUpdated == null) {
             return -1;
         }
-        if (o.lastUpdated == null){
+        if (o.lastUpdated == null) {
             return 1;
         }
         return Long.compare(lastUpdated, o.lastUpdated);

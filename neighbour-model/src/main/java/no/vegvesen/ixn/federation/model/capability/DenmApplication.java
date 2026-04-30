@@ -9,10 +9,10 @@ import java.util.*;
 
 @Entity
 @DiscriminatorValue(Constants.DENM)
-public class DenmApplication extends Application{
+public class DenmApplication extends Application {
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "application_causecodes", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_appcac_cap")))
+    @CollectionTable(name = "application_causecodes", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name = "fk_appcac_cap")))
     @Column(name = "cause_codes")
     private List<Integer> causeCode = new ArrayList<>();
 
@@ -59,6 +59,6 @@ public class DenmApplication extends Application{
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), causeCode != null ? new ArrayList<>(causeCode): new ArrayList<>());
+        return Objects.hash(super.hashCode(), causeCode != null ? new ArrayList<>(causeCode) : new ArrayList<>());
     }
 }

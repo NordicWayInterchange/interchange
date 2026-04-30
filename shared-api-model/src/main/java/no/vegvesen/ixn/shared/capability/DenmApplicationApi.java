@@ -27,7 +27,7 @@ public class DenmApplicationApi extends ApplicationApi {
 
     public void setCauseCode(Set<Integer> causeCode) {
         this.causeCode.clear();
-        if (causeCode != null){
+        if (causeCode != null) {
             this.causeCode.addAll(causeCode);
         }
     }

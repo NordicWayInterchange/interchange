@@ -36,7 +36,7 @@ public class ServiceProviderCertGenerator extends GenericContainer<ServiceProvid
                                         Path outputPath) {
         super(image);
         this.hostCsrPath = inputCsr.toString();
-        this.containerCsrPath = CSR_IN_PATH +inputCsr.getFileName().toString();
+        this.containerCsrPath = CSR_IN_PATH + inputCsr.getFileName().toString();
         this.clientName = clientName;
         this.hostCaCertPath = intermediateCacertPath.toString();
         this.containerCaCertPath = INTERMEDIATE_CA_IN_FOLDER + intermediateCacertPath.getFileName().toString();

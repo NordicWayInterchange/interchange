@@ -19,7 +19,7 @@ public class LocalSubscriptionExportApi {
 
     private String description;
 
-    public enum LocalSubscriptionStatusExportApi{
+    public enum LocalSubscriptionStatusExportApi {
         REQUESTED, CREATED, TEAR_DOWN, ILLEGAL, RESUBSCRIBE, ERROR
     }
 

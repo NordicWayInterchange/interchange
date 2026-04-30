@@ -11,7 +11,7 @@ public class DeliveryRequest {
     public DeliveryRequest() {
     }
 
-    public DeliveryRequest(String selector){
+    public DeliveryRequest(String selector) {
         this.selector = selector;
     }
 
@@ -57,7 +57,7 @@ public class DeliveryRequest {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "DeliveryRequest{" +
                 "selector='" + selector + '\'' +
                 ", description=" + description +

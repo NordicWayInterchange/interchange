@@ -3,7 +3,7 @@ package no.vegvesen.ixn.napcore.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Delivery implements Comparable<Delivery>{
+public class Delivery implements Comparable<Delivery> {
 
     String id;
 
@@ -19,7 +19,7 @@ public class Delivery implements Comparable<Delivery>{
 
     Boolean dlqueue = false;
 
-    public Delivery(){
+    public Delivery() {
     }
 
     public Delivery(String id, String selector, DeliveryStatus status, List<DeliveryEndpoint> endpoints, Long lastUpdatedTimestamp, String description, Boolean dlqueue) {
@@ -62,7 +62,7 @@ public class Delivery implements Comparable<Delivery>{
 
     public void setEndpoints(List<DeliveryEndpoint> endpoints) {
         this.endpoints.clear();
-        if (endpoints != null){
+        if (endpoints != null) {
             this.endpoints.addAll(endpoints);
         }
     }
@@ -92,7 +92,7 @@ public class Delivery implements Comparable<Delivery>{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Delivery{" +
                 "id=" + id +
                 ", status=" + status +
@@ -106,13 +106,13 @@ public class Delivery implements Comparable<Delivery>{
 
     @Override
     public int compareTo(Delivery o) {
-        if (o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null && lastUpdatedTimestamp == null) {
             return 0;
         }
-        if (o.lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null) {
             return 1;
         }
-        else if (lastUpdatedTimestamp == null){
+        else if (lastUpdatedTimestamp == null) {
             return -1;
         }
 

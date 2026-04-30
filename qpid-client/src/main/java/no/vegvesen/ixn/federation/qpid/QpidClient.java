@@ -395,15 +395,15 @@ public class QpidClient {
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}&orderBy={orderBy}", ConnectionQueryResult.class, select, where, orderBy).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain + "?select={query}&where={where}&orderBy={orderBy}", ConnectionQueryResult.class, select, where, orderBy).getBody();
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String where, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}", ConnectionQueryResult.class, select, where).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain + "?select={query}&where={where}", ConnectionQueryResult.class, select, where).getBody();
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}", ConnectionQueryResult.class, select).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain + "?select={query}", ConnectionQueryResult.class, select).getBody();
 	}
 
 	public QueryResult executeQuery(Query query) {

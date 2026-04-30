@@ -19,7 +19,7 @@ public class DeleteNapDelivery implements Callable<Integer> {
     String deliveryId;
 
     @Override
-    public Integer call(){
+    public Integer call() {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         client.deleteDelivery(deliveryId);
         System.out.printf("Nap delivery with id %s deleted successfully", deliveryId);

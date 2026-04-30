@@ -36,12 +36,12 @@ public class ListPeerPrivateChannels {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(version, name, privateChannels);
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ListPeerPrivateChannels that = (ListPeerPrivateChannels) o;
@@ -49,7 +49,7 @@ public class ListPeerPrivateChannels {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "ListPeerPrivateChannels{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +

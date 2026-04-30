@@ -19,7 +19,7 @@ public class CapabilitiesTransformer {
 				dataTypeTransformer.capabilitiesApiToCapabilities(capabilitiesApi.getCapabilities())
 		);
 	}
-	public NeighbourCapabilities capabilitiesApiToNeighbourCapabilities(CapabilitiesApi capabilitiesApi){
+	public NeighbourCapabilities capabilitiesApiToNeighbourCapabilities(CapabilitiesApi capabilitiesApi) {
         return new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
                 dataTypeTransformer.capabilityApiToNeighbourCapabilities(capabilitiesApi.getCapabilities())

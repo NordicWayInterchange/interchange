@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix ="routing-configurer")
+@ConfigurationProperties(prefix = "routing-configurer")
 public class RoutingConfigurerProperties {
 
 	/**

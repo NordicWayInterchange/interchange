@@ -3,7 +3,7 @@ package no.vegvesen.ixn.federation.adminserver.model.serviceProvider;
 import java.util.List;
 
 
-public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
+public class ServiceProviderApi implements Comparable<ServiceProviderApi> {
 
     private Integer id;
 
@@ -92,7 +92,7 @@ public class ServiceProviderApi implements Comparable<ServiceProviderApi>{
             return 0;
         }
 
-        if (serviceProviderApi.id == null){
+        if (serviceProviderApi.id == null) {
             return 1;
         }
 

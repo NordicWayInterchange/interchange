@@ -4,7 +4,7 @@ package no.vegvesen.ixn.napcore.client.command.subscriptions;
 import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
 import static picocli.CommandLine.*;
 
-@Command(name="subscriptions",
+@Command(name = "subscriptions",
                     description = "List, add or delete NAP subscriptions",
                     subcommands = {
                             AddNapSubscription.class,

@@ -14,7 +14,7 @@ import java.util.UUID;
 public class LocalSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locsub_seq")
-    @Column(name="id")
+    @Column(name = "id")
     private Integer id;
 
     @Column(nullable = false)
@@ -24,14 +24,14 @@ public class LocalSubscription {
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
     @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
-    @Column(columnDefinition="TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String selector;
 
     @Column
     @UpdateTimestamp
     private LocalDateTime lastUpdated;
 
-    @Column(columnDefinition="TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String consumerCommonName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -53,7 +53,7 @@ public class LocalSubscription {
     public LocalSubscription() {
     }
 
-    public LocalSubscription(String selector, String consumerCommonName, String description){
+    public LocalSubscription(String selector, String consumerCommonName, String description) {
         this.selector = selector;
         this.consumerCommonName = consumerCommonName;
         this.description = description;

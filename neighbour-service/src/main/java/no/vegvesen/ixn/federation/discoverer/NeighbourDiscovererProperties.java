@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix ="discoverer")
+@ConfigurationProperties(prefix = "discoverer")
 public class NeighbourDiscovererProperties {
 
 	private static final String ONE_DAY = "86400000";

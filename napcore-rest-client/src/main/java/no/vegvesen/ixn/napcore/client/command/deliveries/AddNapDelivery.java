@@ -46,7 +46,7 @@ public class AddNapDelivery implements Callable<Integer> {
         return 0;
     }
 
-    static class AddNapDeliveryOption{
+    static class AddNapDeliveryOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;
 

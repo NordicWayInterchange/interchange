@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix ="interchange.node-provider")
+@ConfigurationProperties(prefix = "interchange.node-provider")
 public class InterchangeNodeProperties {
 
 	public InterchangeNodeProperties() {

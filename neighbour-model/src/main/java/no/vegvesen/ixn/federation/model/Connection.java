@@ -28,11 +28,10 @@ public class Connection {
     private LocalDateTime unreachableTime;
     private LocalDateTime lastFailedConnectionAttempt;
 
-    public Connection(){
-    }
+    public Connection() {}
 
     public boolean canBeContacted(GracefulBackoffProperties backoffProperties) {
-        switch (connectionStatus){
+        switch (connectionStatus) {
             case UNREACHABLE:
                 //Calculate if allowed to connect to UNREACHABLE
                 if (lastFailedConnectionAttempt == null) {

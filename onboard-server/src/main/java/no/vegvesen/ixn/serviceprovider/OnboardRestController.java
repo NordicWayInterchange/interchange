@@ -102,15 +102,15 @@ public class OnboardRestController {
 			}
 
 			Set<String> validatedCapabilities = CapabilityValidator.capabilityHasValidProperties(capability);
-			if (!validatedCapabilities.isEmpty()){
+			if (!validatedCapabilities.isEmpty()) {
 				throw new CapabilityPostException(String.format("Bad api object. %s. capability: %s", validatedCapabilities, capability));
 			}
 
-			if (!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())){
+			if (!CapabilityValidator.isQuadTreeValid(capability.getApplication().getQuadTree())) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has invalid quadTree %s", capability, capability.getApplication().getQuadTree()));
 			}
 
-			if (!CapabilityValidator.isShardCountValid(capability.getMetadata())){
+			if (!CapabilityValidator.isShardCountValid(capability.getMetadata())) {
 				throw new CapabilityPostException(String.format("Bad api object. The posted capability %s has an invalid shardCount", capability));
 			}
 		}
@@ -276,7 +276,7 @@ public class OnboardRestController {
 		for (AddSubscription subscription : requestApi.getSubscriptions()) {
 			LocalSubscription localSubscription = typeTransformer.transformAddSubscriptionToLocalSubscription(subscription, serviceProviderName, nodeProperties.getName());
 			String selector = subscription.getSelector();
-			if (selector == null){
+			if (selector == null) {
 				localSubscription.setStatus(LocalSubscriptionStatus.ERROR);
 				localSubscription.setErrorMessage("Bad api object for adding subscription. The selector object was null.");
 			}
@@ -393,13 +393,13 @@ public class OnboardRestController {
 
 		List<PrivateChannel> savedChannelsList = new ArrayList<>();
 
-		for (PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()){
+		for (PrivateChannelRequestApi privateChannelToAdd : clientChannel.getPrivateChannels()) {
 
-			if (privateChannelToAdd.getPeers() == null){
+			if (privateChannelToAdd.getPeers() == null) {
 				privateChannelToAdd.setPeers(new HashSet<>());
 			}
 
-			if (privateChannelToAdd.getPeers().contains(serviceProviderName)){
+			if (privateChannelToAdd.getPeers().contains(serviceProviderName)) {
 				throw new PrivateChannelException("Can't add private channel with serviceProviderName as peerName");
 			}
 
@@ -410,7 +410,7 @@ public class OnboardRestController {
 
 			PrivateChannel newPrivateChannel = new PrivateChannel(peers, PrivateChannelStatus.REQUESTED, privateChannelToAdd.getDescription(), serviceProviderName);
 
-			String queueName = "priv-"+UUID.randomUUID();
+			String queueName = "priv-" + UUID.randomUUID();
 			PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(nodeProperties.getBrokerExternalName(), Integer.parseInt(nodeProperties.getMessageChannelPort()), queueName);
 			newPrivateChannel.setEndpoint(endpoint);
 
@@ -424,24 +424,24 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.PATCH, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@Tag(name="Private Channel")
+	@Tag(name = "Private Channel")
 	@Operation(summary = "Add peer to existing private channel")
-	public void addPeersToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request){
+	public void addPeersToPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeersRequest request) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Add peers to private channel where id is {}", privateChannelId);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
-		if (request == null || request.getPeersToAdd() == null || request.getPeersToAdd().isEmpty()){
+		if (request == null || request.getPeersToAdd() == null || request.getPeersToAdd().isEmpty()) {
 			throw new PrivateChannelException("Cannot add peers when request is empty");
 		}
 
-		if (request.getPeersToAdd().contains(serviceProviderName)){
+		if (request.getPeersToAdd().contains(serviceProviderName)) {
 			throw new PrivateChannelException("Private channel can not have serviceProviderName as peer");
 		}
 
 		PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(serviceProviderName, privateChannelId, PrivateChannelStatus.CREATED);
-		if (privateChannel == null){
+		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
 		}
 
@@ -455,9 +455,9 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}/{peerName}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@Tag(name="Private Channel")
-	@Operation(summary="Delete peer from existing private channel")
-	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName){
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Delete peer from existing private channel")
+	public void deletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} DELETE peer {} from private channel with id {}", serviceProviderName, peerName, privateChannelId);
 		validatePathVariable(serviceProviderName);
@@ -483,16 +483,16 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = "/{serviceProviderName}/privatechannels/peer/{privateChannelId}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@Tag(name="Private Channel")
-	@Operation(summary="Remove yourself from private channel where you are member")
-	public void peerDeletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
+	@Tag(name = "Private Channel")
+	@Operation(summary = "Remove yourself from private channel where you are member")
+	public void peerDeletePeerFromPrivateChannel(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} DELETE from private channel {} where you are peer", serviceProviderName, privateChannelId);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
-		if (privateChannel == null){
+		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, serviceProviderName));
 		}
 		Peer peerToUpdate = privateChannel.getPeers().stream().filter(peer -> peer.getName().equals(serviceProviderName)).findFirst().get();
@@ -507,14 +507,14 @@ public class OnboardRestController {
 	@Tag(name = "Private Channel")
 	@Operation(summary = "Get private channel with service provider as peer by private channel Id")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPEERPRIVATECHANNELSRESPONSE)))})
-	public PeerPrivateChannelApi getPrivateChannelPeerById(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId){
+	public PeerPrivateChannelApi getPrivateChannelPeerById(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("privateChannelId") String privateChannelId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Service provider {} GET from private channel {} where you are peer", serviceProviderName, privateChannelId);
 		validatePathVariable(serviceProviderName);
 		this.certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 
 		PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, serviceProviderName);
-		if (privateChannel == null){
+		if (privateChannel == null) {
 			throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, serviceProviderName));
 		}
 
@@ -583,7 +583,7 @@ public class OnboardRestController {
 	@Tag(name = "Private Channel")
 	@Operation(summary = "List private channels with service provider as peer")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTPEERPRIVATECHANNELSRESPONSE)))})
-	public ListPeerPrivateChannels listPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName){
+	public ListPeerPrivateChannels listPeerPrivateChannels(@PathVariable("serviceProviderName") String serviceProviderName) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("Get private channels where peername is {}", serviceProviderName);
 		validatePathVariable(serviceProviderName);
@@ -670,7 +670,7 @@ public class OnboardRestController {
 	@Tag(name = "Delivery")
 	@Operation(summary = "List matching deliveries")
 	@ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleAPIObjects.LISTCAPABILITIESRESPONSE)))})
-	public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector){
+	public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilities(@PathVariable("serviceProviderName") String serviceProviderName, @RequestParam(required = false, name = "selector") String selector) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		validatePathVariable(serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
@@ -708,8 +708,8 @@ public class OnboardRestController {
 
 	@RequestMapping(method = RequestMethod.DELETE, path = {"/{serviceProviderName}/deliveries/{deliveryId}"})
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	@Tag(name="Delivery")
-	@Operation(summary="Delete delivery")
+	@Tag(name = "Delivery")
+	@Operation(summary = "Delete delivery")
 	public void deleteDelivery(@PathVariable("serviceProviderName") String serviceProviderName, @PathVariable("deliveryId") String deliveryId) {
 		OnboardMDCUtil.setLogVariables(nodeProperties.getName(), serviceProviderName);
 		logger.info("delete delivery {} for service provider {}", deliveryId, serviceProviderName);
@@ -788,9 +788,9 @@ public class OnboardRestController {
 	}
 
 
-	private void validatePathVariable(String pathVariable){
+	private void validatePathVariable(String pathVariable) {
 		Matcher matcher = pattern.matcher(pathVariable);
-		if (!matcher.matches()){
+		if (!matcher.matches()) {
 			throw new PathVariableException(String.format("Path variable %s contains illegal characters", pathVariable));
 		}
 	}

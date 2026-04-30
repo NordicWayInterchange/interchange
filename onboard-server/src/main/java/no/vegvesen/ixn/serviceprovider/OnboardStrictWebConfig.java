@@ -15,7 +15,7 @@ import java.util.List;
 @EnableWebMvc
 @Configuration
 @ComponentScan({ "no.vegvesen.ixn.serviceprovider" })
-public class OnboardStrictWebConfig implements WebMvcConfigurer{
+public class OnboardStrictWebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void configureMessageConverters(

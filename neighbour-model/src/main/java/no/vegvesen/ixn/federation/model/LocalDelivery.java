@@ -12,7 +12,7 @@ public class LocalDelivery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "locdel_seq")
-    @Column(name="id")
+    @Column(name = "id")
     private Integer id;
 
     @Column(nullable = false)
@@ -22,7 +22,7 @@ public class LocalDelivery {
     @JoinColumn(name = "locdelend_id", foreignKey = @ForeignKey(name = "fk_locdel_end"))
     private Set<LocalDeliveryEndpoint> endpoints = new HashSet<>();
 
-    @Column(columnDefinition="TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String selector = "";
 
     @Column
@@ -74,7 +74,7 @@ public class LocalDelivery {
         this.status = status;
     }
 
-    public LocalDelivery(String selector, String description){
+    public LocalDelivery(String selector, String description) {
         this.selector = selector;
         this.description = description;
     }

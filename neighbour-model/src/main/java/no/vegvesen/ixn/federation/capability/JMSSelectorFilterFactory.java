@@ -42,7 +42,7 @@ public class JMSSelectorFilterFactory {
 
 	private static void notAlwaysTrue(JMSSelectorFilter filter) {
 		CapabilityFilter neverTrue = new CapabilityFilter(Collections.singletonMap(MessageProperty.ORIGINATING_COUNTRY.getName(), "-1"));
-		if (filter.matches(neverTrue)){
+		if (filter.matches(neverTrue)) {
 			throw new SelectorAlwaysTrueException("Cannot subscribe to a filter that is always true: " + filter.getSelector());
 		}
 	}

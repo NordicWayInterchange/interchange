@@ -15,7 +15,7 @@ public class CapabilityShard {
 
     private String exchangeName;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String selector;
 
     public CapabilityShard() {

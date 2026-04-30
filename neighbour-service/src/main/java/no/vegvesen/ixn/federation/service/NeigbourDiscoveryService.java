@@ -138,7 +138,7 @@ public class NeigbourDiscoveryService {
     public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
-            if (neighbour.isIgnore()){
+            if (neighbour.isIgnore()) {
                 logger.info("Ignore flag is set on neighbour {}, skipping.", neighbour.getName());
                 continue;
             }
@@ -352,7 +352,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void setGiveUpSubscriptionsToTearDownForRemoval(){
+    public void setGiveUpSubscriptionsToTearDownForRemoval() {
         List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.GIVE_UP);
         for (Neighbour neighbour : neighbours) {
             for (Subscription subscription : neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.GIVE_UP)) {
@@ -367,10 +367,10 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void tearDownListenerEndpointsFromIgnoredNeighbours(){
+    public void tearDownListenerEndpointsFromIgnoredNeighbours() {
         List<String> ignoredNeighbours = neighbourRepository.findAllByIgnoreIs(true).stream().map(Neighbour::getName).toList();
-        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a-> ignoredNeighbours.contains(a.getNeighbourName())).toList();
-        for (ListenerEndpoint listenerEndpoint : endpointsToDelete){
+        List<ListenerEndpoint> endpointsToDelete = listenerEndpointRepository.findAll().stream().filter(a -> ignoredNeighbours.contains(a.getNeighbourName())).toList();
+        for (ListenerEndpoint listenerEndpoint : endpointsToDelete) {
             listenerEndpointRepository.delete(listenerEndpoint);
             logger.info("Tearing down listenerEndpoint for neighbour {} with host {} and source {}", listenerEndpoint.getNeighbourName(), listenerEndpoint.getHost(), listenerEndpoint.getSource());
         }

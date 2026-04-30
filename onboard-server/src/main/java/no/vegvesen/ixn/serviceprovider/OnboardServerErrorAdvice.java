@@ -20,12 +20,12 @@ public class OnboardServerErrorAdvice {
 	private Logger logger = LoggerFactory.getLogger(OnboardServerErrorAdvice.class);
 
 	@ExceptionHandler({CapabilityPostException.class})
-	public ResponseEntity<ErrorDetails> handleCapabilityPostException(RuntimeException e){
+	public ResponseEntity<ErrorDetails> handleCapabilityPostException(RuntimeException e) {
 		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({SubscriptionRequestException.class})
-	public ResponseEntity<ErrorDetails> handleSubscriptionRequestException(RuntimeException e){
+	public ResponseEntity<ErrorDetails> handleSubscriptionRequestException(RuntimeException e) {
 		return error(BAD_REQUEST, e);
 	}
 
@@ -35,17 +35,17 @@ public class OnboardServerErrorAdvice {
 	}
 
 	@ExceptionHandler({CNAndApiObjectMismatchException.class})
-	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
+	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e) {
 		return error(FORBIDDEN, e);
 	}
 
 	@ExceptionHandler({HttpMessageNotReadableException.class})
-	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e){
+	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e) {
 		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({NotFoundException.class})
-	public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e){
+	public ResponseEntity<ErrorDetails> unknownProperty(NotFoundException e) {
 		return error(NOT_FOUND, e);
 	}
 
@@ -60,12 +60,12 @@ public class OnboardServerErrorAdvice {
 	}
 
 	@ExceptionHandler({PathVariableException.class})
-	public ResponseEntity<ErrorDetails> handlePathVariableException(PathVariableException e){
+	public ResponseEntity<ErrorDetails> handlePathVariableException(PathVariableException e) {
 		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({AlreadyExistsException.class})
-	public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e){
+	public ResponseEntity<ErrorDetails> handleAlreadyExistsException(AlreadyExistsException e) {
 		return error(CONFLICT, e);
 	}
 

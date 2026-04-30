@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.net.URL;
 
 @Component
-@ConfigurationProperties(prefix ="test.ssl")
+@ConfigurationProperties(prefix = "test.ssl")
 public class TestSSLProperties {
 
 	public TestSSLProperties() {

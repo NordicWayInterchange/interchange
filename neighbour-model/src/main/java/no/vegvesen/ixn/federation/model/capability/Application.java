@@ -24,7 +24,7 @@ public abstract class Application {
     private String protocolVersion;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name="fk_quad_app")))
+    @CollectionTable(name = "app_quad", joinColumns = @JoinColumn(name = "app_id", foreignKey = @ForeignKey(name = "fk_quad_app")))
     @Column(name = "quadrant_app")
     private final List<String> quadTree = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public abstract class Application {
 
     public void setQuadTree(Set<String> quadTree) {
         this.quadTree.clear();
-        if (quadTree != null){
+        if (quadTree != null) {
             this.quadTree.addAll(quadTree);
         }
     }
@@ -104,7 +104,7 @@ public abstract class Application {
         return Objects.equals(publisherId, that.publisherId) && Objects.equals(publicationId, that.publicationId)
                 && Objects.equals(originatingCountry, that.originatingCountry)
                 && Objects.equals(protocolVersion, that.protocolVersion)
-                && (quadTree != null? new ArrayList<>(quadTree) : new ArrayList<>()).equals((that.quadTree != null? new ArrayList<>(that.quadTree) : new ArrayList<>()));
+                && (quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>()).equals((that.quadTree != null ? new ArrayList<>(that.quadTree) : new ArrayList<>()));
 
     }
 
@@ -115,7 +115,7 @@ public abstract class Application {
                 publicationId,
                 originatingCountry,
                 protocolVersion,
-                (quadTree != null ? new ArrayList<>(quadTree): new ArrayList<>())
+                (quadTree != null ? new ArrayList<>(quadTree) : new ArrayList<>())
         );
     }
 

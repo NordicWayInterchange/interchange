@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name="neighbour_capability")
+@Table(name = "neighbour_capability")
 public class NeighbourCapability {
 
     @Id
@@ -77,14 +77,14 @@ public class NeighbourCapability {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NeighbourCapability that = (NeighbourCapability) o;
         return Objects.equals(application, that.application);
     }
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(application);
     }
 

@@ -61,7 +61,7 @@ public class AddPrivateChannelRequest {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "AddPrivateChannelRequest{" +
                 "version='" + version + '\'' +
                 ", name='" + name + '\'' +

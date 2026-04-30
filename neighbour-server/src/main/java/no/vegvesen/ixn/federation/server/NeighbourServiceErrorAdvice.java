@@ -28,22 +28,22 @@ public class NeighbourServiceErrorAdvice {
 	}
 
 	@ExceptionHandler({InterchangeNotFoundException.class})
-	public ResponseEntity<ErrorDetails> interchangeNotFoundException(InterchangeNotFoundException e){
+	public ResponseEntity<ErrorDetails> interchangeNotFoundException(InterchangeNotFoundException e) {
 		return error(NOT_FOUND, e);
 	}
 
 	@ExceptionHandler({InterchangeNotInDNSException.class})
-	public ResponseEntity<ErrorDetails> interchangeNotInDNSException(InterchangeNotInDNSException e){
+	public ResponseEntity<ErrorDetails> interchangeNotInDNSException(InterchangeNotInDNSException e) {
 		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({NeighbourSubscriptionNotFound.class})
-	public ResponseEntity<ErrorDetails> subscriptionNotFoundException(NeighbourSubscriptionNotFound e){
+	public ResponseEntity<ErrorDetails> subscriptionNotFoundException(NeighbourSubscriptionNotFound e) {
 		return error(NOT_FOUND, e);
 	}
 
 	@ExceptionHandler({CNAndApiObjectMismatchException.class})
-	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e){
+	public ResponseEntity<ErrorDetails> commonNameDoesNotMatchApiObject(CNAndApiObjectMismatchException e) {
 		return error(FORBIDDEN, e);
 	}
 
@@ -53,12 +53,12 @@ public class NeighbourServiceErrorAdvice {
 	}
 
 	@ExceptionHandler({HttpMessageNotReadableException.class})
-	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e){
+	public ResponseEntity<ErrorDetails> unknownProperty(HttpMessageNotReadableException e) {
 		return error(BAD_REQUEST, e);
 	}
 
 	@ExceptionHandler({NeighbourIgnoredException.class})
-	public ResponseEntity<ErrorDetails> neighbourIgnoredException(NeighbourIgnoredException e){
+	public ResponseEntity<ErrorDetails> neighbourIgnoredException(NeighbourIgnoredException e) {
 		return error(FORBIDDEN, e);
 	}
 

@@ -168,7 +168,7 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void removeLocalSubscription(String uuid){
+	public void removeLocalSubscription(String uuid) {
 		LocalSubscription subscriptionToDelete = subscriptions
 				.stream()
 				.filter(subscription -> subscription.getUuid().equals(uuid))
@@ -180,7 +180,7 @@ public class ServiceProvider {
 		this.subscriptionUpdated = LocalDateTime.now();
 	}
 
-	public void removeOneOrMultipleLocalSubscriptions(List<String> subscriptionUuidList){
+	public void removeOneOrMultipleLocalSubscriptions(List<String> subscriptionUuidList) {
 		subscriptionUuidList.forEach(uuid -> {
 					LocalSubscription subscriptionToDelete = subscriptions
 							.stream()
@@ -241,7 +241,7 @@ public class ServiceProvider {
 		deliveries.addAll(newDeliveries);
 	}
 
-    public void addDelivery(LocalDelivery newDelivery){
+    public void addDelivery(LocalDelivery newDelivery) {
         deliveries.add(newDelivery);
     }
 
@@ -264,22 +264,22 @@ public class ServiceProvider {
 				.orElse(null);
 	}
 
-	public Capability getCapability(String capabilityId){
+	public Capability getCapability(String capabilityId) {
 		return
 				getCapabilities().getCapabilities().stream()
-						.filter(c-> c.getUuid().equals(capabilityId))
+						.filter(c -> c.getUuid().equals(capabilityId))
 						.findFirst()
 						.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
-	public Capability getCreatedCapability(String capabilityId){
+	public Capability getCreatedCapability(String capabilityId) {
 		return getCapabilities().getCapabilitiesByStatus(CapabilityStatus.CREATED).stream()
-				.filter(c-> c.getUuid().equals(capabilityId))
+				.filter(c -> c.getUuid().equals(capabilityId))
 				.findFirst()
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find capability with ID %s for service provider %s", capabilityId, name)));
 	}
 
-	public LocalSubscription getSubscription(String subscriptionId){
+	public LocalSubscription getSubscription(String subscriptionId) {
 		return getSubscriptions()
 				.stream()
 				.filter(s -> s.getUuid().equals(subscriptionId))
@@ -287,14 +287,14 @@ public class ServiceProvider {
 				.orElseThrow(() -> new NotFoundException(String.format("Could not find subscription with ID %s for service provider %s", subscriptionId, name)));
 	}
 
-	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries){
+	public Set<LocalDelivery> getSavedDeliveries(Set<LocalDelivery> allDeliveries) {
 		return this.getDeliveries()
 				.stream()
 				.filter(allDeliveries::contains)
 				.collect(Collectors.toSet());
 	}
 
-	public LocalDelivery getDelivery(String deliveryId){
+	public LocalDelivery getDelivery(String deliveryId) {
 		return getDeliveries()
 				.stream()
 				.filter(d -> d.getUuid().equals(deliveryId))

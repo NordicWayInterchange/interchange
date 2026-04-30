@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Entity
-@Table(name="neighbour_capabilities")
+@Table(name = "neighbour_capabilities")
 public class NeighbourCapabilities {
 
     @Id
@@ -20,7 +20,7 @@ public class NeighbourCapabilities {
     private CapabilitiesStatus status = CapabilitiesStatus.UNKNOWN;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name="fk_neigh_dat_cap"))
+    @JoinColumn(name = "neigh_cap_id", foreignKey = @ForeignKey(name = "fk_neigh_dat_cap"))
     private Set<NeighbourCapability> capabilities = new HashSet<>();
 
     @Column
@@ -29,7 +29,7 @@ public class NeighbourCapabilities {
 
     private LocalDateTime lastCapabilityExchange;
 
-    public NeighbourCapabilities(){
+    public NeighbourCapabilities() {
 
     }
 

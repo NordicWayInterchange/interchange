@@ -19,7 +19,7 @@ public class DeliveryEndpoint {
 
     private String dlqName;
 
-    public DeliveryEndpoint(){}
+    public DeliveryEndpoint() {}
 
     public DeliveryEndpoint(String host, Integer port, String target, String selector, Integer maxBandwidth, Integer maxMessageRate, String dlqName) {
         this.host = host;
@@ -88,7 +88,7 @@ public class DeliveryEndpoint {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "DeliveryEndpoint{" +
                 "host='" + host + "'" +
                 "port=" + port +

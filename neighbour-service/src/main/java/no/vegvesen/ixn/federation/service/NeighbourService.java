@@ -51,7 +51,7 @@ public class NeighbourService {
 		return neighbourRepository.findAllByIgnoreIs(ignore);
 	}
 
-	public List<Neighbour> findAllNeighbours(){
+	public List<Neighbour> findAllNeighbours() {
 		return neighbourRepository.findAll();
 	}
 
@@ -67,7 +67,7 @@ public class NeighbourService {
 			logger.info("*** CAPABILITY POST FROM NEW NEIGHBOUR ***");
 			neighbourToUpdate = findNeighbour(neighbourCapabilities.getName());
 		}
-		if (neighbourToUpdate.isIgnore()){
+		if (neighbourToUpdate.isIgnore()) {
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on neighbour %s, will not process request.", neighbourToUpdate.getName()));
 		}
 		logger.info("--- CAPABILITY POST FROM EXISTING NEIGHBOUR ---");
@@ -132,7 +132,7 @@ public class NeighbourService {
 		if (incomingRequest.getSubscriptions().isEmpty()) {
 			throw new SubscriptionRequestException("Neighbours can not request an empty set of subscriptions.");
 		}
-		if (neighbour.isIgnore()){
+		if (neighbour.isIgnore()) {
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 		}
 
@@ -169,7 +169,7 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-			if (neighbour.isIgnore()){
+			if (neighbour.isIgnore()) {
 				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 			}
 			NeighbourSubscription subscription = neighbour.getNeighbourRequestedSubscriptions().getSubscriptionByUuid(subscriptionId);
@@ -189,7 +189,7 @@ public class NeighbourService {
 
 	public void incomingSubscriptionDelete (String ixnName, String subscriptionId) {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
-		if (neighbour.isIgnore()){
+		if (neighbour.isIgnore()) {
 			throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 		}
 		neighbour.getNeighbourRequestedSubscriptions().setTearDownSubscription(subscriptionId);
@@ -235,7 +235,7 @@ public class NeighbourService {
 		Neighbour neighbour = neighbourRepository.findByName(ixnName);
 
 		if (neighbour != null) {
-			if (neighbour.isIgnore()){
+			if (neighbour.isIgnore()) {
 				throw new NeighbourIgnoredException(String.format("Ignore flag is set on Neighbour %s, will not process request" , neighbour.getName()));
 			}
 			Set<NeighbourSubscription> subscriptions = neighbour.getNeighbourRequestedSubscriptions().getSubscriptions();

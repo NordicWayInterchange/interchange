@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ImageSource extends Source{
+public class ImageSource extends Source {
 
     public ImageSource(String url, String sendQueue, SSLContext context) {
         super(url, sendQueue, context);

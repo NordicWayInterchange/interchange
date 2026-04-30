@@ -13,7 +13,7 @@ public class PrivateChannel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "privchannel_seq")
-    @Column(name="id")
+    @Column(name = "id")
     private Integer id;
 
     @Column(nullable = false)
@@ -22,18 +22,18 @@ public class PrivateChannel {
     @Enumerated(EnumType.STRING)
     private PrivateChannelStatus status;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name="peer_id", foreignKey = @ForeignKey(name="fk_peer_privatechannel"))
+    @JoinColumn(name = "peer_id", foreignKey = @ForeignKey(name = "fk_peer_privatechannel"))
     private Set<Peer> peers;
 
     @Column
     private String serviceProviderName;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name="end_id", foreignKey = @ForeignKey(name="fk_end_privatechannel"))
+    @JoinColumn(name = "end_id", foreignKey = @ForeignKey(name = "fk_end_privatechannel"))
     private PrivateChannelEndpoint endpoint;
 
     @Column
@@ -112,7 +112,7 @@ public class PrivateChannel {
     public void removePeers(Set<Peer> peersToRemove) {
         peers.removeAll(peersToRemove);
     }
-    public void removePeer(Peer peerToRemove){
+    public void removePeer(Peer peerToRemove) {
         peers.remove(peerToRemove);
     }
     public String getServiceProviderName() {

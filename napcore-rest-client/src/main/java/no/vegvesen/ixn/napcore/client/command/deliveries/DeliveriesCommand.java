@@ -4,7 +4,7 @@ import no.vegvesen.ixn.napcore.client.NapRestClientApplication;
 import static picocli.CommandLine.*;
 
 @Command(
-        name="deliveries",
+        name = "deliveries",
         description = "Get, add, list or delete NAP deliveries",
         subcommands = {
                 AddNapDelivery.class,
@@ -20,7 +20,7 @@ public class DeliveriesCommand {
     @ParentCommand
     NapRestClientApplication parentCommand;
 
-    public NapRestClientApplication getParentCommand(){
+    public NapRestClientApplication getParentCommand() {
         return parentCommand;
     }
 

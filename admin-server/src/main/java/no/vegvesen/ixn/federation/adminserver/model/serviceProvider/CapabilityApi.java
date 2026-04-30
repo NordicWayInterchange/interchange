@@ -108,7 +108,7 @@ public class CapabilityApi implements Comparable<CapabilityApi> {
             return 0;
         }
 
-        if (o.createdTimestamp == null){
+        if (o.createdTimestamp == null) {
             return 1;
         }
 

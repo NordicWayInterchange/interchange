@@ -24,7 +24,7 @@ public class CapabilityValidator {
     public static Set<String> capabilityIsValid(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
 
-        return switch (application){
+        return switch (application) {
             case DatexApplicationApi datex -> checkProperties(datex, CapabilityProperty.mandatoryDatex2PropertyNames);
             case DenmApplicationApi denm -> checkProperties(denm, CapabilityProperty.mandatoryDenmPropertyNames);
             case IvimApplicationApi ivim -> checkProperties(ivim, CapabilityProperty.mandatoryIvimPropertyNames);
@@ -37,10 +37,10 @@ public class CapabilityValidator {
         };
     }
 
-    public static Set<String> capabilityHasValidProperties(CapabilityApi capability){
+    public static Set<String> capabilityHasValidProperties(CapabilityApi capability) {
         ApplicationApi application = capability.getApplication();
 
-        return switch (application){
+        return switch (application) {
             case DatexApplicationApi datex -> validateProperties(datex, CapabilityProperty.mandatoryDatex2PropertyNames);
             case DenmApplicationApi denm -> validateProperties(denm, CapabilityProperty.mandatoryDenmPropertyNames);
             case IvimApplicationApi ivim -> validateProperties(ivim, CapabilityProperty.mandatoryIvimPropertyNames);
@@ -108,15 +108,15 @@ public class CapabilityValidator {
         return errorList;
     }
 
-    public static boolean isShardCountValid(MetadataApi metadata){
+    public static boolean isShardCountValid(MetadataApi metadata) {
         Integer shardCount = metadata.getShardCount();
         return shardCount == null || shardCount >= 1 && shardCount <= 10;
     }
 
-    public static boolean isQuadTreeValid(List<String> quadTreeTiles){
-        for (String quadTile : quadTreeTiles){
-            for (char nextNumber : quadTile.toCharArray()){
-                if (Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0){
+    public static boolean isQuadTreeValid(List<String> quadTreeTiles) {
+        for (String quadTile : quadTreeTiles) {
+            for (char nextNumber : quadTile.toCharArray()) {
+                if (Character.getNumericValue(nextNumber) > 3 || Character.getNumericValue(nextNumber) < 0) {
                     return false;
                 }
             }

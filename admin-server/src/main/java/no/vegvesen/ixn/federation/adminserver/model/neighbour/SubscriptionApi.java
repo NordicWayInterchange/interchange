@@ -105,7 +105,7 @@ public class SubscriptionApi implements Comparable<SubscriptionApi> {
             return 0;
         }
 
-        if (o.lastUpdatedTimestamp == null){
+        if (o.lastUpdatedTimestamp == null) {
             return 1;
         }
 

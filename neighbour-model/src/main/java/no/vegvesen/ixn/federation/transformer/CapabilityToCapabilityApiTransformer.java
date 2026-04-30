@@ -48,9 +48,9 @@ public class CapabilityToCapabilityApiTransformer {
 		return capabilities;
 	}
 
-	public Set<NeighbourCapability> capabilityApiToNeighbourCapabilities(Set<CapabilityApi> capabilityApis){
+	public Set<NeighbourCapability> capabilityApiToNeighbourCapabilities(Set<CapabilityApi> capabilityApis) {
 		Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
-		for (CapabilityApi capabilityApi : capabilityApis){
+		for (CapabilityApi capabilityApi : capabilityApis) {
 			neighbourCapabilities.add(new NeighbourCapability(
 					applicationApiToApplication(capabilityApi.getApplication()),
 					metadataApiToMetadata(capabilityApi.getMetadata())
@@ -74,7 +74,7 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
-		return switch (applicationApi){
+		return switch (applicationApi) {
 			case DatexApplicationApi datex -> new DatexApplication(datex.getPublisherId(), datex.getPublicationId(), datex.getOriginatingCountry(), datex.getProtocolVersion(), datex.getQuadTree(), datex.getPublicationType(), datex.getPublisherName());
 			case DenmApplicationApi denm -> new DenmApplication(denm.getPublisherId(), denm.getPublicationId(), denm.getOriginatingCountry(), denm.getProtocolVersion(), denm.getQuadTree(), denm.getCauseCode());
 			case IvimApplicationApi ivim -> new IvimApplication(ivim.getPublisherId(), ivim.getPublicationId(), ivim.getOriginatingCountry(), ivim.getProtocolVersion(), ivim.getQuadTree());

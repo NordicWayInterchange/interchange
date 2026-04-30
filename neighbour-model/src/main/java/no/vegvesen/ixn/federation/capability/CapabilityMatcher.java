@@ -74,7 +74,7 @@ public class CapabilityMatcher {
 		String capabilityJson = null;
 		if (shardCount > 1) {
 			for (int i = 0; i < shardCount; i++) {
-				int shardId = i+1;
+				int shardId = i + 1;
 				if (matchCapabilityApplicationWithShardToSelector(application, shardId, selector)) {
 					return true;
 				}

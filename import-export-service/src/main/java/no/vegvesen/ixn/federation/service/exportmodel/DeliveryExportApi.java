@@ -17,7 +17,7 @@ public class DeliveryExportApi {
 
     private String description;
 
-    public enum DeliveryStatusExportApi{
+    public enum DeliveryStatusExportApi {
         REQUESTED, CREATED, ILLEGAL, NOT_VALID, NO_OVERLAP, ERROR;
 
 

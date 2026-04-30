@@ -4,7 +4,7 @@ import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 
 public class CapabilityPostException extends RuntimeException {
 
-	public CapabilityPostException(String message){
+	public CapabilityPostException(String message) {
 		super(message);
 	}
 
