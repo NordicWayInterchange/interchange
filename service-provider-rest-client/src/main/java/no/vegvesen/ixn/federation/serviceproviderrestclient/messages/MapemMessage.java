@@ -1,18 +1,18 @@
-package no.vegvesen.ixn.federation.serviceproviderclient.messages;
+package no.vegvesen.ixn.federation.serviceproviderrestclient.messages;
 
 import no.vegvesen.ixn.shared.Constants;
 
-public class SpatemMessage extends Message {
+public class MapemMessage extends Message {
 
     private String id;
 
     private String name;
 
-    public SpatemMessage() {
+    public MapemMessage() {
 
     }
 
-    public SpatemMessage(String messageText,
+    public MapemMessage(String messageText,
                          String userId,
                          String publisherId,
                          String publicationId,
@@ -35,7 +35,7 @@ public class SpatemMessage extends Message {
                 protocolVersion,
                 serviceType,
                 baselineVersion,
-                Constants.SPATEM,
+                Constants.MAPEM,
                 longitude,
                 latitude,
                 quadTree,

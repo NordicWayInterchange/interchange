@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
-import no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClient;
-import no.vegvesen.ixn.federation.serviceproviderclient.messages.*;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
+import no.vegvesen.ixn.federation.serviceproviderrestclient.messages.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
 
 import picocli.CommandLine.*;

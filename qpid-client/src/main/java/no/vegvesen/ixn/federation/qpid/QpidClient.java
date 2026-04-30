@@ -206,6 +206,13 @@ public class QpidClient {
 		}
 	}
 
+	public List<ServiceProviderMember> getServiceProviderMembers() {
+		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME;
+		logger.debug("GETting from {}", url);
+		ResponseEntity<ServiceProviderMember[]> response = restTemplate.getForEntity(url, ServiceProviderMember[].class);
+		return Arrays.asList(response.getBody());
+	}
+
 	public ServiceProviderMember addServiceProviderMemberToGroup(String memberName) {
 		ServiceProviderMember member = new ServiceProviderMember(memberName);
 		logger.info("Adding service provider member '{}' to group", memberName);
@@ -438,7 +445,8 @@ public class QpidClient {
 			List<Exchange> allExchanges = getAllExchanges();
 			List<PrivateChannelMember> privateChannelUsers = getPrivateChannelGroupMembers();
 			List<BiConsumerMember> biConsumerMembers = getBiConsumerMembers();
-			return new QpidDelta(allExchanges,allQueues, privateChannelUsers, biConsumerMembers);
+			List<ServiceProviderMember> serviceProviderMembers = getServiceProviderMembers();
+			return new QpidDelta(allExchanges,allQueues, privateChannelUsers, biConsumerMembers, serviceProviderMembers);
 
 		} catch (JsonProcessingException e) {
 			logger.error("Could not parse qpid delta");
