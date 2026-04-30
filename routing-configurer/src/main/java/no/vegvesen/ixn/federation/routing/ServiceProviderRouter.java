@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;

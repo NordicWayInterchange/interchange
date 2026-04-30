@@ -11,7 +11,6 @@ import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.net.ssl.SSLContext;
