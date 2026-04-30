@@ -1,6 +1,5 @@
 import type {
-    GetServerSidePropsContext,
-    InferGetServerSidePropsType,
+    GetServerSidePropsContext
 } from "next";
 import { signIn } from "next-auth/react";
 import { getServerSession } from "next-auth/next";
@@ -11,9 +10,8 @@ import {StyledButton} from "@/components/styles/StyledElements";
 import {Box} from "@mui/system";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
-export default function Login({}: InferGetServerSidePropsType<
-    typeof getServerSideProps
->) {
+export default function Login(isKeycloak: any) {
+
     return (
         <Card
             variant="outlined"
@@ -38,16 +36,28 @@ export default function Login({}: InferGetServerSidePropsType<
                 Sign in will redirect you to our authentication provider.
             </Typography>
 
-            <StyledButton
-                variant="contained"
-                sx={{ textTransform: "none", width: 200, alignSelf: "center" }}
-                onClick={() => {
-                    /*TODO: get from props*/
-                    void signIn("auth0");
-                }}
-            >
-                <Typography>Sign in</Typography>
-            </StyledButton>
+            <div>
+                {isKeycloak.isKeycloak ? (
+                    <StyledButton
+                        variant="contained"
+                        color="buttonThemeColor"
+                        sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                        onClick={() => signIn("keycloak")}
+                    >
+                        <Typography>Sign in with keycloak</Typography>
+                    </StyledButton>
+
+                ) : (
+                    <StyledButton
+                        variant="contained"
+                        color="buttonThemeColor"
+                        sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                        onClick={() => signIn("auth0")}
+                    >
+                        <Typography>Sign in with auth0</Typography>
+                    </StyledButton>
+                )}
+            </div>
         </Card>
     );
 }
@@ -60,6 +70,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 
     return {
-        props: {session},
+        props: {
+            isKeycloak: process.env.USE_KEYCLOAK === "true",
+        },
     };
 }
