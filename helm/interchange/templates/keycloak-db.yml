@@ -32,7 +32,6 @@ spec:
               value: {{ .Values.keycloak_postgres_password | quote }}
             - name: POSTGRES_DB
               value: {{ .Values.napcore_frontend.keycloak.postgres_db | quote }}
-
           ports:
             - containerPort: 5432
               name: db
