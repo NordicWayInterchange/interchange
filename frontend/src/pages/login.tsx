@@ -51,7 +51,7 @@ export default function Login(isKeycloak: any) {
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
-                    sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                    sx={{textTransform: "none", width: 250, alignSelf: "center", ml:10}}
                     onClick={() => signIn("auth0")}
                 >
                     <Typography>Sign in with auth0</Typography>
