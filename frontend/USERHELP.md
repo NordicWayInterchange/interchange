@@ -47,17 +47,37 @@ Following is an example of how the fields can be filled out.
 | Quadtree            | 12003         |
 
 Once a capability has been created by clicking the `Create my capability` button you should see it in the list of
-capabilities, either
-in `My capabilities` or ` Network capabilities` tab.
+capabilities, either in `My capabilities` or ` Network capabilities` tab. By clicking on a capability row, you can view its details in the side window.
 
 ![The newly created capability in list](../demo/images/capability_list.png)
 
-If you open the capability by clicking on it, you can use the `Deliver` button
-to quickly create a [delivery](#delivery) for this specific capability. While creating a delivery you have the option to
-enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. You can also remove
-the capability that you
-have just created from the capability details side window.
+### How to register a Delivery
+
+In order to create a [Delivery](../GLOSSARY.md#delivery), you can click on `Create delivery` from `Deliveries` tab and create a
+delivery by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by
+using a
+provided cheat sheet. 
+
+![Cheat sheet](../demo/images/Cheatsheet.png)
+
+While creating a delivery you have the option to enable the dead letter
+queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. After you click on `Save delivery`, 
+you should see the created delivery in the table. The status might be `REQUESTED`for a short time, while
+the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
+
+Click on the three dots on the far right to see the details of the delivery including the endpoint to connect to in order to send messages.
+
+![Dot dot dot](../demo/images/dot_dot_dot.png)
+
+There is also another way of creating a delivery. In `My capabilities` tab click on the three dots of a `Create delivery`
+capability to the far right in the table and all the way at the bottom, you can potentially create a description of the new Delivery (description is optional),
+and click `Deliver`
+
+![Deliver](../demo/images/deliver.png)
+
+This shows the details of the newly created delivery. While creating a delivery you have the option to
+enable the dead letter queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. You can also remove
+the capability that you have just created from the capability details side window.
 
 ![Capability details](../demo/images/capability_details.png)
 
@@ -100,37 +120,6 @@ create a
 subscription by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by
 using a
 provided cheat sheet.
-
-![Cheat sheet](../demo/images/Cheatsheet.png)
-
-### How to register a Delivery
-
-In order to create a [Delivery](../GLOSSARY.md#delivery), in `My capabilities` tab click on the three dots of a 
-capability to the far right in the table.
-
-![Dot dot dot](../demo/images/dot_dot_dot.png)
-
-This shows the details of the newly created delivery.
-
-![Capability Details](../demo/images/capability_details.png)
-
-and all the way at the bottom, you can potentially create a description of the new Delivery (description is optional),
-and click `Deliver`
-
-![Deliver](../demo/images/deliver.png)
-
-Click `Deliveries` on the left-hand menu, and you should see a single row in the table. The status might be `REQUESTED`
-for a short time, while
-the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
-
-Click on the three dots on the far right to see the details of the delivery including
-the endpoint to connect to in order to send messages.
-
-There is also another way of creating a delivery. You can click on `Add delivery` from `Deliveries` tab and create a
-delivery by clicking on the listed capabilities. You can also click on advanced mode and write your own selector by
-using a
-provided cheat sheet. While creating a delivery you have the option to enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq.
 
 ## Private channels
 
