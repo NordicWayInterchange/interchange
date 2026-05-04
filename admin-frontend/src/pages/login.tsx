@@ -6,9 +6,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { Card, Typography} from "@mui/material";
 import * as React from "react";
-import {StyledButton} from "@/components/styles/StyledElements";
 import {Box} from "@mui/system";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import {StyledButton} from "@/components/styles/StyledElements";
 
 export default function Login(isKeycloak: any) {
 
@@ -41,7 +41,7 @@ export default function Login(isKeycloak: any) {
                     <StyledButton
                         variant="contained"
                         color="buttonThemeColor"
-                        sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10}}
                         onClick={() => signIn("keycloak")}
                     >
                         <Typography>Sign in with keycloak</Typography>
@@ -51,7 +51,7 @@ export default function Login(isKeycloak: any) {
                     <StyledButton
                         variant="contained"
                         color="buttonThemeColor"
-                        sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10}}
                         onClick={() => signIn("auth0")}
                     >
                         <Typography>Sign in with auth0</Typography>
