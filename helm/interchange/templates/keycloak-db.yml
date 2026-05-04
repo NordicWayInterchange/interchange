@@ -1,6 +1,6 @@
-{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
+{{- if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}-keycloak-db
   labels:
@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: keycloak-db
-          image: "postgres:18.1"
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
           env:
             - name: POSTGRES_USER
               value: {{ .Values.keycloak_postgres_user | quote }}
@@ -41,5 +41,6 @@ spec:
               name: postgres-data
       volumes:
         - name: postgres-data
-          emptyDir: {}
-{{- end }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-keycloak-db-pvc
+  {{- end }}
