@@ -4,6 +4,9 @@
 A Service provider is a user of the system, be it a person or an integrated system. Service Providers use the 
 Onboard API to communicate with the interchange in order to create Subscriptions, Capabilities or Deliveries.
 
+## Common name
+Common name is the internal name of the user of the system. 
+
 ## Capability
 A Capability is like a schema for a data stream. It declares what the headers of messages on one or more data streams 
 must contain, and values or range or values for those headers.
@@ -60,9 +63,12 @@ or VmsPublication
 ## Cause code
 Only applies for DENM publications.
 
-## Private channels
+## Private channel
 A Private channel is a point-to point communication channel between Service Providers on the same interchange. Private 
 Channels do not enforce the constraints of Message Types like Capability-based streams do. 
+
+## Private channel peer
+A private channel peer is another service provider that can have access to read from the private channel.
 
 ## Bi-queues
 A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue 

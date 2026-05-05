@@ -126,7 +126,7 @@ const BiConsumer = () => {
                           },
                         }}
                         title="A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue
-allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to the bi-consumer's group"
+allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to subscribe to bi-queues"
                     >
                       <IconButton size="small">
                         <InfoOutlinedIcon fontSize="small" sx={{mt: -2}}/>
@@ -156,7 +156,7 @@ allows service providers to connect and receive messages over the Basic Interfac
                           },
                         }}
                         title="A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue
-allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to the bi-consumer's group"
+allows service providers to connect and receive messages over the Basic Interface. You can add or remove access to subscribe to bi-queues"
                     >
                       <IconButton size="small">
                         <InfoOutlinedIcon fontSize="small" sx={{mt: -2}}/>
