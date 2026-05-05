@@ -5,7 +5,7 @@ A Service provider is a user of the system, be it a person or an integrated syst
 Onboard API to communicate with the interchange in order to create Subscriptions, Capabilities or Deliveries.
 
 ## Common name
-Common name is the internal name of the user of the system. 
+A Common name is the internal name of the user of the system. 
 
 ## Capability
 A Capability is like a schema for a data stream. It declares what the headers of messages on one or more data streams 
@@ -68,7 +68,7 @@ A Private channel is a point-to point communication channel between Service Prov
 Channels do not enforce the constraints of Message Types like Capability-based streams do. 
 
 ## Private channel peer
-A private channel peer is another service provider that can have access to read from the private channel.
+A Private channel peer is another service provider that can have access to read from the private channel.
 
 ## Bi-queues
 A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue 

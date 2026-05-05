@@ -2,7 +2,8 @@
 
 ### How to register a Capability
 
-You can create a new [Capability](../GLOSSARY.md#capability) by clicking on the `Add capability` button in `My capabilities` tab.
+You can create a new [Capability](../GLOSSARY.md#capability) by clicking on the `Add capability` button in
+`My capabilities` tab.
 
 ![Add capability](../demo/images/capabilities.png)
 
@@ -44,8 +45,9 @@ Following is an example of how the fields can be filled out.
 | Cause codes         | 5,6           |
 | Quadtree            | 12003         |
 
-Once a capability properties has been filled out, click on `Create my capability` button. You should see the newly created capability in the list of
-capabilities, either in `My capabilities` or ` Network capabilities` tab. 
+Once the capability properties have been filled out, click on `Create my capability` button. You should see the newly
+created capability in the list of
+capabilities, either in `My capabilities` or ` Network capabilities` tab.
 
 ![The newly created capability in list](../demo/images/capability_list.png)
 
@@ -53,31 +55,33 @@ Click on the three dots on the far right
 
 ![Dot dot dot](../demo/images/dot_dot_dot.png)
 
-or just simply click on capability row to see its details in the side window. 
+Or simply click on a capability row to view its details in the side window.
 
 ![Capability details](../demo/images/capability_details.png)
 
 ### How to register a Delivery
 
-In order to create a [Delivery](../GLOSSARY.md#delivery), you can click on `Create delivery` from `Deliveries` tab and create a
-delivery by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the publication ID field.
+In order to create a [Delivery](../GLOSSARY.md#delivery), you can click on `Create delivery` from `Deliveries` tab and
+create a
+delivery by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the
+publication ID field.
 
 ![Create_delivery](../demo/images/create_delivery.png)
 
-You can also click on advanced mode and write your own selector by using a provided cheat sheet. 
+You can also click on advanced mode and write your own selector by using a provided cheat sheet.
 
 ![Delivery_cheatsheet](../demo/images/delivery_cheatsheet.png)
 
 While creating a delivery you have the option to enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. After you click on `Save delivery`, 
-you should see the created delivery in the table. The status might be `REQUESTED`for a short time, while
+queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. After you click on
+`Save delivery`,
+you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
 Click on the three dots on the far right to see the details of the delivery including the endpoint.
 
-
-There is also another way of creating a delivery. In `My capabilities` tab click on a capability row or click on the three dots to the far right in 
-the capability row. This shows the details of the created capability. 
+There is also another way of creating a delivery. In `My capabilities` tab, click on a capability row, or click the three
+dots on the far right of the capability row. This shows the details of the created capability.
 
 ![Capability details](../demo/images/capability_details.png)
 
@@ -88,12 +92,12 @@ the capability that you have just created from the capability details side windo
 
 ![Deliver](../demo/images/deliver.png)
 
-
 ### How to register a Subscription
 
-In order to create a [Subscription](../GLOSSARY.md#subscription), click on `Network capabilities` on the right-hand menu, and you should see your
+In order to create a [Subscription](../GLOSSARY.md#subscription), click on `Network capabilities` on the right-hand
+menu, and you should see your
 capability, as well as capabilities created by
-other users both on your instance, or any other interchanges in the cluster. 
+other users both on your instance, or any other interchanges in the cluster.
 
 ![Network capabilities](../demo/images/network_capabilities.png)
 
@@ -107,21 +111,23 @@ Click `Subscriptions` on the right-hand menu, and you should see the newly creat
 might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-
 ![Subscription_list](../demo/images/subscription_list.png)
 
 Click on the subscription or the three dots on the far right side to see the details of the subscription including
-the endpoint to connect to in order to receive messages.
+the endpoint.
 
 There is also another way of creating a subscription. You can click on `Add subscription` from `Subscriptions` tab and
-create a subscription by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the publication ID field. 
-You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on `Save subscription` at the bottom.
+create a subscription by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in
+the publication ID field.
+You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on
+`Save subscription` at the bottom.
 
 ![Subscription_cheatsheet](../demo/images/Cheatsheet.png)
 
 ## Private channels
 
-In [Private channel](../GLOSSARY.md#private-channel) tab you can display, create and delete [Peers](../GLOSSARY.md#private-channel-peer) from private channels they own 
+In [Private channel](../GLOSSARY.md#private-channel) tab you can display, create and
+delete [Peers](../GLOSSARY.md#private-channel-peer) from private channels they own
 or remove them from other private channels that are subscribed to them.
 
 ### How to register a Private channel
@@ -139,23 +145,25 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 If another service provider has created a private channel subscribed to yours, it will appear in the
 `My private channel subscriptions`
-list. 
+list.
 
 ![My private channel subscriptions](../demo/images/privateChannel_subscription.png)
 
-You can use the [Common name](../GLOSSARY.md#common-name) of the other service provider as the peer name while creating a private channel.
-`Common name` can be copied from `My common name` section in `Home` tab.
+You can use the [Common name](../GLOSSARY.md#common-name) of the other service provider as the peer name while creating
+a private channel.
+The `Common name` can be copied from `My common name` section in `Home` tab.
 
 ![Common name](../demo/images/commonName.png)
 
 ## Bi-queues
 
-In [Bi-queues](../GLOSSARY.md#bi-queues) tab you can see the list of bi-queues per [message type](../GLOSSARY.md#messagetype-).
+In [Bi-queues](../GLOSSARY.md#bi-queues) tab you can see the list of bi-queues
+per [message type](../GLOSSARY.md#messagetype-).
 You can also add or remove access to subscribe to bi-queues.
 
 ![Bi-queues](../demo/images/bi-queues.png)
 
-By clicking on each bi-queue from the list you can see the bi-queue endpoint details. 
+By clicking on each bi-queue from the list you can see the bi-queue endpoint details.
 
 ![Bi-queue details](../demo/images/bi-queue_details.png)
 
@@ -167,7 +175,7 @@ Interchange.
 ### How to create a Certificate
 
 Enter the country code and the organisation name, and click `Generate certificate` and download the private key, chain
-certificate and root certificate. 
+certificate and root certificate.
 
 ![Certificate](../demo/images/certificate.png)
 
