@@ -6,6 +6,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -48,6 +49,9 @@ public class OnboardRestControllerTest {
 
 	@MockitoBean
 	private PrivateChannelRepository privateChannelRepository;
+
+	@MockitoBean
+	private OutgoingMatchRepository outgoingMatchRepository;
 
 	@Autowired
 	private OnboardRestController onboardRestController;
