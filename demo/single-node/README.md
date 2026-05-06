@@ -82,7 +82,7 @@ register a subscription and listen to messages.
 
 In order to see messages flowing through the system, we can create a [Subscription](../../GLOSSARY.md#subscription) to the data stream, and listen to the associated queue.
 
-In order to create a subscription, click on `Network capabilities` on the right-hand menu, and you should see your capability, as well as capabilities created by 
+In order to create a subscription, click on `Network capabilities` on the left-hand menu, and you should see your capability, as well as capabilities created by 
 other users both on your instance, or any other interchanges in the cluster. In this demo, however, only your own capability will be listed.
 
 ![Network capabilities](../images/network_capabilities.png)
@@ -92,7 +92,7 @@ page, and click `Subscribe`
 
 ![Subscribe](../images/subscribe.png)
 
-Click `Subscriptions` on the right-hand menu, and you should see the newly created subscription in the list. The status might be `REQUESTED` for a short time, while
+Click `Subscriptions` on the left-hand menu, and you should see the newly created subscription in the list. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
 Click on the three dots on the far right to see the details of the delivery including the [Endpoint](../../GLOSSARY.md#endpoint) to connect to

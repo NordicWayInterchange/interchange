@@ -27,9 +27,9 @@ The following fields need to be filled out:
     - **Additional fields for DENM publications**
         - `Cause codes` select the cause codes this publication supports
 - `Quadtree` Quadtree tiles representing the coverage area of the publication, comma sparated without spaces with a
-  leading and trailing comma. E.g. ,01223,102332,012322, If you click on the "Show map" button it will open a tool to
-  help you create the tiles. Zoom in and click on the tiles to add them to the list. click on the tile again to remove
-  it. Click save to return to the "Add capability" screen.
+  leading and trailing comma. E.g. ,01223,102332,012322, If you click on the `Show map` button it will open a tool to
+  help you create the tiles. Zoom in and click on the tiles to add them to the list. Click on the tile again to remove
+  it.
 
 Following is an example of how the fields can be filled out.
 
@@ -64,7 +64,8 @@ Or simply click on a capability row to view its details in the side window.
 In order to create a [Delivery](../GLOSSARY.md#delivery), you can click on `Create delivery` from `Deliveries` tab and
 create a
 delivery by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the
-publication ID field.
+publication ID field. While creating a delivery you have the option to enable dead letter
+queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq.
 
 ![Create_delivery](../demo/images/create_delivery.png)
 
@@ -72,10 +73,7 @@ You can also click on advanced mode and write your own selector by using a provi
 
 ![Delivery_cheatsheet](../demo/images/delivery_cheatsheet.png)
 
-While creating a delivery you have the option to enable the dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq. After you click on
-`Save delivery`,
-you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
+After you click on `Save delivery`, you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
 Click on the three dots on the far right to see the details of the delivery including the endpoint.
@@ -87,14 +85,14 @@ dots on the far right of the capability row. This shows the details of the creat
 
 In this side window, at the bottom, you can create a delivery by clicking on `Deliver` button. You can add a
 description of the new Delivery (description is optional). You have also the option to
-enable the dead letter queue (dlq) for the delivery you are creating. You can also remove
+enable dead letter queue (dlq) for the delivery you are creating. You can also remove
 the capability that you have just created from the capability details side window.
 
 ![Deliver](../demo/images/deliver.png)
 
 ### How to register a Subscription
 
-In order to create a [Subscription](../GLOSSARY.md#subscription), click on `Network capabilities` on the right-hand
+In order to create a [Subscription](../GLOSSARY.md#subscription), click on `Network capabilities` on the left-hand
 menu, and you should see your
 capability, as well as capabilities created by
 other users both on your instance, or any other interchanges in the cluster.
@@ -107,7 +105,7 @@ page (description is optional), and click `Subscribe`
 
 ![Subscribe](../demo/images/subscribe.png)
 
-Click `Subscriptions` on the right-hand menu, and you should see the newly created subscription in the list. The status
+Click `Subscriptions` on the left-hand menu, and you should see the newly created subscription in the list. The status
 might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
@@ -120,7 +118,7 @@ There is also another way of creating a subscription. You can click on `Add subs
 create a subscription by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in
 the publication ID field.
 You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on
-`Save subscription` at the bottom.
+`Save subscription` at the bottom. You will be redirected to the subscriptions section where you can see your newly added subscription.
 
 ![Subscription_cheatsheet](../demo/images/Cheatsheet.png)
 
@@ -143,7 +141,7 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 ![Private channels](../demo/images/privateChannel_details.png)
 
-If another service provider has created a private channel subscribed to yours, it will appear in the
+If another [Service provider](../GLOSSARY.md#service-provider) has created a private channel subscribed to yours, it will appear in the
 `My private channel subscriptions`
 list.
 
@@ -174,7 +172,7 @@ Interchange.
 
 ### How to create a Certificate
 
-Enter the country code and the organisation name, and click `Generate certificate` and download the private key, chain
+Enter the [country code](../GLOSSARY.md#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate.
 
 ![Certificate](../demo/images/certificate.png)
