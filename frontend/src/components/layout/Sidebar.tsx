@@ -70,8 +70,8 @@ const SECONDARY_PAGES: Array<IPages> = [
     icon: <SettingsIcon />,
   },
   {
-    text: "Glossary",
-    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/GLOSSARY.md",
+    text: "User help",
+    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/frontend/USERHELP.md",
     icon: <ArticleIcon />,
   },
 ];
@@ -88,8 +88,8 @@ export default function Sidebar() {
           textDecoration: "none",
           color: "inherit",
         }}
-        target={page.text === "Glossary" ? "_blank" : ""}
-        rel={page.text === "Glossary" ?"noopener noreferrer" : ""}
+        target={page.text === "User help" ? "_blank" : ""}
+        rel={page.text === "User help" ?"noopener noreferrer" : ""}
       >
         <ListItem
           sx={{
