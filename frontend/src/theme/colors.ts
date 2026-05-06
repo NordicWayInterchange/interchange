@@ -39,7 +39,7 @@ export const TRAFFICDATA_COLORS = {
   ...SHARED_COLORS,
 };
 
-export const TRANSPORTPORTAL_COLORS = {
+export const INTERCHANGEPORTAL_COLORS = {
   navbarBackgroundColor: "#444F55",
   mainBackgroundColor: "#f0f1f1",
   searchBoxFocusedFontColor: "#444f55",
