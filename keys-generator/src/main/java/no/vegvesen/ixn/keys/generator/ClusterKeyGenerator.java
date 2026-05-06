@@ -305,18 +305,28 @@ public class ClusterKeyGenerator {
     }
 
     public static void makeKeystore(String name, String password, OutputStream outputStream, List<X509Certificate> certificateChain, PrivateKey aPrivate) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
-        X509Certificate[] certificates = certificateChain.toArray(new X509Certificate[0]);
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(null,null);
-        keyStore.setKeyEntry(name, aPrivate,password.toCharArray(),certificates);
+        KeyStore keyStore = newKeyStore(name, password, certificateChain, aPrivate);
         keyStore.store(outputStream,password.toCharArray());
     }
 
+    public static KeyStore newKeyStore(String name, String password, List<X509Certificate> certificateChain, PrivateKey aPrivate) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        X509Certificate[] certificates = certificateChain.toArray(new X509Certificate[0]);
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(null,null);
+        keyStore.setKeyEntry(name, aPrivate, password.toCharArray(),certificates);
+        return keyStore;
+    }
+
     public static void makeTrustStore(String truststorePassword, OutputStream outputStream, X509Certificate certificate, String myKey) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+        KeyStore trustStore = newTrustStore(certificate, myKey);
+        trustStore.store(outputStream,truststorePassword.toCharArray());
+    }
+
+    public static KeyStore newTrustStore(X509Certificate certificate, String myKey) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
         trustStore.load(null,null);
         trustStore.setCertificateEntry(myKey, certificate);
-        trustStore.store(outputStream,truststorePassword.toCharArray());
+        return trustStore;
     }
 
     public static void saveCertChain(List<X509Certificate> certificateChain, Writer writer) throws IOException {

@@ -36,14 +36,29 @@ spec:
               value: {{ .Values.napcore_frontend.generated_username_prefix }}
             - name: NEXTAUTH_SECRET
               value: {{ .Values.napcore_nextauth_secret | trim | quote }}
+            - name: NEXTAUTH_URL
+              value: {{ .Values.napcore_frontend.home_url | quote }}
+{{- if .Values.napcore_frontend.keycloak.enabled }}
+            - name: USE_KEYCLOAK
+              value: "true"
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.napcore_frontend.keycloak.client_id }}
+            - name: INTERNAL_KEYCLOAK_URL
+              value: {{ .Values.napcore_frontend.keycloak.internal_keycloak_url }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.napcore_frontend.keycloak.realm }}
+            - name: KEYCLOAK_CLIENT_SECRET
+              value: {{ .Values.keycloak_client_secret | quote }}
+            - name: EXTERNAL_KEYCLOAK_URL
+              value: {{.Values.napcore_frontend.keycloak.external_keycloak_url }}
+{{- else }}
             - name: AUTH0_CLIENT_ID
               value: {{ .Values.napcore_auth0_client_id | trim | quote }}
             - name: AUTH0_CLIENT_SECRET
               value: {{ .Values.napcore_auth0_client_secret | trim | quote }}
             - name: AUTH0_ISSUER
               value: {{ .Values.napcore_frontend.napcore_auth0_issuer | quote }}
-            - name: NEXTAUTH_URL
-              value: {{ .Values.napcore_frontend.home_url | quote }}
+{{- end }}
           volumeMounts:
             - mountPath: /app/secret
               name: napcore-frontend-secret

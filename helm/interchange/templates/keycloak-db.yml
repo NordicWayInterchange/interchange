@@ -1,0 +1,45 @@
+{{- if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-keycloak-db
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: keycloak-db
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      component: keycloak-db
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: keycloak-db
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keycloak-db
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.keycloak_postgres_user | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.keycloak_postgres_password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.napcore_frontend.keycloak.postgres_db | quote }}
+          ports:
+            - containerPort: 5432
+              name: db
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql"
+              name: postgres-data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-keycloak-db-pvc
+  {{- end }}

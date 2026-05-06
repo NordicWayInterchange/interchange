@@ -1,0 +1,52 @@
+{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-keycloak
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}{{ .Chart.Version }}
+    component: keycloak
+    release: {{ .Release.Name }}
+spec:
+  serviceName: {{ .Release.Name }}-keycloak-discovery
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: keycloak
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.6.0
+          args: ["start"]
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: {{ .Values.keycloak_admin_name | quote }}
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              value: {{ .Values.keycloak_admin_password | quote }}
+            - name: KC_DB_URL_HOST
+              value: {{ .Release.Name }}-keycloak-db
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_PASSWORD
+              value: {{ .Values.keycloak_postgres_password  | quote}}
+            - name: KC_DB_USERNAME
+              value: {{ .Values.keycloak_postgres_user | quote }}
+            - name: KC_HOSTNAME
+              value: https://portallogin.{{ .Values.external_name }}
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+          ports:
+            - containerPort: 8443
+              name: keycloak-port
+            - containerPort: 8080
+              name: keycloak-http
+{{- end }}
