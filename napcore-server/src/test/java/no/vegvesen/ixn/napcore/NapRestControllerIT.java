@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
@@ -67,6 +68,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private NapRestController napRestController;
+
+    @Autowired
+    private OutgoingMatchRepository outgoingMatchRepository;
 
     @Test
     public void objectsAreAutowired(){
@@ -830,8 +834,54 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
     @Test
     public void testGetMatchingLocalSubscriptionCapabilities() {
-        String actorCommonName = "actor";
-        String selector = "originatingCountry='NO'";
+        String sp1Name = "service-provider";
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pu-1", "");
+        ServiceProvider serviceProvider = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Collections.singleton(cap1
+                        )
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del1,cap1,sp1Name));
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del2 = new LocalDelivery("pubcliationId = 'pub-2'", "");
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Collections.singleton(cap2
+                        )
+                ),
+                Set.of(),
+                Set.of(del2),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del2,cap2,sp2Name));
 
         Neighbour neighbour = new Neighbour(
                 "Neighbour",
@@ -844,35 +894,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, selector, "https://path/id", "neighbour", Set.of())
+                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "publicationId = 'pu-1", "https://path/id", "neighbour", Set.of())
                 )),
                 new no.vegvesen.ixn.federation.model.SubscriptionRequest(),
                 new Connection()
         );
         neighbourRepository.save(neighbour);
 
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
-        List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, selector);
-        List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, "originatingCountry='SE'");
-
-        assertThat(response1).hasSize(1);
-        assertThat(response2).hasSize(0);
-
-
-        DenmApplication app = new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1));
-
-        Metadata meta =  new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0);
-
-        Capability cap = new Capability(app, meta);
-
-        LocalSubscription createdSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, "second-node");
-
-        ServiceProvider serviceProvider = new ServiceProvider("sp", new Capabilities(Collections.singleton(cap)), Collections.singleton(createdSubscription), Collections.emptySet(), LocalDateTime.now());
-
-        serviceProviderRepository.save(serviceProvider);
-
-        List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(actorCommonName, selector);
-
+        List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(sp1Name, selector);
         assertThat(response).hasSize(1);
     }
 
