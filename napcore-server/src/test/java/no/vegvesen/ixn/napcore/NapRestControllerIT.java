@@ -6,9 +6,10 @@ import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.napcore.model.*;
@@ -67,6 +68,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private NapRestController napRestController;
+
+    @Autowired
+    private OutgoingMatchRepository outgoingMatchRepository;
 
     @Test
     public void objectsAreAutowired(){
@@ -826,6 +830,168 @@ public class NapRestControllerIT extends PostgresContainerBase {
         Assertions.assertEquals(5671, datex.getBiqueueEndpointResponse().getMessageChannelPort());
         Assertions.assertEquals("bi-datex", datex.getBiqueueEndpointResponse().getQueueName());
     }
+
+
+    @Test
+    public void testGetMatchingLocalSubscriptionCapabilities() {
+        String sp1Name = "service-provider";
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pu-1", "");
+        ServiceProvider serviceProvider = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Collections.singleton(cap1
+                        )
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del1,cap1,sp1Name));
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del2 = new LocalDelivery("pubcliationId = 'pub-2'", "");
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Collections.singleton(cap2
+                        )
+                ),
+                Set.of(),
+                Set.of(del2),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del2,cap2,sp2Name));
+
+        Neighbour neighbour = new Neighbour(
+                "Neighbour",
+                new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
+                        Set.of(
+                                new NeighbourCapability(
+                                        new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
+                                                "situationPublication", "bouvet"),
+                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                )
+                        )),
+                new NeighbourSubscriptionRequest(Set.of(
+                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "publicationId = 'pu-1", "https://path/id", "neighbour", Set.of())
+                )),
+                new no.vegvesen.ixn.federation.model.SubscriptionRequest(),
+                new Connection()
+        );
+        neighbourRepository.save(neighbour);
+
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
+
+        List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(sp1Name, selector);
+        assertThat(response).hasSize(1);
+    }
+
+    @Test
+    public void testGetMatchingLocalCapabilitiesAllHavingMatches(){
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-2",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL));
+        LocalDelivery del1 = new LocalDelivery(
+                "publicationId = 'pub-1",
+                "delivery for pub-1"
+        );
+        LocalDelivery del2 = new LocalDelivery(
+                "publicationId = 'pub-2'",
+                "delivery for pub-2"
+        );
+        String sp1Name = "sp-1";
+        ServiceProvider serviceProvider1 = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Set.of(cap1, cap2)
+                ),
+                Set.of(),
+                Set.of(del1, del2),
+                LocalDateTime.now()
+        );
+        String sp2Name = "sp-2";
+        Capability cap3 = new Capability(
+                new DenmApplication("NPRA_2",
+                        "pub-3",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap4 = new Capability(
+                new DenmApplication(
+                        "NPRA_2",
+                        "pub-4",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del3 = new LocalDelivery(
+                "publicationId = 'pub-3'",
+                "delivery for pub-3"
+        );
+        LocalDelivery del4 = new LocalDelivery("publicationId = 'pub-4'",
+                "delivery for pub-4"
+        );
+        ServiceProvider serviceProvider2 = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Set.of(cap3, cap4
+                        )
+                ),
+                Set.of(),
+                Set.of(del3, del4),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del1,cap1,sp1Name),new OutgoingMatch(del2,cap2,sp1Name)));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del3,cap3,sp2Name),new OutgoingMatch(del4,cap4,sp2Name)));
+        assertThat(napRestController.getMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(2);
+        assertThat(napRestController.getMatchingSubscriptionCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(4);
+    }
+
 
     @Autowired
     WebApplicationContext context;
