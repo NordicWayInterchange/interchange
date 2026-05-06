@@ -907,6 +907,92 @@ public class NapRestControllerIT extends PostgresContainerBase {
         assertThat(response).hasSize(1);
     }
 
+    @Test
+    public void testGetMatchingLocalCapabilitiesAllHavingMatches(){
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-2",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL));
+        LocalDelivery del1 = new LocalDelivery(
+                "publicationId = 'pub-1",
+                "delivery for pub-1"
+        );
+        LocalDelivery del2 = new LocalDelivery(
+                "publicationId = 'pub-2'",
+                "delivery for pub-2"
+        );
+        String sp1Name = "sp-1";
+        ServiceProvider serviceProvider1 = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Set.of(cap1, cap2)
+                ),
+                Set.of(),
+                Set.of(del1, del2),
+                LocalDateTime.now()
+        );
+        String sp2Name = "sp-2";
+        Capability cap3 = new Capability(
+                new DenmApplication("NPRA_2",
+                        "pub-3",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap4 = new Capability(
+                new DenmApplication(
+                        "NPRA_2",
+                        "pub-4",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del3 = new LocalDelivery(
+                "publicationId = 'pub-3'",
+                "delivery for pub-3"
+        );
+        LocalDelivery del4 = new LocalDelivery("publicationId = 'pub-4'",
+                "delivery for pub-4"
+        );
+        ServiceProvider serviceProvider2 = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Set.of(cap3, cap4
+                        )
+                ),
+                Set.of(),
+                Set.of(del3, del4),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del1,cap1,sp1Name),new OutgoingMatch(del2,cap2,sp1Name)));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del3,cap3,sp2Name),new OutgoingMatch(del4,cap4,sp2Name)));
+        assertThat(napRestController.getMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(2);
+        assertThat(napRestController.getMatchingSubscriptionCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(4);
+    }
+
+
     @Autowired
     WebApplicationContext context;
     @Test
