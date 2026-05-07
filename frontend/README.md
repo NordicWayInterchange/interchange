@@ -1,4 +1,4 @@
-# NAPCORE
+# INTERCHANGE PORTAL
 
 ---
 
@@ -27,6 +27,7 @@ This is a self-help portal for interchange end-users to manage capabilities, sub
 - Tanstack
 - PKI.js
 - NextAuth.js
+- Keycloak
 
 ## Installation and setup
 
@@ -107,7 +108,7 @@ We use the JavaScript library PKI.js to create a CSR. The CSR is created client-
 
 ---
 
-Napcore supports both keycloak and Auth0 as authentication providers.
+Interchange Portal supports both keycloak and Auth0 as authentication providers.
 
 Keycloak is an open source identity and access management solution. It adds authentication to applications and secure services. https://www.keycloak.org/
 
@@ -174,16 +175,16 @@ To avoid unintended styling we do not use global CSS, and all styling is done at
 
 ### Theme
 
-We have created two themes for Trafficdata and Transportportal. They all include a set of shared colors, and their specific colors and fonts. The theme can be changed by importing it and specifying it
+We have created two themes for Trafficdata and Interchange portal. They all include a set of shared colors, and their specific colors and fonts. The theme can be changed by importing it and specifying it
 in `_app.tsx` , as well as changing the title in `Navbar.tsx`.
 
 ```jsx
-import { trafficdata, transportportal } from "@/theme";
+import { trafficdata, interchangePortal } from "@/theme";
 
 <ThemeProvider theme={trafficdata}>
 ```
 
-Adjustments to the theme should be performed at `colors.ts` , `fonts.ts` and `trafficdata.ts` / `transportportal.ts`.
+Adjustments to the theme should be performed at `colors.ts` , `fonts.ts` and `trafficdata.ts` / `interchangePortal.ts`.
 
 ## Troubleshoot
 

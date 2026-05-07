@@ -107,20 +107,22 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                 <StyledCard variant={"outlined"}>
                   <Typography>Endpoints</Typography>
                   <FormControl fullWidth>
-                    <TextField
-                      value={item.endpoints[0].host || ""}
-                      label="Host"
-                      margin="normal"
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <ContentCopy value={item.endpoints[0].host} />
-                            </InputAdornment>
-                          ),
-                        },
-                      }}
-                    />
+                    {item.endpoints.map((endpoint) => (
+                        <TextField
+                            value={endpoint.host || ""}
+                            label="Host"
+                            margin="normal"
+                            slotProps={{
+                              input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                      <ContentCopy value={endpoint.host}/>
+                                    </InputAdornment>
+                                ),
+                              },
+                            }}
+                        />
+                    ))}
                     <TextField
                       value={getAttribute() || ""}
                       label={label == "Delivery" ? "Target" : "Source"}
@@ -135,39 +137,43 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                         },
                       }}
                     />
-                    <TextField
-                      value={item.endpoints[0].port || ""}
-                      label="Port"
-                      margin="normal"
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <ContentCopy
-                                value={item.endpoints[0].port.toString()}
-                              />
-                              ,
-                            </InputAdornment>
-                          ),
-                        },
-                      }}
-                    />
-                    {label == "Delivery" && item.endpoints[0].dlqName?.toString() && (
-                      <TextField
-                        value={item.endpoints[0].dlqName?.toString() || ""}
-                        label= "Dead letter queue"
-                        margin="normal"
-                        slotProps={{
-                          input: {
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <ContentCopy value={item.endpoints[0].dlqName} />
-                              </InputAdornment>
-                            ),
-                          },
-                        }}
-                      />
-                    )}
+                    {item.endpoints.map((endpoint) => (
+                        <TextField
+                            value={endpoint.port || ""}
+                            label="Port"
+                            margin="normal"
+                            slotProps={{
+                              input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                      <ContentCopy
+                                          value={endpoint.port.toString()}
+                                      />
+                                    </InputAdornment>
+                                ),
+                              },
+                            }}
+                        />
+                    ))}
+                    {label == "Delivery" && item.endpoints.map((endpoint) => endpoint.dlqName?.toString() ? (
+                            <TextField
+                                value={endpoint.dlqName?.toString() ? endpoint.dlqName?.toString() : ""}
+                                label="Dead letter queue"
+                                margin="normal"
+                                slotProps={{
+                                  input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                          <ContentCopy
+                                              value={endpoint.dlqName?.toString() ? endpoint.dlqName?.toString() : ""}/>
+                                        </InputAdornment>
+                                    ),
+                                  },
+                                }}
+                            />
+                        ) : null
+                    )
+                    }
                   </FormControl>
                 </StyledCard>
               </ListItem>

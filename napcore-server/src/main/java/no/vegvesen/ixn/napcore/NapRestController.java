@@ -18,6 +18,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -66,6 +67,8 @@ public class NapRestController {
 
     private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
 
+    private final OutgoingMatchRepository outgoingMatchRepository;
+
     private Logger logger = LoggerFactory.getLogger(NapRestController.class);
 
     private TypeTransformer typeTransformer = new TypeTransformer();
@@ -82,7 +85,8 @@ public class NapRestController {
             CertService certService,
             NapCoreProperties napCoreProperties,
             CertSigner certSigner,
-            CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer) {
+            CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer,
+            OutgoingMatchRepository outgoingMatchRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.privateChannelRepository = privateChannelRepository;
@@ -90,6 +94,7 @@ public class NapRestController {
         this.napCoreProperties = napCoreProperties;
         this.certSigner = certSigner;
         this.capabilityToCapabilityApiTransformer = capabilityToCapabilityApiTransformer;
+        this.outgoingMatchRepository = outgoingMatchRepository;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/x509/csr"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -220,7 +225,9 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List network capabilities for serivce provider {}",actorCommonName);
 
-        Set<Capability> localCapabilities = getAllLocalCapabilities();
+        Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+                .map(OutgoingMatch::getCapability)
+                .collect(Collectors.toSet());
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
         if (selector != null) {
             if (!selector.isEmpty()) {
