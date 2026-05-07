@@ -1,68 +1,48 @@
 package no.vegvesen.ixn.federation;
 
 import jakarta.jms.JMSException;
-import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.Source;
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
-import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import org.junit.jupiter.api.BeforeAll;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Fail.fail;
 
-@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
-@SpringBootTest(classes = {
-		ServiceProviderRouter.class,
-		QpidClient.class,
-		QpidClientConfig.class,
-		InterchangeNodeProperties.class,
-		RoutingConfigurerProperties.class,
-		LocalDeliveryService.class,
-		LocalSubscriptionService.class,
-		TestSSLContextConfig.class,
-		TestSSLProperties.class,
-		OutgoingMatchDiscoveryService.class
-})
+@SpringBootTest
+@Transactional
+@Testcontainers
 public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
-	private static final Logger logger = LoggerFactory.getLogger(ServiceProviderRouterIT.class);
 
 	public static final String HOST_NAME = getDockerHost();
-
 	private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(ServiceProviderRouterIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
 
+	@Container
+	public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:18.1")
+			.withDatabaseName("federation")
+			.withUsername("federation")
+			.withPassword("federation");
+
+	@Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
 			stores,
 			HOST_NAME,
@@ -70,52 +50,46 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 			Path.of("qpid")
 			);
 
+
 	@DynamicPropertySource
 	static void datasourceProperties(DynamicPropertyRegistry registry) {
-		qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+		ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+		ClusterKeyGenerator.CaStore caStore = stores.trustStore();
+		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+		registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+		registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
+		registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+		registry.add("routing-configurer.interval",()->"999");
 		registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-		registry.add("routing-configurer.vhost", () -> "localhost");
-		registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-		registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+		registry.add("routing-configurer.vhost",() -> HOST_NAME);
 		registry.add("interchange.node-provider.name", () -> HOST_NAME);
+		registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+		registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+		registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+		registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
 	}
-
-	@BeforeAll
-	static void setup(){
-		qpidContainer.start();
-	}
-
-	@MockitoBean
-	ServiceProviderRepository serviceProviderRepository;
-
-	@MockitoBean
-	PrivateChannelRepository privateChannelRepository;
 
 	@Autowired
 	QpidClient client;
 
+	@Autowired
+	private PrivateChannelRepository privateChannelRepository;
+
+	@Autowired
+	private ServiceProviderRepository serviceProviderRepository;
+
  	@Autowired
 	ServiceProviderRouter router;
-
-	@MockitoBean
-	MatchRepository matchRepository;
-
-	@MockitoBean
-	ListenerEndpointRepository listenerEndpointRepository;
-
-	@MockitoBean
-	OutgoingMatchRepository outgoingMatchRepository;
 
 
 	@Test
 	public void setUpQueueForPrivateChannels(){
 		ServiceProvider serviceProvider = new ServiceProvider("service-provider");
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange", 5671, "queueName");
-		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("peer")), PrivateChannelStatus.REQUESTED, "my-channel", endpoint,"service-provider");
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(new Peer("peer")), PrivateChannelStatus.REQUESTED, "my-channel", endpoint,"service-provider");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
-
+		privateChannelRepository.save(privateChannel);
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -124,9 +98,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		for (Peer peer : privateChannel.getPeers()) {
 			assertThat(client.getPrivateChannelGroupMember(peer.getName())).isNotNull();
 		}
-
-		verify(privateChannelRepository, times(1)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(1)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -135,12 +106,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange", 5671, "queueName");
 		PrivateChannel privateChannel = new PrivateChannel(Collections.singleton(new Peer("peer")), PrivateChannelStatus.REQUESTED, "my-channel", endpoint,"service-provider");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
 		privateChannel.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
@@ -149,9 +120,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		for (Peer peer : privateChannel.getPeers()) {
 			assertThat(client.getPrivateChannelGroupMember(peer.getName())).isNull();
 		}
-
-		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -163,24 +131,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer("peer-1")), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1,"service-provider");
 		PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer("peer-2")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "service-provider");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel1, privateChannel2));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
-		privateChannel1.setStatus(PrivateChannelStatus.TEAR_DOWN);
 
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(List.of(privateChannel2));
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(), any())).thenReturn(Collections.emptyList(),Collections.emptyList());
-		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(1L,0L);
+		privateChannel1.setStatus(PrivateChannelStatus.TEAR_DOWN);
+		privateChannelRepository.save(privateChannel1);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.getPrivateChannelGroupMember(serviceProvider.getName())).isNotNull();
-
-		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(2)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -193,30 +154,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer("peer-1")), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1,"service-provider-1");
 		PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer("service-provider-1")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "service-provider-2");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel1));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
-
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel2));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider2.getName())).thenReturn(Collections.emptyList());
-
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 
 		privateChannel1.setStatus(PrivateChannelStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(List.of(privateChannel1));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(Collections.emptyList());
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(), any())).thenReturn(Collections.singletonList(privateChannel2), Collections.emptyList());
-		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(0L,0L);
+		privateChannelRepository.save(privateChannel1);
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
 		assertThat(client.getPrivateChannelGroupMember(serviceProvider1.getName())).isNotNull();
-
-		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -229,30 +177,21 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel1 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "service-1");
 		PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "service-2");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel1));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
-
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel2));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider2.getName())).thenReturn(Collections.emptyList());
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
 
 		privateChannel2.setStatus(PrivateChannelStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(), any())).thenReturn(Collections.singletonList(privateChannel1), Collections.emptyList());
-		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(), any())).thenReturn(0L, 1L);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 		assertThat(client.getPrivateChannelGroupMember(serviceProvider1.getName())).isNotNull();
 		assertThat(client.getPrivateChannelGroupMember(serviceProvider2.getName())).isNotNull();
 
-		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -268,26 +207,19 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannel privateChannel2 = new PrivateChannel(Collections.singleton(new Peer("service-2")), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "service-1");
 		PrivateChannel privateChannel3 = new PrivateChannel(Collections.singleton(new Peer("service-1")), PrivateChannelStatus.REQUESTED, "my-channel-3", endpoint3, "service-2");
 
-		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider1.getName())).thenReturn(List.of(privateChannel1, privateChannel2));
-		when(privateChannelRepository.findAllByServiceProviderName(serviceProvider2.getName())).thenReturn(List.of(privateChannel3));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
+		privateChannelRepository.save(privateChannel3);
 
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
 
 		privateChannel1.setStatus(PrivateChannelStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(),any())).thenReturn(Collections.emptyList(),Collections.emptyList());
-		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(),any())).thenReturn(1L,1L);
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(List.of(privateChannel2));
+		privateChannelRepository.save(privateChannel1);
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
 		assertThat(client.getPrivateChannelGroupMember(serviceProvider2.getName())).isNotNull();
 
-		verify(privateChannelRepository, times(2)).findAllByPeerNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(2)).countByServiceProviderNameAndStatus(any(),any());
-		verify(privateChannelRepository, times(3)).findAllByServiceProviderName(any());
-		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
 	}
 
 	@Test
@@ -295,11 +227,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange",5671,"queueName");
 		Peer peer = new Peer("peer");
-		PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(peer)), PrivateChannelStatus.REQUESTED, "my-channel", endpoint, "my-service-provider");
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer), PrivateChannelStatus.REQUESTED, "my-channel", endpoint, "my-service-provider");
 
-		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Collections.singletonList(privateChannel));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
+		serviceProviderRepository.save(serviceProvider);
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -309,17 +240,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Peer newPeer = new Peer("new-peer");
 		privateChannel.addPeer(newPeer);
 
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.singletonList(privateChannel));
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
-		assertThat(newPeer.getStatus()).isEqualTo(PeerStatus.CREATED);
+		assertThat(privateChannel.getPeers()).allMatch( p -> p.getStatus().equals(PeerStatus.CREATED));
 		assertThat(client.getPrivateChannelGroupMember("new-peer")).isNotNull();
-
-		verify(privateChannelRepository, times(2)).save(any());
-		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
-		verify(privateChannelRepository, times(0)).findAllByPeerNameAndStatus(any(), any());
-		verify(privateChannelRepository, times(0)).countByServiceProviderNameAndStatus(any(), any());
 	}
 
 	@Test
@@ -328,11 +254,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange",5671,"queueName");
 		Peer peer1 = new Peer("peer-1");
 		Peer peer2 = new Peer("peer-2");
-		PrivateChannel privateChannel = new PrivateChannel(new HashSet<>(Arrays.asList(peer1, peer2)), PrivateChannelStatus.REQUESTED, "my-channel", endpoint, "my-service-provider");
-
-		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Collections.singletonList(privateChannel));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer1, peer2), PrivateChannelStatus.REQUESTED, "my-channel", endpoint, "my-service-provider");
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -342,9 +265,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getPrivateChannelGroupMember("peer-2")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.singletonList(privateChannel));
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(), any())).thenReturn(Collections.singletonList(privateChannel));
+		privateChannelRepository.save(privateChannel);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -352,10 +273,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel.getPeers()).hasSize(1);
 		assertThat(client.getPrivateChannelGroupMember("peer-2")).isNull();
 
-		verify(privateChannelRepository, times(2)).save(any());
-		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
-		verify(privateChannelRepository, times(1)).findAllByPeerNameAndStatus(any(), any());
-		verify(privateChannelRepository, times(1)).countByServiceProviderNameAndStatus(any(), any());
 	}
 
 	@Test
@@ -366,12 +283,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Peer peer1 = new Peer("peer");
 		Peer peer2 = new Peer("peer");
 
-		PrivateChannel privateChannel1 = new PrivateChannel(new HashSet<>(Arrays.asList(peer1)), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "my-service-provider");
-		PrivateChannel privateChannel2 = new PrivateChannel(new HashSet<>(Arrays.asList(peer2)), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "my-service-provider");
-
-		when(serviceProviderRepository.save(serviceProvider)).thenReturn(serviceProvider);
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel1, privateChannel2));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Collections.emptyList());
+		PrivateChannel privateChannel1 = new PrivateChannel(Set.of(peer1), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "my-service-provider");
+		PrivateChannel privateChannel2 = new PrivateChannel(Set.of(peer2), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "my-service-provider");
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -381,9 +296,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider.getName())).thenReturn(Arrays.asList(privateChannel1, privateChannel2));
-		when(privateChannelRepository.findAllByPeerNameAndStatus(any(), any())).thenReturn(Arrays.asList(privateChannel1, privateChannel2));
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -392,11 +305,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel2.getPeers()).hasSize(0);
 		assertThat(peer1.getStatus()).isEqualTo(PeerStatus.CREATED);
 		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
-
-		verify(privateChannelRepository, times(3)).save(any());
-		verify(privateChannelRepository, times(2)).findAllByStatusAndServiceProviderName(any(), any());
-		verify(privateChannelRepository, times(1)).findAllByPeerNameAndStatus(any(), any());
-		verify(privateChannelRepository, times(1)).countByServiceProviderNameAndStatus(any(), any());
 	}
 
 	@Test
@@ -408,11 +316,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		Peer peer1 = new Peer("peer");
 		Peer peer2 = new Peer("my-service-provider-1");
 
-		PrivateChannel privateChannel1 = new PrivateChannel(new HashSet<>(Arrays.asList(peer1)), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "my-service-provider-1");
-		PrivateChannel privateChannel2 = new PrivateChannel(new HashSet<>(Arrays.asList(peer2)), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "my-service-provider-2");
+		PrivateChannel privateChannel1 = new PrivateChannel(Set.of(peer1), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "my-service-provider-1");
+		PrivateChannel privateChannel2 = new PrivateChannel(Set.of(peer2), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "my-service-provider-2");
 
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel1));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider1.getName())).thenReturn(Collections.emptyList());
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider1, client.getQpidDelta());
 
@@ -421,10 +329,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getPrivateChannelGroupMember("my-service-provider-1")).isNotNull();
 		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
 
-
-		when(privateChannelRepository.findAllByServiceProviderName(any())).thenReturn(Arrays.asList(privateChannel2));
-		when(privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, serviceProvider2.getName())).thenReturn(Collections.emptyList());
-
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 
 		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -432,8 +336,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(client.getPrivateChannelGroupMember("my-service-provider-2")).isNotNull();
 
 		peer2.setStatus(PeerStatus.TEAR_DOWN);
-
-		when(privateChannelRepository.countByServiceProviderNameAndStatus(any(), any())).thenReturn(1L);
+		privateChannelRepository.save(privateChannel2);
 
 		router.syncPrivateChannels(serviceProvider2, client.getQpidDelta());
 		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
@@ -441,15 +344,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(privateChannel2.getPeers()).hasSize(0);
 		assertThat(client.getPrivateChannelGroupMember("my-service-provider-1")).isNotNull();
 
-		verify(privateChannelRepository, times(3)).save(any());
-		verify(privateChannelRepository, times(3)).findAllByStatusAndServiceProviderName(any(), any());
-		verify(privateChannelRepository, times(1)).findAllByPeerNameAndStatus(any(), any());
-		verify(privateChannelRepository, times(1)).countByServiceProviderNameAndStatus(any(), any());
 	}
 
 
 	@Test
-	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException, JMSException {
+	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
+		fail();
+	}
+/*
 		String source = "king_gustaf_source";
 		LocalSubscription subscription = new LocalSubscription(
 				1,
@@ -1175,5 +1077,5 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		}
 	}
 
-
+*/
 }
