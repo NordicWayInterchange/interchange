@@ -27,6 +27,7 @@ The goal is to quickly assess the overall health and status of the system, enabl
 - Tanstack
 - PKI.js
 - NextAuth.js
+- Keycloak
 
 ## Installation and setup
 
@@ -65,11 +66,23 @@ AUTH0_BASE_URL=
 AUTH0_CLIENT_ID=
 AUTH0_CLIENT_SECRET=
 AUTH0_ISSUER=
+
+# KeyCloak
+USE_KEYCLOAK=
+KEYCLOAK_REALM=
+KEYCLOAK_CLIENT_ID=
+KEYCLOAK_CLIENT_SECRET=
+EXTERNAL_KEYCLOAK_URL=
+INTERNAL_KEYCLOAK_URL=
 ```
 
 ## Authentication
 
 ---
+
+Admin-frontend supports both keycloak and Auth0 as authentication providers.
+
+Keycloak is an open source identity and access management solution. It adds authentication to applications and secure services. https://www.keycloak.org/
 
 NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
 
@@ -81,6 +94,16 @@ providers: [
       clientId: process.env.AUTH0_CLIENT_ID,
       clientSecret: process.env.AUTH0_CLIENT_SECRET,
       issuer: process.env.AUTH0_ISSUER,
+    })
+  ]
+```
+Keycloak example:
+```jsx
+providers: [
+    Keycloak({
+        clientId: process.env.KEYCLOAK_CLIENT_ID,
+        clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
+        issuer: process.env.KEYCLOAK_REALM,
     })
   ]
 ```
