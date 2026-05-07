@@ -4,7 +4,7 @@ import {signIn} from "next-auth/react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Image from "next/image";
-import logo from "@/../public/napcore-logo.png";
+import logo from "@/../public/interchange-logo.png";
 import { Card, Typography } from "@mui/material";
 import * as React from "react";
 import { Box } from "@mui/system";
@@ -22,8 +22,8 @@ export default function Login(isKeycloak: any) {
         width: "500px",
       }}
     >
-      <Box sx={{ alignSelf: "center", mb: 3 }}>
-        <Image src={logo} alt="Nordic Way logo" width={150} priority={true} />
+      <Box sx={{ alignSelf: "center", mb: -1}}>
+        <Image src={logo} alt="Nordic Way logo" width={170} priority={true} />
       </Box>
       <Typography variant="body1">
         Access to this application is restricted to authorized users only. If
@@ -40,7 +40,7 @@ export default function Login(isKeycloak: any) {
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
-                    sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                    sx={{ textTransform: "none", width: 250, alignSelf: "center", ml:10}}
                     onClick={() => signIn("keycloak")}
                 >
                     <Typography>Sign in with keycloak</Typography>
@@ -50,7 +50,7 @@ export default function Login(isKeycloak: any) {
                 <StyledButton
                     variant="contained"
                     color="buttonThemeColor"
-                    sx={{textTransform: "none", width: 250, alignSelf: "center"}}
+                    sx={{textTransform: "none", width: 250, alignSelf: "center", ml:10}}
                     onClick={() => signIn("auth0")}
                 >
                     <Typography>Sign in with auth0</Typography>

@@ -22,7 +22,19 @@ spec:
                 name: {{ .Release.Name }}-napcore-frontend
                 port:
                   number: 3000
-  {{- end}}
+    {{- end}}
+    {{ if .Values.napcore_frontend.keycloak.enabled }}
+    - host: portallogin.{{ .Values.external_name }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-keycloak-http
+                port:
+                  number: 8080
+    {{- end }}
     {{- if .Values.admin_frontend.enabled}}
     - host: admin.{{ .Values.external_name }}
       http:
@@ -47,5 +59,10 @@ spec:
         - admin.{{ .Values.external_name }}
       secretName: {{ .Release.Name }}-admin-cert
     {{- end}}
+    {{- if .Values.napcore_frontend.keycloak.enabled }}
+    - hosts:
+        - portallogin.{{ .Values.external_name }}
+      secretName: {{ .Release.Name }}-keycloak-cert
+    {{- end }}
   {{- end }}
 {{- end }}

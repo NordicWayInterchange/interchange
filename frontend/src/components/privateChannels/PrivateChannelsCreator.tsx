@@ -142,7 +142,7 @@ const PrivateChannelsCreator = () => {
                   top: "3px",
                 }}
               >
-                Peers *
+                Peers
               </Typography>
 
               <Box
