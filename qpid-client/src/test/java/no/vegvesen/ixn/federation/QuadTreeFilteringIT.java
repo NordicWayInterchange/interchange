@@ -99,70 +99,23 @@ public class QuadTreeFilteringIT {
             assertThat(receivedMessage).isNull();
         }
 
-		/*
         @Test
         public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-            SelectorBuilder datexNoAbcdef = new SelectorBuilder()
-                    .messageType("DATEX2")
-                    .originatingCountry("NO")
-                    .quadTree("abcdef");
-            String dataTypeSelector = datexNoAbcdef.toSelector();
+            String dataTypeSelector = "(messageType='DATEX2') AND (originatingCountry='NO') AND (quadTree like '%,abcdef%')";
             String kingGustaf = "king_gustaf";
             String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
-            Message receivedMessage = sendMessageServiceProvider(kingGustaf, dataTypeSelector, messageQuadTreeTiles,"spQ1","spEx1");
+            Message receivedMessage = sendAndReceive(messageQuadTreeTiles,dataTypeSelector,kingGustaf, "spQ1","spEx1");
             assertThat(receivedMessage).isNotNull();
         }
 
         @Test
         public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
-            SelectorBuilder datexNoAbcdef = new SelectorBuilder()
-                    .messageType("DATEX2")
-                    .originatingCountry("NO")
-                    .quadTree("abcdefghijklmnopqrs");
-            String selector = datexNoAbcdef.toSelector();
+            String selector = "(messageType = 'DATEX2') AND (originatingCountry = 'NO') AND (quadTree like '%,abcdefghijklmnopqrs%')";
             String kingGustaf = "king_gustaf";
             String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
-            Message receivedMessage = sendMessageServiceProvider(kingGustaf, selector, messageQuadTreeTiles, "spQ2","spEx2");
+			Message receivedMessage = sendAndReceive(messageQuadTreeTiles,selector,kingGustaf,"qpQ2","spEx2");
             assertThat(receivedMessage).isNotNull();
         }
-
-
-     */
-	private Message sendMessageServiceProvider(String serviceProviderName, String selector, String messageQuadTreeTiles, String queueName, String exchangeName) throws Exception {
-		qpidClient.createQueue(queueName);
-		qpidClient.addReadAccess(serviceProviderName, queueName);
-		qpidClient.createHeadersExchange(exchangeName);
-		qpidClient.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
-
-		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
-
-		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
-		MessageConsumer consumer = sink.createConsumer();
-
-		Source source = new Source(qpidContainer.getAmqpsUrl(), exchangeName, sslContext);
-		source.start();
-		source.sendNonPersistentMessage(source.createMessageBuilder()
-				.textMessage("fisk")
-				.userId(HOST_NAME)
-				.messageType(Constants.DATEX_2)
-				.publicationType("Obstruction")
-				.publisherName("publishername")
-				.protocolVersion("DATEX2;2.3")
-				.publisherId("NO-123")
-				.publicationId("NO-123-pub")
-				.latitude(60.352374)
-				.longitude(13.334253)
-				.originatingCountry("NO")
-				.shardId(1)
-				.shardCount(1)
-				.quadTreeTiles(messageQuadTreeTiles)
-				.timestamp(System.currentTimeMillis())
-				.build());
-		Message receivedMessage = consumer.receive(1000);
-		sink.close();
-		source.close();
-		return receivedMessage;
-	}
 
 	private Message sendAndReceive(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
 		qpidClient.createQueue(queueName);
@@ -171,7 +124,7 @@ public class QuadTreeFilteringIT {
 		qpidClient.addBinding(exchangeName , new Binding(exchangeName, queueName, new Filter(selector)));
 		qpidClient.addWriteAccess(spName, exchangeName);
 
-		SSLContext sslContext = sslClientContext(stores, "king_gustaf");
+		SSLContext sslContext = sslClientContext(stores, spName);
 
 		Sink sink = new Sink(qpidContainer.getAmqpsUrl(), queueName, sslContext);
 		MessageConsumer consumer = sink.createConsumer();
