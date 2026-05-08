@@ -7,7 +7,6 @@ import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
@@ -93,14 +92,16 @@ public class ServiceProviderRouter {
             serviceProvider = localSubscriptionService.syncSubscriptions(brokerExternalName,messageChannelPort,serviceProvider, delta);
             serviceProvider = localSubscriptionService.removeUnwantedSubscriptions(serviceProvider);
 
-            ServiceProviderMember groupMember = qpidClient.getServiceProviderMember(serviceProvider.getName());
+            ServiceProviderMember groupMember = delta.findServiceProviderMemberByName(serviceProvider.getName());
             if (serviceProvider.hasCapabilitiesOrActiveSubscriptions()) {
                 if (groupMember == null) {
-                    qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
+                    groupMember = qpidClient.addServiceProviderMemberToGroup(serviceProvider.getName());
+                    delta.addServiceProviderMember(groupMember);
                 }
             } else {
                 if (groupMember != null) {
                     qpidClient.removeServiceProviderMemberFromGroup(groupMember);
+                    delta.removeServiceProviderMember(groupMember);
                 }
             }
 
