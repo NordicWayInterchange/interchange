@@ -1,0 +1,21 @@
+{{ if and .Values.napcore_frontend.enabled .Values.napcore_frontend.keycloak.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-keycloak-db
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: keycloak-db
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    component: keycloak-db
+    release: {{ .Release.Name }}
+  ports:
+    - name: db
+      port: 5432
+      targetPort: db
+
+{{- end }}

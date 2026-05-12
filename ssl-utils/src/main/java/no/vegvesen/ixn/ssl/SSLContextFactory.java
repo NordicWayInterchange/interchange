@@ -26,14 +26,8 @@ public class SSLContextFactory {
 		KeyStore keystore = null;
 		try {
 			InputStream stream = new FileInputStream(keystoreDetails.getFileName());
-			keystore = loadKeystoreFromStream(stream, keystoreDetails.getType(), keystoreDetails.getPassword());
-		} catch (FileNotFoundException e) {
-			throw new InvalidSSLConfig(String.format("Could not load store from %s, of type %s", keystoreDetails.getFileName(), keystoreDetails.getType()), e);
-		}
-		return keystore;
-	}
-
-	private static KeyStore loadKeystoreFromStream(InputStream stream, KeystoreType type, String password) {
+			KeystoreType type = keystoreDetails.getType();
+			String password = keystoreDetails.getPassword();
 		KeyStore keyStore;
 		try {
 			keyStore = KeyStore.getInstance(type.toString());
@@ -43,12 +37,15 @@ public class SSLContextFactory {
 		try {
 			keyStore.load(stream, password.toCharArray());
 		} catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-			throw new InvalidSSLConfig("Could not load keystore", e);
+			throw new InvalidSSLConfig("Could not load keystore", e); }
+			keystore = keyStore;
+		} catch (FileNotFoundException e) {
+			throw new InvalidSSLConfig(String.format("Could not load store from %s, of type %s", keystoreDetails.getFileName(),keystoreDetails.getType()), e);
 		}
-		return keyStore;
+		return keystore;
 	}
 
-	private static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
+	public static SSLContext newSSLContext(final KeyStore ks, final String keyPassword, final KeyStore ts) {
 		final KeyManagerFactory kmf;
 		final TrustManagerFactory tmf;
 		try {
@@ -72,13 +69,4 @@ public class SSLContextFactory {
 		}
 	}
 
-	public static class InvalidSSLConfig extends RuntimeException {
-		InvalidSSLConfig(String message, Throwable t) {
-			super(message, t);
-		}
-
-		InvalidSSLConfig(Throwable e) {
-			super(e);
-		}
-	}
 }

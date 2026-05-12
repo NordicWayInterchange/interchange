@@ -16,6 +16,7 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
@@ -49,17 +50,20 @@ public class OnboardRestController {
 	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
 	private TypeTransformer typeTransformer = new TypeTransformer();
 	private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
+	private final OutgoingMatchRepository outgoingMatchRepository;
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
 								 NeighbourRepository neighbourRepository,
 								 PrivateChannelRepository privateChannelRepository, CertService certService,
-								 InterchangeNodeProperties nodeProperties) {
+								 InterchangeNodeProperties nodeProperties,
+								 OutgoingMatchRepository outgoingMatchRepository) {
 		this.serviceProviderRepository = serviceProviderRepository;
 		this.neighbourRepository = neighbourRepository;
 		this.privateChannelRepository = privateChannelRepository;
 		this.certService = certService;
 		this.nodeProperties = nodeProperties;
+		this.outgoingMatchRepository = outgoingMatchRepository;
 	}
 
 
@@ -172,7 +176,9 @@ public class OnboardRestController {
 		validatePathVariable(serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		logger.info("List network capabilities for service provider {}", serviceProviderName);
-		Set<Capability> localCapabilities = getAllLocalCapabilities();
+		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+				.map(OutgoingMatch::getCapability)
+				.collect(Collectors.toSet());
 		Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
 		if (selector != null) {
 			if (!selector.isEmpty()) {
@@ -180,6 +186,7 @@ public class OnboardRestController {
 				neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
 			}
 		}
+
 		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, localCapabilities, neighbourCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;

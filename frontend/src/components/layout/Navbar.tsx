@@ -5,6 +5,8 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { signOut, useSession } from "next-auth/react";
 import { Box } from "@mui/system";
 import LogoutIcon from '@mui/icons-material/Logout';
+import Image from "next/image";
+import logo from "../../../public/interchange-logo.png";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -20,10 +22,13 @@ export default function Navbar() {
       position="fixed"
     >
       <Toolbar>
+        <Box sx={{ alignSelf: "center", mr: 1, padding: -1 }}>
+          <Image src={logo} alt="Nordic Way logo" width={40} priority={true} />
+        </Box>
         <Typography variant="h6" noWrap component="div" sx={{ marginRight: "auto" }}>
           {process.env.NEXT_PUBLIC_THEME_PROVIDER == "trafficdata"
             ? "Trafficdata"
-            : "Transportportal"}
+            : "Interchange Portal"}
         </Typography>
         {showLogoutIcon && (
           <StyledSignOutBox>
