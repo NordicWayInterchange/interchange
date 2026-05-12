@@ -91,6 +91,26 @@ export default function Home() {
         </Typography>
         <Box sx={{ mt: -.5 }}><ContentCopy value={session?.user?.commonName.toString() || ""} /></Box>
       </Box>
+      {session?.user?.organization && (
+        <>
+          <Divider sx={{ marginY: 1.5, visibility: 'hidden' }} />
+          <Subheading>My organization</Subheading>
+          <Box
+            sx={{
+              ...frontPageCardStyle,
+              maxWidth: "fit-content",
+              "@media (min-width:600px)": {
+                ...frontPageCardStyle["@media (min-width:600px)"],
+                maxWidth: "fit-content",
+              },
+            }}
+          >
+            <Typography variant="h6" sx={{ fontSize: "0.85rem", textAlign: "center" }}>
+              {session.user.organization}
+            </Typography>
+          </Box>
+        </>
+      )}
       <Divider sx={{ marginY: 1.5, visibility: 'hidden' }} />
       <Subheading>Shortcuts</Subheading>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
