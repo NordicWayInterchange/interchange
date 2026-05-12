@@ -397,7 +397,7 @@ public class NapRestController {
                 .findFirst().get();
 
         logger.info("Returning updated Service Provider: {}", savedServiceProvider);
-        return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability);
+        return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability, false);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -410,7 +410,7 @@ public class NapRestController {
         logger.info("List capabilities for service provider {}", actorCommonName);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
+        List<OnboardingCapability> capabilities = transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -426,7 +426,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Capability capability = serviceProvider.getCreatedCapability(capabilityId);
-        return typeTransformer.transformCapabilityToOnboardingCapability(capability);
+        return typeTransformer.transformCapabilityToOnboardingCapability(capability, false);
     }
 
     @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -764,5 +764,14 @@ public class NapRestController {
             capabilities.addAll(neighbour.getCapabilities().getCapabilities());
         }
         return capabilities;
+    }
+
+    private List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<Capability> capabilities){
+        List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
+        for(Capability capability : capabilities){
+            boolean hasDelivery = outgoingMatchRepository.findAllByCapability_Id(capability.getId()).stream().map(OutgoingMatch::getLocalDelivery).findAny().isPresent();
+            onboardingCapabilities.add(typeTransformer.transformCapabilityToOnboardingCapability(capability, hasDelivery));
+        }
+        return onboardingCapabilities;
     }
 }

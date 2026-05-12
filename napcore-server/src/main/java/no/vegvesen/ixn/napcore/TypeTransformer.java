@@ -2,7 +2,9 @@ package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.Peer;
+import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.PrivateChannelEndpoint;
@@ -26,20 +28,13 @@ public class TypeTransformer {
         );
     }
 
-    public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability){
+    public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability, boolean hasDelivery){
         return new OnboardingCapability(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
                 capability.getMetadata().toApi(),
+                hasDelivery,
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
-    }
-
-    public List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities){
-        List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
-        for(no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities){
-            onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capability));
-        }
-        return onboardingCapabilities;
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
