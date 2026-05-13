@@ -257,8 +257,34 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>generate userhelp</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.ruleoftech</groupId>
+                        <artifactId>markdown-page-generator-plugin</artifactId>
+                        <version>2.4.2</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <inputDirectory>frontend</inputDirectory>
+                            <outputDirectory>frontend/public/doc-generated</outputDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
-
 
     <modules>
         <module>admin-server</module>
