@@ -12,8 +12,10 @@ import picocli.CommandLine.Option;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("InstantiationOfUtilityClass")
@@ -40,10 +42,19 @@ public class KeysGeneratorApplication {
         @Option(names = "-o", required = true, description = "Folder for created key and truststores")
         private Path outputFolder;
 
-        private final PasswordGenerator passwordGenerator = PasswordGenerator.staticPassword("password");
+        @Option(names = {"-s","--staticpassword"}, description = "Create a static passord for testing. The password generated will be \"password\" for all keystores")
+        private Boolean testPassword;
+
+
 
         @Override
         public Integer call() throws Exception {
+            PasswordGenerator passwordGenerator;
+            if (Objects.equals(testPassword, Boolean.TRUE)) {
+                passwordGenerator = PasswordGenerator.staticPassword("password");
+            } else {
+                passwordGenerator = PasswordGenerator.random(new SecureRandom(),12);
+            }
             if (!Files.isDirectory(outputFolder)) {
                 throw new IllegalArgumentException("Output folder is not a directory");
             }
