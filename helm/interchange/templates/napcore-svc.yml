@@ -18,7 +18,6 @@ spec:
 {{- else }}
   type: LoadBalancer
   loadBalancerIP: {{ .Values.static_external_ip }}
-  externalTrafficPolicy: Cluster
 {{- end }}
   selector:
     app: {{ .Chart.Name }}
