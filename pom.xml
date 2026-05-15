@@ -281,13 +281,34 @@
                                         <resource>
                                             <directory>frontend</directory>
                                             <includes>
-                                                <include>**/*.md</include>
+                                                <include>**/USERHELP.md</include>
                                             </includes>
                                         </resource>
                                         <resource>
                                             <directory>${project.basedir}</directory>
                                             <includes>
                                                 <include>GLOSSARY.md</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-doc-images</id>
+                                <phase>generate-resources</phase>
+
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+
+                                <configuration>
+                                    <outputDirectory>frontend/public/generated-doc</outputDirectory>
+
+                                    <resources>
+                                        <resource>
+                                            <directory>demo/images</directory>
+                                            <includes>
+                                                <include>**/*.png</include>
                                             </includes>
                                         </resource>
                                     </resources>

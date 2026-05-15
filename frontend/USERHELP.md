@@ -11,17 +11,21 @@
     color: white;
   "
 >
-  <h2 style="margin:0;">User Help</h2>
+  <h2 style="margin:0;">Interchange Portal</h2>
 </div>
 
 <div style="padding-top:70px;">
+
+<body style="margin: 40px;">
+
+<h2 style="margin:0;">User help</h2>
 
 ### How to register a Capability
 
 You can create a new [Capability](/generated-doc/GLOSSARY.html#capability) by clicking on the `Add capability` button in
 `My capabilities` tab.
 
-<img src="../demo/images/capabilities.png" alt="Add capabilities" />
+<img src="/generated-doc/capabilities.png" alt="Add capabilities" />
 
 The following fields need to be filled out:
 
@@ -49,7 +53,46 @@ The following fields need to be filled out:
 
 Following is an example of how the fields can be filled out.
 
-<img src="../demo/images/add_capability.png" alt="Capability details">
+<img src="/generated-doc/add_capability.png" alt="Capability details">
+
+<table style="border-collapse: collapse; border: 1px solid black;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Publisher ID</td>
+            <td>NO00000</td>
+        </tr>
+        <tr>
+            <td>Publication ID</td>
+            <td>NO00000:pub-1</td>
+        </tr>
+        <tr>
+            <td>Protocol version</td>
+            <td>DENM:1.2.2</td>
+        </tr>
+        <tr>
+            <td>Originating country</td>
+            <td>NO</td>
+        </tr>
+        <tr>
+            <td>Message type</td>
+            <td>DENM</td>
+        </tr>
+        <tr>
+            <td>Cause codes</td>
+            <td>5,6</td>
+        </tr>
+        <tr>
+            <td>Quadtree</td>
+            <td>12003</td>
+        </tr>
+    </tbody>
+</table>
 
 | Name                | Value         |
 |---------------------|---------------|
@@ -65,15 +108,15 @@ Once the capability properties have been filled out, click on `Create my capabil
 created capability in the list of
 capabilities, either in `My capabilities` or ` Network capabilities` tab.
 
-<img src="../demo/images/capability_list.png" alt="Created capability">
+<img src="/generated-doc/capability_list.png" alt="Created capability">
 
 Click on the three dots on the far right
 
-<img src="../demo/images/dot_dot_dot.png" alt="Dot dot dot">
+<img src="/generated-doc/dot_dot_dot.png" alt="Dot dot dot">
 
 Or simply click on a capability row to view its details in the side window.
 
-<img src="../demo/images/capability_details.png" alt="Capability details">
+<img src="/generated-doc/capability_details.png" alt="Capability details">
 
 ### How to register a Delivery
 
@@ -83,11 +126,11 @@ delivery by clicking on the listed capabilities. Once you click on capability ro
 publication ID field. While creating a delivery you have the option to enable dead letter
 queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq.
 
-<img src="../demo/images/create_delivery.png" alt="Create_delivery">
+<img src="/generated-doc/create_delivery.png" alt="Create_delivery">
 
 You can also click on advanced mode and write your own selector by using a provided cheat sheet.
 
-<img src="../demo/images/delivery_cheatsheet.png" alt="Delivery_cheatsheet">
+<img src="/generated-doc/delivery_cheatsheet.png" alt="Delivery_cheatsheet">
 
 After you click on `Save delivery`, you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
@@ -97,14 +140,14 @@ Click on the three dots on the far right to see the details of the delivery incl
 There is also another way of creating a delivery. In `My capabilities` tab, click on a capability row, or click the three
 dots on the far right of the capability row. This shows the details of the created capability.
 
-<img src="../demo/images/capability_details.png" alt="Capability details">
+<img src="/generated-doc/capability_details.png" alt="Capability details">
 
 In this side window, at the bottom, you can create a delivery by clicking on `Deliver` button. You can add a
 description of the new Delivery (description is optional). You have also the option to
 enable dead letter queue (dlq) for the delivery you are creating. You can also remove
 the capability that you have just created from the capability details side window.
 
-<img src="../demo/images/deliver.png" alt="Deliver">
+<img src="/generated-doc/deliver.png" alt="Deliver">
 
 ### How to register a Subscription
 
@@ -113,19 +156,19 @@ menu, and you should see your
 capability, as well as capabilities created by
 other users both on your instance, or any other interchanges in the cluster.
 
-<img src="../demo/images/network_capabilities.png" alt="Network capabilities">
+<img src="/generated-doc/network_capabilities.png" alt="Network capabilities">
 
 Click on the three dots on the far right, and you should see the details of this capability. Enter a description for
 your new subscription on the bottom of the
 page (description is optional), and click `Subscribe`
 
-<img src="../demo/images/subscribe.png" alt="Subscribe">
+<img src="/generated-doc/subscribe.png" alt="Subscribe">
 
 Click `Subscriptions` on the left-hand menu, and you should see the newly created subscription in the list. The status
 might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-<img src="../demo/images/subscription_list.png" alt="Subscription_list">
+<img src="/generated-doc/subscription_list.png" alt="Subscription_list">
 
 Click on the subscription or the three dots on the far right side to see the details of the subscription including
 the endpoint.
@@ -136,7 +179,7 @@ the publication ID field.
 You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on
 `Save subscription` at the bottom. You will be redirected to the subscriptions section where you can see your newly added subscription.
 
-<img src="../demo/images/Cheatsheet.png" alt="Subscription_cheatsheet">
+<img src="/generated-doc/Cheatsheet.png" alt="Subscription_cheatsheet">
 
 ## Private channels
 
@@ -155,19 +198,19 @@ after a few seconds.
 You can also add or remove peers or even remove the private channel from the side window.
 The endpoint for the private channel consists of the hostname, port and the private channels' queue name.
 
-<img src="../demo/images/privateChannel_details.png" alt="Private channels">
+<img src="/generated-doc/privateChannel_details.png" alt="Private channels">
 
 If another [Service provider](/generated-doc/GLOSSARY.html#service-provider) has created a private channel subscribed to yours, it will appear in the
 `My private channel subscriptions`
 list.
 
-<img src="../demo/images/privateChannel_subscription.png" alt="My private channel subscriptions">
+<img src="/generated-doc/privateChannel_subscription.png" alt="My private channel subscriptions">
 
 You can use the [Common name](/generated-doc/GLOSSARY.html#common-name) of the other service provider as the peer name while creating
 a private channel.
 The `Common name` can be copied from `My common name` section in `Home` tab.
 
-<img src="../demo/images/commonName.png" alt="Common name">
+<img src="/generated-doc/commonName.png" alt="Common name">
 
 ## Bi-queues
 
@@ -175,11 +218,11 @@ In [Bi-queues](/generated-doc/GLOSSARY.html#bi-queues) tab you can see the list 
 per [message type](/generated-doc/GLOSSARY.html#messagetype-).
 You can also add or remove access to subscribe to bi-queues.
 
-<img src="(../demo/images/bi-queues.png" alt="Bi-queues">
+<img src="/generated-doc/bi-queues.png" alt="Bi-queues">
 
 By clicking on each bi-queue from the list you can see the bi-queue endpoint details.
 
-<img src="../demo/images/bi-queue_details.png" alt="Bi-queue details">
+<img src="/generated-doc/bi-queue_details.png" alt="Bi-queue details">
 
 ## Certificate
 
@@ -191,7 +234,8 @@ Interchange.
 Enter the [Country code](/generated-doc/GLOSSARY.html#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate.
 
-<img src="../demo/images/certificate.png" alt="Certificate">
+<img src="/generated-doc/certificate.png" alt="Certificate">
+</body>
 </div>
 
 
