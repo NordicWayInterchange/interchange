@@ -133,6 +133,21 @@ export default function Sidebar() {
         <Box sx={{ marginTop: "auto", padding: 2 }}>
           <List>
             {SECONDARY_PAGES.map((page) => (
+                <ListItem
+                    sx={{
+                      borderRadius: 100,
+                      my: 2,
+                      backgroundColor:
+                          router.asPath === page.url ? "sidebarActiveColor" : null,
+                      border: "1px solid transparent",
+                      "&:hover": {
+                        backgroundColor: "sidebarActiveColor",
+                        border: "1px solid",
+                        borderColor: "sidebarBorderColor",
+                      },
+                    }}
+                    disablePadding
+                >
                 <ListItemButton
                     key={page.text}
                     component="a"
@@ -144,6 +159,7 @@ export default function Sidebar() {
                   </ListItemIcon>
                   <ListItemText primary={page.text}/>
                 </ListItemButton>
+                </ListItem>
             ))}
           </List>
         </Box>
