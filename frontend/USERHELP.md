@@ -2,10 +2,10 @@
 
 ### How to register a Capability
 
-You can create a new [Capability](../GLOSSARY.md#capability) by clicking on the `Add capability` button in
+You can create a new [Capability](/doc-generated/GLOSSARY.html#capability) by clicking on the `Add capability` button in
 `My capabilities` tab.
 
-![Add capability](../demo/images/capabilities.png)
+![Add capability](../../../demo/images/capabilities.png)
 
 The following fields need to be filled out:
 
@@ -61,7 +61,7 @@ Or simply click on a capability row to view its details in the side window.
 
 ### How to register a Delivery
 
-In order to create a [Delivery](../GLOSSARY.md#delivery), you can click on `Create delivery` from `Deliveries` tab and
+In order to create a [Delivery](/doc-generated/GLOSSARY.html#delivery), you can click on `Create delivery` from `Deliveries` tab and
 create a
 delivery by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the
 publication ID field. While creating a delivery you have the option to enable dead letter
@@ -92,7 +92,7 @@ the capability that you have just created from the capability details side windo
 
 ### How to register a Subscription
 
-In order to create a [Subscription](../GLOSSARY.md#subscription), click on `Network capabilities` on the left-hand
+In order to create a [Subscription](/doc-generated/GLOSSARY.html#subscription), click on `Network capabilities` on the left-hand
 menu, and you should see your
 capability, as well as capabilities created by
 other users both on your instance, or any other interchanges in the cluster.
@@ -124,8 +124,8 @@ You can also click on advanced mode and write your own selector by using a provi
 
 ## Private channels
 
-In [Private channel](../GLOSSARY.md#private-channel) tab you can display, create and
-delete [Peers](../GLOSSARY.md#private-channel-peer) from private channels they own
+In [Private channel](/doc-generated/GLOSSARY.html#private-channel) tab you can display, create and
+delete [Peers](/doc-generated/GLOSSARY.html#private-channel-peer) from private channels they own
 or remove them from other private channels that are subscribed to them.
 
 ### How to register a Private channel
@@ -141,13 +141,13 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 ![Private channels](../demo/images/privateChannel_details.png)
 
-If another [Service provider](../GLOSSARY.md#service-provider) has created a private channel subscribed to yours, it will appear in the
+If another [Service provider](/doc-generated/GLOSSARY.html#service-provider) has created a private channel subscribed to yours, it will appear in the
 `My private channel subscriptions`
 list.
 
 ![My private channel subscriptions](../demo/images/privateChannel_subscription.png)
 
-You can use the [Common name](../GLOSSARY.md#common-name) of the other service provider as the peer name while creating
+You can use the [Common name](/doc-generated/GLOSSARY.html#common-name) of the other service provider as the peer name while creating
 a private channel.
 The `Common name` can be copied from `My common name` section in `Home` tab.
 
@@ -155,8 +155,8 @@ The `Common name` can be copied from `My common name` section in `Home` tab.
 
 ## Bi-queues
 
-In [Bi-queues](../GLOSSARY.md#bi-queues) tab you can see the list of bi-queues
-per [message type](../GLOSSARY.md#messagetype-).
+In [Bi-queues](/doc-generated/GLOSSARY.html#bi-queues) tab you can see the list of bi-queues
+per [message type](/doc-generated/GLOSSARY.html#messagetype-).
 You can also add or remove access to subscribe to bi-queues.
 
 ![Bi-queues](../demo/images/bi-queues.png)
@@ -172,7 +172,7 @@ Interchange.
 
 ### How to create a Certificate
 
-Enter the [country code](../GLOSSARY.md#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
+Enter the [country code](/doc-generated/GLOSSARY.html#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate.
 
 ![Certificate](../demo/images/certificate.png)

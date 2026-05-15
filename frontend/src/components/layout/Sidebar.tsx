@@ -73,7 +73,7 @@ const SECONDARY_PAGES: Array<IPages> = [
     text: "User help",
     url: "/doc-generated/USERHELP.html",
     icon: <ArticleIcon />
-  },
+  }
 ];
 
 export default function Sidebar() {
@@ -131,7 +131,18 @@ export default function Sidebar() {
         </Box>
 
         <Box sx={{ marginTop: "auto", padding: 2 }}>
-          <List>{mapPages(SECONDARY_PAGES)}</List>
+          <List>
+            {SECONDARY_PAGES.map((page) => (
+                <ListItemButton
+                    key={page.text}
+                    component="a"
+                    href={page.url}
+                    target="_self"
+                >
+                  <ListItemText primary={page.text} />
+                </ListItemButton>
+            ))}
+          </List>
         </Box>
         <Version></Version>
       </StyledDrawer>
