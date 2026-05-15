@@ -139,7 +139,10 @@ export default function Sidebar() {
                     href={page.url}
                     target="_self"
                 >
-                  <ListItemText primary={page.text} />
+                  <ListItemIcon sx={{ color: "text.primary"}}>
+                    {page.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={page.text}/>
                 </ListItemButton>
             ))}
           </List>
