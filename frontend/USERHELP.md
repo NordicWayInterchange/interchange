@@ -9,18 +9,18 @@
     box-shadow: none;
     padding: 15px 24px;
     color: white;
+    font-family: 'Open Sans', sans-serif;
   "
 >
-  <h2 style="margin:0;">Interchange Portal</h2>
+  <h3 style="margin:0;">User help</h3>
 </div>
 
-<div style="padding-top:70px;">
+<div style="padding-top:50px;">
 
-<body style="margin: 40px;">
-
-<h2 style="margin:0;">User help</h2>
+<body style="margin: 40px; background-color: #f0f1f1; font-family: 'Open Sans', sans-serif; color:#444f55; line-height: 1.6;">
 
 ### How to register a Capability
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 You can create a new [Capability](/generated-doc/GLOSSARY.html#capability) by clicking on the `Add capability` button in
 `My capabilities` tab.
@@ -55,7 +55,7 @@ Following is an example of how the fields can be filled out.
 
 <img src="/generated-doc/add_capability.png" alt="Capability details">
 
-<table style="border-collapse: collapse; border: 1px solid black;">
+<table style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
     <thead>
         <tr>
             <th>Name</th>
@@ -94,16 +94,6 @@ Following is an example of how the fields can be filled out.
     </tbody>
 </table>
 
-| Name                | Value         |
-|---------------------|---------------|
-| Publisher ID        | NO00000       |
-| Publication ID      | NO00000:pub-1 |
-| Protocol version    | DENM:1.2.2    |
-| Originating country | NO            |
-| Message type        | DENM          |
-| Cause codes         | 5,6           |
-| Quadtree            | 12003         |
-
 Once the capability properties have been filled out, click on `Create my capability` button. You should see the newly
 created capability in the list of
 capabilities, either in `My capabilities` or ` Network capabilities` tab.
@@ -118,7 +108,9 @@ Or simply click on a capability row to view its details in the side window.
 
 <img src="/generated-doc/capability_details.png" alt="Capability details">
 
+
 ### How to register a Delivery
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In order to create a [Delivery](/generated-doc/GLOSSARY.html#delivery), you can click on `Create delivery` from `Deliveries` tab and
 create a
@@ -149,7 +141,9 @@ the capability that you have just created from the capability details side windo
 
 <img src="/generated-doc/deliver.png" alt="Deliver">
 
+
 ### How to register a Subscription
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In order to create a [Subscription](/generated-doc/GLOSSARY.html#subscription), click on `Network capabilities` on the left-hand
 menu, and you should see your
@@ -181,13 +175,13 @@ You can also click on advanced mode and write your own selector by using a provi
 
 <img src="/generated-doc/Cheatsheet.png" alt="Subscription_cheatsheet">
 
-## Private channels
+
+### How to register a Private channel
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In [Private channel](/generated-doc/GLOSSARY.html#private-channel) tab you can display, create and
 delete [Peers](/generated-doc/GLOSSARY.html#private-channel-peer) from private channels they own
 or remove them from other private channels that are subscribed to them.
-
-### How to register a Private channel
 
 A private channel can be added by clicking on the `Create private channel` button where you can add a peer name and
 description.
@@ -212,7 +206,9 @@ The `Common name` can be copied from `My common name` section in `Home` tab.
 
 <img src="/generated-doc/commonName.png" alt="Common name">
 
+
 ## Bi-queues
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In [Bi-queues](/generated-doc/GLOSSARY.html#bi-queues) tab you can see the list of bi-queues
 per [message type](/generated-doc/GLOSSARY.html#messagetype-).
@@ -224,12 +220,12 @@ By clicking on each bi-queue from the list you can see the bi-queue endpoint det
 
 <img src="/generated-doc/bi-queue_details.png" alt="Bi-queue details">
 
-## Certificate
+
+### How to create a Certificate
+<div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 You can generate the key and certificate in the portal in order to generate the key and trust stores for using the
 Interchange.
-
-### How to create a Certificate
 
 Enter the [Country code](/generated-doc/GLOSSARY.html#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
 certificate and root certificate.
