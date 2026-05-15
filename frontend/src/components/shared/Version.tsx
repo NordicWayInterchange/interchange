@@ -10,7 +10,7 @@ return (
                 position: "fixed",
                 bottom: 8,
                 left: 12,
-                fontSize: "0.69em",
+                fontSize: "0.63em",
                 opacity: .85
             }}
         >

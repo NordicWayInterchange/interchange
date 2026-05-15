@@ -71,7 +71,7 @@ const SECONDARY_PAGES: Array<IPages> = [
   },
   {
     text: "User help",
-    url: "/doc-generated/USERHELP.html",
+    url: "/generated-doc/USERHELP.html",
     icon: <ArticleIcon />
   }
 ];
