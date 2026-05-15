@@ -5,7 +5,7 @@
 You can create a new [Capability](/doc-generated/GLOSSARY.html#capability) by clicking on the `Add capability` button in
 `My capabilities` tab.
 
-![Add capability](../../../demo/images/capabilities.png)
+![Add capability](../../demo/images/capabilities.png)
 
 The following fields need to be filled out:
 

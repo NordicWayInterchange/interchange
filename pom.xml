@@ -276,18 +276,18 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>frontend/public/doc-generated</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/md-input</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>frontend</directory>
                                             <includes>
-                                                <include>**/USERHELP.md</include>
+                                                <include>**/*.md</include>
                                             </includes>
                                         </resource>
                                         <resource>
                                             <directory>${project.basedir}</directory>
                                             <includes>
-                                                <include>**/GLOSSARY.md</include>
+                                                <include>GLOSSARY.md</include>
                                             </includes>
                                         </resource>
                                     </resources>
@@ -310,8 +310,8 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <inputDirectory>frontend/public/doc-generated</inputDirectory>
-                            <outputDirectory>frontend/public/doc-generated</outputDirectory>
+                            <inputDirectory>${project.build.directory}/md-input</inputDirectory>
+                            <outputDirectory>frontend/public/generated-doc</outputDirectory>
                         </configuration>
                     </plugin>
                 </plugins>
