@@ -7,12 +7,25 @@
     z-index: 1201;
     background-color: #444F55;
     box-shadow: none;
-    padding: 15px 24px;
+    padding: 11px 23px;
     color: white;
     font-family: 'Open Sans', sans-serif;
   "
 >
-  <h3 style="margin:0;">User help</h3>
+<a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+<img src="/generated-doc/interchange-logo.png" alt="Nordic Way logo" style="width: 40px; margin-right: 8px"/>
+  <div
+    style="
+      font-family: Roboto, Helvetica, Arial, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 500;
+      line-height: 1.6;
+      cursor: pointer;
+    "
+  >
+    Interchange Portal
+  </div>
+</a>
 </div>
 
 <div style="padding-top:50px;">
@@ -57,39 +70,39 @@ Following is an example of how the fields can be filled out.
 
 <table style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
     <thead>
-        <tr>
-            <th>Name</th>
-            <th>Value</th>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <th style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Name</th>
+            <th style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Value</th>
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>Publisher ID</td>
-            <td>NO00000</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Publisher ID</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">NO00000</td>
         </tr>
-        <tr>
-            <td>Publication ID</td>
-            <td>NO00000:pub-1</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Publication ID</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">NO00000:pub-1</td>
         </tr>
-        <tr>
-            <td>Protocol version</td>
-            <td>DENM:1.2.2</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Protocol version</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;"> DENM:1.2.2</td>
         </tr>
-        <tr>
-            <td>Originating country</td>
-            <td>NO</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Originating country</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">NO</td>
         </tr>
-        <tr>
-            <td>Message type</td>
-            <td>DENM</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Message type</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">DENM</td>
         </tr>
-        <tr>
-            <td>Cause codes</td>
-            <td>5,6</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Cause codes</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">5,6</td>
         </tr>
-        <tr>
-            <td>Quadtree</td>
-            <td>12003</td>
+        <tr style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">Quadtree</td>
+            <td style="border-collapse: collapse; width: 50%; border: 1px solid #444f55;">12003</td>
         </tr>
     </tbody>
 </table>
@@ -173,7 +186,7 @@ the publication ID field.
 You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on
 `Save subscription` at the bottom. You will be redirected to the subscriptions section where you can see your newly added subscription.
 
-<img src="/generated-doc/Cheatsheet.png" alt="Subscription_cheatsheet">
+<img src="/generated-doc/cheatsheet.png" alt="Subscription_cheatsheet">
 
 
 ### How to register a Private channel

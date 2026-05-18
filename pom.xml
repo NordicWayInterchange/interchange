@@ -311,6 +311,12 @@
                                                 <include>**/*.png</include>
                                             </includes>
                                         </resource>
+                                        <resource>
+                                            <directory>frontend/public</directory>
+                                            <includes>
+                                                <include>interchange-logo.png</include>
+                                            </includes>
+                                        </resource>
                                     </resources>
                                 </configuration>
                             </execution>

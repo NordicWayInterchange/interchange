@@ -22,7 +22,7 @@ export default function Navbar() {
       position="fixed"
     >
       <Toolbar>
-        <Box sx={{ alignSelf: "center", mr: 1, padding: -1 }}>
+        <Box sx={{ alignSelf: "center", mr: 1, mt:1}}>
           <Image src={logo} alt="Nordic Way logo" width={40} priority={true} />
         </Box>
         <Typography variant="h6" noWrap component="div" sx={{ marginRight: "auto" }}>
