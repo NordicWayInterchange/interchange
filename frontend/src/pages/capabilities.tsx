@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Divider, IconButton } from "@mui/material";
+import {Box, Divider, IconButton, Tooltip} from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import { dataGridTemplate } from "@/components/shared/datagrid/DataGridTemplate";
@@ -20,6 +20,7 @@ import AddButton from "@/components/shared/actions/AddButton";
 import { performRefetch } from "@/lib/performRefetch";
 import SearchBox from "@/components/shared/SearchBox";
 import { useQueryClient } from "@tanstack/react-query";
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function Capabilities() {
   const { data: session } = useSession();
@@ -84,7 +85,23 @@ export default function Capabilities() {
     : rows;
 
   const tableHeaders: GridColDef[] = [
-    { ...dataGridTemplate, field: "publisherId", headerName: "Publisher ID" },
+    { ...dataGridTemplate, field: "publisherId", headerName: "Publisher ID",
+      renderCell: (params) => (
+          <Box display="flex" alignItems="center" gap={0.75}>
+            <Tooltip title={`${params.row.hasDelivery ? "" : "This capability does not have an associated delivery, " +
+                "and will not be shown in Network capabilities, nor reported to other interchanges in the network"}`} placement="top"
+                     slotProps={{
+                       tooltip: {
+                         sx: {fontSize: '.87rem'}
+                       },
+                     }}>
+              <IconButton size="small" sx={{ padding: 1 }}>
+                {(params.row.hasDelivery ? "" :
+                    <InfoIcon fontSize="small"/>)}
+              </IconButton>
+            </Tooltip>
+          </Box>
+      )},
     {
       ...dataGridTemplate,
       field: "publicationId",
