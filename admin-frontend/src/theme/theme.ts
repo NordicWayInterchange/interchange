@@ -5,19 +5,19 @@ import {ADMIN_UI_COLORS} from "@/theme/colors";
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#3E3F41', // 202123Primary color (e.g., sidebar background)
+            main: '#3E3F41',
         },
         secondary: {
-            main: '#3E3F41', // Secondary color (e.g., hover effect or buttons)
+            main: '#3E3F41',
         },
         background: {
-            default: '#FFFFFF',  // 202123', Default background color for the app
-            paper: '#FFFFFF', // 202123 Background color for components like Drawer
+            default: '#FFFFFF',
+            paper: '#FFFFFF',
         },
         ...ADMIN_UI_COLORS,
         text: {
-            primary: '#444f55', //'#FFFFFF',
-            secondary: '#444f55'  //000000',
+            primary: '#444f55',
+            secondary: '#444f55'
         },
     },
     typography: {
