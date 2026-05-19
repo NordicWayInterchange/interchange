@@ -19,7 +19,7 @@ export default function UserAssistance() {
       <Tooltip title={
         <span style={{ fontSize: ".88rem" }}>
           Do you need help with filling out this form? Please visit our  <CustomLink
-          href="/generated-doc/USERHELP.html"
+          href="/generated/USERHELP.html"
           target="_blank"
           rel="noopener noreferrer"
         >

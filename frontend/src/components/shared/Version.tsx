@@ -1,5 +1,5 @@
 import {Typography} from "@mui/material";
-import {VERSION} from "../../../generated/version";
+import {VERSION} from "../../../public/generated/version";
 
 export default function Version() {
 return (

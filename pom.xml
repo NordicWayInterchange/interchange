@@ -240,7 +240,7 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>frontend/generated</outputDirectory>
+                                    <outputDirectory>frontend/public/generated</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>frontend/filtered-resources</directory>
@@ -302,7 +302,7 @@
                                 </goals>
 
                                 <configuration>
-                                    <outputDirectory>frontend/public/generated-doc</outputDirectory>
+                                    <outputDirectory>frontend/public/generated</outputDirectory>
 
                                     <resources>
                                         <resource>
@@ -338,7 +338,7 @@
                         </executions>
                         <configuration>
                             <inputDirectory>${project.build.directory}/md-input</inputDirectory>
-                            <outputDirectory>frontend/public/generated-doc</outputDirectory>
+                            <outputDirectory>frontend/public/generated</outputDirectory>
                         </configuration>
                     </plugin>
                 </plugins>
