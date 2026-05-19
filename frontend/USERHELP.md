@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>User help</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <div
   style="
@@ -37,6 +38,29 @@
 <div style="padding-top:50px;">
 
 <body style="margin: 40px; background-color: #f0f1f1; font-family: 'Open Sans', sans-serif; color:#444f55; line-height: 1.6;">
+
+<button onclick="downloadPDF()">Download PDF</button>
+
+  <script>
+function downloadPDF() {
+
+  fetch('/generated/USERHELP.html')  
+    .then(res => res.text())
+    .then(html => {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+
+      const options = {
+        filename: 'USERHELP.pdf',
+        margin: 0.5,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().from(tempDiv).set(options).save();
+    });
+}
+</script>
 
 ### How to register a Capability
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
