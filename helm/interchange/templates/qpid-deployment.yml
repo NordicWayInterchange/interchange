@@ -71,9 +71,14 @@ spec:
             - name: config
               mountPath: /qpid-broker-j/work-override
           readinessProbe:
-            initialDelaySeconds: 5
-            tcpSocket:
-              port: amqps
+            httpGet:
+              path: /api/latest/broker
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
       volumes:
         - name: config
           configMap:
