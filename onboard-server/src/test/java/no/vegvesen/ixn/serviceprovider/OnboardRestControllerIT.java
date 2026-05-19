@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -45,6 +46,9 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     private NeighbourRepository neighbourRepository;
+
+    @Autowired
+    private OutgoingMatchRepository  outgoingMatchRepository;
 
     @Autowired
     private PrivateChannelRepository privateChannelRepository;
@@ -273,40 +277,54 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     void testFetchingAllMatchingCapabilities() {
+        String sp1Name = "service-provider";
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pu-1", "");
         ServiceProvider serviceProvider = new ServiceProvider(
-                "service-provider",
+                sp1Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "NPRA",
-                                                "pub-1",
-                                                "NO",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
+                        Collections.singleton(cap1
                         )
-                )
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(serviceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del1,cap1,sp1Name));
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del2 = new LocalDelivery("pubcliationId = 'pub-2'", "");
         ServiceProvider otherServiceProvider = new ServiceProvider(
-                "other",
+                sp2Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "SPRA",
-                                                "pub-2",
-                                                "SE",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
+                        Collections.singleton(cap2
                         )
-                )
+                ),
+                Set.of(),
+                Set.of(del2),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del2,cap2,sp2Name));
 
         Neighbour neighbour = new Neighbour("Neighbour",
                 new NeighbourCapabilities(
@@ -322,14 +340,11 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                                 new Metadata(RedirectStatus.OPTIONAL)
                         ))), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
-        assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), selector);
         assertThat(response.getCapabilities()).hasSize(1);
-        assertThat(serviceProviderRepository.findAll()).hasSize(2);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
@@ -389,45 +404,144 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         );
        serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
        assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
-       assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
+       assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGettingMatchingLocalCapabilitiesAllHavingMatches(){
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-2",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL));
+        LocalDelivery del1 = new LocalDelivery(
+                "publicationId = 'pub-1",
+                "delivery for pub-1"
+        );
+        LocalDelivery del2 = new LocalDelivery(
+                "publicationId = 'pub-2'",
+                "delivery for pub-2"
+        );
+        String sp1Name = "sp-1";
+        ServiceProvider serviceProvider1 = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Set.of(cap1, cap2)
+                ),
+                Set.of(),
+                Set.of(del1, del2),
+                LocalDateTime.now()
+        );
+        String sp2Name = "sp-2";
+        Capability cap3 = new Capability(
+                new DenmApplication("NPRA_2",
+                        "pub-3",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        Capability cap4 = new Capability(
+                new DenmApplication(
+                        "NPRA_2",
+                        "pub-4",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)
+                ),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del3 = new LocalDelivery(
+                "publicationId = 'pub-3'",
+                "delivery for pub-3"
+        );
+        LocalDelivery del4 = new LocalDelivery("publicationId = 'pub-4'",
+                "delivery for pub-4"
+        );
+        ServiceProvider serviceProvider2 = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Set.of(cap3, cap4
+                        )
+                ),
+                Set.of(),
+                Set.of(del3, del4),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del1,cap1,sp1Name),new OutgoingMatch(del2,cap2,sp1Name)));
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del3,cap3,sp2Name),new OutgoingMatch(del4,cap4,sp2Name)));
+        assertThat(restController.fetchMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(2);
+        assertThat(restController.listMatchingCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").getCapabilities().size()).isEqualTo(4);
     }
 
     @Test
     void testFetchingAllCapabilitiesWhenServiceProviderExists() {
+        String sp1Name = "service-provider";
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pub-1'", "delivery for pub-1");
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("123"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
         ServiceProvider serviceProvider = new ServiceProvider(
-                "service-provider",
+                sp1Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "NPRA",
-                                                "pub-1",
-                                                "NO",
-                                                "1.0",
-                                                List.of("123"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
+                        Collections.singleton(cap1
                         )
-                )
+                ),
+                Set.of(),
+                Set.of(
+                        del1
+                ),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(serviceProvider);
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del2 = new LocalDelivery("publicationId = 'pub-2'", "delivery for pub-2");
         ServiceProvider otherServiceProvider = new ServiceProvider(
-                "other",
+                sp2Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "SPRA",
-                                                "pub-2",
-                                                "SE",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
-                        )
-                )
+                        Collections.singleton(cap2)
+                ),
+                Set.of(),
+                Set.of(del2),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del1,cap1,sp1Name), new OutgoingMatch(del2,cap2,sp2Name)));
 
         Neighbour neighbour = new Neighbour("Neighbour", new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
@@ -454,25 +568,31 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @Test
     void testFetchingAllCapabilitiesWhenServiceProviderDoesNotExist() {
-        ServiceProvider serviceProvider = new ServiceProvider("service-provider");
+        String sp1Name = "service-provider";
+        ServiceProvider serviceProvider = new ServiceProvider(sp1Name);
 
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-1",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pub-1'", "delivery for pub-1");
         ServiceProvider otherServiceProvider = new ServiceProvider(
                 "other",
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "SPRA",
-                                                "pub-1",
-                                                "SE",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
-                        )
-                )
+                        Collections.singleton(cap1)
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.save(new  OutgoingMatch(del1,cap1,sp1Name));
 
         Neighbour neighbour = new Neighbour("neighbour_1",new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,
@@ -488,50 +608,61 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
                 ))),
                 new NeighbourSubscriptionRequest(), new SubscriptionRequest());
         neighbourRepository.save(neighbour);
-        assertThat(serviceProviderRepository.findAll()).hasSize(1);
-        assertThat(neighbourRepository.findAllByIgnoreIs(false)).hasSize(1);
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
-        assertThat(serviceProviderRepository.findAll()).hasSize(1);
         verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
     void testFetchingAllMatchingCapabilitiesWhenSelectorIsNull() {
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pub-1'", "delivery for pub-1");
+        String sp1Name = "service-provider";
         ServiceProvider serviceProvider = new ServiceProvider(
-                "service-provider",
+                sp1Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "NPRA",
-                                                "pub-1",
-                                                "NO",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
+                        Collections.singleton(cap1
                         )
-                )
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(serviceProvider);
-        ServiceProvider otherServiceProvider = new ServiceProvider("other",
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del2 = new LocalDelivery("publicationId = 'pub-2'", "delivery for pub-2");
+        ServiceProvider otherServiceProvider = new ServiceProvider(sp2Name,
                 new Capabilities(
-                        Collections.singleton(new Capability(
-                                        new DenmApplication(
-                                                "SPRA",
-                                                "pub-2",
-                                                "SE",
-                                                "1.0",
-                                                List.of("1234"),
-                                                List.of(6)),
-                                        new Metadata(RedirectStatus.OPTIONAL)
-                                )
+                        Collections.singleton(cap2
                         )
-                )
+                ),
+                Set.of(),
+                Set.of(del2),
+                LocalDateTime.now()
         );
         serviceProviderRepository.save(otherServiceProvider);
+        outgoingMatchRepository.save(new  OutgoingMatch(del1,cap1,sp1Name));
+        outgoingMatchRepository.save(new  OutgoingMatch(del2,cap2,sp2Name));
 
         Neighbour neighbour = new Neighbour("neighbour",  new NeighbourCapabilities(
                 CapabilitiesStatus.KNOWN,

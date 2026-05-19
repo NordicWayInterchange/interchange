@@ -1,6 +1,5 @@
 import { trafficdata } from "./trafficdata";
-import { transportportal } from "./transportportal";
-import { PaletteColor } from "@mui/material";
+import { interchangePortal } from "./interchangePortal";
 
 declare module "@mui/material/styles/createPalette" {
   interface Palette {
@@ -86,4 +85,4 @@ declare module "@mui/material/Button" {
   }
 }
 
-export { trafficdata, transportportal };
+export { trafficdata, interchangePortal };
