@@ -101,7 +101,7 @@ services:
       - KEY_STORE=/keys/a-napcore-server.p12
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a-napcore-server
-      - TRUST_STORE=/keys/ca.internal.a.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.a.internal.bouvetinterchange.eu.jks
       - TRUST_STORE_PASSWORD=password
       - SERVER_NAME=a.bouvetinterchange.eu
       - NAP_NAME=nap.a.internal.bouvetinterchange.eu

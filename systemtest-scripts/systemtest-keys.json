@@ -31,7 +31,7 @@
     }]
 },
 {
-  "name" : "ca.internal.a.bouvetinterchange.eu",
+  "name" : "ca.a.internal.bouvetinterchange.eu",
   "country" : "NO",
   "subCaRequests" : [ ],
   "hostRequests" : [ {
@@ -51,7 +51,7 @@
       "email" : "admin@a.internal.bouvetinterchange.eu"
     } ]
   }, {
-    "name" : "ca.b.bouvetinterchange.eu",
+    "name" : "ca.b.internal.bouvetinterchange.eu",
     "country" : "SE",
     "subCaRequests" : [ ],
     "hostRequests" : [ {
