@@ -116,12 +116,13 @@ public class ClusterKeyGenerator {
     }
 
     /**
-     * Makes a keystore and truststore for the CA (truststore containing the CA cert),
+     * Makes a keystore and truststore for the CA (truststore containing the CA cert, plus cert w/chain for the CA),
      * and keystores for each host and client in the chain
      *
      */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
+        saveCertChain(response.details().certificateChain, Files.newBufferedWriter(basePath.resolve(response.name() + ".crt.pem")));
         List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
         List<ClientStore> clientStores = storeClientStores(basePath, passwordGenerator, response.clientResponses());
         List<CaStores> subCaStores = new ArrayList<>();
@@ -163,8 +164,6 @@ public class ClusterKeyGenerator {
         List<HostStore> hostStores = new ArrayList<>();
         for (HostResponse hostResponse : hostResponses) {
             String hostPassword = randomPasswordGenerator.generatePassword();
-            //TODO should we write the string password to file or not?
-            //TODO we could also create the store as a stream, and not use files at all...
             Files.writeString(basePath.resolve(hostResponse.host() + ".txt"),hostPassword);
             Path outputPath = basePath.resolve(hostResponse.host() + ".p12");
             makeKeystore(hostResponse.host(), hostPassword, Files.newOutputStream(outputPath), hostResponse.keyDetails().certificateChain(), hostResponse.keyDetails().keyPair().getPrivate());
