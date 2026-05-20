@@ -122,7 +122,7 @@ public class ClusterKeyGenerator {
      */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
         CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
-        saveCertChain(response.details().certificateChain, Files.newBufferedWriter(basePath.resolve(response.name() + ".crt.pem")));
+        saveCert(response.details().certificate(),  Files.newBufferedWriter(basePath.resolve(response.name() + ".crt.pem")));
         List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
         List<ClientStore> clientStores = storeClientStores(basePath, passwordGenerator, response.clientResponses());
         List<CaStores> subCaStores = new ArrayList<>();
