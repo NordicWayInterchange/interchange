@@ -5,6 +5,31 @@
   <title>User help</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+ <style>
+    .styled-button {
+      text-transform: none;
+      margin-left: 2px;
+      height: 40px;
+      width: 200px;
+      border: 1px solid #ccc;
+      padding-bottom: 5px;
+      position: relative;
+      background: #444F55;
+      color: #f0f1f1;
+      cursor: pointer;
+    }
+
+    .styled-button:hover::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: #FF9600;
+    }
+  </style>
+
 <div
   style="
     position: fixed;
@@ -39,16 +64,28 @@
 
 <body style="margin: 40px; background-color: #f0f1f1; font-family: 'Open Sans', sans-serif; color:#444f55; line-height: 1.6;">
 
-<button onclick="downloadPDF()">Download PDF</button>
+<button class="styled-button" onclick="downloadPDF()">Download PDF</button>
 
   <script>
-function downloadPDF() {
+function sanitizeLinks(container) {
+  const links = container.querySelectorAll("a");
 
+  links.forEach(a => {
+    const href = a.getAttribute("href");
+ if (href && href.startsWith("/generated/")) {
+      a.replaceWith(document.createTextNode(a.textContent));
+    }
+  });
+}
+
+function downloadPDF() {
   fetch('/generated/USERHELP.html')  
     .then(res => res.text())
     .then(html => {
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = html;
+        
+      sanitizeLinks(tempDiv);
 
       const options = {
         filename: 'USERHELP.pdf',
