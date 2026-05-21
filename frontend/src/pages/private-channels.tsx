@@ -291,7 +291,7 @@ export default function PrivateChannels() {
     <Box flex={1}>
       <Mainheading>Private channels</Mainheading>
       <Subheading>
-        These are all of private channels in the network. You can click a private channel or a private channel subscription
+        These are all of private channels you can connect to. You can click a private channel or a private channel subscription
         to see details or remove.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
