@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
-import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ import java.io.IOException;
 
 @Component
 public class NeighbourRESTClient {
-    private Logger logger = LoggerFactory.getLogger(NeighbourRESTClient.class);
+    private final Logger logger = LoggerFactory.getLogger(NeighbourRESTClient.class);
 
     RestTemplate restTemplate;
     ObjectMapper mapper;
@@ -49,7 +48,7 @@ public class NeighbourRESTClient {
             if (response.getBody() != null) {
                 result = response.getBody();
 			} else {
-                throw new CapabilityPostException(String.format("Server %s returned http code %s with null capability response", name, response.getStatusCodeValue()));
+                throw new CapabilityPostException(String.format("Server %s returned http code %s with null capability response", name, response.getStatusCode().value()));
             }
 
         } catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -80,13 +79,13 @@ public class NeighbourRESTClient {
 			try {
 				logger.debug("{} {} object: {}", logPrefix, body.getClass().getSimpleName(), mapper.writeValueAsString(body));
 			} catch (JsonProcessingException e) {
-				logger.warn("Could not convert {} to json string {}", body.getClass().getSimpleName(), body.toString(), e);
+				logger.warn("Could not convert {} to json string {}", body.getClass().getSimpleName(), body, e);
 			}
 		} else {
 			logger.warn("{} Expected body not to be null {}", logPrefix, entity);
 		}
-		logger.debug("{} HttpEntity: {}", logPrefix, entity.toString());
-		logger.debug("{} Headers: {}", logPrefix, entity.getHeaders().toString());
+		logger.debug("{} HttpEntity: {}", logPrefix, entity);
+		logger.debug("{} Headers: {}", logPrefix, entity.getHeaders());
 	}
 
 	SubscriptionResponseApi doPostSubscriptionRequest(SubscriptionRequestApi subscriptionRequestApi, String controlChannelUrl, String neighbourName) {
@@ -108,12 +107,12 @@ public class NeighbourRESTClient {
                 throw new SubscriptionRequestException(String.format("%s returned empty response from subscription request",neighbourName));
             }
             responseApi = response.getBody();
-            logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCodeValue());
+            logger.debug("Successfully posted a subscription request. Response code: {}", response.getStatusCode().value());
 
             //TODO this might actually warrant an exception of its own. A requested subscription is not accepted
             //TODO or should it be handled at a higher level?
             if (!subscriptionRequestApi.getSubscriptions().isEmpty() && responseApi.getSubscriptions().isEmpty()) {
-                // we posted a non empty subscription request, but received an empty subscription request.
+                // we posted a non-empty subscription request, but received an empty subscription request.
                 logger.debug("Posted non empty subscription request to neighbour but received empty subscription request.");
                 throw new SubscriptionRequestException("Subscription request failed. Posted non-empty subscription request, but received response with empty subscription request from neighbour " + neighbourName + ".");
             }
