@@ -4,9 +4,11 @@ import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.Neighbour;
+import no.vegvesen.ixn.federation.model.OutgoingMatch;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.NeighbourSubscriptionDeleteService;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /***
  * Functionality:
@@ -46,6 +49,7 @@ public class NeighbourDiscoverer {
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
 	private final InterchangeNodeProperties interchangeNodeProperties;
 	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
+	private final OutgoingMatchRepository outgoingMatchRepository;
 
 
 	@Autowired
@@ -54,13 +58,15 @@ public class NeighbourDiscoverer {
 						ServiceProviderService serviceProviderService,
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
-						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService) {
+						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
+						OutgoingMatchRepository outgoingMatchRepository) {
 		this.neighbourService = neighbourService;
 		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
+		this.outgoingMatchRepository = outgoingMatchRepository;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
 	}
 
@@ -74,15 +80,18 @@ public class NeighbourDiscoverer {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
 		logger.debug("CapabilityExchangeWithNeighbours");
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+				.map(OutgoingMatch::getCapability)
+				.collect(Collectors.toSet());
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilitiesOptional(serviceProviders);
 		neigbourDiscoveryService.capabilityExchangeWithNeighbours(neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
 	public void scheduleUnreachableRetry() {
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allServiceProviderCapabilities(serviceProviders);
+		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+				.map(OutgoingMatch::getCapability)
+				.collect(Collectors.toSet());
 		neigbourDiscoveryService.retryUnreachable(neighbourFacade, localCapabilities);
 	}
 

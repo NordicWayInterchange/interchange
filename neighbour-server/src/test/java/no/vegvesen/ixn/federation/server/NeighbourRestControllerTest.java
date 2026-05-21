@@ -8,6 +8,7 @@ import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.shared.capability.*;
@@ -49,6 +50,9 @@ class NeighbourRestControllerTest {
 
 	@MockitoBean
 	NeighbourService neighbourService;
+
+	@MockitoBean
+	OutgoingMatchRepository outgoingMatchRepository;
 
 	@Autowired
 	private NeighbourRestController neighbourRestController;
