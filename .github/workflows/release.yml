@@ -161,7 +161,7 @@ jobs:
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
       - name: Build the Docker image
         run: |
-          cd ./frontend
+          cd ./admin-frontend
           docker build . -t admin-frontend
       - name: Push docker image to Github container registry
         run: |
