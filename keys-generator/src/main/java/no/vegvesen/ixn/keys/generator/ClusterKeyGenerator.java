@@ -116,7 +116,7 @@ public class ClusterKeyGenerator {
     }
 
     /**
-     * Makes a keystore and truststore for the CA (truststore containing the CA cert, plus cert w/chain for the CA),
+     * Makes a keystore and truststore for the CA (truststore containing the CA cert, plus cert without chain for the CA),
      * and keystores for each host and client in the chain
      *
      */
