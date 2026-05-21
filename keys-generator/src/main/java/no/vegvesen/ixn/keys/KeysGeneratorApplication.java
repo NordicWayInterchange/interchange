@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 
 @SuppressWarnings("InstantiationOfUtilityClass")
 @Command(name = "keygenerator",
-        description = "Generates keys for Docker Comapose tests",
+        description = "Generates keys for Docker Compose tests",
         defaultValueProvider = CommandLine.PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
         subcommands = {
@@ -36,13 +36,13 @@ public class KeysGeneratorApplication {
             mixinStandardHelpOptions = true
     )
     public static class Keys implements Callable<Integer> {
-        @Option(names = "-f", required = true, description = "Path to intput JSON file")
-        private Path intputFile;
+        @Option(names = "-f", required = true, description = "Path to input JSON file")
+        private Path inputFile;
 
         @Option(names = "-o", required = true, description = "Folder for created key and truststores")
         private Path outputFolder;
 
-        @Option(names = {"-s","--staticpassword"}, description = "Create a static passord for testing. The password generated will be \"password\" for all keystores")
+        @Option(names = {"-s","--staticpassword"}, description = "Create a static password for testing. The password generated will be \"password\" for all keystores")
         private Boolean testPassword;
 
 
@@ -60,7 +60,7 @@ public class KeysGeneratorApplication {
             }
             ObjectMapper mapper = new ObjectMapper();
             TypeReference<List<CARequest>> listTypeReference = new TypeReference<>() {};
-            List<CARequest> caRequests = mapper.readValue(Files.newInputStream(intputFile), listTypeReference);
+            List<CARequest> caRequests = mapper.readValue(Files.newInputStream(inputFile), listTypeReference);
             List<CaResponse> caResponses = new ArrayList<>();
             for (CARequest request : caRequests) {
                 CaResponse response = ClusterKeyGenerator.generate(request);
