@@ -434,7 +434,7 @@ public class NeighbourServiceIT extends PostgresContainerBase {
 
         Neighbour neighbour = ignoredNeighbour(name);
         CapabilityApi capabilityApi = new CapabilityApi(
-                new DatexApplicationApi(),
+                new DatexApplicationApi("NO001","001","NO","1.0",List.of(),"publication","pub-1"),
                 new MetadataApi()
         );
         assertThrows(NeighbourIgnoredException.class, () -> service.incomingCapabilities(new CapabilitiesApi(name, Set.of(capabilityApi)), Set.of()));
