@@ -510,7 +510,6 @@ public class LocalDeliveryServiceIT {
         String serviceProviderName = "my-service-provider";
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        metadata.setShardCount(3);
         String shard1Exchange = "cap-ex12";
         CapabilityShard shard1 = new CapabilityShard(1, shard1Exchange, "publicationId = 'pub-1'");
         qpidClient.createHeadersExchange(shard1Exchange);

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +32,14 @@ class CapabilityMatcherTest {
 			new Metadata(RedirectStatus.OPTIONAL)
 	);
 
+
+	private static List<CapabilityShard> makeShards(int count) {
+		List<CapabilityShard> shards = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			shards.add(new CapabilityShard(i + 1, "cap-" + UUID.randomUUID(), null));
+		}
+		return shards;
+	}
 
 	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
@@ -269,7 +278,7 @@ class CapabilityMatcherTest {
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, 1)).isTrue();
 	}
 
 	@Test
@@ -279,7 +288,7 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 6 OR causeCode = 5 AND shardId = 2";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, 1)).isFalse();
 	}
 
 	@Test
@@ -289,7 +298,7 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND shardId = 2 AND (causeCode = 6 OR causeCode = 5)";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, 1)).isFalse();
 	}
 
 	@Test
@@ -301,67 +310,67 @@ class CapabilityMatcherTest {
 
 		String selector = "originatingCountry = 'NO' AND causeCode = 5";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, meta.getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(denm_a_b_causeCode_1_2, selector, 1)).isTrue();
 	}
 
 	@Test
 	public void findSubTile() {
 		String selector = "quadTree LIKE '%,12002010%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void findTinySubTile() {
 		String selector = "quadTree LIKE '%,120020100000000000%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void finSuperTile() {
 		String selector = "quadTree LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void FindTilesOutsideSubTile() {
 		String selector = "quadTree NOT LIKE '%,12002010%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTile() {
 		String selector = "quadTree NOT LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileAlternateNegation() {
 		String selector = "NOT (quadTree LIKE '%,12%')";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileAlternateNegationWithoutParentheses() {
 		String selector = "NOT quadTree LIKE '%,12%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void findTilesOutsideSuperTileNoMatch() {
 		String selector = "quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isFalse();
 	}
 
 	@Test
 	public void unknownAndSuperTile() {
 		String selector = "fish = 'shark' AND quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isFalse();
 	}
 
 	@Test
 	public void unknownOrSuperTile() {
 		String selector = "fish = 'shark' OR quadTree NOT LIKE '%,1%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(quadTreeCoverageCapability.getApplication(), selector, quadTreeCoverageCapability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -373,8 +382,8 @@ class CapabilityMatcherTest {
 		String selector1 = "originatingCountry = 'NO' and messageType = 'DATEX2'";
 		String selector2 = "originatingCountry='NO' and messageType = 'DATEX2' and publisherName = 'pub'";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector1, capability.getMetadata().getShardCount())).isTrue();
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector2, capability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector1, capability.getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector2, capability.getShardCount())).isFalse();
 	}
 
 	@Test
@@ -386,8 +395,8 @@ class CapabilityMatcherTest {
 		String selector1 = "originatingCountry= 'NO' and messageType = 'DATEX2' and publisherName = 'NO-PUB'";
 		String selector2 = "originatingCountry = 'NO' and messageType = 'DATEX2' and publisherId = 'pub-1111'";
 
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector1, capability.getMetadata().getShardCount())).isTrue();
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector2, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector1, capability.getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector2, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -405,12 +414,11 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 2";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isFalse();
 	}
 
 	@Test
 	public void matchUnshardedSubscriptionToShardedCapability() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -420,16 +428,16 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL),
+				makeShards(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
 	public void matchShardedSubscriptionToShardedCapabilityAndShardIdIsHigherOnSubscription() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -439,7 +447,8 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL),
+				makeShards(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and shardId = 4";
@@ -448,7 +457,6 @@ class CapabilityMatcherTest {
 
 	@Test
 	public void capabilityIsNotAddedMultipleTimesWhenMatchingMultipleShardsInSelector() {
-		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL,3);
 		Capability capability = new Capability(
 				new DenmApplication(
 						"NO00000",
@@ -458,7 +466,8 @@ class CapabilityMatcherTest {
 						Collections.singletonList("12003"),
 						Collections.singletonList(6)
 				),
-				metadata
+				new Metadata(RedirectStatus.OPTIONAL),
+				makeShards(3)
 		);
 
 		String selector = "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like '%,12003%' and causeCode = 6 and (shardId = 2 OR shardId = 3)";
@@ -480,7 +489,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -498,7 +507,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and quadTree like '%,12300%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -516,7 +525,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "quadTree like '%,123%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -534,7 +543,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "quadTree not like '%,123%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isFalse();
 	}
 
 
@@ -553,7 +562,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,122%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -571,7 +580,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%')";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isFalse();
 	}
 
 	@Test
@@ -589,7 +598,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,124%')";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isTrue();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isTrue();
 	}
 
 	@Test
@@ -607,7 +616,7 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and quadTree not like '%,123%'";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount())).isFalse();
 	}
 
 	@Test
@@ -626,6 +635,6 @@ class CapabilityMatcherTest {
 		);
 
 		String selector = "messageType = 'DENM' and not (quadTree like '%,123%,') and not (quadTree like '%,122%,')";
-		assertThat(CapabilityMatcher.matchApplicationToSelector(capability2.getApplication(), selector, capability2.getMetadata().getShardCount())).isFalse();
+		assertThat(CapabilityMatcher.matchApplicationToSelector(capability2.getApplication(), selector, capability2.getShardCount())).isFalse();
 	}
 }

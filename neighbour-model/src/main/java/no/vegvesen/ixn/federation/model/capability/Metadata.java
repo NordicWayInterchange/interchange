@@ -18,8 +18,6 @@ public class Metadata {
 
     private String infoUrl;
 
-    private Integer shardCount;
-
     private RedirectStatus redirectPolicy;
 
     private Integer maxBandwidth;
@@ -32,9 +30,8 @@ public class Metadata {
 
     }
 
-    public Metadata(String infoUrl, Integer shardCount, RedirectStatus redirectPolicy, Integer maxBandwidth, Integer maxMessageRate, Integer repetitionInterval) {
+    public Metadata(String infoUrl, RedirectStatus redirectPolicy, Integer maxBandwidth, Integer maxMessageRate, Integer repetitionInterval) {
         this.infoUrl = infoUrl;
-        this.shardCount = shardCount;
         this.redirectPolicy = redirectPolicy;
         this.maxBandwidth = maxBandwidth;
         this.maxMessageRate = maxMessageRate;
@@ -43,27 +40,15 @@ public class Metadata {
 
     //for testing
     public Metadata(RedirectStatus redirectPolicy) {
-        this("", 1, redirectPolicy, 0, 0, 0);
+        this("", redirectPolicy, 0, 0, 0);
     }
 
-    //for testing
-    public Metadata(RedirectStatus redirectPolicy, Integer shardCount) {
-        this("", shardCount, redirectPolicy, 0, 0, 0);
-    }
     public String getInfoUrl() {
         return infoUrl;
     }
 
     public void setInfoUrl(String infoUrl) {
         this.infoUrl = infoUrl;
-    }
-
-    public Integer getShardCount() {
-        return shardCount;
-    }
-
-    public void setShardCount(Integer shardCount) {
-        this.shardCount = shardCount;
     }
 
     public RedirectStatus getRedirectPolicy() {
@@ -98,8 +83,8 @@ public class Metadata {
         this.repetitionInterval = repetitionInterval;
     }
 
-    public MetadataApi toApi() {
-        return new MetadataApi(getShardCount(), getInfoUrl(), toRedirectStatusApi(getRedirectPolicy()), getMaxBandwidth(), getMaxMessageRate(), getRepetitionInterval());
+    public MetadataApi toApi(int shardCount) {
+        return new MetadataApi(shardCount, getInfoUrl(), toRedirectStatusApi(getRedirectPolicy()), getMaxBandwidth(), getMaxMessageRate(), getRepetitionInterval());
     }
 
     public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
@@ -121,19 +106,18 @@ public class Metadata {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Metadata metadata = (Metadata) o;
-        return Objects.equals(infoUrl, metadata.infoUrl) && Objects.equals(shardCount, metadata.shardCount) && redirectPolicy == metadata.redirectPolicy && Objects.equals(maxBandwidth, metadata.maxBandwidth) && Objects.equals(maxMessageRate, metadata.maxMessageRate) && Objects.equals(repetitionInterval, metadata.repetitionInterval);
+        return Objects.equals(infoUrl, metadata.infoUrl) && redirectPolicy == metadata.redirectPolicy && Objects.equals(maxBandwidth, metadata.maxBandwidth) && Objects.equals(maxMessageRate, metadata.maxMessageRate) && Objects.equals(repetitionInterval, metadata.repetitionInterval);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(infoUrl, shardCount, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval);
+        return Objects.hash(infoUrl, redirectPolicy, maxBandwidth, maxMessageRate, repetitionInterval);
     }
 
     @Override
     public String toString() {
         return "Metadata{" +
                 "infoUrl='" + infoUrl + '\'' +
-                ", shardCount=" + shardCount +
                 ", redirectPolicy=" + redirectPolicy +
                 ", maxBandwidth=" + maxBandwidth +
                 ", maxMessageRate=" + maxMessageRate +

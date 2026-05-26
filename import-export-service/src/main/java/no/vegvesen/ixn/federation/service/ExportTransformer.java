@@ -80,7 +80,7 @@ public class ExportTransformer {
         return new CapabilityExportApi(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
-                transformMetadataToMetadataExportApi(capability.getMetadata()),
+                transformMetadataToMetadataExportApi(capability.getMetadata(), capability.getShardCount()),
                 transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
                 capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
     }
@@ -99,8 +99,8 @@ public class ExportTransformer {
         }
     }
 
-    public MetadataExportApi transformMetadataToMetadataExportApi(Metadata metadata) {
-        return new MetadataExportApi(metadata.getShardCount(),
+    public MetadataExportApi transformMetadataToMetadataExportApi(Metadata metadata, int shardCount) {
+        return new MetadataExportApi(shardCount,
                 metadata.getInfoUrl(),
                 transformRedirectStatusToRedirectStatusExportApi(metadata.getRedirectPolicy()),
                 metadata.getMaxBandwidth(),
@@ -192,7 +192,7 @@ public class ExportTransformer {
 
     public NeighbourCapabilityExportApi transformNeighbourCapabilityToNeighbourCapabilityExportApi(NeighbourCapability neighbourCapability) {
         return new NeighbourCapabilityExportApi(neighbourCapability.getApplication().toApi(),
-                transformMetadataToMetadataExportApi(neighbourCapability.getMetadata())
+                transformMetadataToMetadataExportApi(neighbourCapability.getMetadata(), neighbourCapability.getShardCount())
         );
     }
 

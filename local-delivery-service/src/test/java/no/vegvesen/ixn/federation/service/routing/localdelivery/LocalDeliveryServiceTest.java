@@ -64,7 +64,6 @@ public class LocalDeliveryServiceTest {
                 ),
                 new Metadata()
         );
-        capability.getMetadata().setShardCount(1);
         ServiceProvider serviceProvider = new ServiceProvider(
                 "serviceProvider",
                 new Capabilities(

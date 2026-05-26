@@ -1,9 +1,7 @@
-package no.vegvesen.ixn.federation.adminserver.qpid;
+package no.vegvesen.ixn.federation;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +13,6 @@ import java.util.stream.Collectors;
  */
 public class SelectorBuilder {
 
-	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);
 	private Map<String, String> values = new HashMap<>();
 
 	public SelectorBuilder() {
@@ -147,6 +144,11 @@ public class SelectorBuilder {
 		return this;
 	}
 
+	public SelectorBuilder shardId(String shardId) {
+		values.put(MessageProperty.SHARD_ID.getName(), shardId);
+		return this;
+	}
+
 	public SelectorBuilder protocolVersion(String protocolVersion) {
 		values.put(MessageProperty.PROTOCOL_VERSION.getName(), protocolVersion);
 		return this;
@@ -169,11 +171,4 @@ public class SelectorBuilder {
 		values.put(MessageProperty.PUBLICATION_TYPE.getName(), publicationType);
 		return this;
 	}
-
-	public SelectorBuilder shardId(String shardId) {
-		values.put(MessageProperty.SHARD_ID.getName(), shardId);
-		return this;
-	}
 }
-
-

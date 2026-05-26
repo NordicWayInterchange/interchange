@@ -589,9 +589,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		Capability cap = new Capability(
 				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				new Metadata(RedirectStatus.OPTIONAL),
+				List.of(
+					new CapabilityShard(1, "cap-" + UUID.randomUUID(), null),
+					new CapabilityShard(2, "cap-" + UUID.randomUUID(), null),
+					new CapabilityShard(3, "cap-" + UUID.randomUUID(), null)
+				)
 		);
-		cap.getMetadata().setShardCount(3);
 
 		Capabilities capabilities = new Capabilities(
 				Collections.singleton(cap));
@@ -1092,18 +1096,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 												"1.0",
 												List.of("1234"),
 												"type",
-												"publisher"
-										),
-										new Metadata(
-												"https://mysite.com",
-												1,
-												RedirectStatus.OPTIONAL,
-												0,
-												0,
-												0
-										),
-										List.of(
-												new CapabilityShard(
+									"publisher"
+									),
+									new Metadata(
+											"https://mysite.com",
+											RedirectStatus.OPTIONAL,
+											0,
+											0,
+											0
+									),
+									List.of(
+											new CapabilityShard(
 														1,
 														"this-exchange-does-not-exist-shard-1",
 														"publicationId = 'NO12345:001' and shardId = 1"
@@ -1143,18 +1146,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 													"NO",
 													"1.0",
 													List.of("1234"),
-													"type",
-													"publisher"
-											),
-											new Metadata(
-													"https://mysite.com",
-													1,
-													RedirectStatus.OPTIONAL,
-													0,
-													0,
-													0
-											),
-											List.of(
+												"type",
+												"publisher"
+										),
+										new Metadata(
+												"https://mysite.com",
+												RedirectStatus.OPTIONAL,
+												0,
+												0,
+												0
+										),
+										List.of(
 													new CapabilityShard(
 															1,
 															exchangeName,

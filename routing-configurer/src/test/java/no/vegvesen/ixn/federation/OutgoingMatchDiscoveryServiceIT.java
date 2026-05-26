@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -297,9 +299,6 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
         LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.REQUESTED, "Delivery", false);
 
 
-        Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        metadata.setShardCount(2);
-
         Capability cap = new Capability(
                 new DenmApplication(
                         "NPRA",
@@ -309,7 +308,11 @@ public class OutgoingMatchDiscoveryServiceIT extends PostgresContainerBase {
                         Collections.singletonList("1234"),
                         Collections.singletonList(6)
                 ),
-                metadata
+                new Metadata(RedirectStatus.OPTIONAL),
+                List.<CapabilityShard>of(
+                    new CapabilityShard(1, "cap-" + UUID.randomUUID(), null),
+                    new CapabilityShard(2, "cap-" + UUID.randomUUID(), null)
+                )
         );
         cap.setStatus(CapabilityStatus.CREATED);
 

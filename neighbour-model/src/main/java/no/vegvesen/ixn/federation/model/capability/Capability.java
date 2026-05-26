@@ -123,8 +123,12 @@ public class Capability {
         this.status = status;
     }
 
+    public int getShardCount() {
+        return shards.size();
+    }
+
     public boolean isSharded() {
-        return metadata.getShardCount() > 1;
+        return getShardCount() > 1;
     }
 
     public LocalDateTime getCreatedTimestamp() {

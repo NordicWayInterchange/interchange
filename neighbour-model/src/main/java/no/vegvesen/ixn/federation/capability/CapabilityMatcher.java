@@ -25,7 +25,7 @@ public class CapabilityMatcher {
 			for (LocalSubscription subscription : subscriptionSelectors) {
 				if (!subscription.getSelector().isEmpty()) {
 					if (matchConsumerCommonNameToRedirectPolicy(subscription.getConsumerCommonName(), capability.getMetadata().getRedirectPolicy(), ixnName)) {
-						boolean match = matchApplicationToSelector(capability.getApplication(), subscription.getSelector(), capability.getMetadata().getShardCount());
+						boolean match = matchApplicationToSelector(capability.getApplication(), subscription.getSelector(), capability.getShardCount());
 						if (match) {
 							logger.debug("Selector [{}] matches capability {}", subscription.getSelector(), capability);
 							matches.add(subscription);
@@ -48,7 +48,7 @@ public class CapabilityMatcher {
 	public static Set<NeighbourCapability> matchNeighbourCapabilitiesToSelector(Set<NeighbourCapability> capabilities, String selector) {
 		Set<NeighbourCapability> matches = new HashSet<>();
 		for (NeighbourCapability capability : capabilities) {
-			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount());
+			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount());
 			if (match) {
 				logger.debug("Selector [{}] matches capability {}", selector, capability);
 				matches.add(capability);
@@ -60,7 +60,7 @@ public class CapabilityMatcher {
 	public static Set<Capability> matchCapabilitiesToSelector(Set<Capability> capabilities, String selector) {
 		Set<Capability> matches = new HashSet<>();
 		for (Capability capability : capabilities) {
-			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getMetadata().getShardCount());
+			boolean match = matchApplicationToSelector(capability.getApplication(), selector, capability.getShardCount());
 			if (match) {
 				logger.debug("Selector [{}] matches capability {}", selector, capability);
 				matches.add(capability);
