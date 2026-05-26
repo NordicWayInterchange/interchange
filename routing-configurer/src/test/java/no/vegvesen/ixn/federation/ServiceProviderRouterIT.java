@@ -5,6 +5,7 @@ import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
+import no.vegvesen.ixn.federation.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -587,13 +588,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
 
+		DatexApplication application = new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName");
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL),
+				application,
+				metadata,
 				List.of(
-					new CapabilityShard(1, "cap-" + UUID.randomUUID(), null),
-					new CapabilityShard(2, "cap-" + UUID.randomUUID(), null),
-					new CapabilityShard(3, "cap-" + UUID.randomUUID(), null)
+					new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 1)),
+					new CapabilityShard(2, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 2)),
+					new CapabilityShard(3, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 3))
 				)
 		);
 
@@ -615,9 +618,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void nonShardedCapabilityIsSetUp() {
 
+		DatexApplication application = new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName");
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				application,
+				metadata,
+				List.of(
+					new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), null))
+				)
 		);
 
 		Capabilities capabilities = new Capabilities(
