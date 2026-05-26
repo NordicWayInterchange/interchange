@@ -94,10 +94,9 @@ public class CapabilityToCapabilityApiTransformer {
 		boolean isSharded = shardCount > 1;
 		if (isSharded) {
 			for (int i = 0; i < shardCount; i++) {
-				String exchangeName = exchangeName();
-				Integer shardId = i + 1;
+                Integer shardId = i + 1;
 				String selector = MessageValidatingSelectorCreator.makeSelector(capabilityApi, shardId);
-				shards.add(new CapabilityShard(shardId, exchangeName, selector));
+				shards.add(new CapabilityShard(shardId, exchangeName(), selector));
 			}
 		} else {
 			shards.add(new CapabilityShard(1,exchangeName(),MessageValidatingSelectorCreator.makeSelector(capabilityApi, null)));
