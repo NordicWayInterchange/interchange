@@ -3,8 +3,6 @@ package no.vegvesen.ixn.federation.model.capability;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -23,9 +21,7 @@ public class NeighbourCapability {
     @JoinColumn(name = "meta", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neigh_cap_meta"))
     private Metadata metadata;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "neigh_cap_shard_id", foreignKey = @ForeignKey(name = "fk_neigh_cap_shard"))
-    private List<CapabilityShard> shards = new ArrayList<>();
+    private int shardCount;
 
     private LocalDateTime createdTimestamp;
 
@@ -36,29 +32,31 @@ public class NeighbourCapability {
     public NeighbourCapability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = 1;
         this.createdTimestamp = LocalDateTime.now();
     }
 
-    public NeighbourCapability(Application application, Metadata metadata, List<CapabilityShard> shards) {
+    public NeighbourCapability(Application application, Metadata metadata, int shardCount) {
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = shardCount;
         this.createdTimestamp = LocalDateTime.now();
-        this.shards.addAll(shards);
     }
 
     public NeighbourCapability(Integer id, Application application, Metadata metadata) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = 1;
         this.createdTimestamp = LocalDateTime.now();
     }
 
-    public NeighbourCapability(Integer id, Application application, Metadata metadata, List<CapabilityShard> shards) {
+    public NeighbourCapability(Integer id, Application application, Metadata metadata, int shardCount) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = shardCount;
         this.createdTimestamp = LocalDateTime.now();
-        this.shards.addAll(shards);
     }
 
     public Integer getId() {
@@ -85,23 +83,12 @@ public class NeighbourCapability {
         this.metadata = metadata;
     }
 
-    public List<CapabilityShard> getShards() {
-        return shards;
-    }
-
-    public void setShards(List<CapabilityShard> shards) {
-        this.shards.clear();
-        if (shards != null) {
-            this.shards.addAll(shards);
-        }
-    }
-
     public int getShardCount() {
-        return shards.size();
+        return shardCount;
     }
 
-    public boolean hasShards() {
-        return !shards.isEmpty();
+    public void setShardCount(int shardCount) {
+        this.shardCount = shardCount;
     }
 
     public LocalDateTime getCreatedTimestamp() {
@@ -134,7 +121,7 @@ public class NeighbourCapability {
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +
-                ", shards=" + shards +
+                ", shardCount=" + shardCount +
                 '}';
     }
 }

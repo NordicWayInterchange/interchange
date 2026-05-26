@@ -57,10 +57,13 @@ public class CapabilityToCapabilityApiTransformer {
 	public Set<NeighbourCapability> capabilityApiToNeighbourCapabilities(Set<CapabilityApi> capabilityApis){
 		Set<NeighbourCapability> neighbourCapabilities = new HashSet<>();
 		for(CapabilityApi capabilityApi : capabilityApis){
+			int shardCount = capabilityApi.getMetadata().getShardCount() != null
+					? capabilityApi.getMetadata().getShardCount()
+					: 1;
 			neighbourCapabilities.add(new NeighbourCapability(
 					applicationApiToApplication(capabilityApi.getApplication()),
 					metadataApiToMetadata(capabilityApi.getMetadata()),
-					buildShards(capabilityApi)
+					shardCount
 			));
 		}
 		return neighbourCapabilities;
