@@ -116,6 +116,7 @@ napcore_frontend:
   home_url: https://portal.example-node.itsinterchange.eu
   keycloak:
     enabled: true
+    replicas: 1
     postgres_db: keycloak
     client_id: portal.example-node.itsinterchange.eu
     realm: portal.example-node.itsinterchange.eu
