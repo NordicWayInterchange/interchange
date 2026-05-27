@@ -2,6 +2,8 @@ package no.vegvesen.ixn.federation;
 
 import jakarta.jms.JMSException;
 import jakarta.transaction.Transactional;
+import no.vegvesen.ixn.Sink;
+import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -20,11 +22,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.naming.NamingException;
+import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Fail.fail;
 
 @SpringBootTest
@@ -79,6 +84,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Autowired
 	private ServiceProviderRepository serviceProviderRepository;
 
+	@Autowired
+	private OutgoingMatchRepository outgoingMatchRepository;
  	@Autowired
 	ServiceProviderRouter router;
 
@@ -349,25 +356,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
-		fail();
-	}
-/*
 		String source = "king_gustaf_source";
-		LocalSubscription subscription = new LocalSubscription(
-				1,
-				LocalSubscriptionStatus.REQUESTED,
-				"messageType = 'DATEX2'",
-				HOST_NAME,
-				Collections.emptySet(),
-				Collections.singleton(new LocalEndpoint(
-								source,
-								qpidContainer.getHost(),
-								qpidContainer.getAmqpsPort()
-						)
-				)
-		);
 
-		Capability capability = new Capability(
+        Capability capability = new Capability(
 				new DatexApplication(
 						"NO-123",
 						"pub-1",
@@ -380,26 +371,35 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		capability.setStatus(CapabilityStatus.CREATED);
-		Capabilities capabilities = new Capabilities(
-				Collections.singleton(capability
-				)
-		);
-		String deliverySelector = "messageType = 'DATEX2'";
-		LocalDelivery localDelivery = new LocalDelivery(
+        String exchangeName = "myexchange";
+        LocalDelivery localDelivery = new LocalDelivery(
 				UUID.randomUUID().toString(),
-				deliverySelector,
+				Set.of(new LocalDeliveryEndpoint(
+                        qpidContainer.getHost(),
+                        qpidContainer.getAmqpsPort(),
+                        exchangeName
+                )),
+                "messageType = 'DATEX2'",
 				LocalDeliveryStatus.CREATED
 		);
-		String exchangeName = "myexchange";
-		localDelivery.addEndpoint(new LocalDeliveryEndpoint(
-				qpidContainer.getHost(),
-				qpidContainer.getAmqpsPort(),
-				exchangeName
-		));
+		String serviceProviderName = "king_gustaf";
 		ServiceProvider king_gustaf = new ServiceProvider(
-				"king_gustaf",
-				capabilities,
-				Set.of(subscription),
+				serviceProviderName,
+                new Capabilities(
+                        Collections.singleton(capability)
+                ),
+				Set.of(new LocalSubscription(
+                        LocalSubscriptionStatus.REQUESTED,
+                        "messageType = 'DATEX2'",
+                        HOST_NAME,
+                        Collections.emptySet(),
+                        Collections.singleton(new LocalEndpoint(
+                                        source,
+                                        qpidContainer.getHost(),
+                                        qpidContainer.getAmqpsPort()
+                                )
+                        )
+                )),
 				Set.of(localDelivery),
 				LocalDateTime.now()
 		);
@@ -407,49 +407,59 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		OutgoingMatch outgoingMatch = new OutgoingMatch(
 				localDelivery,
 				capability,
-				king_gustaf.getName()
+				serviceProviderName
 		);
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(outgoingMatch));
-		when(serviceProviderRepository.save(any())).thenReturn(king_gustaf);
-		router.syncServiceProviders(Arrays.asList(king_gustaf), client.getQpidDelta());
 
-		SSLContext kingGustafSslContext = sslClientContext(stores,"king_gustaf");
+		serviceProviderRepository.save(king_gustaf);
+		outgoingMatchRepository.save(outgoingMatch);
+
+		router.syncServiceProviders(List.of(king_gustaf), client.getQpidDelta());
+
+		SSLContext kingGustafSslContext = sslClientContext(stores, serviceProviderName);
 		String amqpsUrl = qpidContainer.getAmqpsUrl();
 
 		Set<LocalEndpoint> sinkEndpoints = king_gustaf.getSubscriptions().stream().flatMap(s -> s.getLocalEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(sinkEndpoints).hasSize(1);
 
 		LocalEndpoint endpoint = sinkEndpoints.stream().findFirst().get();
-		Sink readKingGustafQueue = new Sink(amqpsUrl, endpoint.getSource(), kingGustafSslContext);
-		readKingGustafQueue.start();
+		assertThat(endpoint.getSource()).isEqualTo(source);
+		assertThatNoException().isThrownBy(() -> {
+			Sink readKingGustafQueue = new Sink(amqpsUrl, source, kingGustafSslContext);
+			readKingGustafQueue.start();
+		});
 
 		Set<LocalDeliveryEndpoint> deliveryEndpoints = king_gustaf.getDeliveries().stream().flatMap(d -> d.getEndpoints().stream()).collect(Collectors.toSet());
 		assertThat(deliveryEndpoints).hasSize(1);
 		LocalDeliveryEndpoint deliveryEndpoint = deliveryEndpoints.stream().findFirst().get();
+		assertThat(deliveryEndpoint.getTarget()).isEqualTo(exchangeName);
 
-		Source writeOnrampQueue = new Source(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
-		writeOnrampQueue.start();
-		try {
-			Sink readDlqueue = new Sink(amqpsUrl, deliveryEndpoint.getTarget(), kingGustafSslContext);
+		assertThatNoException().isThrownBy(() -> {
+			Source writeDelivery = new Source(amqpsUrl, exchangeName, kingGustafSslContext);
+			writeDelivery.start();
+		});
+		assertThatThrownBy(() -> {
+			Sink readDlqueue = new Sink(amqpsUrl, exchangeName, kingGustafSslContext);
 			readDlqueue.start();
-			fail("Should not allow king_gustaf to read from queue not granted access on local endpoint");
-		} catch (Exception ignore) {
-		}
+		} ).isInstanceOf(JMSException.class);
 	}
 
 	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribeFederatedInterchangesGroup() {
 		String serviceProviderName = "tore-down-service-provider";
 
-		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.REQUESTED, "a=b", "my-node");
+		LocalSubscription localSubscription = new LocalSubscription(
+				LocalSubscriptionStatus.REQUESTED,
+				"a=b",
+				"my-node"
+		);
 
 		ServiceProvider toreDownServiceProvider = new ServiceProvider(
 				serviceProviderName,
 				Set.of(localSubscription)
 		);
 
-		when(serviceProviderRepository.save(any())).thenReturn(toreDownServiceProvider);
-		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(toreDownServiceProvider);
+		router.syncServiceProviders(List.of(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(toreDownServiceProvider.getName())).isNotNull();
 		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 
@@ -463,8 +473,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		toreDownServiceProvider.getSubscriptions().forEach(s -> s.setStatus(LocalSubscriptionStatus.TEAR_DOWN));
 
-		when(matchRepository.findAllByLocalSubscriptionId(any(Integer.class))).thenReturn(Collections.emptyList());
-		router.syncServiceProviders(Arrays.asList(toreDownServiceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(toreDownServiceProvider);
+		router.syncServiceProviders(List.of(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
 		assertThat(client.getServiceProviderMember(toreDownServiceProvider.getName())).isNull();
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
@@ -473,16 +483,32 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
+				Collections.singleton(
+						new Capability(
+								new DatexApplication("NO-123",
+										"NO-pub",
+										"NO",
+										"1.0",
+										List.of(),
+										"SituationPublication",
+										"publisherName"
+								),
+								new Metadata(
+										RedirectStatus.OPTIONAL
+								)
+						)
+				)
+		);
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities());
-		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
 	}
 
@@ -490,13 +516,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
 
 		Capability cap = new Capability(
-				new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName"),
+				new DatexApplication("NO-123",
+						"NO-pub",
+						"NO",
+						"1.0",
+						List.of(),
+						"SituationPublication",
+						"publisherName"),
 				new Metadata(RedirectStatus.OPTIONAL)
 		);
 		cap.getMetadata().setShardCount(3);
 
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(cap));
+				Collections.singleton(cap)
+		);
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
@@ -528,7 +561,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		assertThat(cap.hasShards()).isTrue();
 		assertThat(cap.getShards()).hasSize(1);
 		assertThat(client.exchangeExists(cap.getShards().stream().findFirst().get().getExchangeName())).isTrue();
-		assertThat(cap.getShards().stream().findFirst().get().getSelector().contains("shardId")).isFalse();
+		assertThat(cap.getShards().stream().findFirst().orElseThrow().getSelector().contains("shardId")).isFalse();
 	}
 
 	@Test
@@ -546,8 +579,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider",Set.of(sub1,sub2));
 
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
 		assertThat(sub1.getLocalEndpoints()).hasSize(1);
@@ -563,13 +596,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceprovider-should-be-removed",capabilities);
 
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities());
+		serviceProviderRepository.save(serviceProvider);
 
-		router.syncServiceProviders(Arrays.asList(serviceProvider), client.getQpidDelta());
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
 	}
 
@@ -579,7 +613,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownTargetForDeliveryByDeletedDelivery() {
 		String serviceProviderName = "my-service-provider";
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String exchangeName = "my-exchange8";
 
 		CapabilityShard shard = new CapabilityShard(1, "cap-ex4", "publicationId = 'pub-1'");
@@ -599,19 +632,23 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
 		delivery.addEndpoint(new LocalDeliveryEndpoint("my-interchange", 5671, exchangeName));
-		delivery.setId(1);
-		serviceProvider.addDeliveries(Set.of(delivery));
+		ServiceProvider serviceProvider = new ServiceProvider(
+				serviceProviderName,
+				new Capabilities(Set.of(denmCapability)),
+				Set.of(),
+				Set.of(delivery),
+				LocalDateTime.now()
+		);
 
+		serviceProviderRepository.save(serviceProvider);
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
-
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		outgoingMatchRepository.save(match);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
+		outgoingMatchRepository.delete(match);
 		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+		serviceProviderRepository.save(serviceProvider);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
@@ -622,12 +659,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void tearDownDlqForDeliveryByDeletedDelivery() {
 		String serviceProviderName = "my-service-provider";
-		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName);
 		String exchangeName = "dlq-exchange";
 		String dlqName = "dlq-name";
 
-		CapabilityShard shard = new CapabilityShard(1, "cap-ex40", "publicationId = 'pub-1'");
-		Capability denmCapability = new Capability(
+        Capability denmCapability = new Capability(
 				new DenmApplication(
 						"NPRA",
 						"pub-1",
@@ -637,44 +672,59 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of(6)
 				),
 				new Metadata(RedirectStatus.OPTIONAL),
-				Collections.singletonList(shard)
+				List.of(
+						new CapabilityShard(
+								1,
+								"cap-ex40",
+								"publicationId = 'pub-1'"
+						)
+				)
 		);
 		client.createHeadersExchange("cap-ex40");
 
-		LocalDelivery delivery = new LocalDelivery("originatingCountry = 'NO'", LocalDeliveryStatus.CREATED, "delivery", false);
-		delivery.addEndpoint(new LocalDeliveryEndpoint(
-				1,
+		LocalDeliveryEndpoint endpoint = new LocalDeliveryEndpoint(
 				"host",
 				123,
 				exchangeName,
 				2,
 				3,
-				dlqName));
+				dlqName);
+		LocalDelivery delivery = new LocalDelivery(
+				UUID.randomUUID().toString(),
+				Set.of(endpoint),
+				"originatingCountry = 'NO'",
+				LocalDeliveryStatus.CREATED,
+				"delivery",
+				false
+		);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				serviceProviderName,
+				new Capabilities(
+						Set.of(
+								denmCapability
+						)
+				),
+				Set.of(),
+				Set.of(delivery),
+				LocalDateTime.now()
+		);
 
-		serviceProvider.addDeliveries(Set.of(delivery));
-
+		serviceProviderRepository.save(serviceProvider);
 		OutgoingMatch match = new OutgoingMatch(delivery, denmCapability, serviceProviderName);
+		outgoingMatchRepository.save(match);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Arrays.asList(match));
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
 		delivery.setStatus(LocalDeliveryStatus.TEAR_DOWN);
+		serviceProviderRepository.save(serviceProvider);
+		outgoingMatchRepository.delete(match);
 
-		when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 
 		assertThat(client.queueExists(dlqName)).isFalse();
 		assertThat(client.exchangeExists(exchangeName)).isFalse();
 		assertThat(delivery.getEndpoints()).isEmpty();
 	}
-
-
-
-
-
-
 
 
 	@Test
@@ -704,33 +754,41 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
         ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Collections.singleton(denmCapability)));
+		serviceProviderRepository.save(mySP);
+		serviceProviderRepository.save(otherSP);
+		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
-		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
-
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource())).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(1);
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
+		serviceProviderRepository.save(otherSP);
 
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
-		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(0);
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource())).hasSize(0);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(0);
 	}
 
 	@Test
 	public void localSubscriptionKeepsConnectionToOneCapabilityAndTearsDownAnother() {
+		fail();
+	}
+/*
+		String endpointName = "endpoint-4";
+        LocalSubscription subscription = new LocalSubscription(
+				LocalSubscriptionStatus.CREATED,
+				"originatingCountry = 'NO' and (quadTree like '%," +
+						"234%' or quadTree like '%,1233%')",
+				"my-node",
+				Set.of(),
+				Set.of(new LocalEndpoint(endpointName, "my-interchange", 5671))
+		);
+		client.createQueue(endpointName);
 
-		LocalSubscription subscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, "originatingCountry = 'NO' and (quadTree like '%,1234%' or quadTree like '%,1233%')", "my-node");
-		LocalEndpoint endpoint = new LocalEndpoint("endpoint-4", "my-interchange", 5671);
-		subscription.addLocalEndpoint(endpoint);
-		client.createQueue("endpoint-4");
-
-		CapabilityShard shard1 = new CapabilityShard(1, "cap-ex16", "publicationId = 'pub-1'");
+		String capabilityExchange = "cap-ex16";
 		Capability denmCapability1 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -741,13 +799,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of(6)
 				),
 				new Metadata(RedirectStatus.OPTIONAL),
-				Collections.singletonList(shard1)
+				Collections.singletonList(new CapabilityShard(1, capabilityExchange, "publicationId = 'pub-1'"))
 		);
-		client.createHeadersExchange("cap-ex16");
+		client.createHeadersExchange(capabilityExchange);
 
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
 
-		CapabilityShard shard2 = new CapabilityShard(1, "cap-ex17", "publicationId = 'pub-2'");
+		String capExchangeName2 = "cap-ex17";
 		Capability denmCapability2 = new Capability(
 				new DenmApplication(
 						"NPRA",
@@ -758,26 +816,38 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 						List.of(6)
 				),
 				new Metadata(RedirectStatus.OPTIONAL),
-				Collections.singletonList(shard2)
+				Collections.singletonList(new CapabilityShard(1, capExchangeName2, "publicationId = 'pub-2'"))
 		);
-		client.createHeadersExchange("cap-ex17");
+		client.createHeadersExchange(capExchangeName2);
 
 		denmCapability2.setStatus(CapabilityStatus.CREATED);
 
-		ServiceProvider mySP = new ServiceProvider("my-sp",Set.of(subscription));
-        ServiceProvider otherSP = new ServiceProvider("other-sp", new Capabilities(Set.of(denmCapability1, denmCapability2)));
+		ServiceProvider mySP = new ServiceProvider(
+				"my-sp",
+				Set.of(subscription));
+        ServiceProvider otherSP = new ServiceProvider(
+				"other-sp",
+				new Capabilities(
+						Set.of(
+								denmCapability1,
+								denmCapability2
+						)
+				)
+		);
 
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
-		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+		serviceProviderRepository.save(mySP);
+		serviceProviderRepository.save(otherSP);
+		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(2);
+		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource())).hasSize(2);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(2);
 
 		denmCapability1.setStatus(CapabilityStatus.TEAR_DOWN);
 
-		when(serviceProviderRepository.save(any())).thenReturn(mySP);
-		router.syncServiceProviders(Arrays.asList(mySP, otherSP), client.getQpidDelta());
+		//when(serviceProviderRepository.save(any())).thenReturn(mySP);
+		serviceProviderRepository.save(otherSP);
+		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
 		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().get().getSource())).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
