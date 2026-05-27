@@ -10,8 +10,6 @@ services:
       dockerfile: dns-dockerfile
     cap_add:
     - NET_ADMIN
-    container_name: mock-dns-server
-    hostname: mock-dns-server
     networks:
       testing_net:
         ipv4_address: 172.28.1.1
@@ -19,9 +17,9 @@ services:
           - dns.bouvetinterchange.eu
 
 
-  a_db:
+  a-db:
     image: postgres:18.1
-    container_name: a_db
+    container_name: a-db
     depends_on:
       - mock-dns-server
     ports:
@@ -39,7 +37,7 @@ services:
       context: ../admin-server-app
     container_name: a-admin
     depends_on:
-      - a_db
+      - a-db
     links:
       - "a_qpid:a.bouvetinterchange.eu"
     ports:
@@ -49,7 +47,7 @@ services:
     environment:
       - BASE_URL=https://a.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -69,13 +67,13 @@ services:
       context: ../onboard-server-app
     container_name: a_onboard_server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 32666:8797
     volumes:
     - "systemtest-keys-volume:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -94,13 +92,13 @@ services:
       context: ../napcore-server-app
     container_name: a-napcore-server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 32777:8898
     volumes:
       - "systemtest-keys-volume:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - NAP_CHNL_PORT=8898
@@ -148,13 +146,13 @@ services:
       context: ../neighbour-server-app
     container_name: a_neighbour_server
     depends_on:
-      - a_db
+      - a-db
     ports:
       - 8090
     volumes:
       - "systemtest-keys-volume:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -174,11 +172,11 @@ services:
       context: ../routing-configurer-app
     container_name: a_routing_configurer
     depends_on:
-      - a_db
+      - a-db
     volumes:
       - "systemtest-keys-volume:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a_qpid
@@ -197,13 +195,13 @@ services:
       context: ../neighbour-discoverer-app
     container_name: a_neighbour_discoverer
     depends_on:
-      - a_db
+      - a-db
     links:
      - "b_neighbour_server:b.bouvetinterchange.eu"
     volumes:
       - "systemtest-keys-volume:/keys"
     environment:
-      - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.bouvetinterchange.eu
@@ -224,14 +222,14 @@ services:
       context: ../message-collector-app
     container_name: a_message_collector_app
     depends_on:
-    - a_db
+    - a-db
     links:
     - "a_qpid:a.qpid.bouvetinterchange.eu"
     - "b_qpid:b.qpid.bouvetinterchange.eu"
     volumes:
     - "systemtest-keys-volume:/keys"
     environment:
-    - POSTGRES_URI=jdbc:postgresql://a_db:5432/federation
+    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
     - POSTGRES_USER=federation
     - POSTGRES_PASSWORD=federation
     - KEY_STORE=/keys/a.bouvetinterchange.eu.p12

@@ -9,12 +9,12 @@ import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.auth.CertService;
-import no.vegvesen.ixn.federation.capability.CapabilityCalculator;
-import no.vegvesen.ixn.federation.model.ServiceProvider;
+
+import no.vegvesen.ixn.federation.model.OutgoingMatch;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
+import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController("/")
 public class NeighbourRestController {
@@ -32,7 +32,7 @@ public class NeighbourRestController {
 	private final NeighbourService neighbourService;
 	private final CertService certService;
 	private final InterchangeNodeProperties properties;
-	private final ServiceProviderService serviceProviderService;
+	private final OutgoingMatchRepository outgoingMatchRepository;
 
 	private Logger logger = LoggerFactory.getLogger(NeighbourRestController.class);
 
@@ -40,11 +40,11 @@ public class NeighbourRestController {
 	public NeighbourRestController(NeighbourService neighbourService,
 								   CertService certService,
 								   InterchangeNodeProperties properties,
-								   ServiceProviderService serviceProviderService) {
+								   OutgoingMatchRepository outgoingMatchRepository) {
 		this.neighbourService = neighbourService;
 		this.certService = certService;
 		this.properties = properties;
-		this.serviceProviderService = serviceProviderService;
+		this.outgoingMatchRepository = outgoingMatchRepository;
 	}
 
 	@ResponseStatus(HttpStatus.ACCEPTED)
@@ -123,8 +123,9 @@ public class NeighbourRestController {
 		certService.checkIfCommonNameMatchesNameInApiObject(neighbourCapabilities.getName());
 		logger.debug("Common name of certificate matches Neighbour name in capability api object.");
 
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
-		Set<Capability> localCapabilities = CapabilityCalculator.allCreatedServiceProviderCapabilities(serviceProviders);
+		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
+				.map(OutgoingMatch::getCapability)
+				.collect(Collectors.toSet());
 		CapabilitiesApi capabilitiesApiResponse = neighbourService.incomingCapabilities(neighbourCapabilities, localCapabilities);
 		logger.info("Responding with local capabilities: {}", capabilitiesApiResponse.toString());
 		NeighbourMDCUtil.removeLogVariables();

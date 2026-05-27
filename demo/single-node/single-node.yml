@@ -7,8 +7,6 @@ services:
       dockerfile: dns-single-node-dockerfile
     cap_add:
     - NET_ADMIN
-    container_name: mock-dns-server
-    hostname: mock-dns-server
     networks:
       singletest:
         ipv4_address: 172.29.1.1

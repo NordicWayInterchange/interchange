@@ -107,8 +107,9 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                 <StyledCard variant={"outlined"}>
                   <Typography>Endpoints</Typography>
                   <FormControl fullWidth>
-                    {item.endpoints.map((endpoint) => (
+                    {item.endpoints.map((endpoint, idx) => (
                         <TextField
+                            key={idx}
                             value={endpoint.host || ""}
                             label="Host"
                             margin="normal"
@@ -137,8 +138,9 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                         },
                       }}
                     />
-                    {item.endpoints.map((endpoint) => (
+                    {item.endpoints.map((endpoint, idx) => (
                         <TextField
+                            key={idx}
                             value={endpoint.port || ""}
                             label="Port"
                             margin="normal"
@@ -155,8 +157,9 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
                             }}
                         />
                     ))}
-                    {label == "Delivery" && item.endpoints.map((endpoint) => endpoint.dlqName?.toString() ? (
+                    {label == "Delivery" && item.endpoints.map((endpoint, idx) => endpoint.dlqName?.toString() ? (
                             <TextField
+                                key={idx}
                                 value={endpoint.dlqName?.toString() ? endpoint.dlqName?.toString() : ""}
                                 label="Dead letter queue"
                                 margin="normal"
