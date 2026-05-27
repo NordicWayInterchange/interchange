@@ -185,7 +185,7 @@ jobs:
       - name: Build the Docker image
         run: |
           cd ./admin-frontend
-          docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/admin-frontend:${{ env.IMAGE_TAG }}
+          docker buildx build --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/admin-frontend:${{ env.IMAGE_TAG }} --push
 
   docker-push-svv:
     runs-on: ubuntu-latest
