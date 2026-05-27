@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   serviceName: {{ .Release.Name }}-keycloak-discovery
-  replicas: 1
+  replicas: {{ .Values.napcore_frontend.keycloak.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
