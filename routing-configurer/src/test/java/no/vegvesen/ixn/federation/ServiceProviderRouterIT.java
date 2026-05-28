@@ -9,6 +9,7 @@ import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.qpid.*;
+import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
@@ -30,7 +31,6 @@ import java.util.stream.Collectors;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Fail.fail;
 
 @SpringBootTest
 @Transactional
@@ -86,6 +86,14 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Autowired
 	private OutgoingMatchRepository outgoingMatchRepository;
+
+	@Autowired
+	private MatchRepository matchRepository;
+
+	@Autowired
+	private NeighbourRepository neighbourRepository;
+
+
  	@Autowired
 	ServiceProviderRouter router;
 
@@ -774,14 +782,10 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 	@Test
 	public void localSubscriptionKeepsConnectionToOneCapabilityAndTearsDownAnother() {
-		fail();
-	}
-/*
 		String endpointName = "endpoint-4";
         LocalSubscription subscription = new LocalSubscription(
 				LocalSubscriptionStatus.CREATED,
-				"originatingCountry = 'NO' and (quadTree like '%," +
-						"234%' or quadTree like '%,1233%')",
+				"originatingCountry = 'NO'",
 				"my-node",
 				Set.of(),
 				Set.of(new LocalEndpoint(endpointName, "my-interchange", 5671))
@@ -801,9 +805,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL),
 				Collections.singletonList(new CapabilityShard(1, capabilityExchange, "publicationId = 'pub-1'"))
 		);
-		client.createHeadersExchange(capabilityExchange);
-
 		denmCapability1.setStatus(CapabilityStatus.CREATED);
+		client.createHeadersExchange(capabilityExchange);
 
 		String capExchangeName2 = "cap-ex17";
 		Capability denmCapability2 = new Capability(
@@ -818,9 +821,9 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				new Metadata(RedirectStatus.OPTIONAL),
 				Collections.singletonList(new CapabilityShard(1, capExchangeName2, "publicationId = 'pub-2'"))
 		);
+		denmCapability2.setStatus(CapabilityStatus.CREATED);
 		client.createHeadersExchange(capExchangeName2);
 
-		denmCapability2.setStatus(CapabilityStatus.CREATED);
 
 		ServiceProvider mySP = new ServiceProvider(
 				"my-sp",
@@ -839,13 +842,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProviderRepository.save(otherSP);
 		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource())).hasSize(2);
+		LocalEndpoint localEndpoint = subscription.getLocalEndpoints().stream().findFirst().orElseThrow();
+		assertThat(localEndpoint.getSource()).isEqualTo(endpointName);
+		List<Binding> queuePublishingLinks = client.getQueuePublishingLinks(endpointName);
+		assertThat(queuePublishingLinks).hasSize(2);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 		assertThat(subscription.getConnections()).hasSize(2);
 
 		denmCapability1.setStatus(CapabilityStatus.TEAR_DOWN);
 
-		//when(serviceProviderRepository.save(any())).thenReturn(mySP);
 		serviceProviderRepository.save(otherSP);
 		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
@@ -868,12 +873,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(
 						localSubscription
 				),
-				Collections.emptySet(),
+				Set.of(),
 				LocalDateTime.now()
 		);
 
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(Set.of(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 		assertThat(serviceProvider.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 	}
@@ -885,16 +890,18 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"serviceProvider",
 				false,
 				new Capabilities(),
-				Collections.emptySet(),
-				Collections.emptySet(),
+				Set.of(),
+				Set.of(),
 				LocalDateTime.now()
 		);
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		serviceProviderRepository.save(serviceProvider);
 		assertThat(serviceProvider.isBiconsumer()).isFalse();
 		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider, client.getQpidDelta());
 
 		assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
 	}
+
+
     @Test
     public void testNoServiceProviderIsAddedToBiConsumerGroupIfBiconsumerIsNull() {
 
@@ -902,15 +909,16 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
                 "serviceProvider",
                 null,
                 new Capabilities(),
-                Collections.emptySet(),
-                Collections.emptySet(),
+                Set.of(),
+                Set.of(),
                 LocalDateTime.now()
         );
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider,client.getQpidDelta());
 
         assertThat(client.getBiConsumerMember(serviceProvider.getName())).isNull();
     }
+
 
 	@Test
 	public void testServiceProviderAddedToBiConsumerGroup() {
@@ -919,11 +927,11 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"serviceProvider",
 				true,
 				new Capabilities(),
-				Collections.emptySet(),
-				Collections.emptySet(),
+				Set.of(),
+				Set.of(),
 				LocalDateTime.now()
 		);
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		serviceProviderRepository.save(serviceProvider);
 		assertThat(serviceProvider.isBiconsumer()).isTrue();
 		router.addOrRemoveServiceProviderToBiConsumerGroup(serviceProvider,client.getQpidDelta());
 
@@ -935,16 +943,15 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void testIllegalLocalSubscriptionGetsRemovedFromServiceProvider() {
 		LocalSubscription subscription = new LocalSubscription(
-				1,
 				LocalSubscriptionStatus.ILLEGAL,
 				"",
 				"myNode"
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				Set.of(subscription)
 		);
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
@@ -952,65 +959,71 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void testLocalSubscriptionWithErrorGetsRemovedFromServiceProvider(){
 		LocalSubscription subscription = new LocalSubscription(
-				1,
 				LocalSubscriptionStatus.ERROR,
 				"",
 				"myNode"
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				Set.of(subscription)
 		);
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
+
 
 	@Test
 	public void tearDownLocalSubscriptionWithEmptyMatch() {
 		LocalSubscription subscription = new LocalSubscription(
-				1,
 				LocalSubscriptionStatus.TEAR_DOWN,
 				"",
 				"myNode"
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				Set.of(subscription)
 		);
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(new ArrayList<>());
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
+
 	@Test
 	public void teardownLocalSubscriptionWithRemainingMatch() {
-		LocalSubscription subscription = new LocalSubscription(
-				1,
+		LocalSubscription localSubscription = new LocalSubscription(
 				LocalSubscriptionStatus.TEAR_DOWN,
 				"",
 				"myNode"
 		);
 		ServiceProvider serviceProvider = new ServiceProvider(
 				"sp1",
-				Collections.singleton(subscription)
+				Collections.singleton(localSubscription)
 		);
-		Match match = new Match(
-				subscription,
-				new Subscription("",SubscriptionStatus.TEAR_DOWN)
+		Subscription subscription = new Subscription("", SubscriptionStatus.TEAR_DOWN);
+		Neighbour neighbour = new Neighbour(
+			"neighbour",
+			new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(Set.of(subscription))
 		);
 
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Arrays.asList(match));
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		Match match = new Match(
+				localSubscription,
+				subscription
+		);
+
+		serviceProviderRepository.save(serviceProvider);
+		neighbourRepository.save(neighbour);
+		matchRepository.save(match);
+		router.syncServiceProviders(Set.of(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).hasSize(1);
 	}
 
 	@Test
 	public void redirectSubscriptionStatusTearDownEmptyMatchList() {
 		LocalSubscription subscription = new LocalSubscription(
-				1,
 				LocalSubscriptionStatus.TEAR_DOWN,
 				"",
 				"myNode"
@@ -1020,9 +1033,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				Collections.singleton(subscription)
 		);
 
-		when(matchRepository.findAllByLocalSubscriptionId(1)).thenReturn(Collections.emptyList());
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
-		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
+		serviceProviderRepository.save(serviceProvider);
+		router.syncServiceProviders(Set.of(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
 
@@ -1030,7 +1042,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void redirectSubscriptionStatusIllegal() {
 		LocalSubscription subscription = new LocalSubscription(
-				1,
 				LocalSubscriptionStatus.ILLEGAL,
 				"",
 				"sp1"
@@ -1039,8 +1050,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				"sp1",
 				Collections.singleton(subscription)
 		);
-		when(matchRepository.findAllByLocalSubscriptionId(any())).thenReturn(Collections.emptyList());
-		when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(Collections.singleton(serviceProvider), client.getQpidDelta());
 		assertThat(serviceProvider.getSubscriptions()).isEmpty();
 	}
@@ -1147,5 +1157,4 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		}
 	}
 
-*/
 }
