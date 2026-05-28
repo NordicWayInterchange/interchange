@@ -34,6 +34,8 @@ spec:
               value: "https://{{ .Release.Name }}-napcore-server:{{ .Values.self.nap_provider_port}}/nap/"
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.napcore_frontend.generated_username_prefix }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: {{ .Values.napcore_frontend.interchange_ca_pem }}
             - name: NEXTAUTH_SECRET
               value: {{ .Values.napcore_nextauth_secret | trim | quote }}
             - name: NEXTAUTH_URL
@@ -76,8 +78,8 @@ spec:
             httpGet:
               port: 3000
               path: /login
-            initialDelaySeconds: 30
-            periodSeconds: 20
+            initialDelaySeconds: 3
+            periodSeconds: 5
             timeoutSeconds: 10
       volumes:
         - name: napcore-frontend-secret

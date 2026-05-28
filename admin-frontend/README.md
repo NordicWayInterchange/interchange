@@ -66,6 +66,61 @@ AUTH0_BASE_URL=
 AUTH0_CLIENT_ID=
 AUTH0_CLIENT_SECRET=
 AUTH0_ISSUER=
+```
+
+## Authentication
+
+---
+
+NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
+
+Other providers can be added in […nextAuth].js
+
+```jsx
+providers: [
+    Auth0Provider({
+      clientId: process.env.AUTH0_CLIENT_ID,
+      clientSecret: process.env.AUTH0_CLIENT_SECRET,
+      issuer: process.env.AUTH0_ISSUER,
+    })
+  ]
+```
+
+## Installation and setup
+
+---
+
+### Development
+
+1. Clone the repository and install packages `npm install`
+2. Copy environment variables and add PFX file in root.
+3. Available commands:
+
+```bash
+npm run dev # Development mode
+npm run build # Generate optimized version
+npm run start # Start Node.js server
+```
+
+```
+# Certificate
+PFX_KEY_FILENAME=
+PFX_PASSPHRASE=
+
+# Interchange
+INTERCHANGE_URI=
+NEXT_PUBLIC_INTERCHANGE_PREFIX=
+INTERCHANGE_PREFIX=
+
+# NextAuth
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+SESSION_MAXAGE_SECONDS= # Optional value, will fallback to one day
+
+# Auth0 (Or other authentication providers can be added here)
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=
+AUTH0_ISSUER=
 
 # KeyCloak
 USE_KEYCLOAK=
@@ -86,8 +141,9 @@ Keycloak is an open source identity and access management solution. It adds auth
 
 NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
 
-Other providers can be added in […nextAuth].js
+Other providers can be added in buildProviders() in […nextAuth].js
 
+Auth0 example:
 ```jsx
 providers: [
     Auth0Provider({
@@ -97,6 +153,7 @@ providers: [
     })
   ]
 ```
+
 Keycloak example:
 ```jsx
 providers: [
@@ -107,6 +164,33 @@ providers: [
     })
   ]
 ```
+
+### Callbacks
+
+Whenever a session is checked we add a commonName value to the session object, which prefixes the email with the interchange prefix.
+This allows us to send the prefix as an environment variable, instead of bundling it in the build.
+
+```jsx
+callbacks: {
+    async session({ session, token }) {
+      session.user.commonName = process.env.INTERCHANGE_PREFIX + token.email;
+
+      return session;
+    }
+  }
+```
+
+### Middleware
+
+The middleware.ts allows us to run code before a request is completed. With NextAuth we can export a config object with a regex matcher, to specify allowed routings for an unauthenticated user.
+
+Additionally, we check in the backend (for frontend), that all of these criteria are met:
+
+- Does the user have a valid token?
+- Does the user have a valid session?
+- Does the authenticated user equal the user on the request?
+
+If so, continue with the request or respond with an HTTP 403.
 
 ## Styles
 
