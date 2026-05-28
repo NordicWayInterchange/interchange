@@ -32,7 +32,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
-      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+      - ./a.bouvetinterchange.eu-realm.json:/opt/keycloak/data/import/a.bouvetinterchange.eu-realm.json:ro
     command: [ "start-dev", "--import-realm" ]
     networks:
       - testing_net
