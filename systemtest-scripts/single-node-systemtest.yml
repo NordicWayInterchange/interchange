@@ -1,0 +1,21 @@
+a-onboard-server:
+  image: ghcr.io/nordicwayinterchange/onboard-server-app:${IMAGE_TAG}
+  depends_on:
+    - a-db
+  ports:
+    - 32666:8797
+  volumes:
+    - "single-node-keys-volume:/keys"
+  environment:
+    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+    - POSTGRES_USER=federation
+    - POSTGRES_PASSWORD=federation
+    - SERVER_NAME=a.interchangedomain.com
+    - DOMAIN_NAME=lookupdomain.com
+    - SP_CHNL_PORT=8797
+    - TRUST_STORE=/keys/ca.a.interchangedomain.com.jks
+    - TRUST_STORE_PASSWORD=password
+    - KEY_STORE=/keys/a.interchangedomain.com.p12
+    - KEY_STORE_PASSWORD=password
+  networks:
+    - singletest
