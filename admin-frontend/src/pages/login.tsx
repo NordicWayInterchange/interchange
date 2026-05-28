@@ -40,8 +40,7 @@ export default function Login(isKeycloak: any) {
                 {isKeycloak.isKeycloak ? (
                     <StyledButton
                         variant="contained"
-                        color="buttonThemeColor"
-                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10}}
+                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10, color:"buttonThemeColor"}}
                         onClick={() => signIn("keycloak")}
                     >
                         <Typography>Sign in with keycloak</Typography>
@@ -50,8 +49,7 @@ export default function Login(isKeycloak: any) {
                 ) : (
                     <StyledButton
                         variant="contained"
-                        color="buttonThemeColor"
-                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10}}
+                        sx={{textTransform: "none", width: 250, alignSelf: "center", ml: 10, color:"buttonThemeColor"}}
                         onClick={() => signIn("auth0")}
                     >
                         <Typography>Sign in with auth0</Typography>
