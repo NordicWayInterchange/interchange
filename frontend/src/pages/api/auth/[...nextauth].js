@@ -15,13 +15,8 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, profile }) {
-      // At sign-in, profile is populated with claims from the identity provider.
-      // Forward the custom org/SP claims onto the persisted token so they survive
-      // across requests (profile is only present on the initial sign-in call).
       if (profile) {
-        // DEBUG: log raw profile claims to identify correct Keycloak mapper output names.
-        logger.child({ profile }).debug("Raw IdP profile claims at sign-in");
-        // Placeholder claim names — replace with the actual Keycloak mapper output names.
+        logger.child({ profile }).debug("Profile claims at sign-in");
         token.organization = Array.isArray(profile.organization)
           ? profile.organization[0] ?? null
           : null;
@@ -29,9 +24,6 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      // A user that belongs to an Organization has a commonName claim set to the
-      // org's bound ServiceProvider name. Users without an org (or using Auth0)
-      // fall back to the email-derived name.
       session.user.commonName = token.organization
         ? escapeString(process.env.INTERCHANGE_PREFIX + token.organization.toLowerCase())
         : escapeString(process.env.INTERCHANGE_PREFIX + token.email);

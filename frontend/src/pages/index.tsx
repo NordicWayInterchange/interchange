@@ -108,6 +108,7 @@ export default function Home() {
             <Typography variant="h6" sx={{ fontSize: "0.85rem", textAlign: "center" }}>
               {session.user.organization}
             </Typography>
+              <Box sx={{ mt: -.5 }}><ContentCopy value={session.user.organization || ""} /></Box>
           </Box>
         </>
       )}
