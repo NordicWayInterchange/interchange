@@ -25,7 +25,6 @@ The goal is to quickly assess the overall health and status of the system, enabl
 - TypeScript
 - Leaflet
 - Tanstack
-- PKI.js
 - NextAuth.js
 - Keycloak
 
@@ -145,16 +144,14 @@ To avoid unintended styling we do not use global CSS, and all styling is done at
 
 ### Theme
 
-We have created two themes for Trafficdata and Interchange portal. They all include a set of shared colors, and their specific colors and fonts. The theme can be changed by importing it and specifying it
-in `_app.tsx` , as well as changing the title in `Navbar.tsx`.
+We have created themes that includes colors and fonts. This can be changed by importing and specifying it
+in `_app.tsx`.
 
 ```jsx
-import { trafficdata, interchangePortal } from "@/theme";
-
-<ThemeProvider theme={trafficdata}>
+<ThemeProvider theme={theme}>
 ```
 
-Adjustments to the theme should be performed at `colors.ts` , `fonts.ts` and `trafficdata.ts` / `interchangePortal.ts`.
+Adjustments to the theme should be performed at `colors.ts` , `fonts.ts`.
 
 ## Troubleshoot
 
