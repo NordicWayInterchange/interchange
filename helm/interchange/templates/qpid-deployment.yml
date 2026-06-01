@@ -72,13 +72,11 @@ spec:
               mountPath: /qpid-broker-j/work-override
           readinessProbe:
             httpGet:
-              path: /api/latest/broker
+              path: /
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 6
       volumes:
         - name: config
           configMap:
