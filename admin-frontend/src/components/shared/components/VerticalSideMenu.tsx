@@ -19,6 +19,7 @@ import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import QueueIcon from '@mui/icons-material/Queue';
 import TableRowsIcon from '@mui/icons-material/TableRows';
+import Version from "@/components/shared/components/Version";
 
 const drawerWidth = 145;
 
@@ -127,6 +128,7 @@ const VerticalSideMenu: React.FC = () => {
                 <Box sx={{ padding: 2 }}>
                     <List>{mapPages(SIDE_PAGES)}</List>
                 </Box>
+                <Version></Version>
             </Drawer>
 
             <Box
