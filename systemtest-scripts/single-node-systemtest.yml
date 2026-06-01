@@ -53,7 +53,6 @@ services:
   a-napcore-server:
     build:
       context: ../napcore-server-app
-    container_name: a-napcore-server
     depends_on:
       - a-db
     ports:
