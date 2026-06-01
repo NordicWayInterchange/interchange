@@ -88,51 +88,51 @@ public class RoutingConfigurer {
 			}
 		}
 		Set<String> redirectedServiceProviders = new HashSet<>();
-			for (NeighbourSubscription sub : subscriptions) {
-                String consumerCommonName = sub.getConsumerCommonName();
-                for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
-                    Queue queue = qpidClient.getQueue(endpoint.getSource());
-                    if (queue != null) {
-                        qpidClient.removeQueue(queue);
-                        qpidClient.removeReadAccess(consumerCommonName, queue.getName());
-                    }
+		for (NeighbourSubscription sub : subscriptions) {
+			String consumerCommonName = sub.getConsumerCommonName();
+			for (NeighbourEndpoint endpoint : sub.getEndpoints()) {
+				Queue queue = qpidClient.getQueue(endpoint.getSource());
+				if (queue != null) {
+					qpidClient.removeQueue(queue);
+					qpidClient.removeReadAccess(consumerCommonName, queue.getName());
+				}
 
-					if (! consumerCommonName.equals(neighbour.getName())) {
-						redirectedServiceProviders.add(consumerCommonName);
-					}
+				if (! consumerCommonName.equals(neighbour.getName())) {
+					redirectedServiceProviders.add(consumerCommonName);
 				}
 			}
+		}
 
-			//If it is the last subscription of the SP, we need to remove them from the remote_sp group
-			neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
-			neighbourService.saveNeighbour(neighbour);
-			if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
-				NeighbourMember groupMember = qpidClient.getNeighbourMember(name);
+		//If it is the last subscription of the SP, we need to remove them from the remote_sp group
+		neighbour.getNeighbourRequestedSubscriptions().deleteSubscriptions(subscriptions);
+		neighbourService.saveNeighbour(neighbour);
+		if (neighbour.getNeighbourRequestedSubscriptions().getSubscriptions().isEmpty()) {
+			NeighbourMember groupMember = qpidClient.getNeighbourMember(name);
+			if (groupMember != null) {
+				logger.debug("Neighbour member '{}' found in the group", name);
+				qpidClient.removeNeighbourMemberFromGroup(groupMember);
+			} else {
+				logger.warn("Neighbour member '{}' does not exist in the group.", name);
+			}
+			logger.info("Removed routing for neighbour {}", name);
+		}
+		for (String redirectedSpName : redirectedServiceProviders) {
+			Set<NeighbourSubscription> subscriptionsWithConsumerCommonName = neighbour
+					.getNeighbourRequestedSubscriptions()
+					.getSubscriptions()
+					.stream()
+					.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
+					.collect(Collectors.toSet());
+			if (subscriptionsWithConsumerCommonName.isEmpty()) {
+				RemoteServiceProviderMember groupMember = qpidClient.getRemoteServiceProviderMember(redirectedSpName);
 				if (groupMember != null) {
-					logger.debug("Neighbour member '{}' found in the group", name);
-					qpidClient.removeNeighbourMemberFromGroup(groupMember);
+					logger.debug("Remote service provider '{}' found in group. Removing...", redirectedSpName);
+					qpidClient.removeRemoteServiceProviderMemberFromGroup(groupMember);
 				} else {
-					logger.warn("Neighbour member '{}' does not exist in the group.", name);
-				}
-				logger.info("Removed routing for neighbour {}", name);
-			}
-			for (String redirectedSpName : redirectedServiceProviders) {
-				Set<NeighbourSubscription> subscriptionsWithConsumerCommonName = neighbour
-						.getNeighbourRequestedSubscriptions()
-						.getSubscriptions()
-						.stream()
-						.filter(s -> s.getConsumerCommonName().equals(redirectedSpName))
-						.collect(Collectors.toSet());
-				if (subscriptionsWithConsumerCommonName.isEmpty()) {
-					RemoteServiceProviderMember groupMember = qpidClient.getRemoteServiceProviderMember(redirectedSpName);
-					if (groupMember != null) {
-						logger.debug("Remote service provider '{}' found in group. Removing...", redirectedSpName);
-						qpidClient.removeRemoteServiceProviderMemberFromGroup(groupMember);
-					} else {
-						logger.warn("Remote service provider '{}' does not exist in the group and cannot be removed.", redirectedSpName);
-					}
+					logger.warn("Remote service provider '{}' does not exist in the group and cannot be removed.", redirectedSpName);
 				}
 			}
+		}
 	}
 
 	//Both neighbour and service providers binds to outgoingExchange to receive local messages

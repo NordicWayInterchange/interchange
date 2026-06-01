@@ -52,6 +52,8 @@ public class LocalDeliveryServiceIT {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
@@ -60,7 +62,11 @@ public class LocalDeliveryServiceIT {
         registry.add("routing-configurer.interval",()->"999");
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost",() -> HOST_NAME);
-    }
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
+     }
 
     @Autowired
     RoutingConfigurerProperties routingConfigurerProperties;
@@ -71,20 +77,12 @@ public class LocalDeliveryServiceIT {
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
 
+    @Autowired
     private LocalDeliveryService localDeliveryService;
 
+    @Autowired
     private QpidClient qpidClient ;
 
-    @BeforeEach
-    public void setup() {
-        qpidClient = new QpidClient(
-                new QpidClientConfig(
-                        QpidDockerBaseIT.sslClientContext(stores,"routing_configurer")
-                ).qpidRestTemplate(),
-                routingConfigurerProperties
-        );
-        localDeliveryService = new LocalDeliveryService(serviceProviderRepository,outgoingMatchRepository,qpidClient);
-    }
 
     @Test
     public void createTargetAndConnectForServiceProvider() {
@@ -375,6 +373,7 @@ public class LocalDeliveryServiceIT {
 
     @Test
     public void tearDownDlqNameAndTargetForDeliveryByDeletedCapabilityWhenThereIsNoOtherMatches() {
+        System.out.println(qpidContainer.getHttpUrl());
         String serviceProviderName = "my-service-provider";
         String exchangeName = "dlq1-exchange";
         String dlqName = "dlq-name";

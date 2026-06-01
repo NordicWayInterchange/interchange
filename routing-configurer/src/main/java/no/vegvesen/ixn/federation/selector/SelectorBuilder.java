@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation;
+package no.vegvesen.ixn.federation.selector;
 
 import no.vegvesen.ixn.properties.MessageProperty;
 import no.vegvesen.ixn.properties.MessagePropertyType;

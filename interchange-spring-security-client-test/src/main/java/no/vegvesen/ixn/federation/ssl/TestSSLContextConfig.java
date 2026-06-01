@@ -11,19 +11,19 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 
-@Configuration
-@ConfigurationPropertiesScan
+//@Configuration
+//@ConfigurationPropertiesScan
 public class TestSSLContextConfig {
 
 	final
 	TestSSLProperties properties;
 
-	@Autowired
+	//@Autowired
 	public TestSSLContextConfig(TestSSLProperties properties) {
 		this.properties = properties;
 	}
 
-	@Bean
+	//@Bean
 	public SSLContext getTestSslContext() {
 		return SSLContextFactory.sslContextFromKeyAndTrustStores(
 				new KeystoreDetails(properties.getKeyStore(), properties.getKeystorePassword(), KeystoreType.valueOf(properties.getKeystoreType())),
