@@ -223,7 +223,7 @@ jobs:
         id: setup-buildx
         with:
           driver: docker-container
-          name: buildx-${{ matrix.image }}-${{ github.run_id }}
+          name: buildx-${{ matrix.Images }}-${{ github.run_id }}
 
       - name: Build the Docker image
         run: |
