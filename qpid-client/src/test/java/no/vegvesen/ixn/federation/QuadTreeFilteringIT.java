@@ -72,50 +72,50 @@ public class QuadTreeFilteringIT {
 		assertThat(message).isNull();
 	}
 
-        @Test
-        public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
-            String messageQuadTreeTiles = ",abcdefghijklmnop";
-            String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
-            String kingGustaf = "king_gustaf";
-            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue3","exchange3");
-            assertThat(receivedMessage).isNotNull();
-        }
+	@Test
+	public void matchingFilterAndQuadTreeExactMatchGetsRouted() throws Exception {
+		String messageQuadTreeTiles = ",abcdefghijklmnop";
+		String selector = "(originatingCountry = 'NO') and (quadTree like '%,abcdefghijklmnop%')";
+		String kingGustaf = "king_gustaf";
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue3","exchange3");
+		assertThat(receivedMessage).isNotNull();
+	}
 
-        @Test
-        public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
-            String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-            String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
-            String kingGustaf = "king_gustaf";
-            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue4","exchange4");
-            assertThat(receivedMessage).isNull();
-        }
+	@Test
+	public void nonMatchingFilterAndMatcingQuadTreeDoesNotGetRouted() throws Exception {
+		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+		String selector = "(originatingCountry = 'SE') and (quadTree like '%,abcdefgh%')";
+		String kingGustaf = "king_gustaf";
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue4","exchange4");
+		assertThat(receivedMessage).isNull();
+	}
 
-        @Test
-        public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
-            String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
-            String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
-            String kingGustaf = "king_gustaf";
-            Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue5","exchange5" );
-            assertThat(receivedMessage).isNull();
-        }
+	@Test
+	public void nonMatchingFilterAndNonMatcingQuadTreeDoesNotGetRouted() throws Exception {
+		String messageQuadTreeTiles = ",somerandomtile,abcdefghijklmnop,anotherrandomtile,";
+		String selector = "(originatingCountry = 'SE') and (quadTree like '%,cdefghij%')";
+		String kingGustaf = "king_gustaf";
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles, selector, kingGustaf,"queue5","exchange5" );
+		assertThat(receivedMessage).isNull();
+	}
 
-        @Test
-        public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
-            String dataTypeSelector = "(messageType='DATEX2') AND (originatingCountry='NO') AND (quadTree like '%,abcdef%')";
-            String kingGustaf = "king_gustaf";
-            String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
-            Message receivedMessage = sendAndReceive(messageQuadTreeTiles,dataTypeSelector,kingGustaf, "spQ1","spEx1");
-            assertThat(receivedMessage).isNotNull();
-        }
+	@Test
+	public void sendMessageOverlappingQuadAndOriginatingCountry() throws Exception {
+		String dataTypeSelector = "(messageType='DATEX2') AND (originatingCountry='NO') AND (quadTree like '%,abcdef%')";
+		String kingGustaf = "king_gustaf";
+		String messageQuadTreeTiles = ",abcdefghijklmno,cdefghijklmnop";
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles,dataTypeSelector,kingGustaf, "spQ1","spEx1");
+		assertThat(receivedMessage).isNotNull();
+	}
 
-        @Test
-        public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
-            String selector = "(messageType = 'DATEX2') AND (originatingCountry = 'NO') AND (quadTree like '%,abcdefghijklmnopqrs%')";
-            String kingGustaf = "king_gustaf";
-            String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
-			Message receivedMessage = sendAndReceive(messageQuadTreeTiles,selector,kingGustaf,"qpQ2","spEx2");
-            assertThat(receivedMessage).isNotNull();
-        }
+	@Test
+	public void sendMessageWhereQuadTreeTileIsLongerThanEighteen() throws Exception {
+		String selector = "(messageType = 'DATEX2') AND (originatingCountry = 'NO') AND (quadTree like '%,abcdefghijklmnopqrs%')";
+		String kingGustaf = "king_gustaf";
+		String messageQuadTreeTiles = ",abcdefghijklmnopqrs,cdefghijklmnop";
+		Message receivedMessage = sendAndReceive(messageQuadTreeTiles,selector,kingGustaf,"qpQ2","spEx2");
+		assertThat(receivedMessage).isNotNull();
+	}
 
 	private Message sendAndReceive(String messageQuadTreeTiles, String selector, String spName, String queueName, String exchangeName) throws Exception {
 		qpidClient.createQueue(queueName);
