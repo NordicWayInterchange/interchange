@@ -228,5 +228,5 @@ jobs:
       - name: Build the Docker image
         run: |
           cd ./${{ matrix.Images }}          
-          docker buildx build --builder {{ steps.setup-buildx.outputs.name }}  --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout) --push
+          docker buildx build --builder ${{ steps.setup-buildx.outputs.name }}  --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout) --push
 
