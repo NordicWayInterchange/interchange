@@ -109,6 +109,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
         <asciidoctor-maven-plugin.version>3.2.0</asciidoctor-maven-plugin.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <markdown-page-generator-plugin.version>2.4.2</markdown-page-generator-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -231,7 +233,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>${maven-resources-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-interchange-portal</id>
@@ -240,7 +242,7 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>frontend/generated</outputDirectory>
+                                    <outputDirectory>frontend/public/generated</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>frontend/filtered-resources</directory>
@@ -276,8 +278,94 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+        <profile>
+            <id>generate userhelp</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>${maven-resources-plugin.version}</version>
 
+                        <executions>
+                            <execution>
+                                <id>prepare-docs</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/md-input</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>frontend</directory>
+                                            <includes>
+                                                <include>**/USERHELP.md</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.basedir}</directory>
+                                            <includes>
+                                                <include>GLOSSARY.md</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-doc-images</id>
+                                <phase>generate-resources</phase>
+
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+
+                                <configuration>
+                                    <outputDirectory>frontend/public/generated</outputDirectory>
+
+                                    <resources>
+                                        <resource>
+                                            <directory>demo/images</directory>
+                                            <includes>
+                                                <include>**/*.png</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>frontend/public</directory>
+                                            <includes>
+                                                <include>interchange-logo.png</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.ruleoftech</groupId>
+                        <artifactId>markdown-page-generator-plugin</artifactId>
+                        <version>${markdown-page-generator-plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>generate-docs</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <inputDirectory>${project.build.directory}/md-input</inputDirectory>
+                            <outputDirectory>frontend/public/generated</outputDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <modules>
         <module>admin-server</module>
