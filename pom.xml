@@ -109,6 +109,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
         <asciidoctor-maven-plugin.version>3.2.0</asciidoctor-maven-plugin.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <markdown-page-generator-plugin.version>2.4.2</markdown-page-generator-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -231,7 +233,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>${maven-resources-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-resources</id>
@@ -266,7 +268,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.3.1</version>
+                        <version>${maven-resources-plugin.version}</version>
 
                         <executions>
                             <execution>
@@ -325,7 +327,7 @@
                     <plugin>
                         <groupId>com.ruleoftech</groupId>
                         <artifactId>markdown-page-generator-plugin</artifactId>
-                        <version>2.4.2</version>
+                        <version>${markdown-page-generator-plugin.version}</version>
 
                         <executions>
                             <execution>
