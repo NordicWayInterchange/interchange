@@ -220,4 +220,14 @@ public class TypeTransformer {
         }
         return epochSecond;
     }
+
+    List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<CapabilityAndDelivery> capabilitiesAndDeliveries, NapRestController napRestController) {
+        List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
+        for(CapabilityAndDelivery capabilityAndDelivery : capabilitiesAndDeliveries){
+            onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capabilityAndDelivery.capability(),capabilityAndDelivery.hasDelivery()));
+        }
+        return onboardingCapabilities;
+    }
+
+    public record CapabilityAndDelivery(Capability capability, boolean hasDelivery) {}
 }

@@ -409,8 +409,16 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
 
+
+        //NOTE this code has the N+1 problem, and really illustrates that Capabilities and Deliveries should be associated more closely.
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
+        Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN);
+        Set<TypeTransformer.CapabilityAndDelivery> capsAndDeliveries = new HashSet<>();
+        for(Capability capability : serviceProviderCapabilities){
+            boolean hasDelivery = outgoingMatchRepository.findAllByCapability_Id(capability.getId()).stream().map(OutgoingMatch::getLocalDelivery).findAny().isPresent();
+            capsAndDeliveries.add(new TypeTransformer.CapabilityAndDelivery(capability, hasDelivery));
+        }
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(capsAndDeliveries, this);
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -766,12 +774,4 @@ public class NapRestController {
         return capabilities;
     }
 
-    private List<OnboardingCapability> transformCapabilityListToOnboardingCapabilityList(Set<Capability> capabilities){
-        List<OnboardingCapability> onboardingCapabilities = new ArrayList<>();
-        for(Capability capability : capabilities){
-            boolean hasDelivery = outgoingMatchRepository.findAllByCapability_Id(capability.getId()).stream().map(OutgoingMatch::getLocalDelivery).findAny().isPresent();
-            onboardingCapabilities.add(typeTransformer.transformCapabilityToOnboardingCapability(capability, hasDelivery));
-        }
-        return onboardingCapabilities;
-    }
 }
