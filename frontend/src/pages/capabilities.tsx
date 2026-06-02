@@ -87,7 +87,7 @@ export default function Capabilities() {
   const tableHeaders: GridColDef[] = [
     { ...dataGridTemplate, field: "publisherId", headerName: "Publisher ID",
       renderCell: (params) => (
-          <Box display="flex" alignItems="center" gap={0.75}>
+          <Box display="flex" alignItems="left" gap={0.75}>
             <Tooltip title={`${params.row.hasDelivery ? "" : "This capability does not have an associated delivery, " +
                 "and will not be shown in Network capabilities, nor reported to other interchanges in the network"}`} placement="top"
                      slotProps={{
@@ -100,6 +100,7 @@ export default function Capabilities() {
                     <InfoIcon fontSize="small"/>)}
               </IconButton>
             </Tooltip>
+              {params.value}
           </Box>
       )},
     {
