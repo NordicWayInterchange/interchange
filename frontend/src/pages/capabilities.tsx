@@ -161,7 +161,7 @@ export default function Capabilities() {
     <Box flex={1}>
       <Mainheading>My Capabilities</Mainheading>
       <Subheading>
-        These are all of user capabilities in the network. You can click a capability to see details, remove or deliver.
+        These are all of your capabilities. You can click a capability to see details, remove or deliver.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
       <Box display="flex" flexDirection="row" gap={5}>
