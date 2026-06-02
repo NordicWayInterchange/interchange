@@ -9,8 +9,9 @@ services:
     volumes:
       - "systemtest-keys-volume:/app/keys"
     environment:
-      - PFX_KEY_FILENAME=/keys/nap.a.bouvetinterchange.eu.p12
+      - PFX_KEY_FILENAME=/keys/nap.a.internal.bouvetinterchange.eu.p12
       - PFX_PASSPHRASE=password
+      - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.bouvetinterchange.eu.crt.pem
       - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
       - INTERCHANGE_PREFIX=a.bouvetinterchange.eu.nap.
       - NEXTAUTH_SECRET=supersecret
