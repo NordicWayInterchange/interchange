@@ -122,6 +122,7 @@ const fetchUserCapabilities = async (params: extendedGetParams) => {
         ...userCapability.metadata,
         causeCodesDictionary: causeCodes && causeCodes.filter(Boolean),
         id: userCapability.id,
+        hasDelivery: userCapability.hasDelivery
       };
     }),
   ];

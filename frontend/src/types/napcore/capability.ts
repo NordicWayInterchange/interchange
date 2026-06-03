@@ -31,6 +31,7 @@ export type Capability = {
   id: string;
   application: Application;
   metadata: Metadata;
+  hasDelivery: boolean;
 };
 
 export type CapabilityRequest = {
