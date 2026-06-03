@@ -397,7 +397,7 @@ public class NapRestController {
                 .findFirst().get();
 
         logger.info("Returning updated Service Provider: {}", savedServiceProvider);
-        return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability);
+        return typeTransformer.transformCapabilityToOnboardingCapability(savedCapability, false);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -409,8 +409,16 @@ public class NapRestController {
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
 
+
+        //NOTE this code has the N+1 problem, and really illustrates that Capabilities and Deliveries should be associated more closely.
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
-        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN));
+        Set<Capability> serviceProviderCapabilities = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN);
+        Set<TypeTransformer.CapabilityAndDelivery> capsAndDeliveries = new HashSet<>();
+        for(Capability capability : serviceProviderCapabilities){
+            boolean hasDelivery = outgoingMatchRepository.findAllByCapability_Id(capability.getId()).stream().map(OutgoingMatch::getLocalDelivery).findAny().isPresent();
+            capsAndDeliveries.add(new TypeTransformer.CapabilityAndDelivery(capability, hasDelivery));
+        }
+        List<OnboardingCapability> capabilities = typeTransformer.transformCapabilityListToOnboardingCapabilityList(capsAndDeliveries, this);
         Collections.sort(capabilities);
         return capabilities;
     }
@@ -426,7 +434,7 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Capability capability = serviceProvider.getCreatedCapability(capabilityId);
-        return typeTransformer.transformCapabilityToOnboardingCapability(capability);
+        return typeTransformer.transformCapabilityToOnboardingCapability(capability, false);
     }
 
     @RequestMapping(method=RequestMethod.GET, path = {"/nap/{actorCommonName}/capabilities/publicationids"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -765,4 +773,5 @@ public class NapRestController {
         }
         return capabilities;
     }
+
 }
