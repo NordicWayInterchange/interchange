@@ -85,10 +85,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>21</java.version>
-        <spring-boot-dependencies.version>3.5.14</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>4.0.2</spring-boot-dependencies.version>
         <picocli-version>4.7.7</picocli-version>
         <qpid-jms-client.version>2.10.0</qpid-jms-client.version>
-        <testcontainers.version>2.0.5</testcontainers.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
         <dnsjava.version>3.6.4</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
         <bouncycastle.version>1.84</bouncycastle.version>
@@ -149,12 +149,12 @@
 
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-postgresql</artifactId>
+                <artifactId>postgresql</artifactId>
                 <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-junit-jupiter</artifactId>
+                <artifactId>junit-jupiter</artifactId>
                 <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
