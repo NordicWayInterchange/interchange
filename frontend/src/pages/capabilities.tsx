@@ -85,24 +85,32 @@ export default function Capabilities() {
     : rows;
 
   const tableHeaders: GridColDef[] = [
-    { ...dataGridTemplate, field: "publisherId", headerName: "Publisher ID",
-      renderCell: (params) => (
-          <Box display="flex" alignItems="left" gap={0.75}>
-            <Tooltip title={`${params.row.hasDelivery ? "" : "This capability does not have an associated delivery, " +
-                "and will not be shown in Network capabilities, nor reported to other interchanges in the network"}`} placement="top"
-                     slotProps={{
-                       tooltip: {
-                         sx: {fontSize: '.87rem'}
-                       },
-                     }}>
-              <IconButton size="small" sx={{ padding: 1 }}>
-                {(params.row.hasDelivery ? "" :
-                    <InfoIcon fontSize="small"/>)}
-              </IconButton>
-            </Tooltip>
-              {params.value}
-          </Box>
-      )},
+      {
+          ...dataGridTemplate,
+          field: "publisherId",
+          headerName: "Publisher ID",
+          renderCell: (params) => (
+              <Box display="flex" alignItems="center" gap={0.75}>
+                  {!params.row.hasDelivery && (
+                      <Tooltip
+                          title="This capability does not have an associated delivery,
+                      and will not be shown in Network capabilities, nor reported to other interchanges in the network"
+                          placement="top"
+                          slotProps={{
+                              tooltip: {
+                                  sx: { fontSize: ".87rem" },
+                              },
+                          }}
+                      >
+                          <IconButton size="small" sx={{ padding: 1 }}>
+                              <InfoIcon fontSize="small" />
+                          </IconButton>
+                      </Tooltip>
+                  )}
+                  {params.value}
+              </Box>
+          ),
+      },
     {
       ...dataGridTemplate,
       field: "publicationId",
