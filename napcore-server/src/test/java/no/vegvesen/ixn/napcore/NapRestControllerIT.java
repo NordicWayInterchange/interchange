@@ -620,13 +620,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
 
         assertThat(napRestController.getCapabilities(sp1Name)).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp1Name).getFirst().hasDelivery()).isTrue();
+        assertThat(napRestController.getCapabilities(sp1Name).getFirst().isHasDelivery()).isTrue();
         assertThat(napRestController.getCapabilities(sp2Name)).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp2Name).getFirst().hasDelivery()).isFalse();
+        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
 
         List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(sp2Name, selector);
         assertThat(response).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp2Name).getFirst().hasDelivery()).isFalse();
+        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
     }
 
     @Test
