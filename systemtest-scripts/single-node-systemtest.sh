@@ -9,5 +9,5 @@ docker build ../napcore-rest-client -t napcore_rest_client --build-arg JAR_VERSI
 docker build ../keys-generator -t keys-generator --build-arg JAR_VERSION=$JAR_VERSION
 VOLUME_NAME=systemtest-keys-volume
 VOL_EXISTS=$( docker volume ls --format '{{.Name}}' -f name=${VOLUME_NAME})
-[ -n "$VOL_EXISTS" ] || ./systemtest-keys.sh
+[ -n "$VOL_EXISTS" ] || ./single-node-systemtest-keys.sh
 docker compose -f single-node-systemtest.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker compose -f single-node-systemtest.yml up
