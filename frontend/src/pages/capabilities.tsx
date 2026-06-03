@@ -90,11 +90,11 @@ export default function Capabilities() {
           field: "publisherId",
           headerName: "Publisher ID",
           renderCell: (params) => (
-              <Box display="flex" alignItems="center" gap={0.75}>
+              <Box display="flex" alignItems="center" gap={0.55}>
                   {!params.row.hasDelivery && (
                       <Tooltip
                           title="This capability does not have an associated delivery,
-                      and will not be shown in Network capabilities, nor reported to other interchanges in the network"
+                      and will not be shown in 'Network capabilities', nor reported to other interchanges in the network"
                           placement="top"
                           slotProps={{
                               tooltip: {
@@ -102,7 +102,7 @@ export default function Capabilities() {
                               },
                           }}
                       >
-                          <IconButton size="small" sx={{ padding: 1 }}>
+                          <IconButton size="small" sx={{ padding: .25 }}>
                               <InfoIcon fontSize="small" />
                           </IconButton>
                       </Tooltip>
