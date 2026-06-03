@@ -1,26 +1,16 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
 import no.vegvesen.ixn.federation.qpid.QpidDelta;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
-import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,34 +18,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-@SpringBootTest(classes = {
-        QpidClient.class,
-        QpidClientConfig.class,
-        TestSSLContextConfig.class,
-        TestSSLProperties.class,
-        RoutingConfigurerProperties.class,
-        InterchangeNodeProperties.class,
-        ServiceProviderRouter.class,
-        LocalDeliveryService.class,
-        LocalSubscriptionService.class,
-        OutgoingMatchDiscoveryService.class
-})
-@Disabled("This is better tested in other tests")
+@SpringBootTest
+@Transactional
+@Testcontainers
 public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     public static final String CONFIGURER_USER = "routing_configurer";
@@ -68,6 +49,12 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
 
     private static final CaStores stores = generateStores(getTargetFolderPathForTestClass(LocalSubscriptionQpidStructureIT.class),"my_ca", HOST_NAME, CONFIGURER_USER, SP_NAME);
 
+   @Container
+   public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:18.1")
+           .withDatabaseName("federation")
+           .withUsername("federation")
+           .withPassword("federation");
+
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
             stores,
@@ -79,84 +66,68 @@ public class LocalSubscriptionQpidStructureIT extends QpidDockerBaseIT {
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
         qpidContainer.followOutput(new Slf4jLogConsumer(logger));
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
+        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+        registry.add("routing-configurer.interval",()->"999");
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
-        registry.add("interchange.node-provider.name", qpidContainer::getHost);
-        registry.add("interchange.node-provider.messageChannelPort", qpidContainer::getAmqpsPort);
-        registry.add("interchange.node-provider.brokerExternalName", qpidContainer::getHost);
+        registry.add("routing-configurer.vhost",() -> HOST_NAME);
+        registry.add("interchange.node-provider.name", () -> HOST_NAME);
+        registry.add("interchange.node-provider.broker-external-name", () -> HOST_NAME);
+        registry.add("interchange.node-provider.message-channel-port", qpidContainer::getAmqpsPort);
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
     }
 
-    @BeforeAll
-    static void setUp(){
-        qpidContainer.start();
-    }
-
-    @MockitoBean
+    @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
-    @MockitoBean
+    @Autowired
     PrivateChannelRepository privateChannelRepository;
 
     @Autowired
     QpidClient client;
 
-    @MockitoBean
-    LocalSubscriptionService localSubscriptionService;
-
-    @MockitoBean
-    LocalDeliveryService localDeliveryService;
-
-    @MockitoBean
-    OutgoingMatchDiscoveryService outgoingMatchDiscoveryService;
-
-
     @Autowired
     ServiceProviderRouter router;
 
+    //NOTE: This test is better elsewhere
     @Test
     public void setupServiceProviderQueueAndConnect() {
         System.out.println(qpidContainer.getHttpUrl());
         ServiceProvider serviceProvider = new ServiceProvider(
-                1,
                 SP_NAME,
                 new Capabilities(),
-                Collections.singleton(new LocalSubscription(
-                        1,
+                Set.of(new LocalSubscription(
                         LocalSubscriptionStatus.REQUESTED,
                         "originatingCountry = 'NO'",
-                        "my-node",
+                        HOST_NAME,
                         Collections.emptySet(),
                         Collections.emptySet())
                 ),
                 LocalDateTime.now());
-        when(localDeliveryService.tearDownDeliveryQueues(any(),any())).thenReturn(serviceProvider);
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         QpidDelta delta = client.getQpidDelta();
         router.syncServiceProviders(List.of(serviceProvider), delta);
-        LocalEndpoint actualEndpoint = null;
-        for (LocalSubscription subscription : serviceProvider.getSubscriptions()) {
-            for (LocalEndpoint endpoint : subscription.getLocalEndpoints()) {
-                assertThat(endpoint.getSource()).isNotNull();
-                assertThat(endpoint.getHost()).isNotNull();
-                assertThat(endpoint.getPort()).isNotNull();
-                System.out.println(endpoint);
-                actualEndpoint = endpoint;
-            }
-        }
+        LocalEndpoint actualEndpoint = serviceProvider.getSubscriptions().stream().findFirst().orElseThrow().getLocalEndpoints().stream().findFirst().orElseThrow();
         assertThat(actualEndpoint).isNotNull();
         SSLContext sslContext = sslClientContext(stores,SP_NAME);
-        try (Sink sink = new Sink(
-                String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
-                actualEndpoint.getSource(),
-                sslContext,
-                System.out::println
-        ))  {
-            sink.start();
+        assertThatNoException().isThrownBy(() -> {
+            try (Sink sink = new Sink(
+                    String.format("amqps://%s:%d",actualEndpoint.getHost(),actualEndpoint.getPort()),
+                    actualEndpoint.getSource(),
+                    sslContext,
+                    System.out::println
+            ))  {
+                sink.start();
 
-        } catch (Exception e) {
-           throw new RuntimeException(e);
-        }
+            }
+        });
     }
 }

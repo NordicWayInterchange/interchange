@@ -52,12 +52,6 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
-            <artifactId>interchange-spring-security-client-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
             <artifactId>jms-client</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

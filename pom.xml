@@ -268,7 +268,6 @@
         <module>api-model</module>
         <module>interchange-spring-security</module>
         <module>interchange-spring-security-client</module>
-        <module>interchange-spring-security-client-test</module>
         <module>neighbour-dns</module>
         <module>dns-client</module>
         <module>neighbour-model</module>

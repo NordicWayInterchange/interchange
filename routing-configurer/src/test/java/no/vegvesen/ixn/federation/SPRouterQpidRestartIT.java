@@ -54,9 +54,6 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
-    @Autowired
-    SSLContext sslContext;
-
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
