@@ -617,25 +617,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         );
         serviceProviderRepository.save(otherServiceProvider);
 
-        Neighbour neighbour = new Neighbour(
-                "Neighbour",
-                new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
-                        Set.of(
-                                new NeighbourCapability(
-                                        new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
-                                                "situationPublication", "bouvet"),
-                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
-                                )
-                        )),
-                new NeighbourSubscriptionRequest(Set.of(
-                        new NeighbourSubscription(UUID.randomUUID().toString(), NeighbourSubscriptionStatus.CREATED, "publicationId = 'pu-1", "https://path/id", "neighbour", Set.of())
-                )),
-                new no.vegvesen.ixn.federation.model.SubscriptionRequest(),
-                new Connection()
-        );
-        neighbourRepository.save(neighbour);
-
-        String selector = "messageType = 'DENM' and quadTree like '%,1234%' AND originatingCountry = 'NO'";
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
 
         assertThat(napRestController.getCapabilities(sp1Name)).hasSize(1);
         assertThat(napRestController.getCapabilities(sp1Name).getFirst().hasDelivery()).isTrue();
