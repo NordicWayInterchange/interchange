@@ -15,3 +15,4 @@ systemtest-scripts/napcoresettings
 jms-client-app/jmsclient_completion
 demo/keys
 /service-provider-client/serviceproviderclient_completion
+/frontend/generated/version.ts

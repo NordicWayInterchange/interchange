@@ -1,0 +1,37 @@
+import { createTheme } from "@mui/material";
+const { palette } = createTheme();
+
+const { augmentColor } = palette;
+const createColor = (mainColor: string) =>
+    augmentColor({ color: { main: mainColor } });
+
+export const SHARED_COLORS = {
+    depricatedRed: createColor("#F8DEDE"),
+    grayDark: createColor("#444f55"),
+    grayLight: createColor("#DADADA"),
+    depricatedDark: createColor("#7E1010"),
+    depricatedLight: createColor("#F8DEDE"),
+    greenDark: createColor("#1D7721"),
+    greenLight: createColor("#E8F3E9"),
+    blueDark: createColor("#006C9A"),
+    blueLight: createColor("#D4F7FF"),
+    yellowDark: createColor("#A17E00"),
+    yellowLight: createColor("#FFF5C8"),
+    pinkDark: createColor("#9C176F"),
+    pinkLight: createColor("#EDCEF5"),
+    orangeDark: createColor("#FF9600"), //vegvesen oransje
+    orangeLight: createColor("#ffbf7d"),
+    purpleDark: createColor("#7255c0"),
+    purpleLight: createColor("#c1aaff"),
+    buttonThemeColor: createColor("#444f55"),
+    redLight: createColor("#B63434")
+};
+export const ADMIN_UI_COLORS = {
+    menuHoverColor: '#EBF5E6', //#3E3F41
+    menuBorderColor: '#158925',
+    mainBackgroundColor: '#f0f1f1', //2B2B2B
+    searchBoxFocusedFontColor: "#444f55",
+    textColor: '#FFFFFF', //#A9B7C6,
+    headerBackgroundColor: "#444F55",
+    ...SHARED_COLORS,
+};

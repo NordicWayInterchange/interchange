@@ -103,7 +103,7 @@ export default function NetworkCapabilities() {
     <Box flex={1}>
       <Mainheading>Network Capabilities</Mainheading>
       <Subheading>
-        These are all of the capabilites in the network. You can click a
+        These are the capabilities you can subscribe to. You can click a
         capability to see details or subscribe.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
