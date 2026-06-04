@@ -52,11 +52,11 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
         this.metadata = metadata;
     }
 
-    public boolean hasDelivery() {
+    public boolean isHasDelivery() {
         return hasDelivery;
     }
 
-    public void setHasDelivery(boolean hasDelivery) {
+    public void sethasDelivery(boolean hasDelivery) {
         this.hasDelivery = hasDelivery;
     }
 
