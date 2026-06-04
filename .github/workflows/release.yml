@@ -165,7 +165,7 @@ jobs:
           docker build . -t admin-frontend
       - name: Push docker image to Github container registry
         run: |
-          docker tag admin-frontend ghcr.io/nordicwayinterchange/admin-frontend:${{ env.IMAGE_TAG }}
+          docker tag admin-frontend ghcr.io/nordicwayinterchange/admin-frontend:${{ env.CURRENT_VERSION }}
           docker push --all-tags ghcr.io/nordicwayinterchange/admin-frontend
 
   docker-push-svv:

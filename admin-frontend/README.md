@@ -15,6 +15,7 @@ See full MIT license text [here](license.md).
 Admin-frontend provides administrators with a comprehensive overview of their own interchange and neighboring interchanges.
 The goal is to quickly assess the overall health and status of the system, enabling faster detection of issues and more informed operational decisions. This visual insight helps administrators stay in control, ensure smooth interoperability, and maintain high system availability.
 
+
 ## Technologies
 
 ---
@@ -24,65 +25,8 @@ The goal is to quickly assess the overall health and status of the system, enabl
 - TypeScript
 - Leaflet
 - Tanstack
-- PKI.js
 - NextAuth.js
-
-## Installation and setup
-
----
-
-### Development
-
-1. Clone the repository and install packages `npm install`
-2. Copy environment variables and add PFX file in root. The keys and file are provided in a Keeper vault.
-3. Available commands:
-
-```bash
-npm run dev # Development mode
-npm run watch # Development mode and runs the typeScript compiler (tsc) in watch mode
-npm run build # Generate optimized version
-npm run start # Start Node.js server
-```
-
-```
-# Certificate
-PFX_KEY_FILENAME=
-PFX_PASSPHRASE=
-
-# Interchange
-NEXT_PUBLIC_BACKEND_URL=
-INTERCHANGE_URI=
-NEXT_PUBLIC_INTERCHANGE_PREFIX=
-
-# NextAuth
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=
-SESSION_MAXAGE_SECONDS= # Optional value, will fallback to one day
-
-# Auth0
-AUTH0_BASE_URL=
-AUTH0_CLIENT_ID=
-AUTH0_CLIENT_SECRET=
-AUTH0_ISSUER=
-```
-
-## Authentication
-
----
-
-NextAuth.js is an open-source authentication solution for Next.js projects. It has built-in OAuth providers, and for this project, we are using auth0. Users are managed through the auth0 dashboard.
-
-Other providers can be added in […nextAuth].js
-
-```jsx
-providers: [
-    Auth0Provider({
-      clientId: process.env.AUTH0_CLIENT_ID,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET,
-      issuer: process.env.AUTH0_ISSUER,
-    })
-  ]
-```
+- Keycloak
 
 ## Installation and setup
 
@@ -129,41 +73,11 @@ EXTERNAL_KEYCLOAK_URL=
 INTERNAL_KEYCLOAK_URL=
 ```
 
-### Docker
-
-1. Start Docker.
-2. Create and run a shell script with the following content.
-
-```bash
-#!/bin/bash -eu
-
-docker run \
-              -p 3000:3000 \
-              -v <PATH_FILE>:/app/<FILENAME> \
-              -e PFX_KEY_FILENAME=<FILENAME> \
-              -e PFX_PASSPHRASE=<PASSPHRASE> \
-              -e INTERCHANGE_URI=<URI> \
-              -e INTERCHANGE_PREFIX=<PREFIX> \
-              -e NEXTAUTH_SECRET=<SECRET> \  # Other authentication providers can be added here, e.g., Keycloak.
-              -e AUTH0_CLIENT_ID=<CLIENT_ID> \
-              -e AUTH0_CLIENT_SECRET=<CLIENT_SECRET> \
-              -e AUTH0_ISSUER=<ISSUER> \
-              -e NEXTAUTH_URL=<URL> \
-              -e SESSION_MAXAGE_SECONDS=<SECONDS> \ # Optional value, will fallback to one day
-              europe-west4-docker.pkg.dev/nw-shared-w3ml/nordic-way-interchange/napcore-frontend:1.0
-```
-
-## Certificate signing request
-
----
-
-We use the JavaScript library PKI.js to create a CSR. The CSR is created client-side, Base64 encoded, and then sent as a request to the server. The server responds with the signed client certificate and CA certificates as Base64 encoded PEM files.
-
 ## Authentication
 
 ---
 
-Interchange Portal supports both keycloak and Auth0 as authentication providers.
+Admin-frontend supports both keycloak and Auth0 as authentication providers.
 
 Keycloak is an open source identity and access management solution. It adds authentication to applications and secure services. https://www.keycloak.org/
 
@@ -230,16 +144,14 @@ To avoid unintended styling we do not use global CSS, and all styling is done at
 
 ### Theme
 
-We have created two themes for Trafficdata and Interchange portal. They all include a set of shared colors, and their specific colors and fonts. The theme can be changed by importing it and specifying it
-in `_app.tsx` , as well as changing the title in `Navbar.tsx`.
+We have created themes that includes colors and fonts. This can be changed by importing and specifying it
+in `_app.tsx`.
 
 ```jsx
-import { trafficdata, interchangePortal } from "@/theme";
-
-<ThemeProvider theme={trafficdata}>
+<ThemeProvider theme={theme}>
 ```
 
-Adjustments to the theme should be performed at `colors.ts` , `fonts.ts` and `trafficdata.ts` / `interchangePortal.ts`.
+Adjustments to the theme should be performed at `colors.ts` , `fonts.ts`.
 
 ## Troubleshoot
 

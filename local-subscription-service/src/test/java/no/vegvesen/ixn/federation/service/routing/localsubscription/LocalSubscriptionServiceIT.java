@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 public class LocalSubscriptionServiceIT {
     public static final String HOST_NAME = QpidDockerBaseIT.getDockerHost();
-    private static final ClusterKeyGenerator.CaStores stores = QpidDockerBaseIT.generateStores(QpidDockerBaseIT.getTargetFolderPathForTestClass(LocalSubscriptionService.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf");
+    private static final ClusterKeyGenerator.CaStores stores = QpidDockerBaseIT.generateStores(QpidDockerBaseIT.getTargetFolderPathForTestClass(LocalSubscriptionService.class),"my_ca", HOST_NAME, "routing_configurer");
 
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:18.1")
@@ -60,6 +60,12 @@ public class LocalSubscriptionServiceIT {
         registry.add("routing-configurer.interval",()->"999");
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost",() -> HOST_NAME);
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
     }
 
     @Autowired

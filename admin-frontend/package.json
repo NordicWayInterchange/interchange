@@ -25,14 +25,14 @@
     "d3": "^7.9.0",
     "framer-motion": "^12.23.11",
     "leaflet": "^1.9.4",
-    "next": "^15.4.4",
+    "next": "^15.5.18",
     "next-auth": "^4.24.11",
     "next-transpile-modules": "^10.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
     "react-leaflet": "^4.2.1",
-    "uuid": "^11.1.0",
+    "uuid": "^14.0.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {

@@ -11,7 +11,6 @@ import { Box } from "@mui/system";
 import { StyledButton } from "@/components/shared/styles/StyledSelectorBuilder";
 
 export default function Login(isKeycloak: any) {
-    console.log(isKeycloak)
     return (
     <Card
       variant="outlined"
@@ -65,9 +64,9 @@ export default function Login(isKeycloak: any) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getServerSession(context.req as any, context.res as any, authOptions as any);
 
-  if (session) {
-    return { redirect: { destination: "/" } };
-  }
+    if (session) {
+        return {redirect: {destination: "/"}};
+    }
     return {
         props: {
             isKeycloak: process.env.USE_KEYCLOAK === "true",

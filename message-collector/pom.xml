@@ -5,7 +5,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>1.0.40-SNAPSHOT</version>
+        <version>1.0.41-SNAPSHOT</version>
     </parent>
 
     <artifactId>message-collector</artifactId>
@@ -63,12 +63,6 @@
             <artifactId>neighbour-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>interchange-spring-security-client-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

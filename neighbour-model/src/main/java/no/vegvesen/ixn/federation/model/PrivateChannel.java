@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class PrivateChannel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name="peer_id", foreignKey = @ForeignKey(name="fk_peer_privatechannel"))
-    private Set<Peer> peers;
+    private Set<Peer> peers = new HashSet<>();
 
     @Column
     private String serviceProviderName;
@@ -44,14 +45,14 @@ public class PrivateChannel {
     }
 
     public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String description, String serviceProviderName) {
-        this.peers = peers;
+        this.peers.addAll(peers);
         this.status = status;
         this.description = description;
         this.serviceProviderName = serviceProviderName;
     }
 
     public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, String description, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
-        this.peers = peers;
+        this.peers.addAll(peers);
         this.status = status;
         this.description = description;
         this.endpoint = privateChannelEndpoint;
@@ -59,7 +60,7 @@ public class PrivateChannel {
     }
 
     public PrivateChannel(Set<Peer> peers, PrivateChannelStatus status, PrivateChannelEndpoint privateChannelEndpoint, String serviceProviderName) {
-        this.peers = peers;
+        this.peers.addAll(peers);
         this.status = status;
         this.endpoint = privateChannelEndpoint;
         this.serviceProviderName = serviceProviderName;
