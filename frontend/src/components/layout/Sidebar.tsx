@@ -71,9 +71,9 @@ const SECONDARY_PAGES: Array<IPages> = [
   },
   {
     text: "User help",
-    url: "https://github.com/NordicWayInterchange/interchange/blob/federation-master/frontend/USERHELP.md",
-    icon: <ArticleIcon />,
-  },
+    url: "/generated/USERHELP.html",
+    icon: <ArticleIcon />
+  }
 ];
 
 export default function Sidebar() {
@@ -131,7 +131,37 @@ export default function Sidebar() {
         </Box>
 
         <Box sx={{ marginTop: "auto", padding: 2 }}>
-          <List>{mapPages(SECONDARY_PAGES)}</List>
+          <List>
+            {SECONDARY_PAGES.map((page) => (
+                <ListItem
+                    sx={{
+                      borderRadius: 100,
+                      my: 2,
+                      backgroundColor:
+                          router.asPath === page.url ? "sidebarActiveColor" : null,
+                      border: "1px solid transparent",
+                      "&:hover": {
+                        backgroundColor: "sidebarActiveColor",
+                        border: "1px solid",
+                        borderColor: "sidebarBorderColor",
+                      },
+                    }}
+                    disablePadding
+                >
+                <ListItemButton
+                    key={page.text}
+                    component="a"
+                    href={page.url}
+                    target="_self"
+                >
+                  <ListItemIcon sx={{ color: "text.primary"}}>
+                    {page.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={page.text}/>
+                </ListItemButton>
+                </ListItem>
+            ))}
+          </List>
         </Box>
         <Version></Version>
       </StyledDrawer>

@@ -13,15 +13,18 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
 
     MetadataApi metadata;
 
+    boolean hasDelivery;
+
     Long createdTimestamp;
 
     public OnboardingCapability() {
     }
 
-    public OnboardingCapability(String id, ApplicationApi application, MetadataApi metadata, Long createdTimestamp) {
+    public OnboardingCapability(String id, ApplicationApi application, MetadataApi metadata, boolean hasDelivery, Long createdTimestamp) {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.hasDelivery = hasDelivery;
         this.createdTimestamp = createdTimestamp;
     }
 
@@ -49,6 +52,14 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
         this.metadata = metadata;
     }
 
+    public boolean isHasDelivery() {
+        return hasDelivery;
+    }
+
+    public void sethasDelivery(boolean hasDelivery) {
+        this.hasDelivery = hasDelivery;
+    }
+
     public Long getCreatedTimestamp() {
         return createdTimestamp;
     }
@@ -61,7 +72,9 @@ public class OnboardingCapability implements Comparable<OnboardingCapability> {
     public String toString(){
         return "Capability{" +
                 "id=" + id +
+                "hasDelivery=" + hasDelivery +
                 "application=" + application +
+                "createdTimestamp=" + createdTimestamp +
                 ", metadata=" + metadata +
                 '}';
     }

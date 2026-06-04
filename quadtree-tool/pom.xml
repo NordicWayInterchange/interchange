@@ -5,7 +5,7 @@
     <parent>
         <artifactId>interchange-parent</artifactId>
         <groupId>net.nordicway.interchange</groupId>
-        <version>1.0.40-SNAPSHOT</version>
+        <version>1.0.41-SNAPSHOT</version>
     </parent>
 
     <artifactId>quadtree-tool</artifactId>

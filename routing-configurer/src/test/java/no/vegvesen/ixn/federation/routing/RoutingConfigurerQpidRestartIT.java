@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.routing;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -7,70 +8,47 @@ import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.DenmApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
-import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
-import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.routing.match.MatchDiscoveryService;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
-import org.junit.jupiter.api.BeforeAll;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(classes = {
-        QpidClient.class,
-        RoutingConfigurerProperties.class,
-        MatchDiscoveryService.class,
-        OutgoingMatchDiscoveryService.class,
-        ServiceProviderRepository.class,
-        QpidClientConfig.class,
-        TestSSLContextConfig.class,
-        TestSSLProperties.class,
-        RoutingConfigurer.class
-})
+@SpringBootTest
+@Transactional
+@Testcontainers
 public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
 
     public static final String HOST_NAME = getDockerHost();
     private static final CaStores stores = generateStores(
-            getTargetFolderPathForTestClass(RoutingConfigurerIT.class),
+            getTargetFolderPathForTestClass(RoutingConfigurerQpidRestartIT.class),
             "my_ca",
             HOST_NAME,
             "routing_configurer",
             "king_gustaf"
     );
 
-
-    @Qualifier("getTestSslContext")
-    @Autowired
-    SSLContext sslContext;
-
-    private static final Logger logger = LoggerFactory.getLogger(RoutingConfigurerQpidRestartIT.class);
+    @Container
+    public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:18.1")
+            .withDatabaseName("federation")
+            .withUsername("federation")
+            .withPassword("federation");
 
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
@@ -82,49 +60,34 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
-        qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-        String httpsUrl = qpidContainer.getHttpsUrl();
-        String httpUrl = qpidContainer.getHttpUrl();
-        logger.info("server url: {}", httpUrl);
-        registry.add("routing-configurer.baseUrl", () -> httpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
+        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+        registry.add("routing-configurer.interval",()->"999");
+        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+        registry.add("routing-configurer.vhost",() -> HOST_NAME);
+        registry.add("interchange.node-provider.name", () -> HOST_NAME);
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
     }
 
-    @BeforeAll
-    static void setUp(){
-        qpidContainer.start();
-    }
-
-    @MockitoBean
-    NeighbourService neighbourService;
-
-    @MockitoBean
-    MatchDiscoveryService matchDiscoveryService;
+    @Autowired
+    NeighbourRepository neighbourRepository;
 
     @Autowired
     RoutingConfigurer routingConfigurer;
 
-    @MockitoBean
-    ListenerEndpointRepository listenerEndpointRepository;
-
     @Autowired
     QpidClient client;
 
-    @MockitoBean
+    @Autowired
     ServiceProviderRepository serviceProviderRepository;
-
-    /*
-    @MockitoBean
-    ServiceProviderRouter serviceProviderRouter;
-     */
-
-    @MockitoBean
-    OutgoingMatchRepository outgoingMatchRepository;
-
-    @MockitoBean
-    InterchangeNodeProperties properties;
 
     @Test
     public void testSetupRegularNeighbourSubscriptionRoutingAfterRestart() {
@@ -151,6 +114,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
+        serviceProviderRepository.save(serviceProvider);
 
         NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.CREATED, "neighbour");
 
@@ -159,10 +123,9 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
+        neighbourRepository.save(neighbour);
 
 
-        when(neighbourService.getMessagePort()).thenReturn("5671");
-        when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(sub.getEndpoints()).isEmpty();
@@ -193,7 +156,7 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 Collections.emptySet(),
                 LocalDateTime.now());
-
+        serviceProviderRepository.save(serviceProvider);
         NeighbourSubscription sub = new NeighbourSubscription("originatingCountry = 'NO'", NeighbourSubscriptionStatus.CREATED, "neighbour-consumer");
 
         Neighbour neighbour = new Neighbour(
@@ -201,10 +164,8 @@ public class RoutingConfigurerQpidRestartIT extends QpidDockerBaseIT {
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.emptySet()),
                 new NeighbourSubscriptionRequest(Collections.singleton(sub)),
                 new SubscriptionRequest(Collections.emptySet()));
+        neighbourRepository.save(neighbour);
 
-
-        when(neighbourService.getMessagePort()).thenReturn("5671");
-        when(serviceProviderRepository.findAll()).thenReturn(Collections.singletonList(serviceProvider));
         routingConfigurer.setupNeighbourRouting(neighbour, client.getQpidDelta());
 
         assertThat(sub.getEndpoints()).isEmpty();

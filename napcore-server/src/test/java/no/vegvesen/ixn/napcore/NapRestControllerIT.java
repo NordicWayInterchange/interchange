@@ -569,6 +569,67 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGettingCapabilitiesWithAndWithoutDeliveries(){
+        String sp1Name = "service-provider";
+        Capability cap1 = new Capability(
+                new DenmApplication(
+                        "NPRA",
+                        "pub-1",
+                        "NO",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        LocalDelivery del1 = new LocalDelivery("publicationId = 'pu-1", "");
+        ServiceProvider serviceProvider = new ServiceProvider(
+                sp1Name,
+                new Capabilities(
+                        Collections.singleton(cap1
+                        )
+                ),
+                Set.of(),
+                Set.of(del1),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(serviceProvider);
+        outgoingMatchRepository.save(new OutgoingMatch(del1,cap1,sp1Name));
+        String sp2Name = "other";
+        Capability cap2 = new Capability(
+                new DenmApplication(
+                        "SPRA",
+                        "pub-2",
+                        "SE",
+                        "1.0",
+                        List.of("1234"),
+                        List.of(6)),
+                new Metadata(RedirectStatus.OPTIONAL)
+        );
+        ServiceProvider otherServiceProvider = new ServiceProvider(
+                sp2Name,
+                new Capabilities(
+                        Collections.singleton(cap2
+                        )
+                ),
+                Set.of(),
+                Set.of(),
+                LocalDateTime.now()
+        );
+        serviceProviderRepository.save(otherServiceProvider);
+
+        String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
+
+        assertThat(napRestController.getCapabilities(sp1Name)).hasSize(1);
+        assertThat(napRestController.getCapabilities(sp1Name).getFirst().isHasDelivery()).isTrue();
+        assertThat(napRestController.getCapabilities(sp2Name)).hasSize(1);
+        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
+
+        List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(sp2Name, selector);
+        assertThat(response).hasSize(1);
+        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
+    }
+
+    @Test
     public void testDeletingCapability(){
         String actorCommonName = "actor";
         CapabilitiesRequest request = new CapabilitiesRequest(

@@ -48,3 +48,6 @@ error.log
 
 # certificate
 *.p12
+
+# Generated content
+generated/

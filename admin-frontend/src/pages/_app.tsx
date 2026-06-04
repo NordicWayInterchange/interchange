@@ -6,6 +6,7 @@ import theme from "@/theme/theme";
 import Layout from "@/components/shared/components/Layout";
 import type { AppProps } from "next/app";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import Version from "@/components/shared/components/Version";
 
 export default function App({
                                 Component,
@@ -21,6 +22,7 @@ export default function App({
                     <Layout>
                         <Component {...pageProps} />
                     </Layout>
+                    <Version></Version>
                 </ThemeProvider>
                 </HydrationBoundary>
                 <ReactQueryDevtools />

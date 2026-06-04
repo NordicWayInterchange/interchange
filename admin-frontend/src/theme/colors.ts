@@ -27,11 +27,11 @@ export const SHARED_COLORS = {
     redLight: createColor("#B63434")
 };
 export const ADMIN_UI_COLORS = {
-    menuHoverColor: '#EBF5E6', //#3E3F41
+    menuHoverColor: '#EBF5E6',
     menuBorderColor: '#158925',
-    mainBackgroundColor: '#f0f1f1', //2B2B2B
+    mainBackgroundColor: '#f0f1f1',
     searchBoxFocusedFontColor: "#444f55",
-    textColor: '#FFFFFF', //#A9B7C6,
+    textColor: '#FFFFFF',
     headerBackgroundColor: "#444F55",
     ...SHARED_COLORS,
 };

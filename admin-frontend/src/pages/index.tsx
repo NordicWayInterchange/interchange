@@ -188,7 +188,7 @@ export default function Home() {
                                         flexDirection: "column",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        width: 280,
+                                        width: 330,
                                         "&:hover": {
                                             boxShadow: 7,
                                             textDecoration: "underline"

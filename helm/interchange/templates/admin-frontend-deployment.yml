@@ -34,6 +34,8 @@ spec:
               value: "https://{{ .Release.Name }}-admin-server:{{ .Values.self.admin_port }}/admin/"
             - name: INTERCHANGE_PREFIX
               value: {{ .Values.admin_frontend.generated_username_prefix }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: {{ .Values.napcore_frontend.interchange_ca_pem }}
             - name: NEXTAUTH_SECRET
               value: {{ .Values.admin_nextauth_secret | quote }}
             - name: AUTH0_CLIENT_ID
@@ -55,15 +57,15 @@ spec:
             httpGet:
               port: 3000
               path: /login
-            initialDelaySeconds: 300
-            periodSeconds: 20
+            initialDelaySeconds: 3
+            periodSeconds: 5
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
               port: 3000
               path: /login
-            initialDelaySeconds: 30
-            periodSeconds: 20
+            initialDelaySeconds: 3
+            periodSeconds: 5
             timeoutSeconds: 10
       volumes:
         - name: admin-frontend-secret

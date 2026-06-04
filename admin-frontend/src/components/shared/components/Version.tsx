@@ -1,0 +1,21 @@
+import {Typography} from "@mui/material";
+import {VERSION} from "../../../../generated/version";
+
+export default function Version() {
+    return (
+        <>
+            <Typography
+                variant="caption"
+                sx={{
+                    position: "fixed",
+                    bottom: 8,
+                    left: 8,
+                    fontSize: "0.69em",
+                    opacity: .85
+                }}
+            >
+                Version: {VERSION}
+            </Typography>
+        </>
+    )
+}
