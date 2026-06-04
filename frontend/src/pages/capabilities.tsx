@@ -35,13 +35,25 @@ export default function Capabilities() {
   const queryClient = useQueryClient();
   const [searchId, setSearchId] = useState("");
   const [switchChecked, setSwitchChecked] = useState(false);
+  const [shouldRefreshAfterDelete, setShouldRefreshAfterDelete] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isDeleted) {
-      performRefetch(refetch);
-      setIsDeleted(false);
-    }
-  }, [isDeleted, refetch]);
+    useEffect(() => {
+        if (isDeleted) {
+            performRefetch(refetch);
+            setIsDeleted(false);
+            setShouldRefreshAfterDelete(true);
+        }
+    }, [isDeleted, refetch]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            performRefetch(refetch);
+        }, 20000);
+        setShouldRefreshAfterDelete(false);
+        return () => {
+            clearTimeout(timeout);
+        }
+    }, [shouldRefreshAfterDelete, refetch]);
 
   const handleSwitchChange = (checked: boolean) => {
     setSwitchChecked(checked);
