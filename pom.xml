@@ -93,7 +93,9 @@
         <qpid-broker.version>9.2.1</qpid-broker.version>
         <bouncycastle.version>1.84</bouncycastle.version>
         <postgresql.version>42.7.10</postgresql.version>
+        <!--
         <junit-jupiter.version>5.12.2</junit-jupiter.version>
+        -->
         <swagger-annotations-jakarta.version>2.2.49</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.6.0</license-maven-plugin.version>
@@ -185,12 +187,14 @@
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
+            <!--
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
+            -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations-jakarta</artifactId>
