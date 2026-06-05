@@ -19,7 +19,6 @@ services:
 
   a-db:
     image: postgres:18.1
-    container_name: a-db
     depends_on:
       - mock-dns-server
     ports:
@@ -35,7 +34,6 @@ services:
   a-admin:
     build:
       context: ../admin-server-app
-    container_name: a-admin
     depends_on:
       - a-db
     links:
@@ -65,7 +63,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
       context: ../onboard-server-app
-    container_name: a_onboard_server
     depends_on:
       - a-db
     ports:
@@ -90,7 +87,6 @@ services:
   a-napcore-server:
     build:
       context: ../napcore-server-app
-    container_name: a-napcore-server
     depends_on:
       - a-db
     ports:
@@ -118,7 +114,6 @@ services:
 
   a_qpid:
     image: apache/qpid-broker-j:10.0.1-alpine
-    container_name: a_qpid
     ports:
       - 8666:8080
       - 443
@@ -144,7 +139,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
       context: ../neighbour-server-app
-    container_name: a_neighbour_server
     depends_on:
       - a-db
     ports:
@@ -170,7 +164,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
       context: ../routing-configurer-app
-    container_name: a_routing_configurer
     depends_on:
       - a-db
     volumes:
@@ -193,7 +186,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer-app
-    container_name: a_neighbour_discoverer
     depends_on:
       - a-db
     links:
@@ -220,7 +212,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
       context: ../message-collector-app
-    container_name: a_message_collector_app
     depends_on:
     - a-db
     links:
@@ -246,7 +237,6 @@ services:
 
   b_db:
     image: postgres:15.1
-    container_name: b_db
     depends_on:
     - mock-dns-server
     ports:
@@ -261,7 +251,6 @@ services:
   b-admin:
     build:
       context: ../admin-server-app
-    container_name: b-admin
     depends_on:
       - b_db
     links:
@@ -291,7 +280,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/onboard-server-app:${BRANCH_TAG}
     build:
       context: ../onboard-server-app
-    container_name: b_onboard_server
     depends_on:
     - b_db
     ports:
@@ -317,7 +305,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-server-app:${BRANCH_TAG}
     build:
       context: ../neighbour-server-app
-    container_name: b_neighbour_server
     depends_on:
       - b_db
     ports:
@@ -343,7 +330,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/neighbour-discoverer-app:${BRANCH_TAG}
     build:
       context: ../neighbour-discoverer-app
-    container_name: b_neighbour_discoverer
     depends_on:
       - b_db
     links:
@@ -369,7 +355,6 @@ services:
 
   b_qpid:
     image: apache/qpid-broker-j:10.0.1-alpine
-    container_name: b_qpid
     ports:
       - 8555:8080
       - 443
@@ -395,7 +380,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/routing-configurer-app:${BRANCH_TAG}
     build:
       context: ../routing-configurer-app
-    container_name: b_routing_configurer
     depends_on:
       - b_db
     volumes:
@@ -419,7 +403,6 @@ services:
     #image: eu.gcr.io/nordic-way-aad182cc/message-collector-app:${BRANCH_TAG}
     build:
       context: ../message-collector-app
-    container_name: b_message_collector_app
     depends_on:
       - b_db
     links:

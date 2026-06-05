@@ -204,6 +204,7 @@ public class NapCoreAPIDocumentationTest {
                         "ID1"
                 ),
                 new MetadataApi(),
+                false,
                 95323215L);
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));
@@ -224,6 +225,7 @@ public class NapCoreAPIDocumentationTest {
                         "ID1"
                 ),
                 new MetadataApi(),
+                false,
                 95323215L));
         capabilities.add(new OnboardingCapability(
                 UUID.randomUUID().toString(),
@@ -236,6 +238,7 @@ public class NapCoreAPIDocumentationTest {
                         List.of(2)
                 ),
                 new MetadataApi(),
+                false,
                 95323218L));
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
     }
@@ -254,6 +257,27 @@ public class NapCoreAPIDocumentationTest {
                         "ID1"
                 ),
                 new MetadataApi(),
+                false,
+                95323215L);
+
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));
+    }
+
+    @Test
+    public void getCapabilityWithhasDeliveryResponse() throws JsonProcessingException {
+        OnboardingCapability capability = new OnboardingCapability(
+                UUID.randomUUID().toString(),
+                new DatexApplicationApi(
+                        "ID1",
+                        "ID1:firstPublication",
+                        "NO",
+                        "DATEX2:1.2",
+                        List.of("123"),
+                        "roadWorks",
+                        "ID1"
+                ),
+                new MetadataApi(),
+                true,
                 95323215L);
 
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capability));

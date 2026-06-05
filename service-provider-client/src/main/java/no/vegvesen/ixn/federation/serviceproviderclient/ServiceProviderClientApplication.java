@@ -48,7 +48,7 @@ public class ServiceProviderClientApplication{
     @Parameters(index = "0", paramLabel = "SERVER", description = "URL to connect to")
     private String server;
 
-    @Option(names = {"-u", "--user"}, required = false, description = "The service provider user")
+    @Option(names = {"-u", "--user"}, required = true, description = "The service provider user")
     private String user;
 
     static class KeystoreArgs {

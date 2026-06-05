@@ -9,12 +9,10 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dspring.datasource.password=${POSTGRES_PASSWORD} \
      -Drouting-configurer.baseUrl=${BASE_URL} \
      -Drouting-configurer.vhost=${BROKER_EXTERNAL_NAME} \
-     -Djavax.net.ssl.trustStore=${TRUST_STORE} \
-     -Djavax.net.ssl.trustStorePassword=${TRUST_STORE_PASSWORD} \
-     -Djavax.net.ssl.trustStoreType=JKS \
-     -Djavax.net.ssl.keyStore=${KEY_STORE} \
-     -Djavax.net.ssl.keyStoreType=pkcs12 \
-     -Djavax.net.ssl.keyStorePassword=${KEY_STORE_PASSWORD} \
+     -Dspring.ssl.bundle.jks.qpid-client.truststore.location=${TRUST_STORE} \
+     -Dspring.ssl.bundle.jks.qpid-client.keystore.password=${TRUST_STORE_PASSWORD} \
+     -Dspring.ssl.bundle.jks.qpid-client.keystore.location=${KEY_STORE} \
+     -Dspring.ssl.bundle.jks.qpid-client.keystore.password=${KEY_STORE_PASSWORD} \
      -Dinterchange.node-provider.brokerExternalName=${BROKER_EXTERNAL_NAME} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      ${LOG_LEVELS} \

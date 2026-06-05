@@ -1,23 +1,16 @@
 package no.vegvesen.ixn.federation;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
-import no.vegvesen.ixn.federation.qpid.QpidClientConfig;
-import no.vegvesen.ixn.federation.qpid.RoutingConfigurerProperties;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
-import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.OutgoingMatchDiscoveryService;
-import no.vegvesen.ixn.federation.service.routing.localsubscription.LocalSubscriptionService;
-import no.vegvesen.ixn.federation.ssl.TestSSLContextConfig;
-import no.vegvesen.ixn.federation.service.routing.localdelivery.LocalDeliveryService;
-import no.vegvesen.ixn.federation.ssl.TestSSLProperties;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,9 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
@@ -36,28 +30,21 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
 
-
-
-@SpringBootTest(classes = {
-        QpidClient.class,
-        RoutingConfigurerProperties.class,
-        InterchangeNodeProperties.class,
-        QpidClientConfig.class,
-        LocalDeliveryService.class,
-        LocalSubscriptionService.class,
-        TestSSLContextConfig.class,
-        TestSSLProperties.class,
-        ServiceProviderRouter.class,
-        OutgoingMatchDiscoveryService.class,
-})
+@SpringBootTest
+@Transactional
+@Testcontainers
 public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
+    private static final Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
     public static final String HOST_NAME = getDockerHost();
     public static final CaStores stores = generateStores(getTargetFolderPathForTestClass(SPRouterQpidRestartIT.class),"my_ca", HOST_NAME, "routing_configurer", "king_gustaf", "nordea");
+
+    @Container
+    public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:18.1")
+            .withDatabaseName("federation")
+            .withUsername("federation")
+            .withPassword("federation");
 
     @Container
     public static final QpidContainer qpidContainer = getQpidTestContainer(
@@ -67,46 +54,40 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
             Path.of("qpid")
             );
 
-    @Autowired
-    SSLContext sslContext;
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {
         qpidContainer.followOutput(new Slf4jLogConsumer(logger));
-        String httpsUrl = qpidContainer.getHttpsUrl();
         String httpUrl = qpidContainer.getHttpUrl();
-        logger.info("server url: {}", httpsUrl);
         logger.info("server url: {}", httpUrl);
-        registry.add("routing-configurer.baseUrl", () -> httpsUrl);
-        registry.add("routing-configurer.vhost", () -> "localhost");
-        registry.add("test.ssl.trust-store", () -> getTrustStorePath(stores));
-        registry.add("test.ssl.key-store", () -> getClientStorePath("routing_configurer", stores.clientStores()));
+        ClusterKeyGenerator.ClientStore routingConfigurerStore = ClusterKeyGenerator.getClientStore("routing_configurer", stores.clientStores().stream());
+        ClusterKeyGenerator.CaStore caStore = stores.trustStore();
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
+        registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+        registry.add("routing-configurer.interval",()->"999");
+        registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
+        registry.add("routing-configurer.vhost",() -> HOST_NAME);
+        registry.add("interchange.node-provider.name", () -> HOST_NAME);
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.location", () -> routingConfigurerStore.path().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.keystore.password", routingConfigurerStore::password);
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.location", () -> caStore.truststoreName().toString());
+        registry.add("spring.ssl.bundle.jks.qpid-client.truststore.password", caStore::truststorePassword);
     }
-
-    @BeforeAll
-    static void setup(){
-        qpidContainer.start();
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(SPRouterQpidRestartIT.class);
-
-    @MockitoBean
-    NeighbourService neighbourService;
 
     @Autowired
     ServiceProviderRouter serviceProviderRouter;
 
-    @MockitoBean
+    @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
-    @MockitoBean
+    @Autowired
     MatchRepository matchRepository;
 
-    @MockitoBean
+    @Autowired
     OutgoingMatchRepository outgoingMatchRepository;
-
-    @MockitoBean
-    PrivateChannelRepository privateChannelRepository;
 
     @Autowired
     QpidClient client;
@@ -128,8 +109,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
+        serviceProviderRepository.save(serviceProvider);
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
@@ -149,7 +130,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(1);
@@ -170,8 +151,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
         assertThat(serviceProvider.getSubscriptions()).hasSize(0);
@@ -192,7 +172,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
     }
@@ -211,9 +191,8 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.singleton(subscription),
                 Collections.emptySet(),
                 LocalDateTime.now());
+        serviceProviderRepository.save(serviceProvider);
 
-        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -233,8 +212,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(matchRepository.findAllByLocalSubscriptionId(anyInt())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isFalse();
     }
@@ -260,9 +238,9 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
-        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().getFirst().getExchangeName())).isTrue();
         assertThat(client.getQueuePublishingLinks("bi-denm")).hasSize(1);
     }
 
@@ -288,7 +266,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(capability.hasShards()).isFalse();
     }
@@ -315,10 +293,10 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider1);
+        serviceProviderRepository.save(serviceProvider1);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider1), client.getQpidDelta());
 
-        assertThat(client.exchangeExists(capability.getShards().get(0).getExchangeName())).isTrue();
+        assertThat(client.exchangeExists(capability.getShards().getFirst().getExchangeName())).isTrue();
 
         String queueName = "loc-" + UUID.randomUUID();
         LocalEndpoint endpoint = new LocalEndpoint(queueName, HOST_NAME, 5671);
@@ -333,7 +311,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Collections.emptySet(),
                 LocalDateTime.now());
 
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider2);
+        serviceProviderRepository.save(serviceProvider2);
         serviceProviderRouter.syncServiceProviders(new HashSet<>(Arrays.asList(serviceProvider1, serviceProvider2)), client.getQpidDelta());
         assertThat(client.queueExists(queueName)).isTrue();
         assertThat(client.getQueuePublishingLinks(queueName)).hasSize(1);
@@ -370,10 +348,11 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Set.of(),
                 Set.of(delivery),
                 LocalDateTime.now());
+        serviceProviderRepository.save(serviceProvider);
 
         OutgoingMatch match = new OutgoingMatch(delivery, capability, "my-service-provider");
-        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.singletonList(match));
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        outgoingMatchRepository.save(match);
+
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(deliveryExchangeName)).isTrue();
     }
@@ -409,9 +388,7 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
                 Set.of(),
                 Set.of(delivery),
                 LocalDateTime.now());
-
-        when(outgoingMatchRepository.findAllByLocalDelivery_Id(any())).thenReturn(Collections.emptyList());
-        when(serviceProviderRepository.save(any())).thenReturn(serviceProvider);
+        serviceProviderRepository.save(serviceProvider);
         serviceProviderRouter.syncServiceProviders(Collections.singletonList(serviceProvider), client.getQpidDelta());
         assertThat(client.exchangeExists(deliveryExchangeName)).isFalse();
     }
