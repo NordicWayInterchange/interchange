@@ -111,6 +111,7 @@
         <asciidoctor-maven-plugin.version>3.2.0</asciidoctor-maven-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
         <markdown-page-generator-plugin.version>2.4.2</markdown-page-generator-plugin.version>
+        <junit-jupiter-params.version>6.0.3</junit-jupiter-params.version>
     </properties>
 
     <dependencyManagement>
