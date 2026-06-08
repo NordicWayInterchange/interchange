@@ -17,9 +17,22 @@ export const authOptions = {
     async jwt({ token, profile }) {
       if (profile) {
         logger.child({ profile }).debug("Profile claims at sign-in");
-        token.organization = Array.isArray(profile.organization)
-          ? profile.organization[0] ?? null
-          : null;
+        const orgs = profile.organization;
+        if (orgs && typeof orgs === 'object' && !Array.isArray(orgs)) {
+          // Object format (Add organization attributes enabled):
+          // { "alias": { "name": "Display Name", ... } }
+          const alias = Object.keys(orgs)[0] ?? null;
+          const attrs = alias ? orgs[alias] : null;
+          token.organization = alias;
+          token.organizationName = attrs?.name?.[0] ?? attrs?.displayName?.[0] ?? alias;
+        } else if (Array.isArray(orgs)) {
+          // Fallback: array format (attributes not enabled)
+          token.organization = orgs[0] ?? null;
+          token.organizationName = orgs[0] ?? null;
+        } else {
+          token.organization = null;
+          token.organizationName = null;
+        }
       }
       return token;
     },
@@ -29,7 +42,7 @@ export const authOptions = {
         : escapeString(process.env.INTERCHANGE_PREFIX + token.email);
 
       if (token.organization) {
-        session.user.organization = String(token.organization);
+        session.user.organization = String(token.organizationName ?? token.organization);
       }
 
       return session;
