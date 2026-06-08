@@ -188,7 +188,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 	public void testAddMemberToGroupTwice() {
 		String user = "user-added-to-group-twice";
 		client.addServiceProviderMemberToGroup(user);
-		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableContent.class).isThrownBy(
 				() -> client.addServiceProviderMemberToGroup(user)
 		);
 	}
@@ -238,9 +238,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		);
 	}
 
-	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
 	@Test
-	@Disabled
 	public void createValidAclWithBogusAttributes() {
 		Map<String,String> attributes = new HashMap<>();
 		attributes.put("ROUTING_KEY", "routing_key");
@@ -249,16 +247,13 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		AclRule rule = new AclRule("bogus-attribute-user","PUBLISH","ALLOW_LOG","EXCHANGE", attributes);
 		VirtualHostAccessController controller = client.getQpidAcl();
 		controller.addRule(rule);
-		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableContent.class).isThrownBy(
 
 				() -> client.postQpidAcl(controller)
 		);
 	}
 
-	//TODO what happens if we create a bogus rule?
-	//TODO this messes up other tests!!! Make a new, separate test to reproduce the error
 	@Test
-	@Disabled
 	public void createBogusAcl() {
 		Map<String,String> attributes = new HashMap<>();
 		attributes.put("ROUTING_KEY", "routing_key");
@@ -266,7 +261,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		AclRule rule = new AclRule("bogus-rule-user","BLAH","ALLOW_LOG","EXCHANGE", attributes);
 		VirtualHostAccessController controller = client.getQpidAcl();
 		controller.addRule(rule);
-		assertThatExceptionOfType(HttpClientErrorException.UnprocessableEntity.class).isThrownBy(
+		assertThatExceptionOfType(HttpClientErrorException.UnprocessableContent.class).isThrownBy(
 
 				() -> client.postQpidAcl(controller)
 		);
