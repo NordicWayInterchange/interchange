@@ -367,6 +367,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     {(serviceProviderRow && field === 'subscriptions' && highlightedCell.field != 'connections') && (
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
+                            queueValidator={true}
                             open={drawerOpen}
                             commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
@@ -375,6 +376,7 @@ const NestedGridServiceProviders: React.FC<Props> = ({
                     {serviceProviderRow && field === 'deliveries' && (
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
+                            queueValidator={true}
                             open={drawerOpen}
                             commonAttributes={serviceProviderRow as ServiceProviderSubscriptions | ServiceProviderDeliveries}
                             heading={headerContent}
