@@ -22,6 +22,7 @@ import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MapemApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,7 +252,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
-    public void testGettingDeliveriesReturnsOrderedByLastUpdatedTimestamp() throws InterruptedException {
+    public void testGettingDeliveriesReturnsOrderedByLastUpdatedTimestampNewestFirst() throws InterruptedException {
         String actorCommonName = "actor";
         String selector1 = "originatingCountry='NO'";
         String selector2 = "originatingCountry='SE'";
@@ -259,13 +260,10 @@ public class NapRestControllerIT extends PostgresContainerBase {
         ServiceProvider sp = new ServiceProvider(actorCommonName);
         sp = serviceProviderRepository.save(sp);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1, "Delivery 1"));
-        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector1)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2, "Delivery 2"));
-        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector2)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
         TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3, "Delivery 3"));
-        sp.getDeliveries().stream().filter(a->a.getSelector().equals(selector3)).forEach(a->a.setLastUpdatedTimestamp(LocalDateTime.now()));
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
         assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
