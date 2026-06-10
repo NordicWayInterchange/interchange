@@ -79,8 +79,9 @@ services:
       - testing_net
 
   a-napcore-client:
-    build:
-      context: ../frontend
+    #build:
+    #  context: ../frontend
+    image: ghcr.io/nordicwayinterchange/napcore-frontend:e0ad5b8
     depends_on:
       - a-napcore-server
     ports:
