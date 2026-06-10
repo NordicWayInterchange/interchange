@@ -53,7 +53,7 @@ export default function Home() {
       },
       {
           header: "Private channels",
-          description: "View my private channels",
+          description: "View private channels",
           url: "/private-channels",
           icon: <LockIcon/>
       },
