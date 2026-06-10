@@ -13,7 +13,7 @@ export default function buildProviders() {
             issuer:  `${process.env.EXTERNAL_KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`,
             authorization: {
                 url: `${process.env.EXTERNAL_KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/auth`,
-                params: { prompt: "login" },
+                params: { prompt: "login", scope: "openid email profile organization" },
             },
             name: `Keycloak (${process.env.KEYCLOAK_REALM})`,
             token: `${baseInternal}/protocol/openid-connect/token`,
