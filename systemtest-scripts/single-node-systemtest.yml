@@ -8,14 +8,13 @@ services:
       - NET_ADMIN
     networks:
       testing_net:
-        ipv4_address: 172.28.1.1
+        ipv4_address: 172.26.1.1
         aliases:
-          - dns.bouvetinterchange.eu
+          - dns.interchangedomain.com
 
 
   a-db:
     image: postgres:18.1
-    container_name: a-db
     depends_on:
       - mock-dns-server
     ports:
@@ -27,41 +26,39 @@ services:
     networks:
       - testing_net
 
-  a_onboard_server:
+  a-onboard-server:
     build:
       context: ../onboard-server-app
-    container_name: a_onboard_server
     depends_on:
       - a-db
     ports:
       - 32666:8797
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - DOMAIN_NAME=interchangedomain.com
       - SP_CHNL_PORT=8797
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
-      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
       - testing_net
 
   a-napcore-server:
     build:
       context: ../napcore-server-app
-    container_name: a-napcore-server
     depends_on:
       - a-db
     ports:
       - 32777:8898
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -70,14 +67,14 @@ services:
       - KEY_STORE=/keys/a-napcore-server.p12
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a-napcore-server
-      - TRUST_STORE=/keys/ca.internal.a.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.internal.a.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - SERVER_NAME=a.interchangedomain.com
-      - NAP_NAME=nap.a.internal.bouvetinterchange.eu
-      - SIGN_STORE=/keys/ca.a.bouvetinterchange.eu.p12
+      - NAP_NAME=nap.a.internal.interchangedomain.com
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
       - SIGN_STORE_PASSWORD=password
-      - SIGN_STORE_ALIAS=ca.a.bouvetinterchange.eu
-      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
       - testing_net
 
@@ -89,19 +86,19 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - "systemtest-keys-volume:/app/keys"
+      - "single-node-systemtest-keys-volume:/app/keys"
     environment:
-      - PFX_KEY_FILENAME=/keys/nap.a.internal.bouvetinterchange.eu.p12
+      - PFX_KEY_FILENAME=/keys/nap.a.internal.interchangedomain.com.p12
       - PFX_PASSPHRASE=password
-      - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.bouvetinterchange.eu.crt.pem
+      - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
       - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
-      - INTERCHANGE_PREFIX=a.bouvetinterchange.eu.nap.
+      - INTERCHANGE_PREFIX=a.interchangedomain.com.nap.
       - NEXTAUTH_SECRET=supersecret
       - NEXTAUTH_URL=http://localhost:3000
       - USE_KEYCLOAK=true
-      - KEYCLOAK_CLIENT_ID=a.bouvetinterchange.eu
+      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
-      - KEYCLOAK_REALM=a.bouvetinterchange.eu
+      - KEYCLOAK_REALM=a.interchangedomain.com
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
       - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
     networks:
@@ -115,28 +112,27 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
-      - ./a.bouvetinterchange.eu-realm.json:/opt/keycloak/data/import/a.bouvetinterchange.eu-realm.json:ro
+      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
     command: [ "start-dev", "--import-realm" ]
     networks:
       - testing_net
 
-  a_qpid:
+  a-qpid:
     image: apache/qpid-broker-j:10.0.1-alpine
-    container_name: a_qpid
     ports:
       - 8666:8080
       - 443
       - 63003:5671
       - 5672
     volumes:
-      - "../qpid/a:/qpid-broker-j/work-override"
-      - "systemtest-keys-volume:/keys"
+      - "../qpid/single-node-systemtest:/qpid-broker-j/work-override"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - INTERNAL_KEY_STORE=/keys/a_qpid.p12
+      - INTERNAL_KEY_STORE=/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.qpid.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.qpid.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - GROUPS_FILE=/qpid-broker-j/work/groups
     depends_on:
@@ -144,99 +140,95 @@ services:
     networks:
       - testing_net
 
-  a_neighbour_server:
+  a-neighbour-server:
     build:
       context: ../neighbour-server-app
-    container_name: a_neighbour_server
     depends_on:
       - a-db
     ports:
       - 8090
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - DOMAIN_NAME=interchangedomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
     networks:
       - testing_net
-    dns: 172.28.1.1
+    dns: 172.26.1.1
 
-  a_routing_configurer:
+  a-routing-configurer:
     build:
       context: ../routing-configurer-app
-    container_name: a_routing_configurer
     depends_on:
       - a-db
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - BASE_URL=https://a_qpid
+      - BASE_URL=https://a-qpid
       - SERVER_NAME=a.interchangedomain.com
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
-      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
       - testing_net
 
-  a_neighbour_discoverer:
+  a-neighbour-discoverer:
     build:
       context: ../neighbour-discoverer-app
-    container_name: a_neighbour_discoverer
     depends_on:
       - a-db
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=bouvetinterchange.eu
+      - DOMAIN_NAME=interchangedomain.com
       - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
-      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     dns: 172.28.1.1
     networks:
       - testing_net
 
-  a_message_collector_app:
+  a-message-collector-app:
     build:
       context: ../message-collector-app
-    container_name: a_message_collector_app
     depends_on:
       - a-db
     links:
-      - "a_qpid:a.qpid.bouvetinterchange.eu"
+      - "a-qpid:a.qpid.interchangedomain.com"
     volumes:
-      - "systemtest-keys-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - KEY_STORE=/keys/a.bouvetinterchange.eu.p12
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - KEY_STORE_TYPE=PKCS12
-      - TRUST_STORE=/keys/ca.bouvetinterchange.eu.jks
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - TRUST_STORE_TYPE=JKS
       - SERVER_NAME=a.interchangedomain.com
-      - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
       - PREFETCH=1000
     networks:
       - testing_net
@@ -246,9 +238,9 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.28.0.0/16
+        - subnet: 172.26.0.0/16
 
 volumes:
-  systemtest-keys-volume:
+  single-node-systemtest-keys-volume:
     external: true
 
