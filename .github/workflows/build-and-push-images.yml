@@ -125,7 +125,10 @@ jobs:
         uses: actions/upload-artifact@v7.0.0
         with:
           name: interchange
-          path: ./
+          path: |
+            ./
+            ./frontend/.eslintrc.json
+
 
   build-napcore:
     runs-on: ubuntu-latest
