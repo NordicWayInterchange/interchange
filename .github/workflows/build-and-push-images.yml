@@ -127,7 +127,7 @@ jobs:
           name: interchange
           path: |
             ./
-            ./frontend/.eslintrc.json
+            frontend/.eslintrc.json
 
 
   build-napcore:
