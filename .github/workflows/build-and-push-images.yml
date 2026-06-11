@@ -62,7 +62,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Build with Maven and run integration tests
-        run: mvn -B package -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+        run: mvn -B package -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn -DskipTests
         # Step that does cache save and restore
       - name: Save and restore cache
         id: maven-cache
@@ -120,6 +120,9 @@ jobs:
           git commit --allow-empty -m "Updated html files"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/serviceprovider-client-documentation.git --force
         working-directory: ./
+
+      - name: Is file there
+        run: ls -la frontend/ 
 
       - name: Persist to workspace
         uses: actions/upload-artifact@v7.0.0
