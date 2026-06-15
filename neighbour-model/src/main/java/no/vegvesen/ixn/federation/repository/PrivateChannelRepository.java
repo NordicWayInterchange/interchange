@@ -21,10 +21,10 @@ public interface PrivateChannelRepository extends CrudRepository<PrivateChannel,
 
     PrivateChannel findByServiceProviderNameAndUuid(String serviceProviderName, String uuid);
 
-    @Query("select pc from PrivateChannel pc join pc.peers ps where ps.name=:peerName")
+    @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName")
     List<PrivateChannel> findAllByPeerName(@Param(name = "peerName") String peerName);
 
-    @Query("select pc from PrivateChannel pc join pc.peers ps where ps.name=:peerName and pc.status=:status")
+    @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName and pc.status=:status")
     List<PrivateChannel> findAllByPeerNameAndStatus(@Param(name = "peerName") String peerName, @Param(name = "status") PrivateChannelStatus status);
 
     @Query("from PrivateChannel pc join pc.peers ps where ps.name=:peerName and pc.uuid=:uuid")
