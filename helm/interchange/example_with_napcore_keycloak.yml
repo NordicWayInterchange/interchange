@@ -122,6 +122,9 @@ napcore_frontend:
     realm: portal.example-node.itsinterchange.eu
     external_keycloak_url: https://login.example-node.itsinterchange.eu
     internal_keycloak_url: https://login.example-node.itsinterchange.eu
+    image:
+      repository: quay.io/keycloak/keycloak
+      tag: "26.6.0"
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
