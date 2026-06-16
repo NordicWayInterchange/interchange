@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Divider, IconButton } from "@mui/material";
+import {Box, Divider, IconButton, Tooltip} from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import { dataGridTemplate } from "@/components/shared/datagrid/DataGridTemplate";
@@ -20,6 +20,7 @@ import AddButton from "@/components/shared/actions/AddButton";
 import { performRefetch } from "@/lib/performRefetch";
 import SearchBox from "@/components/shared/SearchBox";
 import { useQueryClient } from "@tanstack/react-query";
+import InfoIcon from '@mui/icons-material/Info';
 
 export default function Capabilities() {
   const { data: session } = useSession();
@@ -34,13 +35,25 @@ export default function Capabilities() {
   const queryClient = useQueryClient();
   const [searchId, setSearchId] = useState("");
   const [switchChecked, setSwitchChecked] = useState(false);
+  const [shouldRefreshAfterDelete, setShouldRefreshAfterDelete] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isDeleted) {
-      performRefetch(refetch);
-      setIsDeleted(false);
-    }
-  }, [isDeleted, refetch]);
+    useEffect(() => {
+        if (isDeleted) {
+            performRefetch(refetch);
+            setIsDeleted(false);
+            setShouldRefreshAfterDelete(true);
+        }
+    }, [isDeleted, refetch]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            performRefetch(refetch);
+        }, 20000);
+        setShouldRefreshAfterDelete(false);
+        return () => {
+            clearTimeout(timeout);
+        }
+    }, [shouldRefreshAfterDelete, refetch]);
 
   const handleSwitchChange = (checked: boolean) => {
     setSwitchChecked(checked);
@@ -84,7 +97,32 @@ export default function Capabilities() {
     : rows;
 
   const tableHeaders: GridColDef[] = [
-    { ...dataGridTemplate, field: "publisherId", headerName: "Publisher ID" },
+      {
+          ...dataGridTemplate,
+          field: "publisherId",
+          headerName: "Publisher ID",
+          renderCell: (params) => (
+              <Box display="flex" alignItems="center" gap={0.55}>
+                  {!params.row.hasDelivery && (
+                      <Tooltip
+                          title="This capability does not have an associated delivery,
+                      and will not be shown in 'Network capabilities', nor reported to other interchanges in the network"
+                          placement="top"
+                          slotProps={{
+                              tooltip: {
+                                  sx: { fontSize: ".87rem" },
+                              },
+                          }}
+                      >
+                          <IconButton size="small" sx={{ padding: .25 }}>
+                              <InfoIcon fontSize="small" />
+                          </IconButton>
+                      </Tooltip>
+                  )}
+                  {params.value}
+              </Box>
+          ),
+      },
     {
       ...dataGridTemplate,
       field: "publicationId",
