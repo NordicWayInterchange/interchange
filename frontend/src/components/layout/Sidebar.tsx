@@ -132,8 +132,9 @@ export default function Sidebar() {
 
         <Box sx={{ marginTop: "auto", padding: 2 }}>
           <List>
-            {SECONDARY_PAGES.map((page) => (
+            {SECONDARY_PAGES.map((page, key) => (
                 <ListItem
+                    key={key}
                     sx={{
                       borderRadius: 100,
                       my: 2,
