@@ -1,6 +1,5 @@
-import no.vegvesen.ixn.napcore.model.CapabilityErrorCode;
-import no.vegvesen.ixn.napcore.model.CapabilityErrorMessage;
-import no.vegvesen.ixn.napcore.model.CapabilityValidator;
+package no.vegvesen.ixn.napcore.model;
+
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.IvimApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;

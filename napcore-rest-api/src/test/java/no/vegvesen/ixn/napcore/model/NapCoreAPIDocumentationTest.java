@@ -1,6 +1,7 @@
+package no.vegvesen.ixn.napcore.model;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.DenmApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
