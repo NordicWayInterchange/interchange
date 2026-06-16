@@ -14,8 +14,24 @@ export const authOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    async jwt({ token, profile }) {
+      if (profile) {
+        logger.child({ profile }).debug("Profile claims at sign-in");
+        token.organization = Array.isArray(profile.organization)
+          ? profile.organization[0] ?? null
+          : null;
+      }
+      return token;
+    },
     async session({ session, token }) {
-      session.user.commonName = escapeString(process.env.INTERCHANGE_PREFIX + token.email);
+      session.user.commonName = token.organization
+        ? escapeString(process.env.INTERCHANGE_PREFIX + token.organization.toLowerCase())
+        : escapeString(process.env.INTERCHANGE_PREFIX + token.email);
+
+      if (token.organization) {
+        session.user.organization = String(token.organization);
+      }
+
       return session;
     },
   },
