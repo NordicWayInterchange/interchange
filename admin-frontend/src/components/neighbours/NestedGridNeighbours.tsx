@@ -207,6 +207,7 @@ const NestedGridNeighbours: React.FC<Props> = ({
                     {neighbourRow && (heading === 'Our Subscriptions' || heading === 'Neighbour Subscriptions') && (
                         <CommonDrawer
                             handleMoreClose={handleMoreClose}
+                            queueValidator={heading != 'Our Subscriptions'}
                             open={drawerOpen}
                             commonAttributes={neighbourRow as Subscription}
                             heading={heading}

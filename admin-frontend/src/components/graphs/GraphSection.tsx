@@ -308,6 +308,7 @@ const GraphSection: React.FC<{
                 ) : selectedDeliveryId && !selectedCapabilityId && deliveryDetails ? (
                     <CommonDrawer
                         handleMoreClose={handleMoreClose}
+                        queueValidator={true}
                         open={drawerOpen}
                         commonAttributes={deliveryDetails as Delivery}
                         heading="Delivery"
