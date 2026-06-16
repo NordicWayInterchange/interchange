@@ -1,0 +1,246 @@
+services:
+
+  mock-dns-server:
+    build:
+      context: ../fake-dns-server
+      dockerfile: dns-dockerfile
+    cap_add:
+      - NET_ADMIN
+    networks:
+      testing_net:
+        ipv4_address: 172.26.1.1
+        aliases:
+          - dns.interchangedomain.com
+
+
+  a-db:
+    image: postgres:18.1
+    depends_on:
+      - mock-dns-server
+    ports:
+      - 15432:5432
+    environment:
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - POSTGRES_DB=federation
+    networks:
+      - testing_net
+
+  a-onboard-server:
+    build:
+      context: ../onboard-server-app
+    depends_on:
+      - a-db
+    ports:
+      - 32666:8797
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - SP_CHNL_PORT=8797
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - testing_net
+
+  a-napcore-server:
+    build:
+      context: ../napcore-server-app
+    depends_on:
+      - a-db
+    ports:
+      - 32777:8898
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - NAP_CHNL_PORT=8898
+      - KEY_STORE=/keys/a-napcore-server.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_ALIAS=a-napcore-server
+      - TRUST_STORE=/keys/ca.internal.a.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - SERVER_NAME=a.interchangedomain.com
+      - NAP_NAME=nap.a.internal.interchangedomain.com
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - testing_net
+
+  a-napcore-client:
+    build:
+      context: ../frontend
+    depends_on:
+      - a-napcore-server
+    ports:
+      - 3000:3000
+    volumes:
+      - "single-node-systemtest-keys-volume:/app/keys"
+    environment:
+      - PFX_KEY_FILENAME=/keys/nap.a.internal.interchangedomain.com.p12
+      - PFX_PASSPHRASE=password
+      - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
+      - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
+      - INTERCHANGE_PREFIX=a.interchangedomain.com.nap.
+      - NEXTAUTH_SECRET=supersecret
+      - NEXTAUTH_URL=http://localhost:3000
+      - USE_KEYCLOAK=true
+      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
+      - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
+      - KEYCLOAK_REALM=a.interchangedomain.com
+      - KEYCLOAK_CLIENT_SECRET=anothersupersecret
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
+    networks:
+      - testing_net
+
+  a-keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    ports:
+      - 8888:8080
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    volumes:
+      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+    command: [ "start-dev", "--import-realm" ]
+    networks:
+      - testing_net
+
+  a-qpid:
+    image: apache/qpid-broker-j:10.0.1-alpine
+    ports:
+      - 8666:8080
+      - 443
+      - 63003:5671
+      - 5672
+    volumes:
+      - "../qpid/single-node-systemtest:/qpid-broker-j/work-override"
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - INTERNAL_KEY_STORE=/keys/a-qpid.p12
+      - INTERNAL_KEY_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.qpid.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - GROUPS_FILE=/qpid-broker-j/work/groups
+    depends_on:
+      - mock-dns-server
+    networks:
+      - testing_net
+
+  a-neighbour-server:
+    build:
+      context: ../neighbour-server-app
+    depends_on:
+      - a-db
+    ports:
+      - 8090
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+    networks:
+      - testing_net
+    dns: 172.26.1.1
+
+  a-routing-configurer:
+    build:
+      context: ../routing-configurer-app
+    depends_on:
+      - a-db
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - BASE_URL=https://a-qpid
+      - SERVER_NAME=a.interchangedomain.com
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - testing_net
+
+  a-neighbour-discoverer:
+    build:
+      context: ../neighbour-discoverer-app
+    depends_on:
+      - a-db
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SERVER_NAME=a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - CTRL_CHNL_PORT=8090
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    dns: 172.28.1.1
+    networks:
+      - testing_net
+
+  a-message-collector-app:
+    build:
+      context: ../message-collector-app
+    depends_on:
+      - a-db
+    links:
+      - "a-qpid:a.qpid.interchangedomain.com"
+    volumes:
+      - "single-node-systemtest-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_STORE_TYPE=PKCS12
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - TRUST_STORE_TYPE=JKS
+      - SERVER_NAME=a.interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+      - PREFETCH=1000
+    networks:
+      - testing_net
+
+networks:
+  testing_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/16
+
+volumes:
+  single-node-systemtest-keys-volume:
+    external: true
+
