@@ -51,7 +51,7 @@ public class NeighbourRESTClientTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        client = new NeighbourRESTClient(template, mapper);
+        client = new NeighbourRESTClient(template);
 
     }
 

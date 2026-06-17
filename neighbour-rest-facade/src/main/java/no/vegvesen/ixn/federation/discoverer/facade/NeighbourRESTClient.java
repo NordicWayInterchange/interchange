@@ -26,9 +26,9 @@ public class NeighbourRESTClient {
     ObjectMapper mapper;
 
     @Autowired
-    public NeighbourRESTClient(RestTemplate template, ObjectMapper mapper) {
+    public NeighbourRESTClient(RestTemplate template) {
         this.restTemplate = template;
-        this.mapper = mapper;
+        this.mapper = new ObjectMapper();
     }
 
     CapabilitiesApi doPostCapabilities(String controlChannelUrl, String name, CapabilitiesApi selfCapability) {

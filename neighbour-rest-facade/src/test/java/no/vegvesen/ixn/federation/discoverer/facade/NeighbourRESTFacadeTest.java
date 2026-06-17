@@ -39,13 +39,12 @@ public class NeighbourRESTFacadeTest {
 
 
 	private final RestTemplate restTemplate = new RestTemplate();
-	private final ObjectMapper mapper = new ObjectMapper();
 	private final CapabilitiesTransformer capabilitiesTransformer = new CapabilitiesTransformer();
 	private final SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
 	private final SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	private final CapabilityToCapabilityApiTransformer capabilityTransformer = new CapabilityToCapabilityApiTransformer();
-	private final NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate,mapper),
+	private final NeighbourRESTFacade neighbourRESTFacade = new NeighbourRESTFacade(new NeighbourRESTClient(restTemplate),
 			capabilitiesTransformer,
 			capabilityTransformer,
 			subscriptionTransformer,
