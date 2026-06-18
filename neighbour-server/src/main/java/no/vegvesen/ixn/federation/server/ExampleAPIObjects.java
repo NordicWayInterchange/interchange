@@ -27,12 +27,11 @@ public class ExampleAPIObjects {
             """;
     public static final String DENM_CAPABILITY_REQUEST = """
             {
-              "version" : "1.2",
+              "version" : "2.0",
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
              "capabilities" : [ {
                 "id" : "ddd0c289-ef27-4d0f-9c72-4717513d007f",
                 "path" : "/pilotinterchange.eu.bouvet.pilotinterchange.eu/capabilities/ddd0c289-ef27-4d0f-9c72-4717513d007f",
-                "definition" : {
                   "application" : {
                     "messageType" : "DENM",
                     "publisherId" : "NO00001",
@@ -50,13 +49,13 @@ public class ExampleAPIObjects {
                 "maxMessageRate": 0,
                 "repetitionInterval": 0
                 }
-                }
               } ]
             }
             """;
     public static final String DATEX_CAPABILITY_REQUEST = """
-            "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+            {
+              "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "DATEX2",
@@ -79,9 +78,9 @@ public class ExampleAPIObjects {
             }
             """;
     public static final String IVIM_CAPABILITY_REQUEST = """
-                        {
+           {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "IVIM",
@@ -105,7 +104,7 @@ public class ExampleAPIObjects {
     public static final String SPATEM_CAPABILITY_REQUEST = """
             {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SPATEM",
@@ -129,7 +128,7 @@ public class ExampleAPIObjects {
     public static final String MAPEM_CAPABILITY_REQUEST = """
             {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "MAPEM",
@@ -153,7 +152,7 @@ public class ExampleAPIObjects {
     public static final String SREM_CAPABILITY_REQUEST = """
             {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SREM",
@@ -177,7 +176,7 @@ public class ExampleAPIObjects {
     public static final String SSEM_CAPABILITY_REQUEST = """
             {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "SSEM",
@@ -200,7 +199,7 @@ public class ExampleAPIObjects {
     public static final String CAM_CAPABILITY_REQUEST = """
             {
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
-              "version" : "1.2",
+              "version" : "2.0",
               "capabilities" : [ {
                 "application" : {
                   "messageType" : "CAM",
@@ -223,12 +222,11 @@ public class ExampleAPIObjects {
             """;
     public static final String UPDATECAPABILITIESRESPONSE = """  
             {
-              "version" : "1.2",
+              "version" : "2.0",
               "name" : "pilotinterchange.eu.bouvet.pilotinterchange.eu",
              "capabilities" : [ {
                 "id" : "d4626s9b-8583-4739-ae62-bd1dbc97154a",
                 "path" : "/pilotinterchange.eu.bouvet.pilotinterchange.eu.per@ulv.no/capabilities/d4626s9b-8583-4739-ae62-bd1dbc97154a",
-                "definition" : {
                   "application" : {
                     "messageType" : "DENM",
                     "publisherId" : "NO00001",
@@ -239,7 +237,6 @@ public class ExampleAPIObjects {
                     "causeCode" : [ 6 ]
                   },
                   "metadata" : { }
-                }
               } ]
             }
             """;
