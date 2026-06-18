@@ -16,7 +16,7 @@
       "email" : "kongen@slottet.no"
     }]
   }, {
-  "name" : "ca.internal.a.interchangedomain.com",
+  "name" : "ca.a.internal.interchangedomain.com",
   "country" : "NO",
   "subCaRequests" : [ ],
   "hostRequests" : [ {
