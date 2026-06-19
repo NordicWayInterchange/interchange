@@ -49,6 +49,10 @@ public class ExportApplication implements CommandLineRunner {
             }
 
             Path outputFilePath = Path.of(args[1]);
+            Path outputDir = outputFilePath.getParent();
+            if (! Files.exists(outputDir)) {
+                throw new RuntimeException("Output directory does not exist: " + outputDir);
+            }
             exportData(outputFilePath);
         }
     }
