@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
@@ -32,12 +31,6 @@ public class ExportApplication implements CommandLineRunner {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(ExportApplication.class, args);
-    }
-
-
-    @Override
-    public void run(String... args) throws Exception {
         if (args.length == 0) {
             System.out.println("No output path provided. Exiting.");
             return;
@@ -48,12 +41,18 @@ public class ExportApplication implements CommandLineRunner {
                 System.out.println("No output path provided. Exiting.");
             }
 
-            String outputFilePath = args[1];
-            exportData(outputFilePath);
+            Path outputDir = Path.of(args[1]).getParent();
+            if (!Files.exists(outputDir)) {
+                throw new RuntimeException("Output directory does not exist: " + outputDir);
+            }
         }
+        SpringApplication.run(ExportApplication.class, args);
     }
 
-    private void exportData(String outputFilePath) throws Exception {
+
+    @Override
+    public void run(String... args) throws Exception {
+        Path outputFilePath = Path.of(args[1]);
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -69,13 +68,9 @@ public class ExportApplication implements CommandLineRunner {
                         .collect(Collectors.toSet())
         );
 
-        Path filePath = Paths.get(outputFilePath);
-        if (filePath.getParent() != null && !Files.exists(filePath.getParent())) {
-            Files.createDirectories(filePath.getParent());
-        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(Files.newOutputStream(outputFilePath), exportModel);
 
-        mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), exportModel);
-
-        System.out.println("Export saved to: " + filePath.toAbsolutePath());
+        System.out.println("Export saved to: " + outputFilePath.toAbsolutePath());
     }
+
 }
