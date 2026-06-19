@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
@@ -32,12 +31,29 @@ public class ExportApplication implements CommandLineRunner {
 
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("No output path provided. Exiting.");
+            return;
+        }
+
+        if (args[0].equals("export")) {
+            if (args.length != 2) {
+                System.out.println("No output path provided. Exiting.");
+            }
+
+            Path outputFilePath = Path.of(args[1]);
+            Path outputDir = outputFilePath.getParent();
+            if (!Files.exists(outputDir)) {
+                throw new RuntimeException("Output directory does not exist: " + outputDir);
+            }
+        }
         SpringApplication.run(ExportApplication.class, args);
     }
 
 
     @Override
     public void run(String... args) throws Exception {
+        /*
         if (args.length == 0) {
             System.out.println("No output path provided. Exiting.");
             return;
@@ -55,9 +71,8 @@ public class ExportApplication implements CommandLineRunner {
             }
             exportData(outputFilePath);
         }
-    }
-
-    private void exportData(Path outputFilePath) throws Exception {
+         */
+        Path outputFilePath = Path.of(args[0]);
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -77,4 +92,5 @@ public class ExportApplication implements CommandLineRunner {
 
         System.out.println("Export saved to: " + outputFilePath.toAbsolutePath());
     }
+
 }
