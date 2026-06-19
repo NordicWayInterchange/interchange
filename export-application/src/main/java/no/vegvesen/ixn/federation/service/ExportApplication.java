@@ -48,12 +48,12 @@ public class ExportApplication implements CommandLineRunner {
                 System.out.println("No output path provided. Exiting.");
             }
 
-            String outputFilePath = args[1];
+            Path outputFilePath = Path.of(args[1]);
             exportData(outputFilePath);
         }
     }
 
-    private void exportData(String outputFilePath) throws Exception {
+    private void exportData(Path outputFilePath) throws Exception {
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
 
@@ -69,13 +69,8 @@ public class ExportApplication implements CommandLineRunner {
                         .collect(Collectors.toSet())
         );
 
-        Path filePath = Paths.get(outputFilePath);
-        if (filePath.getParent() != null && !Files.exists(filePath.getParent())) {
-            Files.createDirectories(filePath.getParent());
-        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(Files.newOutputStream(outputFilePath), exportModel);
 
-        mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), exportModel);
-
-        System.out.println("Export saved to: " + filePath.toAbsolutePath());
+        System.out.println("Export saved to: " + outputFilePath.toAbsolutePath());
     }
 }
