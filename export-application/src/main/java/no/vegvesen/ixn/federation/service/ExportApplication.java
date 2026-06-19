@@ -41,8 +41,7 @@ public class ExportApplication implements CommandLineRunner {
                 System.out.println("No output path provided. Exiting.");
             }
 
-            Path outputFilePath = Path.of(args[1]);
-            Path outputDir = outputFilePath.getParent();
+            Path outputDir = Path.of(args[1]).getParent();
             if (!Files.exists(outputDir)) {
                 throw new RuntimeException("Output directory does not exist: " + outputDir);
             }
@@ -53,26 +52,7 @@ public class ExportApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        /*
-        if (args.length == 0) {
-            System.out.println("No output path provided. Exiting.");
-            return;
-        }
-
-        if (args[0].equals("export")) {
-            if (args.length != 2) {
-                System.out.println("No output path provided. Exiting.");
-            }
-
-            Path outputFilePath = Path.of(args[1]);
-            Path outputDir = outputFilePath.getParent();
-            if (! Files.exists(outputDir)) {
-                throw new RuntimeException("Output directory does not exist: " + outputDir);
-            }
-            exportData(outputFilePath);
-        }
-         */
-        Path outputFilePath = Path.of(args[0]);
+        Path outputFilePath = Path.of(args[1]);
         ExportTransformer exportTransformer = new ExportTransformer();
         ObjectMapper mapper = new ObjectMapper();
 
