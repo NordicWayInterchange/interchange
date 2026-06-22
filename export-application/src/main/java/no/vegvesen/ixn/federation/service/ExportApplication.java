@@ -41,10 +41,7 @@ public class ExportApplication implements CommandLineRunner {
                 System.out.println("No output path provided. Exiting.");
             }
 
-            Path absolutePath = Path.of(args[1]).toAbsolutePath();
-            System.out.println("Output path: " + absolutePath);
-            Path outputDir = absolutePath.getParent();
-            System.out.println("Output directory: " + outputDir);
+            Path outputDir = Path.of(args[1]).toAbsolutePath().getParent();
             if (!Files.exists(outputDir)) {
                 throw new RuntimeException("Output directory does not exist: " + outputDir);
             }
