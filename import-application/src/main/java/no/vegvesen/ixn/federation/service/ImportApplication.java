@@ -26,6 +26,17 @@ public class ImportApplication implements CommandLineRunner {
     private final ObjectMapper mapper;
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("usage ...");
+            System.exit(1);
+        }
+
+        if (args[0].equals("import")) {
+            if (args.length != 2) {
+                System.out.println("usage ...");
+                System.exit(2);
+            }
+        }
         SpringApplication.run(ImportApplication.class, args);
     }
 
@@ -39,18 +50,6 @@ public class ImportApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (args.length == 0) {
-            System.out.println("usage ...");
-            System.exit(1);
-        }
-
-        if (args[0].equals("import")) {
-            if (args.length != 2) {
-                System.out.println("usage ...");
-                System.exit(2);
-            }
-        }
-
         String inputFilePath = args[1];
         Path filePath = Paths.get(inputFilePath);
 
