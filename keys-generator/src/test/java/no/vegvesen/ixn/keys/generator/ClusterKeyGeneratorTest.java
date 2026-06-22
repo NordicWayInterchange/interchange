@@ -3,8 +3,10 @@ package no.vegvesen.ixn.keys.generator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.cert.CertSigner;
+import no.vegvesen.ixn.cert.KeyPairAndCsr;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
+import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateAndCertificateChain;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -395,6 +397,164 @@ public class ClusterKeyGeneratorTest {
         return IETFUtils.valueToString(rdNs[0].getFirst().getValue());
     }
 
+    /**
+     * Verifies the full "external top CA" workflow:
+     * <ol>
+     *   <li>An external root CA exists outside our system (simulated with {@code generateTopCa}).</li>
+     *   <li>We generate a keypair + CSR for our top CA using {@link ClusterKeyGenerator#generateTopCaCsr}.</li>
+     *   <li>The external CA signs our CSR via {@link ClusterKeyGenerator#signIntermediateCsr}.</li>
+     *   <li>We build the rest of the certificate tree with {@link ClusterKeyGenerator#generateFromSignedTopCa}.</li>
+     * </ol>
+     */
+    @Test
+    public void testExternalTopCaScenario() throws Exception {
+        SecureRandom random = new SecureRandom();
+
+        // Step 1 – simulate the external root CA
+        CertificateCertificateChainAndKeys externalRootCa =
+                ClusterKeyGenerator.generateTopCa("external-root-ca", "NO", random);
+
+        // Step 2 – generate keypair + CSR for our top CA
+        KeyPairAndCsr topCaCsr = ClusterKeyGenerator.generateTopCaCsr("our-top-ca", "NO");
+
+        // Step 3 – external root CA signs our top CA's CSR
+        CertificateAndCertificateChain signedTopCa = ClusterKeyGenerator.signIntermediateCsr(
+                externalRootCa.certificate(),
+                externalRootCa.certificateChain(),
+                externalRootCa.keyPair().getPrivate(),
+                topCaCsr.csr(),
+                random
+        );
+
+        // Assemble: [our top CA cert, external root CA cert]
+        X509Certificate ourTopCaCert = signedTopCa.certificate();
+        List<X509Certificate> fullChain = signedTopCa.chain();
+        assertThat(fullChain).hasSize(2);
+        assertThat(fullChain.get(0)).isEqualTo(ourTopCaCert);
+        assertThat(fullChain.get(1)).isEqualTo(externalRootCa.certificate());
+
+        CertificateCertificateChainAndKeys signedTopCaDetails =
+                new CertificateCertificateChainAndKeys(topCaCsr.keyPair(), ourTopCaCert, fullChain);
+
+        // Step 4 – generate the sub-tree under the externally-signed top CA
+        CARequest caRequest = new CARequest(
+                "our-top-ca",
+                "NO",
+                List.of(
+                        new CARequest(
+                                "intermediate-ca",
+                                "NO",
+                                List.of(),
+                                List.of(new HostRequest("service.example.eu")),
+                                List.of(new ClientRequest("client_app", "NO", "client@example.eu"))
+                        )
+                ),
+                List.of(),
+                List.of()
+        );
+
+        CaResponse response = ClusterKeyGenerator.generateFromSignedTopCa(caRequest, signedTopCaDetails, random);
+
+        // Verify top CA response
+        assertThat(response.details()).isEqualTo(signedTopCaDetails);
+        assertThat(response.caResponses()).hasSize(1);
+
+        // Verify intermediate CA chain: [intermediateCA, ourTopCA, externalRoot]
+        CertificateCertificateChainAndKeys intermediateCa = response.caResponses().getFirst().details();
+        assertThat(intermediateCa.certificateChain()).hasSize(3);
+        assertThat(intermediateCa.certificateChain().get(0)).isEqualTo(intermediateCa.certificate());
+        assertThat(intermediateCa.certificateChain().get(1)).isEqualTo(ourTopCaCert);
+        assertThat(intermediateCa.certificateChain().get(2)).isEqualTo(externalRootCa.certificate());
+
+        // Intermediate CA cert must be signed by our top CA key
+        intermediateCa.certificate().verify(topCaCsr.keyPair().getPublic());
+
+        // Our top CA cert must be signed by the external root CA key
+        ourTopCaCert.verify(externalRootCa.keyPair().getPublic());
+
+        // Verify host cert chain: [hostCert, intermediateCA, ourTopCA, externalRoot]
+        CertificateCertificateChainAndKeys hostDetails =
+                response.caResponses().getFirst().hostResponses().getFirst().keyDetails();
+        assertThat(hostDetails.certificateChain()).hasSize(4);
+        assertThat(hostDetails.certificateChain().get(0)).isEqualTo(hostDetails.certificate());
+        assertThat(hostDetails.certificateChain().get(1)).isEqualTo(intermediateCa.certificate());
+        assertThat(hostDetails.certificateChain().get(2)).isEqualTo(ourTopCaCert);
+        assertThat(hostDetails.certificateChain().get(3)).isEqualTo(externalRootCa.certificate());
+
+        // Host cert must be signed by the intermediate CA key
+        hostDetails.certificate().verify(intermediateCa.keyPair().getPublic());
+
+        // Verify client cert chain: [clientCert, intermediateCA, ourTopCA, externalRoot]
+        CertificateCertificateChainAndKeys clientDetails =
+                response.caResponses().getFirst().clientResponses().getFirst().clientDetails();
+        assertThat(clientDetails.certificateChain()).hasSize(4);
+        clientDetails.certificate().verify(intermediateCa.keyPair().getPublic());
+    }
+
+    /**
+     * Verifies that {@link ClusterKeyGenerator#store(CaResponse, Path, PasswordGenerator, X509Certificate)}
+     * writes the external root CA certificate into the top-level JKS truststore while leaving
+     * sub-CA truststores unchanged (each sub-CA's own cert is the trust anchor).
+     */
+    @Test
+    public void testExternalTopCaStoreTrustAnchor() throws Exception {
+        SecureRandom random = new SecureRandom();
+
+        CertificateCertificateChainAndKeys externalRootCa =
+                ClusterKeyGenerator.generateTopCa("external-root", "NO", random);
+
+        KeyPairAndCsr topCaCsr = ClusterKeyGenerator.generateTopCaCsr("our-ca", "NO");
+
+        CertificateAndCertificateChain signedTopCa = ClusterKeyGenerator.signIntermediateCsr(
+                externalRootCa.certificate(),
+                externalRootCa.certificateChain(),
+                externalRootCa.keyPair().getPrivate(),
+                topCaCsr.csr(),
+                random
+        );
+
+        CertificateCertificateChainAndKeys signedTopCaDetails = new CertificateCertificateChainAndKeys(
+                topCaCsr.keyPair(),
+                signedTopCa.certificate(),
+                signedTopCa.chain()
+        );
+
+        CARequest caRequest = new CARequest(
+                "our-ca",
+                "NO",
+                List.of(
+                        new CARequest("sub-ca", "NO", List.of(), List.of(), List.of())
+                ),
+                List.of(),
+                List.of()
+        );
+
+        CaResponse response = ClusterKeyGenerator.generateFromSignedTopCa(caRequest, signedTopCaDetails, random);
+
+        Path outDir = Files.createTempDirectory("external-ca-store-test");
+        PasswordGenerator pg = PasswordGenerator.staticPassword("password");
+        X509Certificate externalTrustAnchor = externalRootCa.certificate();
+
+        CaStores caStores = ClusterKeyGenerator.store(response, outDir, pg, externalTrustAnchor);
+
+        // Top-level truststore must contain the external root CA cert
+        KeyStore topTrustStore = KeyStore.getInstance("JKS");
+        try (java.io.InputStream is = Files.newInputStream(caStores.trustStore().truststoreName())) {
+            topTrustStore.load(is, "password".toCharArray());
+        }
+        X509Certificate storedTrustCert = (X509Certificate) topTrustStore.getCertificate("myKey");
+        assertThat(storedTrustCert).isEqualTo(externalTrustAnchor);
+
+        // Sub-CA truststore must contain the sub-CA's own cert (not the external root)
+        CaStores subCaStores = caStores.subCaStores().getFirst();
+        KeyStore subTrustStore = KeyStore.getInstance("JKS");
+        try (java.io.InputStream is = Files.newInputStream(subCaStores.trustStore().truststoreName())) {
+            subTrustStore.load(is, "password".toCharArray());
+        }
+        X509Certificate subStoredTrustCert = (X509Certificate) subTrustStore.getCertificate("myKey");
+        CertificateCertificateChainAndKeys subCaDetails = response.caResponses().getFirst().details();
+        assertThat(subStoredTrustCert).isEqualTo(subCaDetails.certificate());
+    }
 
 }
 

@@ -121,7 +121,7 @@ public class ClusterKeyGenerator {
      *
      */
     public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-        CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator);
+        CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator, response.details().certificate());
         saveCert(response.details().certificate(),  Files.newBufferedWriter(basePath.resolve(response.name() + ".crt.pem")));
         List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
         List<ClientStore> clientStores = storeClientStores(basePath, passwordGenerator, response.clientResponses());
@@ -133,7 +133,35 @@ public class ClusterKeyGenerator {
         return new CaStores(response.name(), caStore, hostStores, clientStores, subCaStores);
     }
 
-    private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    /**
+     * Variant of {@link #store(CaResponse, Path, PasswordGenerator)} for use when the top CA
+     * certificate was signed by an external CA.  The top-level JKS truststore will contain
+     * {@code externalTrustAnchor} (typically the external root CA certificate) rather than the
+     * top CA's own certificate, so that TLS clients can verify the full chain up to the external
+     * root.  Sub-CA truststores are unaffected and still contain each sub-CA's own certificate.
+     *
+     * @param response           the {@link CaResponse} returned by
+     *                           {@link #generateFromSignedTopCa}
+     * @param basePath           directory where keystores and truststores are written
+     * @param passwordGenerator  generates passwords for each store
+     * @param externalTrustAnchor the certificate to place in the top-level JKS truststore
+     *                            (e.g. the external root CA certificate)
+     */
+    public static CaStores store(CaResponse response, Path basePath, PasswordGenerator passwordGenerator, X509Certificate externalTrustAnchor) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
+        CaStore caStore = trustStoreForCa(response, basePath, passwordGenerator, externalTrustAnchor);
+        saveCert(response.details().certificate(),  Files.newBufferedWriter(basePath.resolve(response.name() + ".crt.pem")));
+        List<HostStore> hostStores = storeHostResponses(basePath, passwordGenerator, response.hostResponses());
+        List<ClientStore> clientStores = storeClientStores(basePath, passwordGenerator, response.clientResponses());
+        List<CaStores> subCaStores = new ArrayList<>();
+        for (CaResponse subResponses : response.caResponses()) {
+            // Sub-CA truststores always contain the sub-CA's own cert (unchanged behaviour)
+            CaStores store = store(subResponses, basePath, passwordGenerator);
+            subCaStores.add(store);
+        }
+        return new CaStores(response.name(), caStore, hostStores, clientStores, subCaStores);
+    }
+
+    private static CaStore trustStoreForCa(CaResponse response, Path basePath, PasswordGenerator passwordGenerator, X509Certificate trustAnchorCert) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         String truststorePassword = passwordGenerator.generatePassword();
         Files.writeString(basePath.resolve(response.name() + ".jks.txt"),truststorePassword);
         Path truststorePath = basePath.resolve(response.name() + ".jks");
@@ -141,7 +169,7 @@ public class ClusterKeyGenerator {
             makeTrustStore(
                     truststorePassword,
                     outputStream,
-                    response.details().certificate(),
+                    trustAnchorCert,
                     "myKey");
         }
         String keystorePassword = passwordGenerator.generatePassword();
@@ -443,6 +471,58 @@ public class ClusterKeyGenerator {
         ArrayList<X509Certificate> certificates = new ArrayList<>();
         certificates.add(details.certificate());
         return new CertificateCertificateChainAndKeys(details.keyPair(), details.certificate(),certificates);
+    }
+
+    /**
+     * Generates a keypair and a PKCS10 CSR for a top-level CA node whose certificate will be
+     * signed by an external CA (i.e. the top CA is not self-signed within this system).
+     * <p>
+     * The returned {@link KeyPairAndCsr} contains the private key (keep secret) and the
+     * CSR PEM to send to the external CA.  Once the external CA returns a signed certificate,
+     * pass the keypair, signed cert and the external chain into
+     * {@link #generateFromSignedTopCa(CARequest, CertificateCertificateChainAndKeys, SecureRandom)}
+     * to continue building the rest of the certificate tree.
+     *
+     * @param commonName     CN for the CA (e.g. "ca.example.eu")
+     * @param country        two-letter ISO country code; defaults to "NO" when {@code null}
+     * @return keypair and unsigned CSR
+     */
+    public static KeyPairAndCsr generateTopCaCsr(String commonName, String country) throws NoSuchAlgorithmException, OperatorCreationException {
+        if (country == null) {
+            country = "NO";
+        }
+        CsrGenerator generator = new CsrGenerator("RSA", 4096, "SHA512withRSA");
+        X500Name x500Name = new X500Name(
+                String.format(
+                        "CN=%s, O=Nordic Way, C=%s",
+                        commonName,
+                        country
+                )
+        );
+        return generator.generateKeyPairAndCsr(x500Name);
+    }
+
+    /**
+     * Generates the full certificate tree described by {@code caRequest}, starting from an
+     * already-signed top CA certificate (e.g. one returned by an external CA after signing the
+     * CSR produced by {@link #generateTopCaCsr}).
+     * <p>
+     * The {@code signedTopCa} record must contain:
+     * <ul>
+     *   <li>the keypair generated by {@link #generateTopCaCsr}</li>
+     *   <li>the signed {@link X509Certificate} returned by the external CA</li>
+     *   <li>the full certificate chain: {@code [signedTopCaCert, externalRootCaCert, ...]}</li>
+     * </ul>
+     *
+     * @param caRequest    describes the sub-CAs, host certs and client certs to generate
+     * @param signedTopCa  the externally-signed top CA cert bundled with its keypair and chain
+     * @param secureRandom source of randomness
+     * @return complete {@link CaResponse} tree rooted at the signed top CA
+     */
+    public static CaResponse generateFromSignedTopCa(CARequest caRequest, CertificateCertificateChainAndKeys signedTopCa, SecureRandom secureRandom) throws CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException, CertIOException {
+        List<HostResponse> hostResponses = getHostResponses(caRequest.hostRequests(), signedTopCa, secureRandom);
+        List<ClientResponse> clientResponses = getClientResponses(caRequest.clientRequests(), signedTopCa);
+        return generateSubCaResponses(caRequest, secureRandom, signedTopCa, hostResponses, clientResponses);
     }
 
     public static CertificateCertificateChainAndKeys generateIntermediateCA(String commonName, String country, List<X509Certificate> issuerCertChain, X509Certificate issuerCert, PrivateKey issuerKey, SecureRandom secureRandom) throws NoSuchAlgorithmException, OperatorCreationException, CertificateException, SignatureException, InvalidKeyException, NoSuchProviderException, CertIOException {
