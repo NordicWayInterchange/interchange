@@ -90,23 +90,23 @@ public class Sink implements AutoCloseable {
 		logger.debug("Consuming messages from {} with listener {}", this.queueName, this);
 	}
 
-	public MessageConsumer createConsumerWithPrefetch(Integer prefetch) throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName, prefetch);
-		connection = ixnContext.createConnection(sslContext);
-		Destination destination = ixnContext.getReceiveQueue();
+	public MessageConsumer createConsumerWithPrefetch(Integer prefetch) throws JMSException {
+		SinkConnectionCreator connectionCreator = new SinkConnectionCreator(this.url,sslContext,prefetch);
+		connection = connectionCreator.createConnection();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Destination destination = session.createQueue(this.queueName);
 		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
 	}
 
-	public MessageConsumer createConsumer() throws NamingException, JMSException {
-		IxnContext ixnContext = new IxnContext(this.url,null, this.queueName);
-		connection = ixnContext.createConnection(sslContext);
-		Destination destination = ixnContext.getReceiveQueue();
+	public MessageConsumer createConsumer() throws JMSException {
+		SinkConnectionCreator connectionCreator = new SinkConnectionCreator(this.url,sslContext,null);
+		connection = connectionCreator.createConnection();
 		connection.start();
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Destination destination = session.createQueue(this.queueName);
 		MessageConsumer consumer = dynamicFilter == null ? session.createConsumer(destination) : session.createConsumer(destination, dynamicFilter);
 		logger.debug("Created message consumer for {}", this.queueName);
 		return consumer;
