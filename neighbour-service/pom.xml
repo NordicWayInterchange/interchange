@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.nordicway.interchange</groupId>
         <artifactId>interchange-parent</artifactId>
-        <version>1.0.42-SNAPSHOT</version>
+        <version>1.0.43-SNAPSHOT</version>
     </parent>
 
     <artifactId>neighbour-service</artifactId>
@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>

@@ -9,6 +9,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import java.io.IOException;
 
+//TODO is this class actually in use? Make a test that checks if the correct logging is done.
 @Component
 public class DiscovererResponseErrorHandler implements ResponseErrorHandler {
 
@@ -21,8 +22,6 @@ public class DiscovererResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 
-	// TODO: Decide how the client should handle various errors.
-	@Override
 	public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
 
 		if(clientHttpResponse.getStatusCode().is5xxServerError()){

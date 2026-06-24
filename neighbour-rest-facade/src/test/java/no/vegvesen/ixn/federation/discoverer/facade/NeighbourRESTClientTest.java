@@ -51,7 +51,7 @@ public class NeighbourRESTClientTest {
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        client = new NeighbourRESTClient(template, mapper);
+        client = new NeighbourRESTClient(template);
 
     }
 
@@ -70,8 +70,9 @@ public class NeighbourRESTClientTest {
     @Test
     @DisplayName("Post capability: Server returns OK, but with empty response body")
     public void doPostCapabilitiesOkEmpty() {
+        CapabilitiesApi capabilitiesApi = null;
         when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
-                .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<CapabilitiesApi>(capabilitiesApi, HttpStatus.OK));
         String neighbourName = "test";
         CapabilityPostException thrown = assertThrows(CapabilityPostException.class, () -> client.doPostCapabilities("https://test.server/", neighbourName, new CapabilitiesApi()));
         assertThat(thrown.getMessage()).contains(neighbourName);
@@ -143,8 +144,9 @@ public class NeighbourRESTClientTest {
     @Test
     @DisplayName("Post subscription request: Server returns OK, but with empty response body")
     public void postSubscriptionRequestOkEmpty() {
+        SubscriptionResponseApi response = null;
         when(template.exchange(any(String.class),any(HttpMethod.class),any(HttpEntity.class), any(Class.class)))
-                .thenReturn(new ResponseEntity(null,HttpStatus.OK));
+                .thenReturn(new ResponseEntity(response,HttpStatus.OK));
 
         String neighbourName = "test";
         SubscriptionRequestException thrown = assertThrows(SubscriptionRequestException.class, () -> client.doPostSubscriptionRequest(new SubscriptionRequestApi(), "https://test.server/", neighbourName));

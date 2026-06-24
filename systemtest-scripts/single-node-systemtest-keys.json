@@ -1,0 +1,41 @@
+[{
+  "name" : "ca.interchangedomain.com",
+  "country" : "NO",
+  "subCaRequests" : [ {
+    "name" : "ca.a.interchangedomain.com",
+    "country" : "NO",
+    "subCaRequests" : [ ],
+    "hostRequests" : [ {
+      "name" : "a.interchangedomain.com"
+    }, {
+      "name" : "a.qpid.interchangedomain.com"
+    }],
+    "clientRequests" : [ {
+      "name" : "king_olav.a.interchangedomain.com",
+      "country" : "NO",
+      "email" : "kongen@slottet.no"
+    }]
+  }, {
+  "name" : "ca.a.internal.interchangedomain.com",
+  "country" : "NO",
+  "subCaRequests" : [ ],
+  "hostRequests" : [ {
+    "name" : "a-napcore-server"
+  }, {
+    "name" : "a-admin"
+  },{
+    "name" : "a-qpid"
+  }],
+    "clientRequests" : [ {
+      "name" : "nap.a.internal.interchangedomain.com",
+      "country" : "NO",
+      "email" : "nap@a.internal.interchangedomain.com"
+    }, {
+      "name" : "admin.a.internal.interchangedomain.com",
+      "country" : "NO",
+      "email" : "admin@a.internal.interchangedomain.com"
+    } ]
+  }],
+  "hostRequests" : [ ],
+  "clientRequests" : [ ]
+}]

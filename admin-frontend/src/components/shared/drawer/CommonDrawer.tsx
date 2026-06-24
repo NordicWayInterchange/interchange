@@ -21,12 +21,13 @@ import {timeConverter} from "@/lib/timeConverter";
 
 type Props = {
     commonAttributes: Subscription | ServiceProviderSubscriptions | ServiceProviderDeliveries | Delivery;
+    queueValidator: boolean;
     open: boolean;
     handleMoreClose: () => void;
     heading: string;
 };
 
-const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props) => {
+const CommonDrawer = ({commonAttributes, queueValidator, open, handleMoreClose, heading}: Props) => {
     if (!commonAttributes) {
         return  <Loading text=""/>;
     }
@@ -117,7 +118,7 @@ const CommonDrawer = ({commonAttributes, open, handleMoreClose, heading}: Props)
                                 <StyledCard variant="outlined">
                                     <Typography>Endpoints</Typography>
                                     <FormControl fullWidth>
-                                        {commonAttributes.endpoints[0].source &&
+                                        {commonAttributes.endpoints[0].source && queueValidator &&
                                             <QueueValidator queueName={commonAttributes.endpoints[0].source}/>}
                                         {commonAttributes.endpoints[0].target &&
                                             <ExchangeValidator exchangeName={commonAttributes.endpoints[0].target}/>}

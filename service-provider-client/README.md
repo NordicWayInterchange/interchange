@@ -30,14 +30,9 @@ command, and give autocomplete for the different switches and subcommands when p
 ## Generating keys
 
 In order to generate the key and trust stores for using the Interchange, you have to generate keys and certificate in the portal.
-Enter the country code and the organisation name, and click "Generate certificate".
-This will start the download of three files. Store them in a single directory.
-
-Then, in you shell, run the command ```serviceproviderclient portalstore <path to where you stored you certs> <path to where you want to store your credentials>```
-Make sure the second path already exists.
-This will create a .p12 and .jks file in the second path. The .p12 file should be used in the  ```--keystorepath``` setting, and the .jks file in the ```--truststorepath``` setting.
-
-The ````--user```` setting can be obtained by looking at the "Home" page in the portal, and can be copied by clicking the copy icon.
+Enter the country code and the organisation name, and click "Generate certificate". This will start the download of three files.
+Move these three files to a known location, and you can use these with the service provider client by using the ```--cacert=root...crt.pem```, 
+``--cert=chain...crt.pem`` and ``--key=...key.pem`` arguments. 
 
 ## Tip
 
@@ -47,5 +42,5 @@ use an "at-file", a file with the switches you want to have a default value on o
 In the case of using an at-file, the alias would be
 ```alias serviceproviderclient='java -jar <absolute-path-to-jar>/service-provider-client-1.0.33-SNAPSHOT.jar' @<path-to-my-at-file>```,
 and you could have settings in the file, for example
-```--user=myUser --keystorepath=/path/to/my/keystore.p12 --keystorepassword=mySuperDuperStrongPassword```
+```--user=myUser --key=/path/to/my/key.pem ...```
 

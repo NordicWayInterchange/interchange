@@ -9,11 +9,12 @@ If you want to expose the application to the world, the IP's/ports for onboard-s
 should be exposed. How this is done depends on the deployment/cloud used.
 
 
-## Portal
-The Interchange includes a simple portal implementation that uses Auth0 for authentication and letsencrypt for 
+## Interchange Portal
+The Interchange includes a simple portal implementation that uses both Auth0 and keycloak for authentication and letsencrypt for 
 certificate management, as well as nginx-ingress as ingress. These components require the ability to install
 components in separate namespaces. Additional requirements are a separate static IP for the portal, and an DNS A-record
-for the domain name the portal is to be served from.
+for the domain name the portal is to be served from. We are moving toward using Keycloak as the only authentication provider
+and access management solution going forward.
 
 To enable the portal, first install [Niginx ingress](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io/)
 into their separate namespaces. 
@@ -28,7 +29,5 @@ It is advised to set the `letsencrypt.server` variable to the letsencrypt stagin
 convinced that the setup is successful, so you don't wind up hitting the strict limits of the letsencrypt production 
 server.
 
-## Admin server
-The admin server is implemented in the same fasion as the portal.
-
-At the moment, only the backend config is included in the interchange project.
+## Admin frontend 
+The admin frontend is implemented in the same fashion as the Interchange portal as described above.
