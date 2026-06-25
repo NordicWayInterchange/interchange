@@ -203,7 +203,14 @@ row will disappear and the capability will be shown in the list of `Network capa
 
 To create a [Delivery](/generated/GLOSSARY.html#delivery) that will be associated with a capability, go to `Deliveries` tab and click `Create delivery`. Then,
 select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
-be automatically pre-filled in the Publication ID field of the form. While creating a delivery you also have the option to
+be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or leave them as they are.
+The [Quadtree](/generated/GLOSSARY.html#quadtree) field can also be populated by clicking `Show map`. Each area on the map is associated with a four-digit
+number, and by clicking different areas, a comma-separated value will be generated. This value can then be used as the
+`Quadtree` input in the form.
+
+<img src="/generated/show_map.png" alt="quadtree">
+
+While creating a delivery you also have the option to
 enable dead letter queue (dlq) for the delivery you are creating which is displayed at bottom of the form. Messages that cannot be delivered are moved to dlq.
 
 <img src="/generated/create_delivery.png" alt="Create_delivery">
@@ -259,7 +266,13 @@ the endpoint.
 
 There is also another way of creating a subscription. Go to `Subscriptions` tab and click on `Add subscription`. Then
 select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
-be automatically pre-filled in the Publication ID field of the form.
+be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or leave them as they are.
+The [Quadtree](/generated/GLOSSARY.html#quadtree) field can also be populated by clicking `Show map`. Each area on the map is associated with a four-digit
+number, and by clicking different areas, a comma-separated value will be generated. This value can then be used as the
+`Quadtree` input in the form.
+
+<img src="/generated/show_map.png" alt="quadtree">
+
 Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated and displayed in the **Selector** section.
 You can also write your own selector using the provided cheat sheet. Click on
 `Save subscription` at the bottom. You will be redirected to the `Subscriptions` section where you can see your newly added subscription.
