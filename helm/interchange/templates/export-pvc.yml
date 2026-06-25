@@ -1,0 +1,18 @@
+{{- if and .Values.export.enabled .Values.export.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-exports
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: export
+    release: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.export.persistence.size | quote }}
+  storageClassName: {{ .Values.export.persistence.storageClassName }}
+{{- end }}

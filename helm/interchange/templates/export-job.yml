@@ -1,0 +1,45 @@
+{{- if .Values.export.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-export
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: export
+    release: {{ .Release.Name }}
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        component: export
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: export
+          image: "{{ .Values.export.image.repository }}:{{ .Values.export.image.tag }}"
+          args:
+            - "export"
+            - "/exports/export.json"
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Release.Name }}-database:5432/{{ .Values.database.postgres_db }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.postgres_user | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.postgres_password | quote }}
+          volumeMounts:
+            - name: exports
+              mountPath: /exports
+      volumes:
+        - name: exports
+          {{- if .Values.export.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-exports
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
