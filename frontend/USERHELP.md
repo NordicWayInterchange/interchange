@@ -188,36 +188,46 @@ Or simply click on a capability row to view its details in the side window.
 
 <img src="/generated/capability_details.png" alt="Capability details">
 
+Capabilities without associated deliveries will not be shown in `Network capabilities` tab, nor reported to other
+interchanges in the network. As you can see in the image, capabilities without associated deliveries are marked with an
+information icon.
+
+<img src="/generated/capabilities_without_deliveries.png" alt="Capability without delivery">
+
+Please review the instructions on how to register a delivery section. Once the associated delivery's status receive
+`CREATED` status label, the information icon next to the capability
+row will disappear and the capability will be shown in the list of `Network capabilities`.
 
 ### How to register a Delivery
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
-In order to create a [Delivery](/generated/GLOSSARY.html#delivery), you can click on `Create delivery` from `Deliveries` tab and
-create a
-delivery by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in the
-publication ID field. While creating a delivery you have the option to enable dead letter
-queue (dlq) for the delivery you are creating. Messages that cannot be delivered are moved to dlq.
+To create a [Delivery](/generated/GLOSSARY.html#delivery) that will be associated with a capability, go to `Deliveries` tab and click `Create delivery`. Then,
+select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
+be automatically pre-filled in the Publication ID field of the form. While creating a delivery you also have the option to
+enable dead letter queue (dlq) for the delivery you are creating which is displayed at bottom of the form. Messages that cannot be delivered are moved to dlq.
 
 <img src="/generated/create_delivery.png" alt="Create_delivery">
 
-You can also click on advanced mode and write your own selector by using a provided cheat sheet.
+Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated and displayed in the **Selector** section.
+You can also write your own selector using the provided cheat sheet. 
 
 <img src="/generated/delivery_cheatsheet.png" alt="Delivery_cheatsheet">
 
 After you click on `Save delivery`, you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-Click on the three dots on the far right to see the details of the delivery including the endpoint.
+Click on the three dots on the far right to see the details of the delivery including the endpoint. 
+You also have the option to remove the delivery you just created from the delivery details side panel.
 
 There is also another way of creating a delivery. In `My capabilities` tab, click on a capability row, or click the three
 dots on the far right of the capability row. This shows the details of the created capability.
 
 <img src="/generated/capability_details.png" alt="Capability details">
 
-In this side window, at the bottom, you can create a delivery by clicking on `Deliver` button. You can add a
-description of the new Delivery (description is optional). You have also the option to
+In this side window, at the bottom, you can create a delivery by clicking on `Deliver` button. You can add a description
+for the new Delivery. This field is optional. You have also the option to
 enable dead letter queue (dlq) for the delivery you are creating. You can also remove
-the capability that you have just created from the capability details side window.
+the selected capability from the capability details side window.
 
 <img src="/generated/deliver.png" alt="Deliver">
 
@@ -234,7 +244,7 @@ other users both on your instance, or any other interchanges in the cluster.
 
 Click on the three dots on the far right, and you should see the details of this capability. Enter a description for
 your new subscription on the bottom of the
-page (description is optional), and click `Subscribe`
+page. This field is optional. Then click `Subscribe`
 
 <img src="/generated/subscribe.png" alt="Subscribe">
 
@@ -244,17 +254,22 @@ the endpoint is being provisioned on the broker, but should end up in a `CREATED
 
 <img src="/generated/subscription_list.png" alt="Subscription_list">
 
-Click on the subscription or the three dots on the far right side to see the details of the subscription including
+Click on the created subscription row or the three dots on the far right side to see the details of the subscription including
 the endpoint.
 
-There is also another way of creating a subscription. You can click on `Add subscription` from `Subscriptions` tab and
-create a subscription by clicking on the listed capabilities. Once you click on capability row, the ID will be filled in
-the publication ID field.
-You can also click on advanced mode and write your own selector by using a provided cheat sheet. Click on
-`Save subscription` at the bottom. You will be redirected to the subscriptions section where you can see your newly added subscription.
+There is also another way of creating a subscription. Go to `Subscriptions` tab and click on `Add subscription`. Then
+select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
+be automatically pre-filled in the Publication ID field of the form.
+Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated and displayed in the **Selector** section.
+You can also write your own selector using the provided cheat sheet. Click on
+`Save subscription` at the bottom. You will be redirected to the `Subscriptions` section where you can see your newly added subscription.
+The status might be `REQUESTED` for a short time, while
+the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
 <img src="/generated/cheatsheet.png" alt="Subscription_cheatsheet">
 
+Click on the three dots on the far right to see the details of the subscription including the endpoint. 
+You also have the option to remove the subscription just created by clicking `Remove subscription`.
 
 ### How to register a Private channel
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
