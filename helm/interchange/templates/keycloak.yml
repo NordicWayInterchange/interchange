@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:${KEYCLOAK_IMAGE_TAG}
+          image: {{ .Values.napcore_frontend.keycloak.image.repository }}:{{ .Values.napcore_frontend.keycloak.image.tag }}
           args: ["start"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
