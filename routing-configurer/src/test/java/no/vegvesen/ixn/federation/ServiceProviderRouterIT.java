@@ -400,7 +400,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
                         LocalSubscriptionStatus.REQUESTED,
                         "messageType = 'DATEX2'",
                         HOST_NAME,
-                        Collections.emptySet(),
                         Collections.singleton(new LocalEndpoint(
                                         source,
                                         qpidContainer.getHost(),
@@ -766,7 +765,8 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProviderRepository.save(otherSP);
 		router.syncServiceProviders(List.of(mySP, otherSP), client.getQpidDelta());
 
-		assertThat(client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource())).hasSize(1);
+		List<Binding> queuePublishingLinks = client.getQueuePublishingLinks(subscription.getLocalEndpoints().stream().findFirst().orElseThrow().getSource());
+		assertThat(queuePublishingLinks).hasSize(1);
 		assertThat(subscription.getLocalEndpoints()).hasSize(1);
 
 		denmCapability.setStatus(CapabilityStatus.TEAR_DOWN);
@@ -786,7 +786,6 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 				LocalSubscriptionStatus.CREATED,
 				"originatingCountry = 'NO'",
 				"my-node",
-				Set.of(),
 				Set.of(new LocalEndpoint(endpointName, "my-interchange", 5671))
 		);
 		client.createQueue(endpointName);
