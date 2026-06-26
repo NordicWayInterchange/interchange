@@ -188,9 +188,10 @@ Or simply click on a capability row to view its details in the side window.
 
 <img src="/generated/capability_details.png" alt="Capability details">
 
+In `Network capabilities` tab you can see neighbour capabilities and local capabilities with deliveries.
 Capabilities without associated deliveries will not be shown in `Network capabilities` tab, nor reported to other
 interchanges in the network. As you can see in the image, capabilities without associated deliveries are marked with an
-information icon. Deliveries without an information icon are listed in the `Network capabilities` tab.
+information icon.
 
 <img src="/generated/capabilities_without_deliveries.png" alt="Capability without delivery">
 

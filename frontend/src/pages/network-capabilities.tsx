@@ -103,8 +103,8 @@ export default function NetworkCapabilities() {
     <Box flex={1}>
       <Mainheading>Network Capabilities</Mainheading>
       <Subheading>
-        These are the capabilities you can subscribe to. You can click a
-        capability to see details or subscribe.
+        These are the capabilities you can subscribe to. Neighbour capabilities and local capabilities with delivery
+        are listed below. You can click a capability to see details or subscribe.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="capability" searchElement="publicationID"/>
