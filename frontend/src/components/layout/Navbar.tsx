@@ -1,12 +1,12 @@
-import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
+import {AppBar, IconButton, Toolbar, Typography} from "@mui/material";
 import React from "react";
 import { styled } from "@mui/material/styles";
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { signOut, useSession } from "next-auth/react";
-import { Box } from "@mui/system";
 import LogoutIcon from '@mui/icons-material/Logout';
 import Image from "next/image";
 import logo from "../../../public/interchange-logo.png";
+import {Box} from "@mui/system";
+import PersonIcon from '@mui/icons-material/Person';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -33,11 +33,10 @@ export default function Navbar() {
         {showLogoutIcon && (
           <StyledSignOutBox>
             <IconButton sx={{ marginRight: "-5px", mb: .25, cursor: 'default'}}>
-              <PersonOutlineIcon sx={{ color: "white", fontSize: "large"}} />
+              <PersonIcon sx={{ color: "white", fontSize: "large"}} />
             </IconButton>
             <Typography>{session?.user?.name}</Typography>
 
-            <Box mx={1.5} />
             <IconButton sx={{ marginRight: "-5px", mb: .25 }} onClick={() => signOut()}>
               <LogoutIcon sx={{ color: "white", fontSize: "large" }} />
             </IconButton>

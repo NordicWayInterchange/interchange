@@ -1,7 +1,6 @@
 import React from "react";
 import { Divider, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { Box } from "@mui/system";
 import Link from "next/link";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
@@ -19,6 +18,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { ContentCopy } from "@/components/shared/actions/ContentCopy";
 import { frontPageCardStyle } from "@/components/shared/styles/CardStyle";
 import TableRowsIcon from "@mui/icons-material/TableRows";
+import { Box } from '@mui/material';
 
 export default function Home() {
   const { data: session } = useSession();
