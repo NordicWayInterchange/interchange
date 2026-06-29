@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from "react";
-import { Box, Divider, IconButton } from "@mui/material";
+import {Divider, IconButton } from "@mui/material";
 import { useDeliveries } from "@/hooks/useDeliveries";
 import { GridColDef } from "@mui/x-data-grid";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
@@ -21,6 +21,7 @@ import AddButton from "@/components/shared/actions/AddButton";
 import { performRefetch } from "@/lib/performRefetch";
 import SearchBox from "@/components/shared/SearchBox";
 import { useQueryClient } from "@tanstack/react-query";
+import {Box} from "@mui/system";
 
 export default function Deliveries() {
   const { data: session } = useSession();
@@ -158,14 +159,14 @@ export default function Deliveries() {
   ];
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>Deliveries</Mainheading>
       <Subheading>
         These are all of your deliveries. You can click a
         delivery to see details or remove.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
-      <Box display="flex" flexDirection="row" gap={5}>
+      <Box sx={{flexWrap: 'row', display: 'flex', gap: 5}}>
       <AddButton text="Create delivery" labelUrl="delivery"></AddButton>
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="delivery" searchElement="ID"/>
       </Box>
