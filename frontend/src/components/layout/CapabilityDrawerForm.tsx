@@ -166,12 +166,16 @@ const CapabilityDrawerForm = ({
               <FormControl margin="normal">
                 <InputLabel>Cause codes</InputLabel>
                 <Select
-                  MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
-                  label="Cause codes"
-                  multiple
-                  defaultValue={capability.causeCodesDictionary.map((cause) => {
-                    return cause["value"];
-                  })}
+                    multiple
+                    label="Cause codes"
+                    defaultValue={capability.causeCodesDictionary.map(c => c.value)}
+                    MenuProps={{
+                        sx: {
+                            "& .MuiPaper-root": {
+                                maxHeight: 200,
+                            },
+                        },
+                    }}
                 >
                   {capability.causeCodesDictionary.map((cause, index) => {
                     return (

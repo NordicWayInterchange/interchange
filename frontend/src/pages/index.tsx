@@ -72,7 +72,7 @@ export default function Home() {
   ];
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>Welcome, {session?.user?.name}!</Mainheading>
       <Divider sx={{ marginY: 2 }} />
       <Subheading>My common name</Subheading>

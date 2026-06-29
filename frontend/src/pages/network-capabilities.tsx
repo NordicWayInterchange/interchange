@@ -100,7 +100,7 @@ export default function NetworkCapabilities() {
     : rows;
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>Network Capabilities</Mainheading>
       <Subheading>
         These are the capabilities you can subscribe to. You can click a

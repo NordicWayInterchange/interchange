@@ -102,7 +102,7 @@ export default function Capabilities() {
           field: "publisherId",
           headerName: "Publisher ID",
           renderCell: (params) => (
-              <Box display="flex" alignItems="center" gap={0.55}>
+              <Box sx={{ display: "flex", alignItems: "center", gap:"0.55" }}>
                   {!params.row.hasDelivery && (
                       <Tooltip
                           title="This capability does not have an associated delivery,
@@ -179,13 +179,13 @@ export default function Capabilities() {
   ];
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>My Capabilities</Mainheading>
       <Subheading>
         These are all of your capabilities. You can click a capability to see details, remove or deliver.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
-      <Box display="flex" flexDirection="row" gap={5}>
+      <Box sx={{ display: "flex", flexDirection: "row", gap: 5 }}>
       <AddButton text="Add capability" labelUrl="capability"></AddButton>
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="capability" searchElement="publicationID"/>
       </Box>
