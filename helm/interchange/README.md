@@ -31,3 +31,33 @@ server.
 
 ## Admin frontend 
 The admin frontend is implemented in the same fashion as the Interchange portal as described above.
+
+## Exporting the database
+
+The chart includes an optional Job that runs `export-application` to snapshot the database to a JSON file on a PersistentVolumeClaim.
+
+Enable it by setting `export.enabled=true` and providing an image in your values override:
+
+```yaml
+export:
+  enabled: true
+  image:
+    repository: ghcr.io/nordicwayinterchange/export-application
+    tag: "<image tag>"
+  persistence:
+    enabled: true
+    storageClassName: standard
+    size: 1Gi
+```
+
+The Job is a regular Kubernetes resource (no Helm hooks). It is created when the chart is installed or upgraded with `export.enabled=true` and runs once automatically at that point.
+
+To copy the file out once the Job completes:
+
+```bash
+kubectl cp $(kubectl get pod -l component=export -o jsonpath='{.items[0].metadata.name}'):/exports/export.json ./export.json
+```
+
+To run the export again, delete the completed Job — it will be recreated on the next deployment.
+
+The exported JSON can be imported into another node using `import-application`.

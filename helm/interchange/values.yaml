@@ -74,6 +74,13 @@ admin_frontend:
   enabled: false
   certmanager_enabled: false
 
+export:
+  enabled: false
+  persistence:
+    enabled: true
+    storageClassName: standard
+    size: 1Gi
+
 #letsencrypt:
 #  server: https://letsencrypt-server
 #  email: my-email@mycompany.com
