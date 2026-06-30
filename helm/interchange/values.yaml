@@ -77,7 +77,7 @@ admin_frontend:
 export:
   enabled: false
   persistence:
-    enabled: true
+    enabled: false
     storageClassName: standard
     size: 1Gi
 
