@@ -28,6 +28,12 @@
       height: 3px;
       background-color: #FF9600;
     }
+
+    .content {
+        max-width: 1000px;
+        margin: 100px auto;
+        padding: 10px;
+    }
   </style>
 
 <div
@@ -60,10 +66,8 @@
 </a>
 </div>
 
-<div style="padding-top:50px;">
-
 <body style="margin: 40px; background-color: #f0f1f1; font-family: 'Open Sans', sans-serif; color:#444f55; line-height: 1.6;">
-
+<section class="content">
 <button class="styled-button" onclick="downloadPDF()">Download PDF</button>
 
   <script>
@@ -100,6 +104,7 @@ function downloadPDF() {
 </script>
 
 ### How to register a Capability
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 You can create a new [Capability](/generated/GLOSSARY.html#capability) by clicking on the `Add capability` button in
@@ -200,35 +205,44 @@ Please review the instructions on how to register a delivery section. Once the a
 row will disappear and the capability will be shown in the list of `Network capabilities`.
 
 ### How to register a Delivery
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
-To create a [Delivery](/generated/GLOSSARY.html#delivery) that will be associated with a capability, go to `Deliveries` tab and click `Create delivery`. Then,
+To create a [Delivery](/generated/GLOSSARY.html#delivery) that will be associated with a capability, go to `Deliveries`
+tab and click `Create delivery`. Then,
 select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
-be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or leave them as they are.
+be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or
+leave them as they are.
 
-The [Quadtree](/generated/GLOSSARY.html#quadtree) field can also be populated by clicking `Show map`. Each area on the map is associated with a
-number between 0-3, and by clicking different areas, a comma-separated value will be generated. Click `Save` and this value can then be used as the
+The [Quadtree](/generated/GLOSSARY.html#quadtree) field can also be populated by clicking `Show map`. Each area on the
+map is associated with a
+number between 0-3, and by clicking different areas, a comma-separated value will be generated. Click `Save` and this
+value can then be used as the
 `Quadtree` input in the form.
 
 <img src="/generated/show_map.png" alt="quadtree">
 
 While creating a delivery you also have the option to
-enable dead letter queue (dlq) for the delivery you are creating which is displayed at bottom of the form. Messages that cannot be delivered are moved to dlq.
+enable dead letter queue (dlq) for the delivery you are creating which is displayed at bottom of the form. Messages that
+cannot be delivered are moved to dlq.
 
 <img src="/generated/create_delivery.png" alt="Create_delivery">
 
-Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated and displayed in the **Selector** section.
-You can also write your own selector using the provided cheat sheet. 
+Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated
+and displayed in the **Selector** section.
+You can also write your own selector using the provided cheat sheet.
 
 <img src="/generated/delivery_cheatsheet.png" alt="Delivery_cheatsheet">
 
-After you click on `Save delivery`, you should see the created delivery in the table. The status might be `REQUESTED` for a short time, while
+After you click on `Save delivery`, you should see the created delivery in the table. The status might be `REQUESTED`
+for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
-Click on the three dots on the far right to see the details of the delivery including the endpoint. 
+Click on the three dots on the far right to see the details of the delivery including the endpoint.
 You also have the option to remove the delivery you just created from the delivery details side panel.
 
-There is also another way of creating a delivery. In `My capabilities` tab, click on a capability row, or click the three
+There is also another way of creating a delivery. In `My capabilities` tab, click on a capability row, or click the
+three
 dots on the far right of the capability row. This shows the details of the created capability.
 
 <img src="/generated/capability_details.png" alt="Capability details">
@@ -240,11 +254,12 @@ the selected capability from the capability details side window.
 
 <img src="/generated/deliver.png" alt="Deliver">
 
-
 ### How to register a Subscription
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
-In order to create a [Subscription](/generated/GLOSSARY.html#subscription), click on `Network capabilities` on the left-hand
+In order to create a [Subscription](/generated/GLOSSARY.html#subscription), click on `Network capabilities` on the
+left-hand
 menu, and you should see your
 capability, as well as capabilities created by
 other users both on your instance, or any other interchanges in the cluster.
@@ -263,26 +278,31 @@ the endpoint is being provisioned on the broker, but should end up in a `CREATED
 
 <img src="/generated/subscription_list.png" alt="Subscription_list">
 
-Click on the created subscription row or the three dots on the far right side to see the details of the subscription including
+Click on the created subscription row or the three dots on the far right side to see the details of the subscription
+including
 the endpoint.
 
 There is also another way of creating a subscription. Go to `Subscriptions` tab and click on `Add subscription`. Then
 select one of the listed capabilities on the right-hand side. Once you click a capability row, the Publication ID will
-be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or leave them as they are.
+be automatically pre-filled in the Publication ID field of the form. You can fill in the other fields in the form or
+leave them as they are.
 The [Quadtree](/generated/GLOSSARY.html#quadtree) field is the same as described in `Delivery` section.
 
-Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated and displayed in the **Selector** section.
+Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated
+and displayed in the **Selector** section.
 You can also write your own selector using the provided cheat sheet. Click on
-`Save subscription` at the bottom. You will be redirected to the `Subscriptions` section where you can see your newly added subscription.
+`Save subscription` at the bottom. You will be redirected to the `Subscriptions` section where you can see your newly
+added subscription.
 The status might be `REQUESTED` for a short time, while
 the endpoint is being provisioned on the broker, but should end up in a `CREATED` state after a few seconds.
 
 <img src="/generated/cheatsheet.png" alt="Subscription_cheatsheet">
 
-Click on the three dots on the far right to see the details of the subscription including the endpoint. 
+Click on the three dots on the far right to see the details of the subscription including the endpoint.
 You also have the option to remove the subscription just created by clicking `Remove subscription`.
 
 ### How to register a Private channel
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In [Private channel](/generated/GLOSSARY.html#private-channel) tab you can display, create and
@@ -300,20 +320,22 @@ The endpoint for the private channel consists of the hostname, port and the priv
 
 <img src="/generated/privateChannel_details.png" alt="Private channels">
 
-If another [Service provider](/generated/GLOSSARY.html#service-provider) has created a private channel subscribed to yours, it will appear in the
+If another [Service provider](/generated/GLOSSARY.html#service-provider) has created a private channel subscribed to
+yours, it will appear in the
 `My private channel subscriptions`
 list.
 
 <img src="/generated/privateChannel_subscription.png" alt="My private channel subscriptions">
 
-You can use the [Common name](/generated/GLOSSARY.html#common-name) of the other service provider as the peer name while creating
+You can use the [Common name](/generated/GLOSSARY.html#common-name) of the other service provider as the peer name while
+creating
 a private channel.
 The `Common name` can be copied from `My common name` section in `Home` tab.
 
 <img src="/generated/commonName.png" alt="Common name">
 
-
 ## Bi-queues
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 In [Bi-queues](/generated/GLOSSARY.html#bi-queues) tab you can see the list of bi-queues
@@ -326,19 +348,20 @@ By clicking on each bi-queue from the list you can see the bi-queue endpoint det
 
 <img src="/generated/bi-queue_details.png" alt="Bi-queue details">
 
-
 ### How to create a Certificate
+
 <div style="border-bottom: 2px solid #444f55; width: 100%; margin-top: 8px;"></div>
 
 You can generate the key and certificate in the portal in order to generate the key and trust stores for using the
 Interchange.
 
-Enter the [Country code](/generated/GLOSSARY.html#originating-country-) and the organisation name, and click `Generate certificate` and download the private key, chain
+Enter the [Country code](/generated/GLOSSARY.html#originating-country-) and the organisation name, and click
+`Generate certificate` and download the private key, chain
 certificate and root certificate.
 
 <img src="/generated/certificate.png" alt="Certificate">
+</section>
 </body>
-</div>
 </html>
 
 
