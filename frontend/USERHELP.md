@@ -228,7 +228,7 @@ cannot be delivered are moved to dlq.
 
 <img src="/generated/create_delivery.png" alt="Create_delivery">
 
-Once you switch to **Advanced Mode** a selector based on the values entered in the form will be automatically generated
+Once you switch to **Advanced Mode** a [selector](/generated/GLOSSARY.html#selector) based on the values entered in the form will be automatically generated
 and displayed in the **Selector** section.
 You can also write your own selector using the provided cheat sheet.
 
