@@ -90,7 +90,7 @@ jobs:
         if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
-          git config --global user.name = "GitHub Actions"
+          git config --global user.name "GitHub Actions"
           cp /home/runner/work/interchange/interchange/onboard-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-onboard
           cp /home/runner/work/interchange/interchange/neighbour-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-neighbour
           cp /home/runner/work/interchange/interchange/napcore-server/target/swagger/swagger.json ./interchange-swagger-docs/swagger-napcore
@@ -113,7 +113,7 @@ jobs:
         if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
-          git config --global user.name = "GitHub Actions"
+          git config --global user.name "GitHub Actions"
           cd ./serviceprovider-client-documentation
           cp /home/runner/work/interchange/interchange/service-provider-client/target/generated-docs/*.html ./
           git add --all
@@ -133,9 +133,9 @@ jobs:
         if: github.ref == 'refs/heads/federation-master'
         run: |
           git config --global user.email "actions@github.com"
-          git config --global user.name = "GitHub Actions"
+          git config --global user.name "GitHub Actions"
           cd ./interchange-handbook
-          cp /home/runner/work/interchange/interchange/frontend/public/generated/*.* ./generated
+          cp /home/runner/work/interchange/interchange/frontend/public/generated/. ./generated/
           git add --all
           git commit --allow-empty -m "Updated generated files"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-handbook.git --force
