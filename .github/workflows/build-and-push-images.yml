@@ -135,7 +135,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name = "GitHub Actions"
           cd ./interchange-handbook
-          cp /home/runner/work/interchange/interchange/frontend/public/generated/*.* ./
+          cp /home/runner/work/interchange/interchange/frontend/public/generated/*.* ./generated
           git add --all
           git commit --allow-empty -m "Updated generated files"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-handbook.git --force
