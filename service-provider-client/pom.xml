@@ -11,24 +11,8 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-        </dependency>
-        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
@@ -46,10 +30,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
             <groupId>net.nordicway.interchange</groupId>
             <artifactId>keys-generator</artifactId>
             <version>${project.version}</version>
@@ -60,6 +40,11 @@
             <artifactId>service-provider-rest-client</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -152,7 +137,9 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
+                            <!--
                             <sourceHighlighter>coderay</sourceHighlighter>
+                            -->
                             <backend>html5</backend>
                         </configuration>
                     </execution>
