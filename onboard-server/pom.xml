@@ -61,6 +61,10 @@
             <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
