@@ -56,7 +56,9 @@ export default function MapDialog(props: Props) {
   return (
     <Dialog
       fullScreen
-      TransitionComponent={Transition}
+      slots={{
+        transition: Transition,
+      }}
       open={open}
       onClose={onClose}
     >
