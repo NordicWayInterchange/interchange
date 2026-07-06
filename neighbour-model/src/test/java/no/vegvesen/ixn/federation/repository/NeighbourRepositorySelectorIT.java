@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.repository;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +102,7 @@ public class NeighbourRepositorySelectorIT extends PostgresContainerBase {
 		Subscription subscriptionA = new Subscription();
 		subscriptionA.setSelector("originatingCountry = 'OM'");
 		subscriptionA.setSubscriptionStatus(SubscriptionStatus.REQUESTED);
-		SubscriptionRequest fedin = new SubscriptionRequest(Sets.newSet(subscriptionA));
+		SubscriptionRequest fedin = new SubscriptionRequest(Set.of(subscriptionA));
 		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.UNKNOWN, Collections.emptySet());
 		Neighbour ericssonA = new Neighbour("ericsson-5-A", capabilities, null, fedin);
 		neighbourRepository.save(ericssonA);
