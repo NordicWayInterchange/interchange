@@ -19,7 +19,6 @@ import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import org.assertj.core.util.Sets;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,7 +32,10 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {NeighbourService.class, NeigbourDiscoveryService.class, InterchangeNodeProperties.class})
+@SpringBootTest(classes = {NeighbourService.class, NeigbourDiscoveryService.class, InterchangeNodeProperties.class},
+properties = {
+		"interchange.node-provider.name=my-interchange"
+})
 public class NeighbourServiceDiscoveryTest {
 
 	@MockitoBean
@@ -69,10 +71,6 @@ public class NeighbourServiceDiscoveryTest {
 		return new Capability(
 				new DatexApplication(originatingCountry + "-123", originatingCountry + "-pub", originatingCountry, "1.0", List.of("0122"),"SituationPublication", "publisherName"),
 				new Metadata(RedirectStatus.OPTIONAL));
-	}
-
-	@BeforeEach
-	public void before(){
 	}
 
 	private Set<LocalSubscription> getLocalSubscriptions() {
