@@ -8,14 +8,14 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 export default function UserAssistance() {
 
   return (
-    <Box
-      position="absolute"
-      top={6}
-      right={-4}
-      sx={{
-        transform: "translate(50%, -50%)"
-      }}
-    >
+      <Box
+            sx={{
+                position:"absolute",
+                top: 6,
+                right: -10,
+                transform: "translate(50%, -50%)"
+            }}
+        >
       <Tooltip title={
         <span style={{ fontSize: ".88rem" }}>
           Do you need help with filling out this form? Please visit our  <CustomLink
