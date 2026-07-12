@@ -30,7 +30,7 @@ const Header = () => {
                         <Typography>{session?.user?.name}</Typography>
 
                         <Box mx={1.5} />
-                        <IconButton sx={{ marginRight: "-5px", mb: .25 }} onClick={() => signOut()}>
+                        <IconButton sx={{ marginRight: "-5px", mb: .25}} onClick={() => signOut()}>
                             <LogoutIcon sx={{ color: "white", fontSize: "large" }} />
                         </IconButton>
                         <Typography sx={{
