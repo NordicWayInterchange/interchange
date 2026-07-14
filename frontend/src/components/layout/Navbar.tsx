@@ -37,6 +37,7 @@ export default function Navbar() {
             </IconButton>
             <Typography>{session?.user?.name}</Typography>
 
+            <Box sx={{mx:1.5}} />
             <IconButton sx={{ marginRight: "-5px", mb: .25 }} onClick={() => signOut()}>
               <LogoutIcon sx={{ color: "white", fontSize: "large" }} />
             </IconButton>
