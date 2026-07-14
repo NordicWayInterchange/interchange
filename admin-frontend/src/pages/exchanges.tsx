@@ -59,7 +59,7 @@ const Exchanges = () => {
             headerName: "Name",
             flex: 2,
             renderCell: (params) => (
-                <Box display="flex" alignItems="center" gap={0.75}>
+                <Box sx={{display:'flex', alignItems:'center', gap:0.75}}>
                     <div
                         style={{
                             whiteSpace: 'normal',
@@ -132,7 +132,7 @@ const Exchanges = () => {
 
 
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <Mainheading>Exchanges</Mainheading>
             <Subheading>
                 These are all of qpid exchanges. You can click on each row to see more information.

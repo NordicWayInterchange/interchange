@@ -65,7 +65,7 @@ const Queues = () => {
         : rows;
 
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <Mainheading>Queues</Mainheading>
             <Subheading>
                 These are all of qpid queues.

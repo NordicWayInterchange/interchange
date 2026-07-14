@@ -17,7 +17,7 @@ type Props = {
 };
 const NestedGridConnections = ({row, nestedConnectionData, nestedConnectionColumns, isFlashing}: Props) => {
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <motion.div
                 animate={{backgroundColor: isFlashing ? "#ffdbb0" : "#f0f1f1"}}
                 transition={{duration: 0.3, ease: "easeInOut"}}
