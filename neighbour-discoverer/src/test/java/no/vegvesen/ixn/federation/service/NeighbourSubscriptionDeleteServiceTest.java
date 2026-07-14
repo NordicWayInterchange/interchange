@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.repository.MatchRepository;
@@ -12,13 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +28,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
     MatchRepository matchRepository;
 
     @Mock
-    NeighbourFacade neighbourFacade;
+    NeighbourRESTFacade neighbourFacade;
 
     private final GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 

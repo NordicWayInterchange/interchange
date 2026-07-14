@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
@@ -41,7 +42,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
     NeighbourSubscriptionDeleteService service;
 
     @MockitoBean
-    NeighbourFacade mockNeighbourFacade;
+    NeighbourRESTFacade mockNeighbourFacade;
 
     @Test
     public void serviceIsAutowired() {

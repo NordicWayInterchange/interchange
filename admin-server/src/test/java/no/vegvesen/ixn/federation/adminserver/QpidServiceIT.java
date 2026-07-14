@@ -90,20 +90,10 @@ public class QpidServiceIT extends QpidDockerBaseIT {
 
         client.createHeadersExchange(exchangeName);
 
-        Capability capability = new Capability(
-                new DenmApplication(
-                        "NO-123",
-                        "pub-1",
-                        "NO",
-                        "1.0",
-                        List.of("12", "13"),
-                        List.of(5, 6)
-                ),
-                new Metadata()
-        );
-        String selector = MessageValidatingSelectorCreator.makeSelector(capability, null);
+        String selector = "(publisherId = 'NO-123') AND (causeCode = 5 OR causeCode = 6) AND (publicationId = 'pub-1') AND (protocolVersion = '1.0') AND (messageType = 'DENM') AND (originatingCountry = 'NO') AND (quadTree like '%,12%' OR quadTree like '%,13%')";
         client.addBinding(exchangeName, new Binding(exchangeName, queueName, new Filter(selector)));
         assertThat(service.bindingExists(exchangeName, queueName)).isTrue();
+        System.out.println(selector);
     }
 
     @Test

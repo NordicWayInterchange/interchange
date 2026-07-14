@@ -5,8 +5,6 @@ import no.vegvesen.ixn.federation.api.v1_0.SubscriptionRequestApi;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
-import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
@@ -15,11 +13,11 @@ import no.vegvesen.ixn.federation.model.capability.DatexApplication;
 import no.vegvesen.ixn.federation.model.capability.Metadata;
 import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
-import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,24 +39,16 @@ class NeighbourServiceTest {
 	@Mock
 	NeighbourRepository neighbourRepository;
 	@Mock
-	ListenerEndpointRepository listenerEndpointRepository;
-	@Mock
 	DNSFacade dnsFacade;
-	@Mock
-	NeighbourFacade neighbourFacade;
 
-	private final NeighbourDiscovererProperties discovererProperties = new NeighbourDiscovererProperties();
-	private final GracefulBackoffProperties backoffProperties = new GracefulBackoffProperties();
 	private final String myName = "bouvet.itsinterchange.eu";
 
 	NeighbourService neighbourService;
-	NeigbourDiscoveryService neigbourDiscoveryService;
 
 	@BeforeEach
 	void setUp() {
 		InterchangeNodeProperties interchangeNodeProperties = new InterchangeNodeProperties(myName, "5671");
 		neighbourService = new NeighbourService(neighbourRepository, dnsFacade,interchangeNodeProperties);
-		neigbourDiscoveryService = new NeigbourDiscoveryService(dnsFacade,neighbourRepository,listenerEndpointRepository,interchangeNodeProperties,backoffProperties,discovererProperties);
 	}
 
 	@Test
@@ -224,65 +214,15 @@ class NeighbourServiceTest {
 	}
 
 	@Test
-	public void noSubscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreTheSame() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", myName));
-
-		Subscription subscription = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", myName);
-
-		SubscriptionRequest subscriptionRequest = new SubscriptionRequest(Collections.singleton(subscription));
-
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Collections.singleton(getDatexNeighbourCapability("NO")));
-		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), subscriptionRequest);
-
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
-		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
+	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraIncomingCapabilityExchange() {
+		Neighbour neighbour = new Neighbour("neigbhour-one", "5671");
+		when(neighbourRepository.findByName(any())).thenReturn(neighbour);
+		neighbourService.incomingCapabilities(new CapabilitiesApi("neighbour-one", Set.of(new CapabilityApi(new DatexApplicationApi("NO-213", "NO-pub", "NO", "1.0", List.of("0122"), "SituationPublication", "publisherName"), new MetadataApi(RedirectStatusApi.OPTIONAL)))), Collections.emptySet());
+		verify(neighbourRepository).save(neighbour);
+		verify(neighbourRepository, times(1)).findByName("neighbour-one");
 	}
 
-	@Test
-	public void subscriptionsAreAddedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'SE'", "self"));
 
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
-
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1)));
-
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
-		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
-
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
-
-		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new HashSet<>(Collections.singleton(subscription2)));
-		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
-		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
-		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(2);
-	}
-
-	@Test
-	public void subscriptionsAreRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "localnode"));
-
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/localnode/subscriptions/1", "localnode");
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/localnode/subscriptions/2", "localnode");
-
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1, subscription2)));
-
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE")));
-		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
-
-		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
-		//TODO should actually post a subscription request with only one subscription here????
-		//verify(neighbourFacade, times(0)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
-		//So here, the neighbour should have 2 subscriptions, one TEAR_DOWN and one in another state
-		Set<Subscription> ourRequestedSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
-		Subscription actual = getSubscriptionById(ourRequestedSubscriptions, 2);
-		assertThat(actual.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
-	}
 
 	private static Subscription getSubscriptionById(Set<Subscription> ourRequestedSubscriptions, int b) {
 		for (Subscription s : ourRequestedSubscriptions) {
@@ -293,105 +233,9 @@ class NeighbourServiceTest {
 		return null;
 	}
 
-	@Test
-	public void subscriptionsAreAddedAndRemovedWhenLocalSubscriptionsAndCapabilitiesAreNotTheSame() {
-		Set<LocalSubscription> localSubscriptions = new HashSet<>();
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'NO'", "self"));
-		localSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"messageType = 'DATEX2' AND originatingCountry = 'FI'", "self"));
-
-		Subscription subscription1 = new Subscription(1, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'NO'", "/neighbour/subscriptions/1", "self");
-		Subscription subscription2 = new Subscription(2, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'SE'", "/neighbour/subscriptions/2", "self");
-		Subscription subscription3 = new Subscription(3, SubscriptionStatus.REQUESTED, "messageType = 'DATEX2' AND originatingCountry = 'FI'", "/neighbour/subscriptions/3", "self");
-
-		SubscriptionRequest existingSubscriptions = new SubscriptionRequest(new HashSet<>(Arrays.asList(subscription1, subscription2)));
-
-		NeighbourCapabilities capabilities = new NeighbourCapabilities(CapabilitiesStatus.KNOWN, Sets.newSet(getDatexNeighbourCapability("NO"), getDatexNeighbourCapability("SE"), getDatexNeighbourCapability("FI")));
-		Neighbour neighbour = new Neighbour("neighbour", capabilities, new NeighbourSubscriptionRequest(), existingSubscriptions);
-
-		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(new HashSet<>(Collections.singleton(subscription3)));
-		when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-		neigbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
-		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class), any(), any(String.class));
-		Set<Subscription> subscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptions();
-		assertThat(getSubscriptionById(subscriptions, 2).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
-		assertThat(getSubscriptionById(subscriptions,3).getSubscriptionStatus()).isEqualTo(SubscriptionStatus.REQUESTED);
-	}
-
-	@Test
-	public void listenerEndpointsAreRemovedFromEndpointsList() {
-		String neighbourName = "my-neighbour";
-
-		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-2", 5671, new SubscriptionShard("target"));
-
-		Set<Endpoint> endpoints = new HashSet<>(Sets.newSet(endpoint1, endpoint2));
-
-		Subscription subscription = new Subscription();
-		subscription.setEndpoints(endpoints);
-
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
-
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-1", neighbourName)).thenReturn(listenerEndpoint1);
-		when(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("target", "my-source-2", neighbourName)).thenReturn(listenerEndpoint2);
-
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList(neighbourName, endpoints);
-
-		verify(listenerEndpointRepository, times(2)).delete(any(ListenerEndpoint.class));
-	}
-
-	@Test
-	public void tearDownListenerEndpointsForIgnoredNeighbours(){
-		String neighbourName = "my-ignored-neighbour";
-		Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest());
-
-		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
-
-		Set<Endpoint> endpoints = Set.of(endpoint1, endpoint2);
-		Subscription subscription = new Subscription();
-		subscription.setEndpoints(endpoints);
-
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
-
-		when(neighbourRepository.findAllByIgnoreIs(true)).thenReturn(List.of(neighbour));
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint1, listenerEndpoint2));
-
-		neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();
-
-		verify(listenerEndpointRepository, times(2)).delete(any());
-	}
-
-	@Test
-	public void doNotTearDownListenerEndpointsForNonIgnoredNeighbours(){
-		String neighbourName = "my-ignored-neighbour";
-		Endpoint endpoint1 = new Endpoint("my-source-1", "my-endpoint-1", 5671, new SubscriptionShard("target"));
-		Endpoint endpoint2 = new Endpoint("my-source-2", "my-endpoint-1", 5671, new SubscriptionShard("target"));
-
-		Set<Endpoint> endpoints = Set.of(endpoint1, endpoint2);
-		Subscription subscription = new Subscription();
-		subscription.setEndpoints(endpoints);
-
-		ListenerEndpoint listenerEndpoint1 = new ListenerEndpoint(neighbourName, "my-source-1", "my-endpoint-1", 5671, new Connection(), "target");
-		ListenerEndpoint listenerEndpoint2 = new ListenerEndpoint(neighbourName, "my-source-2", "my-endpoint-1", 5671,  new Connection(), "target");
-
-		when(neighbourRepository.findAllByIgnoreIs(true)).thenReturn(List.of());
-		when(listenerEndpointRepository.findAll()).thenReturn(List.of(listenerEndpoint1, listenerEndpoint2));
-
-		neigbourDiscoveryService.tearDownListenerEndpointsFromIgnoredNeighbours();
-
-		verify(listenerEndpointRepository, times(0)).delete(any());
-	}
 
 
-	@Test
-	public void teardownListenerEndpointsWithNullShard() {
-		Endpoint endpoint = new Endpoint("my-source-1", "my-endpoint-1", 5671);
-		neigbourDiscoveryService.tearDownListenerEndpointsFromEndpointsList("neighbour",Set.of(endpoint));
-		verify(listenerEndpointRepository,never()).delete(any(ListenerEndpoint.class));
 
-	}
 
 	private NeighbourCapability getDatexNeighbourCapability(String country) {
 		return new NeighbourCapability(new DatexApplication(country + "-123", country + "-pub", country, "1.0", List.of("0122"), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL));
