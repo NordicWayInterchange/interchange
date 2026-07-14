@@ -9,10 +9,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-/**
- * NOTE this class is a selector builder, but is retrofitted from an earlier model object.
- * It is not used in production code, as the selector building is not properly tested.
- */
 public class SelectorBuilder {
 
 	private static Logger logger = LoggerFactory.getLogger(SelectorBuilder.class);

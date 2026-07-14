@@ -405,6 +405,13 @@ public class ClusterKeyGenerator {
         pemWriter.close();
     }
 
+    public static void saveKey(PrivateKey key, Writer keyWriter) throws IOException {
+        JcaPEMWriter pemWriter;
+        pemWriter = new JcaPEMWriter(keyWriter);
+        pemWriter.writeObject(key);
+        pemWriter.close();
+    }
+
     public static void saveCSR(PKCS10CertificationRequest csr, Writer keyWriter) throws IOException {
         JcaPEMWriter pemWriter;
         pemWriter = new JcaPEMWriter(keyWriter);
@@ -479,6 +486,19 @@ public class ClusterKeyGenerator {
             o = parser.readObject();
         }
         return certificates;
+    }
+
+    public static PrivateKey safeLoadPrivateKey(Reader reader) throws IOException {
+        PEMParser keyParser = new PEMParser(reader);
+        Object obj = keyParser.readObject();
+        PrivateKey privateKey = null;
+        switch (obj) {
+            case PEMKeyPair keyPair -> privateKey = new JcaPEMKeyConverter().getKeyPair(keyPair).getPrivate();
+            case PrivateKeyInfo privateKeyInfo -> privateKey = new JcaPEMKeyConverter().getPrivateKey(privateKeyInfo);
+            default -> throw new RuntimeException("Cannot determine key type");
+        }
+        return privateKey;
+
     }
 
     public static PrivateKey loadPrivateKey(Reader reader) throws IOException {

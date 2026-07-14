@@ -25,16 +25,13 @@ public class Source implements AutoCloseable {
     }
 
     public void start() throws NamingException, JMSException {
-        IxnContext context = new IxnContext(url, sendQueue, null);
-        createConnection(context);
-        connection.start();
+		SourceConnectionCreator connectionCreator = new SourceConnectionCreator(url, sslContext);
+		connection = connectionCreator.createConnection();
+		connection.start();
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		producer = session.createProducer(context.getSendQueue());
+		Destination destination = session.createQueue(this.sendQueue);
+		producer = session.createProducer(destination);
     }
-
-	protected void createConnection(IxnContext ixnContext) throws NamingException, JMSException {
-		connection = ixnContext.createConnection(sslContext);
-	}
 
 	public MessageBuilder createMessageBuilder() {
 		return new MessageBuilder(session);
