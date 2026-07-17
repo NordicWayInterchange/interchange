@@ -25,51 +25,80 @@ export default function Home() {
   const { data, isLoading } = useSubscriptions(
     session?.user.commonName as string
   );
-
-  const shortcuts = [
-      {
-          header: "Subscriptions",
-          description: "View subscriptions",
-          url: "/subscriptions",
-          icon: <SubscriptionsIcon/>
-      },
-      {
-          header: "Network capabilities",
-          description: "View all capabilities",
-          url: "network-capabilities",
-          icon: <CellTowerIcon/>
-      },
-      {
-          header: "My capabilities",
-          description: "View my capabilities",
-          url: "capabilities",
-          icon: <PersonIcon/>
-      },
-      {
-          header: "Deliveries",
-          description: "View deliveries",
-          url: "/deliveries",
-          icon: <LocalPostOfficeIcon/>
-      },
-      {
-          header: "Private channels",
-          description: "View my private channels",
-          url: "/private-channels",
-          icon: <LockIcon/>
-      },
-      {
-          header: "Bi-queues",
-          description: "View bi-queues",
-          url: "/bi-queues",
-          icon: <TableRowsIcon/>
-      },
-      {
-          header: "Certificate",
-          description: "Generate certificate",
-          url: "/certificate",
-          icon: <SettingsIcon/>
-      },
-  ];
+    let shortcuts;
+    if (session?.user.organization) {
+         shortcuts = [
+            {
+                header: "Subscriptions",
+                description: "View subscriptions",
+                url: "/subscriptions",
+                icon: <SubscriptionsIcon/>
+            },
+            {
+                header: "Network capabilities",
+                description: "View all capabilities",
+                url: "network-capabilities",
+                icon: <CellTowerIcon/>
+            },
+            {
+                header: "Bi-queues",
+                description: "View bi-queues",
+                url: "/bi-queues",
+                icon: <TableRowsIcon/>
+            },
+            {
+                header: "Certificate",
+                description: "Generate certificate",
+                url: "/certificate",
+                icon: <SettingsIcon/>
+            },
+        ];
+    } else {
+         shortcuts = [
+            {
+                header: "Subscriptions",
+                description: "View subscriptions",
+                url: "/subscriptions",
+                icon: <SubscriptionsIcon/>
+            },
+            {
+                header: "Network capabilities",
+                description: "View all capabilities",
+                url: "network-capabilities",
+                icon: <CellTowerIcon/>
+            },
+            {
+                header: "My capabilities",
+                description: "View my capabilities",
+                url: "capabilities",
+                icon: <PersonIcon/>
+            },
+            {
+                header: "Deliveries",
+                description: "View deliveries",
+                url: "/deliveries",
+                icon: <LocalPostOfficeIcon/>
+            },
+            {
+                header: "Private channels",
+                description: "View my private channels",
+                url: "/private-channels",
+                icon: <LockIcon/>
+            },
+            {
+                header: "Bi-queues",
+                description: "View bi-queues",
+                url: "/bi-queues",
+                icon: <TableRowsIcon/>
+            },
+            {
+                header: "Certificate",
+                description: "Generate certificate",
+                url: "/certificate",
+                icon: <SettingsIcon/>
+            },
+        ];
+    }
 
   return (
       <Box sx={{flex: 1}}>
