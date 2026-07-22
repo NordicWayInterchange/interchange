@@ -22,12 +22,10 @@ import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MapemApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -225,7 +223,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
         napRestController.addDelivery(actorCommonName, deliveryRequest, false);
-        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
+        assertThat(napRestController.getDeliveries(actorCommonName, false)).hasSize(1);
     }
 
     @Test
@@ -233,8 +231,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", true);
         napRestController.addDelivery(actorCommonName, deliveryRequest, false);
-        assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
-        assertThat(napRestController.getDeliveries(actorCommonName).getFirst().getDlqueue()).isEqualTo(true);
+        assertThat(napRestController.getDeliveries(actorCommonName, false)).hasSize(1);
+        assertThat(napRestController.getDeliveries(actorCommonName, false).getFirst().getDlqueue()).isEqualTo(true);
     }
 
     @Test
@@ -253,7 +251,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testGettingNonExistentDeliveryThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getDelivery(actorCommonName, "1"));
+        assertThrows(NotFoundException.class, () -> napRestController.getDelivery(actorCommonName, "1", false));
     }
 
     @Test
@@ -261,7 +259,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
         Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector, "NO Delivery"), false);
-        Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
+        Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId(), false);
         assertThat(delivery).isNotNull();
         assertThat(delivery.getSelector()).isEqualTo(selector);
     }
@@ -280,7 +278,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         TimeUnit.SECONDS.sleep(1);
         napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3, "Delivery 3"), false);
 
-        List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
+        List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName, false);
         assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
         assertThat(deliveries.get(1).getSelector()).isEqualTo(selector2);
         assertThat(deliveries.get(2).getSelector()).isEqualTo(selector1);
@@ -309,10 +307,10 @@ public class NapRestControllerIT extends PostgresContainerBase {
         napRestController.addCapability(actor1, request2);
         napRestController.addCapability(actor2, request3);
 
-        List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingDeliveryCapabilities(actor1, selector);
-        List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingDeliveryCapabilities(actor1, "originatingCountry='SE'");
-        List<no.vegvesen.ixn.napcore.model.Capability> response3 = napRestController.getMatchingDeliveryCapabilities(actor2, "originatingCountry='SE'");
-        List<no.vegvesen.ixn.napcore.model.Capability> response4 = napRestController.getMatchingDeliveryCapabilities(actor2, selector);
+        List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingDeliveryCapabilities(actor1, selector, false);
+        List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingDeliveryCapabilities(actor1, "originatingCountry='SE'", false);
+        List<no.vegvesen.ixn.napcore.model.Capability> response3 = napRestController.getMatchingDeliveryCapabilities(actor2, "originatingCountry='SE'", false);
+        List<no.vegvesen.ixn.napcore.model.Capability> response4 = napRestController.getMatchingDeliveryCapabilities(actor2, selector, false);
         assertThat(response1).hasSize(1);
         assertThat(response2).hasSize(1);
         assertThat(response3).hasSize(0);
@@ -322,7 +320,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingNonExistentDeliveryThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "1"));
+        assertThrows(NotFoundException.class, () -> napRestController.deleteDelivery(actorCommonName, "1", false));
     }
 
     @Test
@@ -331,8 +329,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'", "Test delivery");
         Delivery delivery = napRestController.addDelivery(actorCommonName, request,false);
 
-        napRestController.deleteDelivery(actorCommonName, delivery.getId());
-        for(Delivery response : napRestController.getDeliveries(actorCommonName)){
+        napRestController.deleteDelivery(actorCommonName, delivery.getId(), false);
+        for(Delivery response : napRestController.getDeliveries(actorCommonName, false)){
             assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
         }
     }
@@ -674,26 +672,26 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
         assertThat(response).isNotNull();
     }
 
     @Test
     public void testAddingPrivateChannelWithRequestAsNull() {
         String actorCommonName = "actor";
-        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, null));
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, null, false));
     }
 
     @Test
     public void testAddingPrivateChannelWithPeersListAsNull() {
         String actorCommonName = "actor";
-        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "desc")));
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(null, "desc"), false));
     }
 
     @Test
     public void testAddingPrivateChannelWithEmptyPeersList() {
         String actorCommonName = "actor";
-        assertThat(napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(Set.of(), "my private channel"))).isNotNull();
+        assertThat(napRestController.addPrivateChannel(actorCommonName, new PrivateChannelRequest(Set.of(), "my private channel"),false)).isNotNull();
     }
 
     @Test
@@ -701,8 +699,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
-        napRestController.deletePrivateChannel(actorCommonName, response.getId());
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
+        napRestController.deletePrivateChannel(actorCommonName, response.getId(), false);
 
         assertThat(privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getStatus()).isEqualTo(no.vegvesen.ixn.federation.model.PrivateChannelStatus.TEAR_DOWN);
     }
@@ -710,7 +708,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deletePrivateChannel(actorCommonName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePrivateChannel(actorCommonName, "notAnId", false));
     }
 
     @Test
@@ -719,10 +717,10 @@ public class NapRestControllerIT extends PostgresContainerBase {
         PrivateChannelRequest request1 = new PrivateChannelRequest(Collections.singleton("peer1"), "My first private channel");
         PrivateChannelRequest request2 = new PrivateChannelRequest(Collections.singleton("peer2"), "My second private channel");
 
-        napRestController.addPrivateChannel(actorCommonName, request1);
-        napRestController.addPrivateChannel(actorCommonName, request2);
+        napRestController.addPrivateChannel(actorCommonName, request1, false);
+        napRestController.addPrivateChannel(actorCommonName, request2, false);
 
-        List<PrivateChannelResponse> response = napRestController.getPrivateChannels(actorCommonName);
+        List<PrivateChannelResponse> response = napRestController.getPrivateChannels(actorCommonName, false);
         assertThat(response).hasSize(2);
     }
 
@@ -731,16 +729,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
 
-        PrivateChannelResponse getPrivateChannel = napRestController.getPrivateChannel(actorCommonName, response.getId());
+        PrivateChannelResponse getPrivateChannel = napRestController.getPrivateChannel(actorCommonName, response.getId(), false);
         assertThat(getPrivateChannel).isNotNull();
     }
 
     @Test
     public void testGettingPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getPrivateChannel(actorCommonName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.getPrivateChannel(actorCommonName, "notAnId", false));
     }
 
     @Test
@@ -749,9 +747,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String peerName = "peer";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton(peerName), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
 
-        List<PeerPrivateChannel> peerChannels = napRestController.getPeerPrivateChannels(peerName);
+        List<PeerPrivateChannel> peerChannels = napRestController.getPeerPrivateChannels(peerName, false);
         Set<String> owners = peerChannels.stream().map(PeerPrivateChannel::getOwner).collect(Collectors.toSet());
         assertThat(owners).contains(actorCommonName);
     }
@@ -762,16 +760,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String peerName = "peer";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton(peerName), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
 
-        PeerPrivateChannel peerChannel = napRestController.getPeerPrivateChannel(peerName, response.getId());
+        PeerPrivateChannel peerChannel = napRestController.getPeerPrivateChannel(peerName, response.getId(), false);
         assertThat(peerChannel.getOwner()).isEqualTo(actorCommonName);
     }
 
     @Test
     public void testGettingPrivateChannelForPeerWithNonExistingId() {
         String peerName = "peer";
-        assertThrows(NotFoundException.class, () -> napRestController.getPeerPrivateChannel(peerName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.getPeerPrivateChannel(peerName, "notAnId", false));
     }
 
     @Test
@@ -779,14 +777,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(Collections.singleton("peer"), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
         PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
         AddPeerRequest newPeer = new AddPeerRequest("newPeer");
 
-        napRestController.addPeerToPrivateChannel(actorCommonName, response.getId(), newPeer);
+        napRestController.addPeerToPrivateChannel(actorCommonName, response.getId(), newPeer, false);
         Set<String> peers = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().map(Peer::getName).collect(Collectors.toSet());
         assertThat(peers).hasSize(2);
         assertThat(peers).contains("newPeer");
@@ -795,21 +793,21 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingPeerToPrivateChannelWithRequestAsNull() {
         String actorCommonName = "actor";
-        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", null));
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", null, false));
     }
 
     @Test
     public void testAddingPeerToPrivateChannelWithPeerAsNull() {
         String actorCommonName = "actor";
         AddPeerRequest newPeer = new AddPeerRequest(null);
-        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", newPeer));
+        assertThrows(PrivateChannelException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "validId", newPeer, false));
     }
 
     @Test
     public void testAddingPeerToPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
         AddPeerRequest newPeer = new AddPeerRequest("newPeer");
-        assertThrows(NotFoundException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "notAnId", newPeer));
+        assertThrows(NotFoundException.class, () -> napRestController.addPeerToPrivateChannel(actorCommonName, "notAnId", newPeer, false));
     }
 
     @Test
@@ -817,12 +815,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", "peerTwo")), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
         PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "peerTwo");
+        napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "peerTwo", false);
         Peer peerToTearDown = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().filter(p -> p.getStatus().equals(PeerStatus.TEAR_DOWN)).findFirst().get();
         assertThat(peerToTearDown.getName()).isEqualTo("peerTwo");
     }
@@ -830,7 +828,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingPeerFromPrivateChannelWithNonExistingId() {
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, "notAnId", "peer"));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, "notAnId", "peer", false));
     }
 
     @Test
@@ -838,12 +836,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", "peerTwo")), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
         PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "nonExistingPeer"));
+        assertThrows(NotFoundException.class, () -> napRestController.deletePeerFromPrivateChannel(actorCommonName, response.getId(), "nonExistingPeer", false));
     }
 
     @Test
@@ -852,12 +850,12 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String peerToDelete = "peerTwo";
         PrivateChannelRequest request = new PrivateChannelRequest(new HashSet<>(Arrays.asList("peerOne", peerToDelete)), "My private channel");
 
-        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request);
+        PrivateChannelResponse response = napRestController.addPrivateChannel(actorCommonName, request, false);
         PrivateChannel savedChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId());
         savedChannel.setStatus(no.vegvesen.ixn.federation.model.PrivateChannelStatus.CREATED);
         privateChannelRepository.save(savedChannel);
 
-        napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, response.getId());
+        napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, response.getId(), false);
         Peer peerToTearDown = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, response.getId()).getPeers().stream().filter(p -> p.getStatus().equals(PeerStatus.TEAR_DOWN)).findFirst().get();
         assertThat(peerToTearDown.getName()).isEqualTo("peerTwo");
     }
@@ -865,7 +863,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingPeerFromPrivateChannelByPeerWithNonExistingId() {
         String peerToDelete = "peerToDelete";
-        assertThrows(NotFoundException.class, () -> napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.peerDeletePeerFromPrivateChannel(peerToDelete, "notAnId", false));
     }
 
     @Test
@@ -876,9 +874,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new no.vegvesen.ixn.federation.model.PrivateChannelEndpoint("test", 1337, "test"),
                 actorCommonName));
         String privateChannelId = privateChannelRepository.findAllByServiceProviderName(actorCommonName).stream().findFirst().get().getUuid();
-        napRestController.deletePeerFromPrivateChannel(actorCommonName, privateChannelId, peerToDelete);
+        napRestController.deletePeerFromPrivateChannel(actorCommonName, privateChannelId, peerToDelete, false);
 
-        assertThat(napRestController.getPrivateChannels(actorCommonName).getFirst().getPeers()).hasSize(0);
+        assertThat(napRestController.getPrivateChannels(actorCommonName, false).getFirst().getPeers()).hasSize(0);
     }
 
     @Test
@@ -1062,7 +1060,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         serviceProviderRepository.saveAll(List.of(serviceProvider1, serviceProvider2));
         outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del1,cap1,sp1Name),new OutgoingMatch(del2,cap2,sp1Name)));
         outgoingMatchRepository.saveAll(List.of(new OutgoingMatch(del3,cap3,sp2Name),new OutgoingMatch(del4,cap4,sp2Name)));
-        assertThat(napRestController.getMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(2);
+        assertThat(napRestController.getMatchingDeliveryCapabilities(serviceProvider1.getName(), "originatingCountry='NO'", false).size()).isEqualTo(2);
         assertThat(napRestController.getMatchingSubscriptionCapabilities(serviceProvider1.getName(), "originatingCountry='NO'").size()).isEqualTo(4);
     }
 

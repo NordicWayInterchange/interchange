@@ -249,12 +249,12 @@ public class NapRestController {
     @Operation(summary = "Add delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDDELIVERIESRESPONSE)))})
     public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest,
-                                @RequestHeader(value = "X-NAP-READ-ONLY", defaultValue = "false") boolean readOnly){
+                                @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
-        readOnlyChecker.check(readOnly);
-
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
+
+        readOnlyChecker.check(readOnly);
 
         if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
             throw new DeliveryPostException("Bad api object for Delivery Request, Delivery is missing selector");
@@ -297,10 +297,13 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Get delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERYRESPONSE)))})
-    public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+    public Delivery getDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                                @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Getting subscription {} for service provider {}", deliveryId, actorCommonName);
+
+        readOnlyChecker.check(readOnly);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         LocalDelivery localDelivery = serviceProvider.getDeliveries().stream()
@@ -315,10 +318,13 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Get deliveries")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERIESRESPONSE)))})
-    public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName){
+    public List<Delivery> getDeliveries(@PathVariable("actorCommonName") String actorCommonName,
+                                        @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing deliveries for service provider {}", actorCommonName);
+
+        readOnlyChecker.check(readOnly);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         List<Delivery> deliveries = typeTransformer.transformLocalDeliveriesToNapDeliveries(serviceProvider.getDeliveries());
@@ -330,10 +336,13 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Deliveries")
     @Operation(summary = "Delete delivery")
-    public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId){
+    public void deleteDelivery(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("deliveryId") String deliveryId,
+                               @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE delivery {}", actorCommonName, deliveryId);
+
+        readOnlyChecker.check(readOnly);
 
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         serviceProviderToUpdate.removeLocalDelivery(deliveryId);
@@ -346,10 +355,13 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Get capabilities matching delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETDELIVERYCAPABILITYRESPONSE)))})
-    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector){
+    public List<no.vegvesen.ixn.napcore.model.Capability> getMatchingDeliveryCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestParam(required = false, name="selector") String selector,
+                                                                                          @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List local capabilities for service provider {}", actorCommonName);
+
+        readOnlyChecker.check(readOnly);
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
@@ -476,10 +488,13 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Add private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDPRIVATECHANNELRESPONSE)))})
-    public PrivateChannelResponse addPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @RequestBody PrivateChannelRequest request) {
+    public PrivateChannelResponse addPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @RequestBody PrivateChannelRequest request,
+                                                    @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("PrivateChannels - Received POST from Service Provider: {}", actorCommonName);
+
+        readOnlyChecker.check(readOnly);
 
         if (request == null || request.getPeers() == null) {
             throw new PrivateChannelException("Private channel or peers can not be null");
@@ -509,11 +524,13 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary = "Delete private channel")
-    public void deletePrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+    public void deletePrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId,
+                                     @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Service Provider {}, DELETE private channel {}", actorCommonName, privateChannelId);
 
+        readOnlyChecker.check(readOnly);
         PrivateChannel privateChannelToDelete = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, privateChannelId);
         if (privateChannelToDelete == null) {
             throw new NotFoundException("The private channel to delete is not in the Service Provider private channels. Cannot delete private channel that don't exist.");
@@ -530,11 +547,12 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get private channels")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELSRESPONSE)))})
-    public List<PrivateChannelResponse> getPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+    public List<PrivateChannelResponse> getPrivateChannels(@PathVariable("actorCommonName") String actorCommonName, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Listing private channels for service provider {}", actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByServiceProviderName(actorCommonName);
         List<PrivateChannelResponse> response = new ArrayList<>(privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPrivateChannelResponse(p)).toList());
         Collections.sort(response);
@@ -545,11 +563,13 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPRIVATECHANNELRESPONSE)))})
-    public PrivateChannelResponse getPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+    public PrivateChannelResponse getPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId,
+                                                    @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel {} for service provider {}", privateChannelId, actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuid(actorCommonName, privateChannelId);
         if (privateChannel == null) {
             throw new NotFoundException(String.format("Could not find private channel with id %s", privateChannelId));
@@ -562,11 +582,12 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get private channels with actorCommonName as peer")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNELS)))})
-    public List<PeerPrivateChannel> getPeerPrivateChannels(@PathVariable("actorCommonName") String actorCommonName) {
+    public List<PeerPrivateChannel> getPeerPrivateChannels(@PathVariable("actorCommonName") String actorCommonName, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channels where peer name is {}", actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         List<PrivateChannel> privateChannels = privateChannelRepository.findAllByPeerName(actorCommonName);
         List<PeerPrivateChannel> response = new ArrayList<>(privateChannels.stream().map(p -> typeTransformer.transformPrivateChannelToPeerPrivateChannel(p)).collect(Collectors.toList()));
         Collections.sort(response);
@@ -577,11 +598,13 @@ public class NapRestController {
     @Tag(name = "Private channels")
     @Operation(summary = "Get peer private channel")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPEERPRIVATECHANNEL)))})
-    public PeerPrivateChannel getPeerPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+    public PeerPrivateChannel getPeerPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId,
+                                                    @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get private channel for peer {} where id is {}", actorCommonName, privateChannelId);
 
+        readOnlyChecker.check(readOnly);
         PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, actorCommonName);
         if (privateChannel == null) {
             throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, actorCommonName));
@@ -594,11 +617,13 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Add peer to existing private channel")
-    public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request) {
+    public void addPeerToPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @RequestBody AddPeerRequest request,
+                                        @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Add peers to private channel where id is {}", privateChannelId);
 
+        readOnlyChecker.check(readOnly);
         if (request == null || request.getPeerToAdd() == null) {
             throw new PrivateChannelException("Cannot add peer when request is empty");
         }
@@ -627,11 +652,13 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Delete peer from existing private channel")
-    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName) {
+    public void deletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId, @PathVariable("peerName") String peerName,
+                                             @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         validatePathVariable(peerName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by owner {}", privateChannelId, actorCommonName);
+        readOnlyChecker.check(readOnly);
 
         PrivateChannel privateChannel = privateChannelRepository.findByServiceProviderNameAndUuidAndStatus(actorCommonName, privateChannelId, PrivateChannelStatus.CREATED);
         if (privateChannel == null) {
@@ -654,11 +681,13 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Private channels")
     @Operation(summary="Remove yourself from private channel where you are member")
-    public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId) {
+    public void peerDeletePeerFromPrivateChannel(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("privateChannelId") String privateChannelId,
+                                                 @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly) {
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Delete peer from private channel where id is {} by peer {}", privateChannelId, actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         PrivateChannel privateChannel = privateChannelRepository.findByUuidAndPeerName(privateChannelId, actorCommonName);
         if (privateChannel == null) {
             throw new NotFoundException(String.format("Could not find private channel with id %s for peer %s", privateChannelId, actorCommonName));
