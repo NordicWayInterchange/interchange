@@ -15,8 +15,9 @@ const tlsAgent = getTLSAgent();
 const fetchIXN: (
   actorCommonName: string,
   path: string,
-  selector?: string
-) => Promise<any> = async (actorCommonName, path, selector = "") => {
+  readOnly: boolean,
+  selector?: string,
+) => Promise<any> = async (actorCommonName, path, readOnly, selector = "" ) => {
   const uri = process.env.INTERCHANGE_URI || "";
 
   const acn = actorCommonName ? actorCommonName : "";
@@ -31,7 +32,10 @@ const fetchIXN: (
 
   return await axios.get(uri + uriPath, {
     params,
-    headers,
+    headers: {
+      ...headers,
+      "X-Read-Only": String(readOnly),
+    },
     httpsAgent: tlsAgent,
   });
 };
@@ -39,12 +43,16 @@ const fetchIXN: (
 const postIXN: (
   actorCommonName: string,
   path: string,
-  body: SubscriptionRequest | CertificateSignRequest | DeliveryRequest | CapabilityRequest |  {}
-) => Promise<any> = async (actorCommonName, path, body) => {
+  body: SubscriptionRequest | CertificateSignRequest | DeliveryRequest | CapabilityRequest |  {},
+  readOnly: boolean
+) => Promise<any> = async (actorCommonName, path, body, readOnly) => {
   const uri = process.env.INTERCHANGE_URI || "";
   const uriPath = `${actorCommonName}${path}`;
   return await axios.post(uri + uriPath, body, {
-    headers,
+    headers: {
+      ...headers,
+      "X-Read-Only": String(readOnly),
+    },
     httpsAgent: tlsAgent,
   });
 };
@@ -52,12 +60,16 @@ const postIXN: (
 const putIXN: (
   actorCommonName: string,
   path: string,
-  body: BiQueueResponse | {}
-) => Promise<any> = async (actorCommonName, path, body) => {
+  body: BiQueueResponse | {},
+  readOnly: boolean
+) => Promise<any> = async (actorCommonName, path, body, readOnly) => {
   const uri = process.env.INTERCHANGE_URI || "";
   const uriPath = `${actorCommonName}${path}`;
   return await axios.put(uri + uriPath, body, {
-    headers,
+    headers: {
+      ...headers,
+      "X-Read-Only": String(readOnly),
+    },
     httpsAgent: tlsAgent,
   });
 };
@@ -65,24 +77,32 @@ const putIXN: (
 const patchIXN: (
   actorCommonName: string,
   path: string,
-  body: PrivateChannelRequest | {}
-) => Promise<any> = async (actorCommonName, path, body) => {
+  body: PrivateChannelRequest | {},
+  readOnly: boolean
+) => Promise<any> = async (actorCommonName, path, body, readOnly) => {
   const uri = process.env.INTERCHANGE_URI || "";
   const uriPath = `${actorCommonName}${path}`;
   return await axios.patch(uri + uriPath, body, {
-    headers,
+    headers: {
+      ...headers,
+      "X-Read-Only": String(readOnly),
+    },
     httpsAgent: tlsAgent,
   });
 };
 
 const deleteIXN: (
   actorCommonName: string,
-  path: string
-) => Promise<any> = async (actorCommonName, path) => {
+  path: string,
+  readOnly: boolean
+) => Promise<any> = async (actorCommonName, path, readOnly) => {
   const uri = process.env.INTERCHANGE_URI || "";
   const uriPath = `${actorCommonName}${path}`;
   return await axios.delete(uri + uriPath, {
-    headers,
+    headers: {
+      ...headers,
+      "X-Read-Only": String(readOnly),
+    },
     httpsAgent: tlsAgent,
   });
 };
@@ -91,28 +111,33 @@ const deleteIXN: (
 export type basicGetParams = {
   actorCommonName: string;
   selector?: string;
+  readOnly: boolean;
 };
 
 export type extendedGetParams = {
   actorCommonName: string;
   pathParam?: string;
   selector?: string;
+  readOnly: boolean;
 };
 
 export type basicPostParams = {
   actorCommonName: string;
   body?: SubscriptionRequest | CertificateSignRequest | DeliveryRequest | CapabilityRequest | PrivateChannelRequest;
+  readOnly: boolean;
 };
 
 export type basicPutParams = {
   actorCommonName: string;
   body?: BiQueueResponse | BiQueueEndpointsApi;
+  readOnly: boolean;
 };
 
 export type basicPatchParams = {
   actorCommonName: string;
   pathParam?:string;
   body?: SubscriptionRequest | CertificateSignRequest | DeliveryRequest | CapabilityRequest | PrivateChannelRequest;
+  readOnly: boolean;
 };
 
 export type basicDeleteParams = {
@@ -120,6 +145,7 @@ export type basicDeleteParams = {
   pathParam?:string;
   firstParam?: string;
   secondParam?: string;
+  readOnly: boolean;
 };
 
 export type basicGetFunction = (params: basicGetParams) => Promise<any>;
@@ -132,143 +158,145 @@ export type basicDeleteFunction = (params: basicDeleteParams) => Promise<any>;
 export const fetchNapcoreNetworkCapabilities: basicGetFunction = async (
   params
 ) => {
-  const { actorCommonName, selector = "" } = params;
-  return await fetchIXN(actorCommonName, "/subscriptions/capabilities", selector
-  );
+  const { actorCommonName, selector = "", readOnly } = params;
+  return await fetchIXN(actorCommonName, "/subscriptions/capabilities", readOnly, selector);
 };
 
 export const fetchNapcoreSubscriptions: extendedGetFunction = async (
   params
 ) => {
-  const { actorCommonName, selector = "" } = params;
-  return await fetchIXN(actorCommonName, `/subscriptions`, selector);
+  const { actorCommonName, selector = "", readOnly } = params;
+  return await fetchIXN(actorCommonName, `/subscriptions`, readOnly, selector);
 };
 
 export const addNapcoreSubscriptions: basicPostFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await postIXN(actorCommonName, "/subscriptions", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await postIXN(actorCommonName, "/subscriptions", body, readOnly);
 };
 
 export const deleteNapcoreSubscriptions: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, pathParam } = params;
-  return await deleteIXN(actorCommonName, `/subscriptions/${pathParam}`);
+  const { actorCommonName, pathParam, readOnly} = params;
+  return await deleteIXN(actorCommonName, `/subscriptions/${pathParam}`, readOnly);
 };
 
 export const addNapcoreCertificates: basicPostFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await postIXN(actorCommonName, "/x509/csr", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await postIXN(actorCommonName, "/x509/csr", body, readOnly);
 };
 
 export const fetchNapcoreDeliveries: basicGetFunction = async (params: {
   actorCommonName: string;
+  readOnly: boolean;
   selector?: string;
 }) => {
-  const { actorCommonName, selector = "" } = params;
-  return await fetchIXN(actorCommonName, "/deliveries", selector);
+  const { actorCommonName, selector = "", readOnly} = params;
+  return await fetchIXN(actorCommonName, "/deliveries", readOnly, selector);
 };
 
 export const fetchNapcoreDeliveriesCapabilities: basicGetFunction = async (
   params
 ) => {
-  const { actorCommonName, selector = "" } = params;
-  return await fetchIXN(actorCommonName, "/deliveries/capabilities", selector);
+  const { actorCommonName, readOnly, selector = "" } = params;
+  return await fetchIXN(actorCommonName, "/deliveries/capabilities", readOnly, selector);
 };
 
 export const deleteNapcoreDeliveries: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, pathParam } = params;
-  return await deleteIXN(actorCommonName, `/deliveries/${pathParam}`);
+  const { actorCommonName, pathParam, readOnly } = params;
+  return await deleteIXN(actorCommonName, `/deliveries/${pathParam}`, readOnly);
 };
 
 export const addNapcoreDeliveries: basicPostFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await postIXN(actorCommonName, "/deliveries", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await postIXN(actorCommonName, "/deliveries", body, readOnly);
 };
 
 export const fetchNapcoreCapabilities: basicGetFunction = async (params) => {
-  const { actorCommonName, selector = "" } = params;
-  return await fetchIXN(actorCommonName, "/capabilities", selector);
+  const { actorCommonName, readOnly, selector = "" } = params;
+  return await fetchIXN(actorCommonName, "/capabilities", readOnly, selector);
 };
 
 export const fetchNapcorePublicationIds: basicGetFunction = async (params) => {
-  const { actorCommonName, selector = "" } = params;
+  const { actorCommonName, readOnly, selector = "" } = params;
   return await fetchIXN(actorCommonName,
     "/capabilities/publicationids",
+    readOnly,
     selector);
 };
 
 export const addNapcoreCapabilities: basicPostFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await postIXN(actorCommonName, "/capabilities", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await postIXN(actorCommonName, "/capabilities", body, readOnly);
 };
 
 export const deleteNapcoreCapabilities: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, pathParam } = params;
-  return await deleteIXN(actorCommonName, `/capabilities/${pathParam}`);
+  const { actorCommonName, pathParam, readOnly } = params;
+  return await deleteIXN(actorCommonName, `/capabilities/${pathParam}`, readOnly);
 };
 
 export const fetchNapcorePrivateChannels: extendedGetFunction = async (
   params
 ) => {
-  const { actorCommonName } = params;
-  return await fetchIXN(actorCommonName, `/privatechannels`);
+  const { actorCommonName, readOnly } = params;
+  return await fetchIXN(actorCommonName, `/privatechannels`, readOnly);
 };
 
 export const addNapcorePrivateChannels: basicPostFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await postIXN(actorCommonName, "/privatechannels", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await postIXN(actorCommonName, "/privatechannels", body, readOnly);
 };
 
 export const addNapcorePeerToExistingPrivateChannel: basicPatchFunction = async (params) => {
-  const { actorCommonName, pathParam, body = {} } = params;
-  return await patchIXN(actorCommonName, `/privatechannels/peer/${pathParam}`, body);
+  const { actorCommonName, pathParam, body = {}, readOnly } = params;
+  return await patchIXN(actorCommonName, `/privatechannels/peer/${pathParam}`, body, readOnly);
 };
 
 export const deleteNapcorePrivateChannels: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, pathParam } = params;
-  return await deleteIXN(actorCommonName, `/privatechannels/${pathParam}`);
+  const { actorCommonName, pathParam, readOnly } = params;
+  return await deleteIXN(actorCommonName, `/privatechannels/${pathParam}`, readOnly);
 };
 
 export const deleteNapcoreMyselfFromSubscribedPrivateChannel: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, pathParam } = params;
-  return await deleteIXN(actorCommonName, `/privatechannels/peer/${pathParam}`);
+  const { actorCommonName, pathParam, readOnly } = params;
+  return await deleteIXN(actorCommonName, `/privatechannels/peer/${pathParam}`, readOnly);
 };
 
 export const deleteNapcorePeerFromExistingPrivateChannel: basicDeleteFunction = async (
   params
 ) => {
-  const { actorCommonName, firstParam, secondParam } = params;
-  return await deleteIXN(actorCommonName, `/privatechannels/peer/${firstParam}/${secondParam}`);
+  const { actorCommonName, firstParam, secondParam, readOnly } = params;
+  return await deleteIXN(actorCommonName, `/privatechannels/peer/${firstParam}/${secondParam}`, readOnly);
 };
 
 export const fetchNapcorePrivateChannelsPeers: extendedGetFunction = async (
   params
 ) => {
-  const { actorCommonName } = params;
-  return await fetchIXN(actorCommonName, `/privatechannels/peer`);
+  const { actorCommonName, readOnly } = params;
+  return await fetchIXN(actorCommonName, `/privatechannels/peer`, readOnly);
 };
 
 export const fetchNapcoreAccessToBiQueue: extendedGetFunction = async (
   params
 ) => {
-  const { actorCommonName } = params;
-  return await fetchIXN(actorCommonName, `/biconsumer`);
+  const { actorCommonName, readOnly } = params;
+  return await fetchIXN(actorCommonName, `/biconsumer`, readOnly);
 };
 
-export const fetchNapcoreBiQueueEndpoints: extendedGetFunction = async () => {
-  return await fetchIXN("", "/biqueueendpoints");
+export const fetchNapcoreBiQueueEndpoints: extendedGetFunction = async (params) => {
+  const { readOnly } = params;
+  return await fetchIXN("", "/biqueueendpoints", readOnly);
 };
 
 export const addNapcoreAccessToBiQueue: basicPutFunction = async (params) => {
-  const { actorCommonName, body = {} } = params;
-  return await putIXN(actorCommonName, "/biconsumer", body);
+  const { actorCommonName, body = {}, readOnly } = params;
+  return await putIXN(actorCommonName, "/biconsumer", body, readOnly);
 };
