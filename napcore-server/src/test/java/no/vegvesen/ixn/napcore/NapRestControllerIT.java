@@ -27,12 +27,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -43,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -177,15 +180,27 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryWithValidSelectorGivesRequestedDelivery(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
-        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest, false);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
+    }
+
+    @Test
+    public void testAddingDeliveryWithValidSelectorAndReadOnlyUserMakesUnauthorizedRequest(){
+        String actorCommonName = "actor";
+        DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
+        assertThatThrownBy(() ->
+                napRestController.addDelivery(actorCommonName, deliveryRequest, true)
+        )
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403 FORBIDDEN \"Read-only users are not allowed to perform this action");
+
     }
 
     @Test
     public void testAddingDeliveryWithDlqAndValidSelectorGivesRequestedDelivery(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery", true);
-        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest, false);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.REQUESTED);
         assertThat(response.getDlqueue()).isEqualTo(true);
     }
@@ -194,14 +209,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryThatAlreadyExistsThrowsException(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", "NO delivery");
-        napRestController.addDelivery(actorCommonName, deliveryRequest);
-        assertThrows(AlreadyExistsException.class, () -> napRestController.addDelivery(actorCommonName, deliveryRequest));
+        napRestController.addDelivery(actorCommonName, deliveryRequest, false);
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addDelivery(actorCommonName, deliveryRequest, false));
     }
     @Test
     public void testAddingDeliveryWithInvalidSelectorGivesInvalidDelivery(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("1=1", "Invalid delivery");
-        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest);
+        Delivery response = napRestController.addDelivery(actorCommonName, deliveryRequest, false);
         assertThat(response.getStatus()).isEqualTo(DeliveryStatus.ILLEGAL);
     }
 
@@ -209,7 +224,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryWithoutDescription(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'");
-        napRestController.addDelivery(actorCommonName, deliveryRequest);
+        napRestController.addDelivery(actorCommonName, deliveryRequest, false);
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
     }
 
@@ -217,7 +232,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testAddingDeliveryWithoutDescriptionAndWithDlqueue(){
         String actorCommonName = "actor";
         DeliveryRequest deliveryRequest = new DeliveryRequest("originatingCountry='NO'", true);
-        napRestController.addDelivery(actorCommonName, deliveryRequest);
+        napRestController.addDelivery(actorCommonName, deliveryRequest, false);
         assertThat(napRestController.getDeliveries(actorCommonName)).hasSize(1);
         assertThat(napRestController.getDeliveries(actorCommonName).getFirst().getDlqueue()).isEqualTo(true);
     }
@@ -225,13 +240,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testAddingNullDeliveryThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, null));
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, null, false));
     }
 
     @Test
     public void testAddingNullSelectorInDeliveryThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest()));
+        assertThrows(DeliveryPostException.class, () -> napRestController.addDelivery(actorCommonName, new DeliveryRequest(), false));
     }
 
 
@@ -245,7 +260,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testGettingDelivery(){
         String actorCommonName = "actor";
         String selector = "originatingCountry='NO'";
-        Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector, "NO Delivery"));
+        Delivery response = napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector, "NO Delivery"), false);
         Delivery delivery = napRestController.getDelivery(actorCommonName, response.getId());
         assertThat(delivery).isNotNull();
         assertThat(delivery.getSelector()).isEqualTo(selector);
@@ -259,11 +274,11 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String selector3 = "originatingCountry='FI'";
         ServiceProvider sp = new ServiceProvider(actorCommonName);
         sp = serviceProviderRepository.save(sp);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1, "Delivery 1"));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector1, "Delivery 1"), false);
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2, "Delivery 2"));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector2, "Delivery 2"), false);
         TimeUnit.SECONDS.sleep(1);
-        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3, "Delivery 3"));
+        napRestController.addDelivery(actorCommonName, new DeliveryRequest(selector3, "Delivery 3"), false);
 
         List<Delivery> deliveries = napRestController.getDeliveries(actorCommonName);
         assertThat(deliveries.get(0).getSelector()).isEqualTo(selector3);
@@ -314,7 +329,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
     public void testDeletingDelivery(){
         String actorCommonName = "actor";
         DeliveryRequest request = new DeliveryRequest("originatingCountry='NO'", "Test delivery");
-        Delivery delivery = napRestController.addDelivery(actorCommonName, request);
+        Delivery delivery = napRestController.addDelivery(actorCommonName, request,false);
 
         napRestController.deleteDelivery(actorCommonName, delivery.getId());
         for(Delivery response : napRestController.getDeliveries(actorCommonName)){
@@ -489,21 +504,21 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String illegal14 = "s=";
 
         DeliveryRequest request = new DeliveryRequest("test");
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request));
-        napRestController.addDelivery(legal, request);
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal2, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal3, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal4, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal5, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal6, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal7, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal8, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal9, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal10, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal11, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal12, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal13, request));
-        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal14, request));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal1, request, false));
+        napRestController.addDelivery(legal, request, false);
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal2, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal3, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal4, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal5, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal6, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal7, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal8, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal9, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal10, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal11, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal12, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal13, request, false));
+        assertThrows(PathVariableException.class, () -> napRestController.addDelivery(illegal14, request, false));
     }
 
     @Test
