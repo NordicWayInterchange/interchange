@@ -77,6 +77,8 @@ public class NapRestController {
 
     private CertSigner certSigner;
 
+    private final ReadOnlyChecker readOnlyChecker;
+
     @Autowired
     public NapRestController(
             ServiceProviderRepository serviceProviderRepository,
@@ -86,7 +88,8 @@ public class NapRestController {
             NapCoreProperties napCoreProperties,
             CertSigner certSigner,
             CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer,
-            OutgoingMatchRepository outgoingMatchRepository) {
+            OutgoingMatchRepository outgoingMatchRepository,
+            ReadOnlyChecker readOnlyChecker) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.neighbourRepository = neighbourRepository;
         this.privateChannelRepository = privateChannelRepository;
@@ -95,6 +98,7 @@ public class NapRestController {
         this.certSigner = certSigner;
         this.capabilityToCapabilityApiTransformer = capabilityToCapabilityApiTransformer;
         this.outgoingMatchRepository = outgoingMatchRepository;
+        this.readOnlyChecker = readOnlyChecker;
     }
 
     @RequestMapping(method = RequestMethod.POST, path = {"/nap/{actorCommonName}/x509/csr"}, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -244,9 +248,12 @@ public class NapRestController {
     @Tag(name = "Deliveries")
     @Operation(summary = "Add delivery")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDDELIVERIESRESPONSE)))})
-    public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest){
+    public Delivery addDelivery(@PathVariable("actorCommonName") String actorCommonName, @RequestBody DeliveryRequest deliveryRequest,
+                                @RequestHeader(value = "X-NAP-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
+        readOnlyChecker.check(readOnly);
+
         logger.info("Delivery - Received POST From Service Provider {}", actorCommonName);
 
         if(Objects.isNull(deliveryRequest) || Objects.isNull(deliveryRequest.getSelector())){
