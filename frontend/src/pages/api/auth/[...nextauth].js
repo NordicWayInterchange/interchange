@@ -32,6 +32,8 @@ export const authOptions = {
         session.user.organization = String(token.organization);
       }
 
+      session.user.readOnly = Boolean(token.organization);
+
       return session;
     },
   },
