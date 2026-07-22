@@ -79,6 +79,9 @@ public class NapRestControllerTest {
     @Autowired
     private CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer;
 
+    @MockitoBean
+    private ReadOnlyChecker readOnlyChecker;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
