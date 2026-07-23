@@ -6,6 +6,8 @@ declare module "next-auth" {
       commonName: string;
       /* Present when the user belongs to an Organization in keycloak. The organization's bound ServiceProvider name. */
       organization?: string;
+      readOnly: boolean;
+      email?: string;
     } & DefaultSession["user"];
   }
 }
