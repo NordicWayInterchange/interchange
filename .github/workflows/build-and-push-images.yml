@@ -139,7 +139,7 @@ jobs:
           git add --all
           git commit --allow-empty -m "Updated generated files"
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-handbook.git --force
-          working-directory: ./
+        working-directory: ./
 
       - name: Persist to workspace
         uses: actions/upload-artifact@v7.0.0
