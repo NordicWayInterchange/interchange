@@ -484,7 +484,7 @@ export default async function handler(
       body,
       actorCommonName,
       selector,
-      readOnly: typedSession.user.readOnly,
+      readOnly: Boolean(typedSession.user.readOnly)
     });
 
     if (executer && "fn" in executer) {

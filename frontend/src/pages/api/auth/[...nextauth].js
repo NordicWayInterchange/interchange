@@ -28,11 +28,9 @@ export const authOptions = {
         ? escapeString(process.env.INTERCHANGE_PREFIX + token.organization.toLowerCase())
         : escapeString(process.env.INTERCHANGE_PREFIX + token.email);
 
-      if (token.organization) {
-        session.user.organization = String(token.organization);
-      }
+      session.user.organization = token.organization ? String(token.organization) : undefined;
 
-      session.user.readOnly = session.user.organization != null;
+      session.user.readOnly = token.organization != null;
 
       return session;
     },
