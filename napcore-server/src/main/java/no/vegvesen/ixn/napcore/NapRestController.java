@@ -379,11 +379,12 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Add capability")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.ADDCAPABILITYRESPONSE)))})
-    public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest){
+    public OnboardingCapability addCapability(@PathVariable("actorCommonName") String actorCommonName, @RequestBody CapabilitiesRequest capabilitiesRequest, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Capability - Received POST from Service Provider: {}", actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         if(Objects.isNull(capabilitiesRequest) || Objects.isNull(capabilitiesRequest.getApplication()) || Objects.isNull(capabilitiesRequest.getMetadata())){
             throw new CapabilityPostException("Bad api object for Capability Request, object can not be null");
         }
@@ -423,11 +424,12 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Get capabilities")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.LISTCAPABILITIESRESPONSE)))})
-    public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName){
+    public List<OnboardingCapability> getCapabilities(@PathVariable("actorCommonName") String actorCommonName, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("List capabilities for service provider {}", actorCommonName);
 
+        readOnlyChecker.check(readOnly);
 
         //NOTE this code has the N+1 problem, and really illustrates that Capabilities and Deliveries should be associated more closely.
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
@@ -446,11 +448,12 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Get capability")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETCAPABILITYRESPONSE)))})
-    public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+    public OnboardingCapability getCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Get capability {} for service provider {}", capabilityId, actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Capability capability = serviceProvider.getCreatedCapability(capabilityId);
         return typeTransformer.transformCapabilityToOnboardingCapability(capability, false);
@@ -460,11 +463,12 @@ public class NapRestController {
     @Tag(name = "Capabilities")
     @Operation(summary = "Get publicationIds")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = ExampleApiObjects.GETPUBLICATIONIDSRESPONSE)))})
-    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName){
+    public Set<String> getPublicationIds(@PathVariable("actorCommonName") String actorCommonName, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request for publicationIds from Service Provider: {}", actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         return allPublicationIds();
     }
 
@@ -472,11 +476,12 @@ public class NapRestController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @Tag(name = "Capabilities")
     @Operation(summary = "Delete capability")
-    public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId){
+    public void deleteCapability(@PathVariable("actorCommonName") String actorCommonName, @PathVariable("capabilityId") String capabilityId, @RequestHeader(value = "X-READ-ONLY", defaultValue = "false") boolean readOnly){
         validatePathVariable(actorCommonName);
         this.certService.checkIfCommonNameMatchesNapName(napCoreProperties.getNap());
         logger.info("Received request to delete capability {} from Service Provider: {}", capabilityId, actorCommonName);
 
+        readOnlyChecker.check(readOnly);
         ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(actorCommonName);
         serviceProviderToUpdate.getCapabilities().removeCapability(capabilityId);
         serviceProviderRepository.save(serviceProviderToUpdate);
