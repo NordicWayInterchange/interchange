@@ -32,7 +32,7 @@ export const authOptions = {
         session.user.organization = String(token.organization);
       }
 
-      session.user.readOnly = user.organization != null;
+      session.user.readOnly = session.user.organization != null;
 
       return session;
     },
