@@ -303,9 +303,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK12345","DK12345:publication-id-3","NO","1", List.of("1"), "type","name"),
                 new MetadataApi()
         );
-        napRestController.addCapability(actor1, request1);
-        napRestController.addCapability(actor1, request2);
-        napRestController.addCapability(actor2, request3);
+        napRestController.addCapability(actor1, request1, false);
+        napRestController.addCapability(actor1, request2, false);
+        napRestController.addCapability(actor2, request3, false);
 
         List<no.vegvesen.ixn.napcore.model.Capability> response1 = napRestController.getMatchingDeliveryCapabilities(actor1, selector, false);
         List<no.vegvesen.ixn.napcore.model.Capability> response2 = napRestController.getMatchingDeliveryCapabilities(actor1, "originatingCountry='SE'", false);
@@ -397,7 +397,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK12345", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        OnboardingCapability response = napRestController.addCapability(actorCommonName, capabilitiesRequest);
+        OnboardingCapability response = napRestController.addCapability(actorCommonName, capabilitiesRequest, false);
         assertThat(response).isNotNull();
     }
 
@@ -408,7 +408,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi(11, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
     }
 
     @Test
@@ -418,7 +418,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi(9, "test", RedirectStatusApi.OPTIONAL, 1, 1, 1)
         );
-        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
+        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest, false)).isNotNull();
     }
 
     @Test
@@ -428,7 +428,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1'22", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
     }
 
     @Test
@@ -438,7 +438,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:publicationId", "DK", "protocolVersion", List.of("124"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
     }
 
     @Test
@@ -448,7 +448,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("NO12345", "NO12345:1", "NO", null, List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
     }
 
     @Test
@@ -458,9 +458,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK12345", "DK12345:publicationId", "NO", "protocolversion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest)).isNotNull();
+        assertThat(napRestController.addCapability(actorCommonName, capabilitiesRequest, false)).isNotNull();
 
-        assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(AlreadyExistsException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
     }
 
     @Test
@@ -470,16 +470,16 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK1234X", "DK12345:publicationId", "NO", "protocolVersion", List.of("1"), "test", "test"),
                 new MetadataApi()
         );
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
         capabilitiesRequest.getApplication().setPublisherId("DK12345");
         capabilitiesRequest.getApplication().setOriginatingCountry("NOK");
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
         capabilitiesRequest.getApplication().setOriginatingCountry("NO");
         capabilitiesRequest.getApplication().setProtocolVersion("*!!!");
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
         capabilitiesRequest.getApplication().setProtocolVersion("protocolVersion");
         capabilitiesRequest.getApplication().setPublicationId("DK12345-publicationId");
-        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest));
+        assertThrows(CapabilityNotValidException.class, () -> napRestController.addCapability(actorCommonName, capabilitiesRequest, false));
 
     }
 
@@ -524,7 +524,7 @@ public class NapRestControllerIT extends PostgresContainerBase {
         String actorCommonName = "actor";
         CapabilitiesRequest request = null;
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request, false));
     }
 
     @Test
@@ -533,20 +533,20 @@ public class NapRestControllerIT extends PostgresContainerBase {
         CapabilitiesRequest request1 = new CapabilitiesRequest(new MapemApplicationApi(), null);
         CapabilitiesRequest request2 = new CapabilitiesRequest(null, new MetadataApi());
 
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request1));
-        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request2));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request1, false));
+        assertThrows(CapabilityPostException.class, () -> napRestController.addCapability(actorCommonName, request2, false));
     }
 
     @Test
     public void testGettingNonExistentCapabilityThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "1"));
+        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "1", false));
     }
 
     @Test
     public void testGettingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.getCapability(actorCommonName, "notAnId", false));
     }
 
     @Test
@@ -557,11 +557,11 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK12345", "DK12345:id", "NO", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
                 new MetadataApi()
         );
-        napRestController.addCapability(actor1, request);
+        napRestController.addCapability(actor1, request, false);
         request.getApplication().setPublicationId("DK12345:publi-Id-2");
-        napRestController.addCapability(actor1, request);
+        napRestController.addCapability(actor1, request, false);
         request.getApplication().setPublicationId("DK12345:publi-Id-3");
-        napRestController.addCapability(actor2, request);
+        napRestController.addCapability(actor2, request, false);
 
         ServiceProvider actor1Caps = serviceProviderRepository.findByName(actor1);
         for (Capability cap : actor1Caps.getCapabilities().getCapabilities()) {
@@ -575,8 +575,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
         }
         serviceProviderRepository.save(actor2Caps);
 
-        assertThat(napRestController.getCapabilities(actor1)).hasSize(2);
-        assertThat(napRestController.getCapabilities(actor2)).hasSize(1);
+        assertThat(napRestController.getCapabilities(actor1, false)).hasSize(2);
+        assertThat(napRestController.getCapabilities(actor2, false)).hasSize(1);
     }
 
     @Test
@@ -630,14 +630,14 @@ public class NapRestControllerIT extends PostgresContainerBase {
 
         String selector = "messageType = 'DENM' and quadTree like '%,1234%'";
 
-        assertThat(napRestController.getCapabilities(sp1Name)).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp1Name).getFirst().isHasDelivery()).isTrue();
-        assertThat(napRestController.getCapabilities(sp2Name)).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
+        assertThat(napRestController.getCapabilities(sp1Name, false)).hasSize(1);
+        assertThat(napRestController.getCapabilities(sp1Name, false).getFirst().isHasDelivery()).isTrue();
+        assertThat(napRestController.getCapabilities(sp2Name, false)).hasSize(1);
+        assertThat(napRestController.getCapabilities(sp2Name, false).getFirst().isHasDelivery()).isFalse();
 
         List<no.vegvesen.ixn.napcore.model.Capability> response = napRestController.getMatchingSubscriptionCapabilities(sp2Name, selector);
         assertThat(response).hasSize(1);
-        assertThat(napRestController.getCapabilities(sp2Name).getFirst().isHasDelivery()).isFalse();
+        assertThat(napRestController.getCapabilities(sp2Name, false).getFirst().isHasDelivery()).isFalse();
     }
 
     @Test
@@ -647,8 +647,8 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new DatexApplicationApi("DK12345", "DK12345:Id", "NO", "protocolVersion", List.of("1"), "publicationtype", "publisherName"),
                 new MetadataApi()
         );
-        OnboardingCapability response = napRestController.addCapability(actorCommonName, request);
-        napRestController.deleteCapability(actorCommonName, response.getId());
+        OnboardingCapability response = napRestController.addCapability(actorCommonName, request, false);
+        napRestController.deleteCapability(actorCommonName, response.getId(), false);
 
         for(Capability capability : serviceProviderRepository.findAll().stream().flatMap(a->a.getCapabilities().getCapabilities().stream()).collect(Collectors.toSet())){
             assertThat(capability.getStatus().equals(CapabilityStatus.TEAR_DOWN));
@@ -658,13 +658,13 @@ public class NapRestControllerIT extends PostgresContainerBase {
     @Test
     public void testDeletingNonExistentCapabilityThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "1"));
+        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "1", false));
     }
 
     @Test
     public void testDeletingCapabilityWithInvalidIdThrowsException(){
         String actorCommonName = "actor";
-        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId"));
+        assertThrows(NotFoundException.class, () -> napRestController.deleteCapability(actorCommonName, "notAnId", false));
     }
 
     @Test
