@@ -377,7 +377,7 @@ const findHandler: (params: any) =>
       }
     case "PUT":
       if (Object.keys(putPaths).includes(urlPath)) {
-        return { fn: putPaths[urlPath], params: { actorCommonName, body } };
+        return { fn: putPaths[urlPath], params: { actorCommonName, body, readOnly } };
       }
     case "PATCH": {
       const aliasMatch = path[0];
@@ -410,7 +410,7 @@ const findHandler: (params: any) =>
       if (Object.keys(deletePaths).includes(aliasMatch)) {
         return {
           fn: deletePaths[aliasMatch],
-          params: { actorCommonName, pathParam: idMatch },
+          params: { actorCommonName, pathParam: idMatch, readOnly },
         };
       }
     }
