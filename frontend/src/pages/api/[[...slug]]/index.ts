@@ -53,6 +53,7 @@ interface CustomSession extends Session {
   user: {
     commonName: string;
     email?: string;
+    readOnly: boolean;
   };
 }
 
@@ -345,6 +346,7 @@ const findHandler: (params: any) =>
     body = {},
     actorCommonName,
     selector = "",
+    readOnly
   } = params;
   const urlPath = path.join("/");
   switch (method) {
@@ -353,25 +355,25 @@ const findHandler: (params: any) =>
       if (path.length === 0 && possiblePaths.includes(actorCommonName)) {
         return {
           fn: getPaths[actorCommonName],
-          params: { selector }
+          params: { selector, readOnly }
         };
       }
 
       if (possiblePaths.includes(urlPath)) {
         return {
           fn: getPaths[urlPath],
-          params: { actorCommonName, selector },
+          params: { actorCommonName, selector, readOnly },
         };
       }
       if (path.length > 1 && possiblePaths.includes(path[0])) {
         return {
           fn: getPaths[path[0]],
-          params: { actorCommonName, pathParam: path[1] },
+          params: { actorCommonName, pathParam: path[1], readOnly },
         };
       }
     case "POST":
       if (Object.keys(postPaths).includes(urlPath)) {
-        return { fn: postPaths[urlPath], params: { actorCommonName, body } };
+        return { fn: postPaths[urlPath], params: { actorCommonName, body, readOnly } };
       }
     case "PUT":
       if (Object.keys(putPaths).includes(urlPath)) {
@@ -381,7 +383,7 @@ const findHandler: (params: any) =>
       const aliasMatch = path[0];
       const idMatch = path[1];
       if (aliasMatch === "privatechannels" && idMatch === "peer") {
-        return { fn: patchPaths["privatechannels/peer"], params: { actorCommonName, pathParam: path[2], body } };
+        return { fn: patchPaths["privatechannels/peer"], params: { actorCommonName, pathParam: path[2], body, readOnly } };
       } else {
         console.warn(`Path length ${path.length} does not match expected values for 'privatechannels/peer'`);
       }
@@ -394,12 +396,12 @@ const findHandler: (params: any) =>
         if (path.length === 3) {
           return {
             fn: deletePaths["privatechannels/peer/single"],
-            params: { actorCommonName, pathParam: path[2] },
+            params: { actorCommonName, pathParam: path[2], readOnly },
           };
         } else if (path.length === 4) {
           return {
             fn: deletePaths["privatechannels/peer/double"],
-            params: { actorCommonName, firstParam: path[2], secondParam: path[3] },
+            params: { actorCommonName, firstParam: path[2], secondParam: path[3], readOnly },
           };
         } else {
           console.warn(`Path length ${path.length} does not match expected values for 'privatechannels/peer'`);
@@ -482,6 +484,7 @@ export default async function handler(
       body,
       actorCommonName,
       selector,
+      readOnly: typedSession.user.readOnly,
     });
 
     if (executer && "fn" in executer) {
