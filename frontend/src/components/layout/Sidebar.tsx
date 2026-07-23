@@ -25,43 +25,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import LockIcon from '@mui/icons-material/Lock';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import Version from "@/components/shared/Version";
-
-const MAIN_PAGES: Array<IPages> = [
-  {
-    text: "Home",
-    url: "/",
-    icon: <HouseIcon /> },
-  {
-    text: "Subscriptions",
-    url: "/subscriptions",
-    icon: <SubscriptionsIcon /> },
-  {
-    text: "Network capabilities",
-    url: "/network-capabilities",
-    icon: <CellTowerIcon />,
-  },
-  {
-    text: "My capabilities",
-    url: "/capabilities",
-    icon: <PersonIcon />,
-  },
-  {
-    text: "Deliveries",
-    url: "/deliveries",
-    icon: <LocalPostOfficeIcon />,
-  },
-  {
-    text: "Private channels",
-    url: "/private-channels",
-    icon: <LockIcon />,
-  },
-  {
-    text: "Bi-queues",
-    url: "/bi-queues",
-    icon: <TableRowsIcon />,
-  },
-
-];
+import {useSession} from "next-auth/react";
 
 const SECONDARY_PAGES: Array<IPages> = [
   {
@@ -79,7 +43,69 @@ const SECONDARY_PAGES: Array<IPages> = [
 export default function Sidebar() {
   const router = useRouter();
 
-  const mapPages = (pages: Array<IPages>) => {
+  const { data: session } = useSession();
+
+  let MAIN_PAGES;
+
+  if (session?.user.organization) {
+    MAIN_PAGES = [{
+      text: "Home",
+      url: "/",
+      icon: <HouseIcon/>
+    },
+      {
+        text: "Subscriptions",
+        url: "/subscriptions",
+        icon: <SubscriptionsIcon/>
+      },
+      {
+        text: "Network capabilities",
+        url: "/network-capabilities",
+        icon: <CellTowerIcon/>,
+      },
+      {
+        text: "Bi-queues",
+        url: "/bi-queues",
+        icon: <TableRowsIcon/>,
+      }]
+  } else {
+    MAIN_PAGES = [{
+      text: "Home",
+      url: "/",
+      icon: <HouseIcon/>
+    },
+      {
+        text: "Subscriptions",
+        url: "/subscriptions",
+        icon: <SubscriptionsIcon/>
+      },
+      {
+        text: "Network capabilities",
+        url: "/network-capabilities",
+        icon: <CellTowerIcon/>,
+      },
+      {
+        text: "My capabilities",
+        url: "/capabilities",
+        icon: <PersonIcon/>,
+      },
+      {
+        text: "Deliveries",
+        url: "/deliveries",
+        icon: <LocalPostOfficeIcon/>,
+      },
+      {
+        text: "Private channels",
+        url: "/private-channels",
+        icon: <LockIcon/>,
+      },
+      {
+        text: "Bi-queues",
+        url: "/bi-queues",
+        icon: <TableRowsIcon/>,
+      }]
+  }
+    const mapPages = (pages: Array<IPages>) => {
     return pages.map((page: IPages, key: number) => (
       <Link
         href={page.url}
