@@ -103,7 +103,6 @@ public class ImportTransformer {
 
     public Metadata transformMetadataImportApiToMetadata(MetadataImportApi metadata) {
         return new Metadata(metadata.getInfoUrl(),
-                metadata.getShardCount(),
                 transformRedirectStatusImportApiToRedirectStatus(metadata.getRedirectPolicy()),
                 metadata.getMaxBandwidth(),
                 metadata.getMaxMessageRate(),

@@ -111,7 +111,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                         Set.of(
                                 new NeighbourCapability(
                                         new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"), "situationPublication", "bouvet"),
-                                        new Metadata("https://www.bouvet.no", 1, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                        new Metadata("https://www.bouvet.no", RedirectStatus.OPTIONAL, 0, 0, 5)
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
@@ -191,7 +191,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
                                 new NeighbourCapability(
                                         new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
                                                 "situationPublication", "bouvet"),
-                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                        new Metadata("https://www.bouvet.no", RedirectStatus.OPTIONAL, 0, 0, 5)
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(
@@ -212,7 +212,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         DenmApplication app = new DenmApplication("publisher-1", "publisher-1-0123", "NO", "DENM:1.1.0", List.of("123"), List.of(1));
 
-        Metadata meta =  new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0);
+        Metadata meta =  new Metadata("info.com", RedirectStatus.OPTIONAL, 0, 0, 0);
 
         Capability cap = new Capability(app, meta);
 
@@ -236,12 +236,12 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         Capability aCap1 = new Capability(
                 new DatexApplication("DK12345","DK12345:publication-id","FI","1", List.of("1"), "type","name"),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+                new Metadata("info.com", RedirectStatus.OPTIONAL, 0, 0, 0)
         );
 
         Capability aCap2 = new Capability(
                 new DenmApplication("publisher-1", "publisher-1-0123", "DK", "DENM:1.1.0", List.of("123"), List.of(1)),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+                new Metadata("info.com", RedirectStatus.OPTIONAL, 0, 0, 0)
         );
 
 
@@ -325,7 +325,7 @@ public class AdminRestControllerIT extends PostgresContainerBase {
 
         Capability aCap1 = new Capability(
                 new DatexApplication("DK12345","DK12345","FI","1", List.of("1"), "type","name"),
-                new Metadata("info.com", 1, RedirectStatus.OPTIONAL, 0, 0, 0)
+                new Metadata("info.com", RedirectStatus.OPTIONAL, 0, 0, 0)
         );
 
         LocalDelivery aDelivery = new LocalDelivery();

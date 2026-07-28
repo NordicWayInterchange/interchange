@@ -27,7 +27,7 @@ public class CapabilitiesTransformerTest {
 
         Capability cap = caps.getCapabilities().stream().findFirst().get();
 
-        assertThat(cap.getMetadata().getShardCount()).isEqualTo(1);
+        assertThat(cap.getShardCount()).isEqualTo(1);
     }
 
     @Test
@@ -42,6 +42,6 @@ public class CapabilitiesTransformerTest {
 
         Capability cap = caps.getCapabilities().stream().findFirst().get();
 
-        assertThat(cap.getMetadata().getShardCount()).isEqualTo(3);
+        assertThat(cap.getShardCount()).isEqualTo(3);
     }
 }

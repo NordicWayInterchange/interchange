@@ -9,6 +9,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.QpidClient;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.selector.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import org.junit.jupiter.api.Disabled;
@@ -219,16 +220,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreAutomaticallyAddedToQpidAfterRestart() {
+        DenmApplication denmApplication1 = new DenmApplication("NO12345", "pub-1", "NO", "1.2.2", List.of("0123"), List.of(5));
+        Metadata metadata1 = new Metadata(RedirectStatus.OPTIONAL);
         Capability capability = new Capability(
-                new DenmApplication(
-                        "NO12345",
-                        "pub-1",
-                        "NO",
-                        "1.2.2",
-                        List.of("0123"),
-                        List.of(5)
-                ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                denmApplication1,
+                metadata1,
+                List.of(new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(denmApplication1, metadata1), null)))
         );
 
         ServiceProvider serviceProvider = new ServiceProvider(
@@ -246,16 +243,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
 
     @Test
     public void testCapabilityExchangesAreNotAutomaticallyAddedToQpidAfterRestartWhenStatusIsTearDown() {
+        DenmApplication denmApplication2 = new DenmApplication("NO12345", "pub-1", "NO", "1.2.2", List.of("0123"), List.of(5));
+        Metadata metadata2 = new Metadata(RedirectStatus.OPTIONAL);
         Capability capability = new Capability(
-                new DenmApplication(
-                        "NO12345",
-                        "pub-1",
-                        "NO",
-                        "1.2.2",
-                        List.of("0123"),
-                        List.of(5)
-                ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                denmApplication2,
+                metadata2,
+                List.of(new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(denmApplication2, metadata2), null)))
         );
         capability.setStatus(CapabilityStatus.TEAR_DOWN);
 
@@ -274,16 +267,12 @@ public class SPRouterQpidRestartIT extends QpidDockerBaseIT {
     @Test
     @Disabled
     public void testConnectionBetweenLocalSubscriptionAndCapabilityIsAutomaticallyAddedAfterRestart() {
+        DenmApplication denmApplication3 = new DenmApplication("NO12345", "pub-1", "NO", "1.2.2", List.of("0123"), List.of(5));
+        Metadata metadata3 = new Metadata(RedirectStatus.OPTIONAL);
         Capability capability = new Capability(
-                new DenmApplication(
-                        "NO12345",
-                        "pub-1",
-                        "NO",
-                        "1.2.2",
-                        List.of("0123"),
-                        List.of(5)
-                ),
-                new Metadata(RedirectStatus.OPTIONAL)
+                denmApplication3,
+                metadata3,
+                List.of(new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(denmApplication3, metadata3), null)))
         );
 
         ServiceProvider serviceProvider1 = new ServiceProvider(

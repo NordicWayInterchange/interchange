@@ -21,10 +21,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -264,36 +262,15 @@ public class ServiceProviderRouter {
     public ServiceProvider setUpCapabilityExchanges(ServiceProvider serviceProvider, QpidDelta delta) {
         Set<Capability> requestedCaps = serviceProvider.getCapabilities().getCapabilitiesByStatusIsNot(CapabilityStatus.TEAR_DOWN);
         for (Capability capability : requestedCaps) {
-            if (!capability.hasShards()) {
-                List<CapabilityShard> newShards = new ArrayList<>();
-                int numberOfShards = capability.getMetadata().getShardCount();
-                for (int i = 0; i < numberOfShards; i++) {
-                    String exchangeName = "cap-" + UUID.randomUUID();
-                    Exchange exchange = qpidClient.createHeadersExchange(exchangeName);
-                    logger.info("Created exchange {} for Capability with id {}", exchangeName, capability.getId());
+            for (CapabilityShard shard : capability.getShards()) {
+                Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
+                if (exchange == null) {
+                    exchange = qpidClient.createHeadersExchange(shard.getExchangeName());
+                    logger.info("Created exchange {} for Capability with id {}", shard.getExchangeName(), capability.getId());
                     delta.addExchange(exchange);
-
-                    String capabilitySelector;
-                    if (capability.isSharded()) {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, i+1);
-                    } else {
-                        capabilitySelector = MessageValidatingSelectorCreator.makeSelector(capability, null);
-                    }
-                    CapabilityShard newShard = new CapabilityShard(i + 1, exchangeName, capabilitySelector);
-                    newShards.add(newShard);
                 }
-                capability.setShards(newShards);
-                capability.setStatus(CapabilityStatus.CREATED);
-            } else {
-                for (CapabilityShard shard : capability.getShards()) {
-                    Exchange exchange = delta.findByExchangeName(shard.getExchangeName());
-                    if (exchange == null) {
-                        exchange = qpidClient.createHeadersExchange(shard.getExchangeName());
-                        delta.addExchange(exchange);
-                    }
-                }
-                capability.setStatus(CapabilityStatus.CREATED);
             }
+            capability.setStatus(CapabilityStatus.CREATED);
         }
         return repository.save(serviceProvider);
     }

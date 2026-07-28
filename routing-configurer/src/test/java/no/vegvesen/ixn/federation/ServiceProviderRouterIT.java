@@ -12,6 +12,7 @@ import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.*;
 import no.vegvesen.ixn.federation.routing.ServiceProviderRouter;
+import no.vegvesen.ixn.federation.selector.MessageValidatingSelectorCreator;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -491,22 +492,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void serviceProviderShouldBeRemovedWhenCapabilitiesAreRemoved() {
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(
-						new Capability(
-								new DatexApplication("NO-123",
-										"NO-pub",
-										"NO",
-										"1.0",
-										List.of(),
-										"SituationPublication",
-										"publisherName"
-								),
-								new Metadata(
-										RedirectStatus.OPTIONAL
-								)
-						)
-				)
-		);
+				Collections.singleton(new Capability(new DatexApplication("NO-123", "NO-pub","NO", "1.0", List.of(), "SituationPublication", "publisherName"), new Metadata(RedirectStatus.OPTIONAL))));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		serviceProviderRepository.save(serviceProvider);
@@ -523,21 +509,20 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	@Test
 	public void shardedCapabilityGetsEqualNumberOfShardsAsShardCount() {
 
+		DatexApplication application = new DatexApplication("NO-123", "NO-pub","NO", "1.0", Collections.emptyList(), "SituationPublication", "publisherName");
+		Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
 		Capability cap = new Capability(
-				new DatexApplication("NO-123",
-						"NO-pub",
-						"NO",
-						"1.0",
-						List.of(),
-						"SituationPublication",
-						"publisherName"),
-				new Metadata(RedirectStatus.OPTIONAL)
+				application,
+				metadata,
+				List.of(
+					new CapabilityShard(1, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 1)),
+					new CapabilityShard(2, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 2)),
+					new CapabilityShard(3, "cap-" + UUID.randomUUID(), MessageValidatingSelectorCreator.makeSelector(new Capability(application, metadata), 3))
+				)
 		);
-		cap.getMetadata().setShardCount(3);
 
 		Capabilities capabilities = new Capabilities(
-				Collections.singleton(cap)
-		);
+				Collections.singleton(cap));
 		ServiceProvider serviceProvider = new ServiceProvider("serviceProvider",capabilities);
 
 		router.setUpCapabilityExchanges(serviceProvider, client.getQpidDelta());
@@ -1074,18 +1059,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 												"1.0",
 												List.of("1234"),
 												"type",
-												"publisher"
-										),
-										new Metadata(
-												"https://mysite.com",
-												1,
-												RedirectStatus.OPTIONAL,
-												0,
-												0,
-												0
-										),
-										List.of(
-												new CapabilityShard(
+									"publisher"
+									),
+									new Metadata(
+											"https://mysite.com",
+											RedirectStatus.OPTIONAL,
+											0,
+											0,
+											0
+									),
+									List.of(
+											new CapabilityShard(
 														1,
 														"this-exchange-does-not-exist-shard-1",
 														"publicationId = 'NO12345:001' and shardId = 1"
@@ -1125,18 +1109,17 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 													"NO",
 													"1.0",
 													List.of("1234"),
-													"type",
-													"publisher"
-											),
-											new Metadata(
-													"https://mysite.com",
-													1,
-													RedirectStatus.OPTIONAL,
-													0,
-													0,
-													0
-											),
-											List.of(
+												"type",
+												"publisher"
+										),
+										new Metadata(
+												"https://mysite.com",
+												RedirectStatus.OPTIONAL,
+												0,
+												0,
+												0
+										),
+										List.of(
 													new CapabilityShard(
 															1,
 															exchangeName,

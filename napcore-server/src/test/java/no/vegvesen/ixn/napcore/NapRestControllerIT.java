@@ -947,9 +947,9 @@ public class NapRestControllerIT extends PostgresContainerBase {
                 new NeighbourCapabilities(CapabilitiesStatus.KNOWN,
                         Set.of(
                                 new NeighbourCapability(
-                                        new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
-                                                "situationPublication", "bouvet"),
-                                        new Metadata("https://www.bouvet.no", 2, RedirectStatus.OPTIONAL, 0, 0, 5)
+                                         new DatexApplication("NO12345", "NO12345:dk21o2", "NO", "DATEX2:1.2", List.of("1"),
+                                                 "situationPublication", "bouvet"),
+                                         new Metadata("https://www.bouvet.no", RedirectStatus.OPTIONAL, 0, 0, 5)
                                 )
                         )),
                 new NeighbourSubscriptionRequest(Set.of(

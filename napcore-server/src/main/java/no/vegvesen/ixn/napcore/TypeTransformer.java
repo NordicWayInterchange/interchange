@@ -32,7 +32,7 @@ public class TypeTransformer {
         return new OnboardingCapability(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
+                capability.getMetadata().toApi(capability.getShardCount()),
                 hasDelivery,
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
     }
@@ -149,14 +149,14 @@ public class TypeTransformer {
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
+                    capability.getMetadata().toApi(capability.getShardCount()),
                     transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     neighbourCapability.getApplication().toApi(),
-                    neighbourCapability.getMetadata().toApi(),
+                    neighbourCapability.getMetadata().toApi(neighbourCapability.getShardCount()),
                     transformLocalDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
             ));
         }

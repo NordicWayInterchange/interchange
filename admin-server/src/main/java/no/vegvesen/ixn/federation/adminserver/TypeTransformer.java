@@ -84,13 +84,13 @@ public class TypeTransformer {
         for (Capability capability : capabilities) {
             matchingCapabilities.add(new MatchingCapabilityApi(
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi()
+                    capability.getMetadata().toApi(capability.getShardCount())
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
             matchingCapabilities.add(new MatchingCapabilityApi(
                     neighbourCapability.getApplication().toApi(),
-                    neighbourCapability.getMetadata().toApi()
+                    neighbourCapability.getMetadata().toApi(neighbourCapability.getShardCount())
             ));
         }
         return matchingCapabilities;
@@ -238,7 +238,7 @@ public class TypeTransformer {
             capabilityApiList.add(new CapabilityApi(
                     capability.getUuid(),
                     capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
+                    capability.getMetadata().toApi(capability.getShardCount()),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
                     capabilityStatusToCapabilityStatusApi(capability.getStatus()),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
@@ -426,7 +426,7 @@ public class TypeTransformer {
         return new NeighbourCapabilityApi(
                 neighbourCapability.getId(),
                 neighbourCapability.getApplication().toApi(),
-                neighbourCapability.getMetadata().toApi(),
+                neighbourCapability.getMetadata().toApi(neighbourCapability.getShardCount()),
                 localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
         );
     }
@@ -440,7 +440,7 @@ public class TypeTransformer {
         return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
+                capability.getMetadata().toApi(capability.getShardCount()),
                 capabilityShardSetToCapabilityShardIdSetApi(capability.getShards()),
                 localDateTimeToTimestamp(capability.getCreatedTimestamp())
         );

@@ -21,6 +21,8 @@ public class NeighbourCapability {
     @JoinColumn(name = "meta", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_neigh_cap_meta"))
     private Metadata metadata;
 
+    private int shardCount;
+
     private LocalDateTime createdTimestamp;
 
     public NeighbourCapability() {
@@ -30,6 +32,14 @@ public class NeighbourCapability {
     public NeighbourCapability(Application application, Metadata metadata) {
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = 1;
+        this.createdTimestamp = LocalDateTime.now();
+    }
+
+    public NeighbourCapability(Application application, Metadata metadata, int shardCount) {
+        this.application = application;
+        this.metadata = metadata;
+        this.shardCount = shardCount;
         this.createdTimestamp = LocalDateTime.now();
     }
 
@@ -37,6 +47,15 @@ public class NeighbourCapability {
         this.id = id;
         this.application = application;
         this.metadata = metadata;
+        this.shardCount = 1;
+        this.createdTimestamp = LocalDateTime.now();
+    }
+
+    public NeighbourCapability(Integer id, Application application, Metadata metadata, int shardCount) {
+        this.id = id;
+        this.application = application;
+        this.metadata = metadata;
+        this.shardCount = shardCount;
         this.createdTimestamp = LocalDateTime.now();
     }
 
@@ -64,6 +83,14 @@ public class NeighbourCapability {
         this.metadata = metadata;
     }
 
+    public int getShardCount() {
+        return shardCount;
+    }
+
+    public void setShardCount(int shardCount) {
+        this.shardCount = shardCount;
+    }
+
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }
@@ -73,7 +100,7 @@ public class NeighbourCapability {
     }
 
     public boolean isSharded() {
-        return metadata.getShardCount() > 1;
+        return getShardCount() > 1;
     }
 
     @Override
@@ -94,6 +121,7 @@ public class NeighbourCapability {
                 "id=" + id +
                 ", application=" + application +
                 ", metadata=" + metadata +
+                ", shardCount=" + shardCount +
                 '}';
     }
 }

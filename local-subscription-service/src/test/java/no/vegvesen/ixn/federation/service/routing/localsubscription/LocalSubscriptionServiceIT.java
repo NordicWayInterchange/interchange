@@ -228,7 +228,6 @@ public class LocalSubscriptionServiceIT {
         client.createQueue("endpoint-2");
 
         Metadata metadata = new Metadata(RedirectStatus.OPTIONAL);
-        metadata.setShardCount(3);
 
         CapabilityShard shard1 = new CapabilityShard(1, "cap-ex9", "publicationId = 'pub-1'");
         client.createHeadersExchange("cap-ex9");
