@@ -136,7 +136,8 @@ const UserCapabilitiesCreator = () => {
 
   const validateUniquePublicationId = (value: string) => {
     if (value && findPublicationIds(value)) {
-      setDuplicatePublicationIdError("Publisher ID and publication ID combination must be unique, please try another one.");
+      setDuplicatePublicationIdError("The combination of Publisher ID and publication ID must be unique. " +
+          "This combination already exists. Please try another one.");
       return true;
     } else {
       setDuplicatePublicationIdError("");

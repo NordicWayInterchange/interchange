@@ -91,7 +91,13 @@ export default function NetworkCapabilities() {
     handleMore(params.row);
   };
 
-  const rows = Array.isArray(data) ? data : [];
+  const rows = Array.isArray(data)
+      ? data.map((row, index) => ({
+        ...row,
+        uniqueId: `${row.publicationId}-${index}`,
+      }))
+      : [];
+
 
   const filteredCapabilitiesRows = searchId.trim()
     ? rows.filter((row) =>
@@ -114,7 +120,7 @@ export default function NetworkCapabilities() {
         rows={filteredCapabilitiesRows || []}
         onRowClick={handleOnRowClick}
         loading={isLoading}
-        getRowId={(row) => row.publicationId}
+        getRowId={(row) => row.uniqueId}
         sort={{ field: "lastUpdatedTimestamp", sort: "desc" }}
         slots={{
           noRowsOverlay: CustomEmptyOverlayCapabilites,
