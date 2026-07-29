@@ -71,8 +71,7 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                             <ListItemText
                                                 primary={
                                                     <Typography variant="body2">
-                                                        Backoff start: <Typography component="span"
-                                                                                   fontWeight="bold"> {controlConnection.backoffStart ? timeConverter(controlConnection.backoffStart) : ''} </Typography>
+                                                        Backoff start: <Typography sx={{component:'span', fontWeight:'bold'}}> {controlConnection.backoffStart ? timeConverter(controlConnection.backoffStart) : ''} </Typography>
                                                     </Typography>
                                                 }
                                             />
@@ -82,8 +81,7 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                         <ListItemText
                                             primary={
                                                 <Typography variant="body2">
-                                                    Backoff attempts: <Typography component="span"
-                                                                                  fontWeight="bold"> {controlConnection.backoffAttempts} </Typography>
+                                                    Backoff attempts: <Typography sx={{component:'span', fontWeight:'bold'}}> {controlConnection.backoffAttempts} </Typography>
                                                 </Typography>
                                             }
                                         />
@@ -92,8 +90,7 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                             <ListItemText
                                                 primary={
                                                     <Typography variant="body2">
-                                                        Unreachable time: <Typography component="span"
-                                                                                      fontWeight="bold"> {controlConnection.unreachableTime ? timeConverter(controlConnection.unreachableTime) : ''} </Typography>
+                                                        Unreachable time: <Typography sx={{component:'span', fontWeight:'bold'}}> {controlConnection.unreachableTime ? timeConverter(controlConnection.unreachableTime) : ''} </Typography>
                                                     </Typography>
                                                 }
                                             />
@@ -104,8 +101,7 @@ const ControlConnectionDrawer = ({open, handleMoreClose, controlConnection}: Pro
                                                 primary={
                                                     <Typography variant="body2">
                                                         Last failed Connection
-                                                        attempt: <Typography component="span"
-                                                                             fontWeight="bold"> {controlConnection.lastFailedConnectionAttempt ? timeConverter(controlConnection.lastFailedConnectionAttempt) : ''}
+                                                        attempt: <Typography sx={{component:'span', fontWeight:'bold'}}> {controlConnection.lastFailedConnectionAttempt ? timeConverter(controlConnection.lastFailedConnectionAttempt) : ''}
                                                     </Typography>
                                                     </Typography>
                                                 }

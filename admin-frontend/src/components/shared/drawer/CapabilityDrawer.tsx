@@ -192,7 +192,15 @@ const CapabilityDrawer = ({capabilities, open, handleMoreClose}: Props) => {
                                         <FormControl margin="normal">
                                             <InputLabel>Cause codes</InputLabel>
                                             <Select
-                                                MenuProps={{PaperProps: {sx: {maxHeight: 200}}}}
+                                                MenuProps={{
+                                                    slotProps: {
+                                                        paper: {
+                                                            sx: {
+                                                                maxHeight: 200,
+                                                            },
+                                                        },
+                                                    },
+                                                }}
                                                 label="Cause codes"
                                                 multiple
                                                 defaultValue={causeCode?.map(
