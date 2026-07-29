@@ -58,7 +58,7 @@ services:
     ports:
       - 32665:8899
     volumes:
-      - "single-node-systemtest-admin-keys-admin-volume:/keys"
+      - "single-node-systemtest-keys-volume:/keys"
     environment:
       - BASE_URL=https://a.bouvetinterchange.eu
       - BROKER_EXTERNAL_NAME=a.qpid.bouvetinterchange.eu
@@ -84,7 +84,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - "single-node-systemtest-admin-keys-admin-volume:/app/keys"
+      - "single-node-systemtest-keys-volume:/app/keys"
     environment:
       - PFX_KEY_FILENAME=/keys/nap.a.internal.interchangedomain.com.p12
       - PFX_PASSPHRASE=password
