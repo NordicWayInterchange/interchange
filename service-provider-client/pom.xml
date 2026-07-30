@@ -137,9 +137,6 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
-                            <!--
-                            <sourceHighlighter>coderay</sourceHighlighter>
-                            -->
                             <backend>html5</backend>
                         </configuration>
                     </execution>
