@@ -37,14 +37,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-<!--
-        <dependency>
-            <groupId>net.nordicway.interchange</groupId>
-            <artifactId>interchange-spring-security-client</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
--->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
