@@ -2,7 +2,7 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.*;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -32,6 +32,7 @@ public class NeigbourDiscoveryService {
     private final InterchangeNodeProperties interchangeNodeProperties;
     private final GracefulBackoffProperties backoffProperties;
     private final NeighbourDiscovererProperties discovererProperties;
+    private final NeighbourRESTFacade neighbourFacade;
 
 
     @Autowired
@@ -40,13 +41,15 @@ public class NeigbourDiscoveryService {
                                     ListenerEndpointRepository listenerEndpointRepository,
                                     InterchangeNodeProperties interchangeNodeProperties,
                                     GracefulBackoffProperties backoffProperties,
-                                    NeighbourDiscovererProperties discovererProperties) {
+                                    NeighbourDiscovererProperties discovererProperties,
+                                    NeighbourRESTFacade neighbourFacade) {
         this.dnsFacade = dnsFacade;
         this.neighbourRepository = neighbourRepository;
         this.listenerEndpointRepository = listenerEndpointRepository;
         this.interchangeNodeProperties = interchangeNodeProperties;
         this.backoffProperties = backoffProperties;
         this.discovererProperties = discovererProperties;
+        this.neighbourFacade = neighbourFacade;
     }
     public void checkForNewNeighbours() {
         logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
@@ -67,7 +70,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void capabilityExchangeWithNeighbours(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    public void capabilityExchangeWithNeighbours(Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         List<Neighbour> neighboursForCapabilityExchange = neighbourRepository.findByIgnoreIsAndCapabilities_StatusIn(
                 false,
                 CapabilitiesStatus.UNKNOWN,
@@ -76,7 +79,7 @@ public class NeigbourDiscoveryService {
         capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourRESTFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
@@ -98,7 +101,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void retryUnreachable(NeighbourFacade neighbourFacade, Set<Capability> localCapabilities) {
+    public void retryUnreachable(Set<Capability> localCapabilities) {
         List<Neighbour> unreachableNeighbours = neighbourRepository.findByControlConnection_ConnectionStatusAndIgnoreIs(ConnectionStatus.UNREACHABLE, false);
         if (!unreachableNeighbours.isEmpty()) {
             logger.debug("Retrying connection to unreachable neighbours {}", unreachableNeighbours.stream().map(Neighbour::getName).collect(Collectors.toList()));
@@ -116,7 +119,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Neighbour neighbour, NeighbourFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
+    private void postCapabilities(Neighbour neighbour, NeighbourRESTFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
         try {
             Set<NeighbourCapability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
@@ -135,7 +138,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
+    public void evaluateAndPostSubscriptionRequest(List<Neighbour> neighboursForSubscriptionRequest, Optional<LocalDateTime> lastUpdatedLocalSubscriptions, Set<LocalSubscription> localSubscriptions) {
 
         for (Neighbour neighbour : neighboursForSubscriptionRequest) {
             if(neighbour.isIgnore()){
@@ -171,7 +174,7 @@ public class NeigbourDiscoveryService {
     //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
                 //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
                 //So, this is really a n-to-1 relationship.
-    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourFacade neighbourFacade) {
+    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourRESTFacade neighbourFacade) {
         String neighbourName = neighbour.getName();
         Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
@@ -215,7 +218,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptions(NeighbourFacade neighbourFacade) {
+    public void pollSubscriptions() {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 false,
                 SubscriptionStatus.REQUESTED,
@@ -236,7 +239,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsWithStatusCreated(NeighbourFacade neighbourFacade) {
+    public void pollSubscriptionsWithStatusCreated() {
         List<Neighbour> neighboursToPoll = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(
                 false,
                 SubscriptionStatus.CREATED);
@@ -255,7 +258,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
+    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, NeighbourRESTFacade neighbourFacade) {
         try {
             Set<Subscription> subscriptionsForPolling = neighbour.getSubscriptionsForPolling();
             for (Subscription subscription : subscriptionsForPolling) {
@@ -303,7 +306,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourFacade neighbourFacade) {
+    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourRESTFacade neighbourFacade) {
         try {
             Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
             for (Subscription subscription : createdSubscriptions) {

@@ -44,11 +44,9 @@ public class NeighbourDiscoverer {
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 
 	private final NeighbourService neighbourService;
-	private final NeighbourRESTFacade neighbourFacade;
 	private final ServiceProviderService serviceProviderService;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
-	private final InterchangeNodeProperties interchangeNodeProperties;
-	private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
+    private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 	private final OutgoingMatchRepository outgoingMatchRepository;
 
 
@@ -61,11 +59,9 @@ public class NeighbourDiscoverer {
 						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
 						OutgoingMatchRepository outgoingMatchRepository) {
 		this.neighbourService = neighbourService;
-		this.neighbourFacade = neighbourFacade;
 		this.serviceProviderService = serviceProviderService;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
-		this.interchangeNodeProperties = interchangeNodeProperties;
-		this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
+        this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
 		this.outgoingMatchRepository = outgoingMatchRepository;
 		NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), null);
 	}
@@ -84,7 +80,7 @@ public class NeighbourDiscoverer {
 				.map(OutgoingMatch::getCapability)
 				.collect(Collectors.toSet());
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = CapabilityCalculator.calculateLastUpdatedCapabilitiesOptional(serviceProviders);
-		neigbourDiscoveryService.capabilityExchangeWithNeighbours(neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchangeWithNeighbours(localCapabilities, lastUpdatedLocalCapabilities);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.unreachable-retry-interval}")
@@ -92,7 +88,7 @@ public class NeighbourDiscoverer {
 		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
 				.map(OutgoingMatch::getCapability)
 				.collect(Collectors.toSet());
-		neigbourDiscoveryService.retryUnreachable(neighbourFacade, localCapabilities);
+		neigbourDiscoveryService.retryUnreachable(localCapabilities);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
@@ -103,7 +99,7 @@ public class NeighbourDiscoverer {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions);
 	}
 
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
@@ -112,17 +108,17 @@ public class NeighbourDiscoverer {
 		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions);
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void schedulePollSubscriptions() {
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-poll-update-interval}", initialDelayString = "${discoverer.subscription-poll-initial-delay}")
 	public void schedulePollSubscriptionsWithStatusCreated() {
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
@@ -132,7 +128,7 @@ public class NeighbourDiscoverer {
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
-		neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
+		neighbourSubscriptionDeleteService.deleteSubscriptions();
 	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
