@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.service;
 
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionPollException;
 import no.vegvesen.ixn.federation.model.SubscriptionStatus;
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
 import no.vegvesen.ixn.federation.model.GracefulBackoffProperties;
 import no.vegvesen.ixn.federation.discoverer.NeighbourDiscovererProperties;
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.exceptions.CapabilityPostException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.model.*;
@@ -45,7 +45,7 @@ public class NeighbourServiceDiscoveryTest {
 	@MockitoBean
 	private DNSFacade dnsFacade;
 	@MockitoBean
-	private NeighbourFacade neighbourFacade;
+	private NeighbourRESTFacade neighbourFacade;
 	@MockitoBean
 	private NeighbourDiscovererProperties discovererProperties;
 	@MockitoBean
@@ -151,7 +151,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -192,7 +192,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions);
 
 		verify(neighbourFacade, times(0)).postSubscriptionRequest(any(), anySet(), anyString());
 	}
@@ -211,7 +211,7 @@ public class NeighbourServiceDiscoveryTest {
 		);;
 		ericsson.getControlConnection().setBackoffStart(LocalDateTime.now().plusSeconds(10));
 		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(anyBoolean(), any(SubscriptionStatus.class))).thenReturn(Collections.singletonList(ericsson));
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		verify(neighbourFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -232,7 +232,7 @@ public class NeighbourServiceDiscoveryTest {
 		);
 		ericsson.getControlConnection().setBackoffStart(LocalDateTime.now().plusSeconds(10));
 		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(anyBoolean(), any())).thenReturn(Collections.singletonList(ericsson));
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
 		verify(neighbourFacade, times(0)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
@@ -271,7 +271,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.of(now);
 		Set<LocalSubscription> localSubscriptions = getLocalSubscriptions();
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Collections.singletonList(ericsson), lastUpdatedLocalSubscriptions, localSubscriptions);
 
 		verify(neighbourFacade, times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -297,7 +297,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		verify(neighbourFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
@@ -332,7 +332,7 @@ public class NeighbourServiceDiscoveryTest {
 		doReturn(ericsson).when(neighbourRepository).save(any(Neighbour.class));
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 
 		verify(neighbourFacade, times(1)).pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class));
 	}
@@ -396,7 +396,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -423,7 +423,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(polledSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -451,7 +451,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(listenerEndpointRepository.save(any(ListenerEndpoint.class))).thenAnswer(i -> i.getArguments()[0]); // return the argument sent in
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		verify(listenerEndpointRepository, times(2)).save(any(ListenerEndpoint.class));
 	}
@@ -469,7 +469,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptions()).contains(createdSubscription);
 	}
@@ -487,7 +487,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED)).isEmpty();
 	}
@@ -507,7 +507,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		assertThat(spyNeighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 	}
@@ -543,7 +543,7 @@ public class NeighbourServiceDiscoveryTest {
 		Set<LocalSubscription> selfSubscriptions = new HashSet<>();
 		selfSubscriptions.add(new LocalSubscription(LocalSubscriptionStatus.REQUESTED,"originatingCountry = 'NO'", interchangeNodeProperties.getName()));
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours,Optional.of(LocalDateTime.now()), selfSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighbours,Optional.of(LocalDateTime.now()), selfSubscriptions);
 
 		verify(neighbourFacade, times(3)).postSubscriptionRequest(any(Neighbour.class),anySet(), anyString());
 	}
@@ -594,7 +594,7 @@ public class NeighbourServiceDiscoveryTest {
 
 		when(neighbourFacade.postSubscriptionRequest(any(), any(), any())).thenReturn(Collections.emptySet());
 
-		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), Optional.of(lastUpdatedLocalSubscriptions), selfLocalSubscriptions, neighbourFacade);
+		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour,otherNeighbour), Optional.of(lastUpdatedLocalSubscriptions), selfLocalSubscriptions);
 
 		verify(neighbourRepository).save(otherNeighbour);
     }
@@ -618,7 +618,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class))).thenReturn(createdSubscription);
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(7);
 
-		neigbourDiscoveryService.pollSubscriptions(neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptions();
 
 		verify(listenerEndpointRepository, times(0)).save(any(ListenerEndpoint.class));
 	}
