@@ -468,7 +468,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProviderRepository.save(toreDownServiceProvider);
 		router.syncServiceProviders(List.of(toreDownServiceProvider), client.getQpidDelta());
-		assertThat(client.getQpidDelta().findByPrivateChannelUserName(toreDownServiceProvider.getName())).isNotNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(toreDownServiceProvider.getName())).isNotNull();
 		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
