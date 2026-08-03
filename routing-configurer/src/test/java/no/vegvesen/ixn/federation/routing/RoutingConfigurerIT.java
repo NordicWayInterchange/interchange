@@ -658,6 +658,47 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
         }
 
         @Test
+        public void neighbourWithShardAndExchangeButNoListenerEndpointGetsListenerEndpointCreated() {
+            String exchangeName = "my-test-exchange";
+            String name = "neighbour";
+            String source = "neighbour-endpoint";
+            Neighbour neighbour = new Neighbour(
+                    name,
+                    new NeighbourCapabilities(),
+                    new NeighbourSubscriptionRequest(),
+                    new SubscriptionRequest(
+                            Set.of(
+                                    new Subscription(
+                                            SubscriptionStatus.CREATED,
+                                            "a = b",
+                                            "/subscriptions/1",
+                                            interchangeNodeProperties.getName(),
+                                            Set.of(
+                                                    new Endpoint(
+                                                            source,
+                                                            name,
+                                                            1234,
+                                                            new SubscriptionShard(
+                                                                    exchangeName
+                                                            )
+                                                    )
+                                            )
+
+                                    )
+                            )
+                    )
+            );
+            client.createHeadersExchange(exchangeName);
+            neighbourRepository.save(neighbour);
+            routingConfigurer.setUpSubscriptionExchanges();
+            assertThat(
+                    listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName,source,name)
+            ).isNotNull();
+
+        }
+
+
+        @Test
         public void tearDownSubscriptionShardExchange() {
             String selector = "a=b";
             String exchangeName = "subscription-exchange-teardown-shard";
