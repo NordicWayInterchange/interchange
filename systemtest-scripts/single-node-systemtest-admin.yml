@@ -60,18 +60,22 @@ services:
     volumes:
       - "single-node-systemtest-keys-volume:/keys"
     environment:
-      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=interchangedomain.com
-      - SP_CHNL_PORT=8899
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-      - TRUST_STORE_PASSWORD=password
+      - ADMIN_CHNL_PORT=8899
       - KEY_STORE=/keys/ca.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
+      - KEY_ALIAS=a-admin-server
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - SERVER_NAME=a.interchangedomain.com
       - ADMIN_NAME=admin.a.internal.interchangedomain.com
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
       - testing_net
 
