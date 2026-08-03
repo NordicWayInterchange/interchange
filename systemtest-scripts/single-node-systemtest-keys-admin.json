@@ -6,7 +6,7 @@
     "country" : "NO",
     "subCaRequests" : [ ],
     "hostRequests" : [ {
-      "name" : "a.interchangedomain.com"
+      "name" : "a-admin.interchangedomain.com"
     }, {
       "name" : "a.qpid.interchangedomain.com"
     }],
@@ -26,12 +26,12 @@
     },{
       "name" : "a-qpid"
     }],
-    "clientRequests" : [ {
-      "name" : "admin.a.internal.interchangedomain.com",
+    "clientRequests" : [{
+      "name" : "admin.a-admin.interchangedomain.com",
       "country" : "NO",
-      "email" : "admin@a.internal.interchangedomain.com"
-    } ]
-  }],
+      "email" : "admin@a-admin.interchangedomain.com"
+    }]
+}],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
 }]

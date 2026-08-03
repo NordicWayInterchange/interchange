@@ -6,7 +6,7 @@
     "country" : "NO",
     "subCaRequests" : [ ],
     "hostRequests" : [ {
-      "name" : "admin.a.interchangedomain.com"
+      "name" : "a-admin.interchangedomain.com"
     },{
       "name": "a.qpid.interchangedomain.com"
     }, {
@@ -17,7 +17,7 @@
       "country" : "NO",
       "email" : "king_olav@slottet.no"
     },{
-      "name" : "admin.a.interchangedomain.com",
+      "name" : "a-admin.interchangedomain.com",
       "country" : "NO",
       "email" : "admin@a.admin.interchangedomain.com"
     } ]

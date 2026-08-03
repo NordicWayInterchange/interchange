@@ -70,7 +70,7 @@ services:
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - SERVER_NAME=a.interchangedomain.com
-      - ADMIN_NAME=admin.a.internal.interchangedomain.com
+      - ADMIN_NAME=a-admin.interchangedomain.com
       - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
@@ -97,9 +97,9 @@ services:
       - NEXTAUTH_SECRET=supersecret
       - NEXTAUTH_URL=http://localhost:3000
       - USE_KEYCLOAK=true
-      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com
+      - KEYCLOAK_CLIENT_ID=a-admin.interchangedomain.com
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
-      - KEYCLOAK_REALM=a.interchangedomain.com
+      - KEYCLOAK_REALM=a-admin.interchangedomain.com
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
       - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
     networks:
@@ -113,7 +113,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
-      - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+      - ./a-admin.interchangedomain.com-realm.json:/opt/keycloak/data/import/a-admin.interchangedomain.com-realm.json:ro
     command: [ "start-dev", "--import-realm" ]
     networks:
       - testing_net
