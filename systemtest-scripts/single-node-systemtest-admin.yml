@@ -63,8 +63,8 @@ services:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
-      - ADMIN_CHNL_PORT=8899
-      - KEY_STORE=/keys/ca.interchangedomain.com.p12
+      - SP_CHNL_PORT=8899
+      - KEY_STORE=/keys/ca.a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a-admin-server
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks

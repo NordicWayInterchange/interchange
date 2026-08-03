@@ -25,3 +25,12 @@ instance registered and configured, and the details filled in a file called `nap
 The exact variables are listed in `napcoresettings.example`.
 Please refer to the [Aut0 documentation](https://auth0.com/docs/quickstart/webapp/nextjs/interactive).
 To actually run the project, use the `systemtest-napcore.sh` script.
+
+
+## Admin-frontend
+
+The `single-node-systemtest-admin.yml` file in this folder contains a Docker Compose dummy deployment of a single-node cluster.
+In order to run a cluster in terminal, run `./single-node-systemtest-admin.sh`. This will start the node, called `a-admin.interchangedomain.com`.
+
+The Admin portal provides system administrators with a view of the system. It is currently read-only and is designed to help administrators monitor the system, 
+investigate issues, and gather the information needed to diagnose and resolve problems.
