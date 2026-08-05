@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
+    "types": [
+      "@jest/globals"
+    ],
     "lib": [
       "dom",
       "dom.iterable",
@@ -9,6 +12,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -17,11 +21,6 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
       "@/*": [
         "./src/*"
