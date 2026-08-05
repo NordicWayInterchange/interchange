@@ -1,6 +1,6 @@
 {
   "name": "admin-frontend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -36,6 +36,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@jest/globals": "^30.4.1",
     "@tanstack/react-query-devtools": "^5.83.0",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
@@ -45,13 +46,19 @@
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "babel-jest": "^30.4.1",
     "concurrently": "^9.2.0",
     "eslint": "^9.32.0",
     "eslint-config-next": "^15.4.4",
     "eslint-config-prettier": "^10.1.8",
-    "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "prettier": "^3.6.2",
     "typescript": "^5"
+  },
+  "overrides": {
+    "babel-plugin-istanbul": {
+      "test-exclude": "^8.0.0"
+    }
   }
 }
