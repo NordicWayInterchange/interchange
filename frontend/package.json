@@ -25,7 +25,7 @@
     "asn1js": "^3.0.6",
     "axios": "^1.16.0",
     "leaflet": "^1.9.4",
-    "next": "^15.5.18",
+    "next": "^16.3.0",
     "next-auth": "^4.24.11",
     "next-transpile-modules": "^10.0.1",
     "pino": "^9.7.0",
