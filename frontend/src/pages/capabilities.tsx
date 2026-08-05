@@ -102,7 +102,7 @@ export default function Capabilities() {
           field: "publisherId",
           headerName: "Publisher ID",
           renderCell: (params) => (
-              <Box sx={{ display: "flex", alignItems: "center", gap:"0.55" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.55 }}>
                   {!params.row.hasDelivery && (
                       <Tooltip
                           title="This capability does not have an associated delivery,
@@ -114,7 +114,7 @@ export default function Capabilities() {
                               },
                           }}
                       >
-                          <IconButton size="small" sx={{ padding: .25 }}>
+                          <IconButton size="small" sx={{ padding: .25, marginLeft: -.25 }}>
                               <InfoIcon fontSize="small" />
                           </IconButton>
                       </Tooltip>
