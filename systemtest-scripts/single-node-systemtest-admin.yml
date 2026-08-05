@@ -89,11 +89,11 @@ services:
     volumes:
       - "single-node-systemtest-keys-volume:/app/keys"
     environment:
-      - PFX_KEY_FILENAME=/keys/admin.a.internal.interchangedomain.com.p12
+      - PFX_KEY_FILENAME=/keys/a-admin.internal.interchangedomain.com.p12
       - PFX_PASSPHRASE=password
       - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
       - INTERCHANGE_URI=https://a-admin-server:8899/admin/
-      - INTERCHANGE_PREFIX=a.internal.interchangedomain.com.admin.
+      - INTERCHANGE_PREFIX=a-admin.interchangedomain.com.admin.
       - NEXTAUTH_SECRET=supersecret
       - NEXTAUTH_URL=http://localhost:3000
       - USE_KEYCLOAK=true
