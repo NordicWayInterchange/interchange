@@ -12,7 +12,7 @@ See full MIT license text [here](license.md).
 
 ---
 
-Admin-frontend provides administrators with a comprehensive overview of their own interchange and neighboring interchanges.
+Admin frontend is a system administrator view of the system. It is currently view-only, and provides administrators with a comprehensive overview of their own interchange and neighboring interchanges.
 The goal is to quickly assess the overall health and status of the system, enabling faster detection of issues and more informed operational decisions. This visual insight helps administrators stay in control, ensure smooth interoperability, and maintain high system availability.
 
 
@@ -122,9 +122,10 @@ callbacks: {
   }
 ```
 
-### Middleware
+### Proxy
 
-The middleware.ts allows us to run code before a request is completed. With NextAuth we can export a config object with a regex matcher, to specify allowed routings for an unauthenticated user.
+The proxy.ts file allows us to run code before a request is processed. Using NextAuth, we can export a config object with a matcher that specifies which routes the authentication middleware should apply to,
+allowing unauthenticated users to access only certain routes, such as the login page.
 
 Additionally, we check in the backend (for frontend), that all of these criteria are met:
 
