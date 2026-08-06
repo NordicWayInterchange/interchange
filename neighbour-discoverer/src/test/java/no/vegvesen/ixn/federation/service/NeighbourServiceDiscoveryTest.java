@@ -136,7 +136,7 @@ public class NeighbourServiceDiscoveryTest {
 
 
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = Optional.of(now);
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade,  getSelfCapabilities(), lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), getSelfCapabilities(), lastUpdatedLocalCapabilities);
 
 		verify(neighbourRepository, times(1)).save(any(Neighbour.class));
 	}
@@ -170,7 +170,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(a -> a.getArgument(0));
 
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = Optional.of(now);
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), getSelfCapabilities(), lastUpdatedLocalCapabilities);
 
 		verify(neighbourFacade, times(0)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -252,7 +252,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = Optional.of(now);
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), getSelfCapabilities(), lastUpdatedLocalCapabilities);
 
 		verify(neighbourFacade, times(1)).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
 	}
@@ -348,7 +348,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = Optional.of(now);
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), getSelfCapabilities(), lastUpdatedLocalCapabilities);
 
 		assertThat(ericsson.getControlConnection().getBackoffAttempts()).isEqualTo(1);
 	}
@@ -368,7 +368,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(neighbourRepository.save(any(Neighbour.class))).thenAnswer(p -> p.getArgument(0));
 
 		Optional<LocalDateTime> lastUpdatedLocalCapabilities = Optional.of(now);
-		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), neighbourFacade, getSelfCapabilities(), lastUpdatedLocalCapabilities);
+		neigbourDiscoveryService.capabilityExchange(Collections.singletonList(ericsson), getSelfCapabilities(), lastUpdatedLocalCapabilities);
 
 		assertThat(ericsson.getControlConnection().getConnectionStatus()).isEqualTo(ConnectionStatus.UNREACHABLE);
 		verify(neighbourFacade).postCapabilitiesToCapabilities(any(Neighbour.class), any(), any());
@@ -441,7 +441,7 @@ public class NeighbourServiceDiscoveryTest {
 				new NeighbourSubscriptionRequest(),
 				ericssonSubscription,
 				"8080"
-		);;
+		);
 		when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(any(), any())).thenReturn(Collections.singletonList(ericsson));
 
 		Subscription polledSubscription = new Subscription("originatingCountry = 'NO'", SubscriptionStatus.CREATED, interchangeNodeProperties.getName());
