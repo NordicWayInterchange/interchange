@@ -76,17 +76,17 @@ public class NeigbourDiscoveryService {
                 CapabilitiesStatus.UNKNOWN,
                 CapabilitiesStatus.KNOWN,
                 CapabilitiesStatus.FAILED);
-        capabilityExchange(neighboursForCapabilityExchange, neighbourFacade, localCapabilities, lastUpdatedLocalCapabilities);
+        capabilityExchange(neighboursForCapabilityExchange, localCapabilities, lastUpdatedLocalCapabilities);
     }
 
-    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, NeighbourRESTFacade neighbourFacade, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
+    void capabilityExchange(List<Neighbour> neighboursForCapabilityExchange, Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {
         for (Neighbour neighbour : neighboursForCapabilityExchange) {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
                     if (neighbour.needsOurUpdatedCapabilities(lastUpdatedLocalCapabilities)) {
                         logger.info("Posting capabilities to neighbour: {} ", neighbour.getName());
-                        postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
+                        postCapabilities(neighbour, interchangeNodeProperties.getName(), localCapabilities);
                     } else {
                         logger.debug("Neighbour has our last capabilities");
                     }
@@ -109,7 +109,7 @@ public class NeigbourDiscoveryService {
                 try {
                     NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                     logger.info("Retrying capability post to neighbour {}", neighbour.getName());
-                    postCapabilities(neighbour, neighbourFacade, interchangeNodeProperties.getName(), localCapabilities);
+                    postCapabilities(neighbour, interchangeNodeProperties.getName(), localCapabilities);
                 } catch (Exception e) {
                     logger.error("Error occurred while posting capabilities to unreachable neighbour", e);
                 } finally {
@@ -119,7 +119,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    private void postCapabilities(Neighbour neighbour, NeighbourRESTFacade neighbourFacade, String selfName, Set<Capability> localCapabilities) {
+    private void postCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
         try {
             Set<NeighbourCapability> capabilities = neighbourFacade.postCapabilitiesToCapabilities(neighbour, selfName, localCapabilities);
             NeighbourCapabilities neighbourCapabilities = neighbour.getCapabilities();
