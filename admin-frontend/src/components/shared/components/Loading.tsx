@@ -8,13 +8,15 @@ interface Props  {
 const Loading = ({ text }: Props) => {
     return (
         <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            flexDirection="column"
+            sx={{
+            display:'flex',
+            justifyContent:'center',
+            alignItems:'center',
+            flexDirection:'column'
+            }}
         >
             <CircularProgress />
-            <Typography fontWeight="bold" color="textSecondary" marginTop={2}>
+            <Typography sx={{fontWeight:'bold', color:'textSecondary', marginTop:2}}>
                 {text} is loading...
             </Typography>
         </Box>

@@ -192,7 +192,7 @@ export default function ServiceProviders() {
 
     return (
         <>
-            <Box flex={1}>
+            <Box sx={{flex:1}}>
                 <Mainheading>Service providers</Mainheading>
                 <Subheading>
                     These are all of all service providers. You can click on subscriptions, capabilities or deliveries cell

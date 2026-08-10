@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Divider, IconButton} from "@mui/material";
+import {Divider, IconButton} from "@mui/material";
 import Mainheading from "@/components/shared/display/typography/Mainheading";
 import Subheading from "@/components/shared/display/typography/Subheading";
 import { GridColDef } from "@mui/x-data-grid";
@@ -23,6 +23,7 @@ import { usePeers } from "@/hooks/usePeers";
 import { timeConverter } from "@/lib/timeConverter";
 import DeleteSubDialog from "@/components/shared/actions/DeleteSubDialog";
 import SearchBox from "@/components/shared/SearchBox";
+import {Box} from "@mui/system";
 
 export default function PrivateChannels() {
 
@@ -288,14 +289,14 @@ export default function PrivateChannels() {
   ];
 
   return (
-    <Box flex={1}>
+    <Box sx={{flex: 1}}>
       <Mainheading>Private channels</Mainheading>
       <Subheading>
         These are all of private channels you can connect to. You can click a private channel or a private channel subscription
         to see details or remove.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
-      <Box display="flex" flexDirection="row" gap={5}>
+      <Box sx={{flexWrap: 'row', display: 'flex', gap: 5}}>
       <AddButton text="Create private channel" labelUrl="privateChannel"></AddButton>
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="private channel" searchElement="ID"/>
       </Box>
@@ -343,7 +344,7 @@ export default function PrivateChannels() {
       <Divider style={{ margin: "20px 0", visibility: "hidden" }} />
       {hasPeersData && (
         <Box>
-          <Box display="flex" flexDirection="row" gap={5}>
+          <Box sx={{flexWrap: 'row', display: 'flex', gap: 5}}>
           <Subheading>My private channel subscriptions</Subheading>
           <SearchBox searchId={peerSearchId} setSearchId={setPeerSearchId} label="my private channel subscription" searchElement="ID"/>
           </Box>

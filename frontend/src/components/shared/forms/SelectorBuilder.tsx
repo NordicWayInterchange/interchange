@@ -340,14 +340,14 @@ const SelectorBuilder = (props: Props) => {
                       ))}
                     </Select>
                     <Box
-                      position="absolute"
-                      right={30}
-                      top="50%"
-                      sx={{
-                        transform: "translateY(-50%)",
-                        pointerEvents: "auto",
-                      }}
-                    >
+                          sx={{
+                            position: 'absolute',
+                            right: 30,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            pointerEvents: 'auto',
+                          }}
+                      >
                       <Tooltip
                         title="Country code (based on ISO 3166-1 alpha-2). Country code where the payload message is created"
                         arrow
@@ -390,14 +390,14 @@ const SelectorBuilder = (props: Props) => {
                       ))}
                     </Select>
                     <Box
-                      position="absolute"
-                      right={30}
-                      top="35%"
-                      sx={{
-                        transform: "translateY(-50%)",
-                        pointerEvents: "auto",
-                      }}
-                    >
+                          sx={{
+                            position: 'absolute',
+                            right: 30,
+                            top: '35%',
+                            transform: 'translateY(-50%)',
+                            pointerEvents: 'auto',
+                          }}
+                      >
                       <Tooltip
                         title="Message type is the type of the published message"
                         arrow
@@ -430,8 +430,15 @@ const SelectorBuilder = (props: Props) => {
                   >
                     <InputLabel>Cause codes</InputLabel>
                     <Select
-                      MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
-                      multiple
+                        MenuProps={{
+                          slotProps: {
+                            paper: {
+                              sx: {
+                                maxHeight: 200,
+                              },
+                            },
+                          },
+                        }}                      multiple
                       label="Cause codes"
                       {...field}
                     >
@@ -677,7 +684,7 @@ or VmsPublication"
                 control={<Switch onChange={enableDlqueue} />}
                 sx={{mt: -3 }}
                 label={
-                  <Box display="flex" alignItems="center">
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
                     <span>
                       Enable dead letter queue (DLQ) for this delivery
                     </span>

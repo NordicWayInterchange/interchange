@@ -158,14 +158,14 @@ export default function Subscriptions() {
   ];
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>Subscriptions</Mainheading>
       <Subheading>
         These are all of your subscriptions. You can click a subscription to
         see details or unsubscribe.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
-      <Box display="flex" flexDirection="row" gap={5}>
+      <Box sx={{flexWrap: 'row', display: 'flex', gap: 5}}>
       <AddButton text="Add subscription" labelUrl="subscription"></AddButton>
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="subscription" searchElement="ID"/>
       </Box>

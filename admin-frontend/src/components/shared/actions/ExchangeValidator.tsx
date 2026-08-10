@@ -28,11 +28,11 @@ export default function ExchangeValidator ({ exchangeName }: Props) {
             {(data === undefined || data === null || isDataWithDescription(data) && data.description === "Page not found" || error) ? (
                 <Loading text="Exchange"/>
             ) : data ? (
-                <Typography color="success.main" marginTop={2} style={validatorStyle }>
+                <Typography sx={{color:'success.main', marginTop:2}} style={validatorStyle }>
                     <CheckCircleIcon style={{ color: 'green', marginRight: 8 }} /> &quot;{exchangeName}&quot; exchange exists!
                 </Typography>
             ) : (
-                <Typography color="warning.main" marginTop={2} style={validatorStyle}>
+                <Typography sx={{color:'success.main', marginTop:2}} style={validatorStyle}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                     <WarningAmberIcon style={{ color: 'orange', marginRight: 8 }} /> &quot;{exchangeName}&quot; exchange could not be found!
                     <NextLink href="/matchingCapabilitiesGraph" passHref>

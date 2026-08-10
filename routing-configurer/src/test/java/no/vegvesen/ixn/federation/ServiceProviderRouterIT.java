@@ -468,7 +468,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProviderRepository.save(toreDownServiceProvider);
 		router.syncServiceProviders(List.of(toreDownServiceProvider), client.getQpidDelta());
-		assertThat(client.getServiceProviderMember(toreDownServiceProvider.getName())).isNotNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(toreDownServiceProvider.getName())).isNotNull();
 		assertThat(localSubscription.getStatus()).isEqualTo(LocalSubscriptionStatus.CREATED);
 
 		Set<LocalEndpoint> localEndpoints = toreDownServiceProvider.getSubscriptions().stream()
@@ -484,7 +484,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProviderRepository.save(toreDownServiceProvider);
 		router.syncServiceProviders(List.of(toreDownServiceProvider), client.getQpidDelta());
 		assertThat(toreDownServiceProvider.getSubscriptions()).isEmpty();
-		assertThat(client.getServiceProviderMember(toreDownServiceProvider.getName())).isNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(toreDownServiceProvider.getName())).isNull();
 		assertThat(client.queueExists(endpoint.getSource())).isFalse();
 	}
 
@@ -512,12 +512,12 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
 
-		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(serviceProvider.getName())).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities());
 		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
-		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(serviceProvider.getName())).isNull();
 	}
 
 	@Test
@@ -589,7 +589,7 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
-		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(serviceProvider.getName())).isNotNull();
 
 		assertThat(sub1.getLocalEndpoints()).hasSize(1);
 		LocalEndpoint endpoint1 = sub1.getLocalEndpoints().stream().findFirst().get();
@@ -606,13 +606,13 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 		serviceProviderRepository.save(serviceProvider);
 		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
-		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNotNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(serviceProvider.getName())).isNotNull();
 
 		serviceProvider.setCapabilities(new Capabilities());
 		serviceProviderRepository.save(serviceProvider);
 
 		router.syncServiceProviders(List.of(serviceProvider), client.getQpidDelta());
-		assertThat(client.getServiceProviderMember(serviceProvider.getName())).isNull();
+		assertThat(client.getQpidDelta().findServiceProviderMemberByName(serviceProvider.getName())).isNull();
 	}
 
 
