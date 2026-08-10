@@ -1,7 +1,8 @@
 import { trafficdata } from "./trafficdata";
 import { interchangePortal } from "./interchangePortal";
+import { PaletteColor } from "@mui/material";
 
-declare module "@mui/material/styles/createPalette" {
+declare module "@mui/material/styles"{
   interface Palette {
     navbarBackgroundColor: string;
     mainBackgroundColor: string;

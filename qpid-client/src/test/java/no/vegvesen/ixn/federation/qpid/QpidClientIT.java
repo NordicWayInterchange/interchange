@@ -119,7 +119,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		String groupMember = "test-get-group-member-member";
 		client.addServiceProviderMemberToGroup(groupMember);
 
-		ServiceProviderMember member = client.getServiceProviderMember(groupMember);
+		ServiceProviderMember member = client.getQpidDelta().findServiceProviderMemberByName(groupMember);
 		assertThat(member).isNotNull();
 		assertThat(member.getName()).isEqualTo(groupMember);
 	}
@@ -135,7 +135,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 
 	@Test
 	public void testGetGroupMemberNonExistingMember() {
-		ServiceProviderMember groupMember = client.getServiceProviderMember("this-group-member-does-not-exist");
+		ServiceProviderMember groupMember = client.getQpidDelta().findServiceProviderMemberByName("this-group-member-does-not-exist");
 		assertThat(groupMember).isNull();
 	}
 
@@ -158,7 +158,7 @@ public class QpidClientIT extends QpidDockerBaseIT {
 		assertThat(groupMember).isNotNull().extracting(ServiceProviderMember::getName).isEqualTo(myUser);
 
 		client.removeServiceProviderMemberFromGroup(groupMember);
-		groupMember = client.getServiceProviderMember(myUser);
+		groupMember = client.getQpidDelta().findServiceProviderMemberByName(myUser);
 
 		assertThat(groupMember).isNull();
 	}

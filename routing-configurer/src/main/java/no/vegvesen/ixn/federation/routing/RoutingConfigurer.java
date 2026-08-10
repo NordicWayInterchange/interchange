@@ -267,32 +267,34 @@ public class RoutingConfigurer {
 					if (subscription.getConsumerCommonName().equals(interchangeNodeProperties.getName())) {
 						if (!subscription.getEndpoints().isEmpty()) {
 							for (Endpoint endpoint : subscription.getEndpoints()) {
+								Exchange exchange;
 								if (!endpoint.hasShard()) {
 									String exchangeName = "sub-" + UUID.randomUUID();
 									endpoint.setShard(
 											new SubscriptionShard(exchangeName)
 									);
-									qpidClient.createHeadersExchange(exchangeName);
+									exchange = qpidClient.createHeadersExchange(exchangeName);
 									logger.info("Set up exchange for subscription with id {}", subscription.getId());
-									createListenerEndpoint(endpoint.getHost(), endpoint.getPort(), endpoint.getSource(), exchangeName, neighbour.getName(), endpoint.getDynamicFilter());
 								}
 								else{
-									Exchange exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
+									exchange = qpidClient.getExchange(endpoint.getShard().getExchangeName());
 									if(exchange == null){
-										qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
+										exchange = qpidClient.createHeadersExchange(endpoint.getShard().getExchangeName());
 										logger.info("Set up exchange for subscription with id {}", subscription.getId());
 									}
 								}
+								createListenerEndpoint(exchange.getName(), endpoint.getSource(), neighbour.getName(), endpoint.getHost(), endpoint.getPort(), endpoint.getDynamicFilter());
 							}
 						}
 					}
 				}
+				//TODO also, set the saveNeighbour call to inside the if, at least.
 			}
 			neighbourService.saveNeighbour(neighbour);
 		}
 	}
 
-	public void createListenerEndpoint(String host, Integer port, String source, String exchangeName, String neighbourName, String dynamicFilter) {
+	public void createListenerEndpoint(String exchangeName, String source, String neighbourName, String host, Integer port, String dynamicFilter) {
 		if(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName(exchangeName, source, neighbourName) == null){
 			ListenerEndpoint savedListenerEndpoint = listenerEndpointRepository.save(new ListenerEndpoint(neighbourName, source, host, port, new Connection(), exchangeName, dynamicFilter));
 			logger.info("ListenerEndpoint was created: {}", savedListenerEndpoint);

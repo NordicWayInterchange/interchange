@@ -2,7 +2,7 @@ import React from 'react';
 import {AppBar, Box, IconButton, Toolbar, Typography} from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import {signOut, useSession} from "next-auth/react";
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import PersonIcon from '@mui/icons-material/Person';
 import {styled} from "@mui/system";
 
 const Header = () => {
@@ -25,11 +25,11 @@ const Header = () => {
                 {showLogoutIcon && (
                     <StyledSignOutBox>
                         <IconButton sx={{ marginRight: "-5px", mb: .25, cursor: 'default'}}>
-                            <PersonOutlineIcon sx={{ color: "white", fontSize: "large"}} />
+                            <PersonIcon sx={{ color: "white", fontSize: "large"}} />
                         </IconButton>
                         <Typography>{session?.user?.name}</Typography>
 
-                        <Box mx={1.5} />
+                        <Box sx={{mx:1.5}} />
                         <IconButton sx={{ marginRight: "-5px", mb: .25 }} onClick={() => signOut()}>
                             <LogoutIcon sx={{ color: "white", fontSize: "large" }} />
                         </IconButton>
