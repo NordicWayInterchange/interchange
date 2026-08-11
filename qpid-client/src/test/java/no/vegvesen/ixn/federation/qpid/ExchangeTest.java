@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.CollectionType;
 import tools.jackson.databind.type.TypeFactory;
@@ -106,7 +106,7 @@ public class ExchangeTest {
     }
 
     @Test
-    public void testJsonWithNameOnly() throws JsonProcessingException {
+    public void testJsonWithNameOnly() throws JacksonException {
         Exchange exchange = new Exchange("test-exchange");
         String result = new ObjectMapper().writeValueAsString(exchange);
         assertThat(result).contains("name");
@@ -118,7 +118,7 @@ public class ExchangeTest {
 
 
     @Test
-    public void testJsonWithOneBinding() throws JsonProcessingException {
+    public void testJsonWithOneBinding() throws JacksonException {
         Exchange exchange = new Exchange("test-exchange", Collections.singletonList(
                 new Binding("my-binding-key", "my-destination", new Filter("a = b"))
         ));
@@ -132,7 +132,7 @@ public class ExchangeTest {
     }
 
     @Test
-    public void testExchangeWithAlternativeBinding() throws JsonProcessingException {
+    public void testExchangeWithAlternativeBinding() throws JacksonException {
         String exhangeJson = """
 {
   "id" : "d936db17-2e68-4514-ab30-e84365a5498a",

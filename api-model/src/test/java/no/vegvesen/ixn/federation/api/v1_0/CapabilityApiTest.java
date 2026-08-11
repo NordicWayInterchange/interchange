@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.DenmApplicationApi;
@@ -13,7 +13,7 @@ import java.util.List;
 public class CapabilityApiTest {
 
     @Test
-    public void denmCapability() throws JsonProcessingException {
+    public void denmCapability() throws JacksonException {
         CapabilityApi capabilityApi = new CapabilityApi(
                 new DenmApplicationApi(
                         "NO-123",

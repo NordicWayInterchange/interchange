@@ -1,16 +1,14 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
 
-import tools.jackson.core.JsonProcessingException;
-import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
-import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SubscriptionPollResponseApiTest {
 
     @Test
-    public void createValidJson() throws JsonProcessingException {
+    public void createValidJson() throws JacksonException {
         EndpointApiV1 endpoint = new EndpointApiV1("client1queue","b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApiV1(
                 UUID.randomUUID().toString(),
@@ -36,7 +34,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void parseUnknownJsonField() throws JsonProcessingException {
+    public void parseUnknownJsonField() throws JacksonException {
         String input = "{\"foo\":\"bar\",\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
         SubscriptionPollResponseApiV1 result = mapper.readValue(input,SubscriptionPollResponseApiV1.class);
@@ -47,7 +45,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void createValidJsonWithEndpoints() throws JsonProcessingException {
+    public void createValidJsonWithEndpoints() throws JacksonException {
         EndpointApiV1 endpoint1 = new EndpointApiV1("client1source", "a.c-its-interchange.eu", 5671);
         EndpointApiV1 endpoint2 = new EndpointApiV1("client2source", "b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApiV1(
@@ -64,7 +62,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void parseEndpointsToObject() throws JsonProcessingException {
+    public void parseEndpointsToObject() throws JacksonException {
         String input = "{\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
 
@@ -73,7 +71,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void marshallAndUnmarshallPollResponseWithDynamicFilter() throws JsonProcessingException {
+    public void marshallAndUnmarshallPollResponseWithDynamicFilter() throws JacksonException {
         String  uuid = UUID.randomUUID().toString();
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApiV2(
                 uuid,
@@ -101,7 +99,7 @@ public class SubscriptionPollResponseApiTest {
     }
 
     @Test
-    public void parseEndpointsToObjectWitMissingVersion() throws JsonProcessingException {
+    public void parseEndpointsToObjectWitMissingVersion() throws JacksonException {
         String input = "{\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
         ObjectMapper mapper = new ObjectMapper();
 

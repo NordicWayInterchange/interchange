@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +11,7 @@ import java.util.HashSet;
 public class SubscriptionRequestApiTest {
 
     @Test
-    public void subscriptionRequestOneSingleSubscriptionWithOnlySelector() throws JsonProcessingException {
+    public void subscriptionRequestOneSingleSubscriptionWithOnlySelector() throws JacksonException {
         RequestedSubscriptionApi subscription = new RequestedSubscriptionApi(
                 "messageType='DENM' AND originatingCountry='SE'");
         SubscriptionRequestApi requestApi = new SubscriptionRequestApi("client1",
@@ -21,7 +21,7 @@ public class SubscriptionRequestApiTest {
     }
 
     @Test
-    public void subscriptionRequestWithBothConsumerCommonNameAsClientNameAndIxnName() throws JsonProcessingException {
+    public void subscriptionRequestWithBothConsumerCommonNameAsClientNameAndIxnName() throws JacksonException {
         RequestedSubscriptionApi sub1 = new RequestedSubscriptionApi(
                 "messageType='DENM' AND orginatingCountry='SE'"
         );
@@ -36,7 +36,7 @@ public class SubscriptionRequestApiTest {
     }
 
     @Test
-    public void testUnknownJsonFields() throws JsonProcessingException {
+    public void testUnknownJsonFields() throws JacksonException {
         SubscriptionRequestApi example = new SubscriptionRequestApi("test",new HashSet<>());
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(example));
