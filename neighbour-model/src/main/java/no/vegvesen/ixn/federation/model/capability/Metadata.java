@@ -3,8 +3,6 @@ package no.vegvesen.ixn.federation.model.capability;
 import no.vegvesen.ixn.federation.model.RedirectStatus;
 
 import jakarta.persistence.*;
-import no.vegvesen.ixn.shared.capability.MetadataApi;
-import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
 
 import java.util.*;
 
@@ -96,24 +94,6 @@ public class Metadata {
 
     public void setRepetitionInterval(Integer repetitionInterval) {
         this.repetitionInterval = repetitionInterval;
-    }
-
-    public MetadataApi toApi() {
-        return new MetadataApi(getShardCount(), getInfoUrl(), toRedirectStatusApi(getRedirectPolicy()), getMaxBandwidth(), getMaxMessageRate(), getRepetitionInterval());
-    }
-
-    public RedirectStatusApi toRedirectStatusApi(RedirectStatus status) {
-        if (status == null) {
-            return RedirectStatusApi.OPTIONAL;
-        }
-        switch (status) {
-            case MANDATORY:
-                return RedirectStatusApi.MANDATORY;
-            case NOT_AVAILABLE:
-                return RedirectStatusApi.NOT_AVAILABLE;
-            default:
-                return RedirectStatusApi.OPTIONAL;
-        }
     }
 
     @Override
