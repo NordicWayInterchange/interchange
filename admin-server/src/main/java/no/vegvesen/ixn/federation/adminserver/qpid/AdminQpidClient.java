@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver.qpid;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminQpidClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

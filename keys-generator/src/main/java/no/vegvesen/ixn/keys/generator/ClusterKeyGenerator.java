@@ -1,9 +1,9 @@
 package no.vegvesen.ixn.keys.generator;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.*;
+import tools.jackson.databind.module.SimpleModule;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.cert.CsrGenerator;
 import no.vegvesen.ixn.cert.KeyPairAndCsr;
