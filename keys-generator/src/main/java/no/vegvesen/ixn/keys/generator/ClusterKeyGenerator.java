@@ -566,15 +566,15 @@ public class ClusterKeyGenerator {
             Base64.Encoder encoder = Base64.getEncoder();
             saveKeyPair(value.keyPair(), keyWriter);
             String keypairString = encoder.encodeToString(keyWriter.toString().getBytes());
-            gen.writeStringField("keypair", keypairString);
+            gen.writeStringProperty("keypair", keypairString);
             StringWriter certWriter = new StringWriter();
             saveCert(value.certificate(), certWriter);
             String certString = encoder.encodeToString(certWriter.toString().getBytes());
-            gen.writeStringField("cert",certString);
+            gen.writeStringProperty("cert",certString);
             StringWriter certChainWriter = new StringWriter();
             saveCertChain(value.certificateChain(), certChainWriter);
             String certChainString = encoder.encodeToString(certChainWriter.toString().getBytes());
-            gen.writeStringField("certChain",certChainString);
+            gen.writeStringProperty("certChain",certChainString);
             gen.writeEndObject();
         }
     }
