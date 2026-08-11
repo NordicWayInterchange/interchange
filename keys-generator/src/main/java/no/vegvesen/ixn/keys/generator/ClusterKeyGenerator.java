@@ -557,10 +557,10 @@ public class ClusterKeyGenerator {
     public record CertificateCertificateChainAndKeys(KeyPair keyPair, X509Certificate certificate, List<X509Certificate> certificateChain) {
     }
 
-    public static class CertificateCertificateChainAndKeysSerializer extends JsonSerializer<CertificateCertificateChainAndKeys> {
+    public static class CertificateCertificateChainAndKeysSerializer extends ValueSerializer<CertificateCertificateChainAndKeys> {
 
         @Override
-        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(CertificateCertificateChainAndKeys value, JsonGenerator gen, SerializationContext context) {
             gen.writeStartObject();
             StringWriter keyWriter = new StringWriter();
             Base64.Encoder encoder = Base64.getEncoder();
@@ -579,10 +579,10 @@ public class ClusterKeyGenerator {
         }
     }
 
-    public static class CertificateCertificateChainAndKeysDeserializer extends JsonDeserializer<CertificateCertificateChainAndKeys> {
+    public static class CertificateCertificateChainAndKeysDeserializer extends ValueDeserializer<CertificateCertificateChainAndKeys> {
 
         @Override
-        public CertificateCertificateChainAndKeys deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public CertificateCertificateChainAndKeys deserialize(JsonParser p, DeserializationContext ctxt) {
             Base64.Decoder decoder = Base64.getDecoder();
             JsonNode node = p.readValueAsTree();
             String encodedKeyPair = node.get("keypair").asText();
