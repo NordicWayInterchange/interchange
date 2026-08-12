@@ -313,7 +313,7 @@ public class ClusterKeyGeneratorTest {
             responses.add(ClusterKeyGenerator.generate(request));
         }
         Writer responseWriter = new StringWriter();
-        ClusterKeyGenerator.writeCaReponsesToJson(responseWriter, responses);
+        ClusterKeyGenerator.writeCaResponsesToJson(responseWriter, responses);
         String responseJson = responseWriter.toString();
         Reader responseReader = new StringReader(responseJson);
         List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);

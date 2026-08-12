@@ -3,6 +3,7 @@ package no.vegvesen.ixn.keys.generator;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.*;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.cert.CsrGenerator;
@@ -513,24 +514,24 @@ public class ClusterKeyGenerator {
     }
 
     public static List<CaResponse> readCaResponsesFromJson(Reader reader) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addDeserializer(
                 CertificateCertificateChainAndKeys.class,
                 new CertificateCertificateChainAndKeysDeserializer()
         );
-        mapper.registerModule(module);
+        ObjectMapper mapper = JsonMapper.builder()
+                        .addModule(module).build();
         return mapper.readerForListOf(CaResponse.class).readValue(reader);
     }
 
-    public static void writeCaReponsesToJson(Writer writer, List<CaResponse> responses) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+    public static void writeCaResponsesToJson(Writer writer, List<CaResponse> responses) throws IOException {
         SimpleModule module = new SimpleModule();
         module.addSerializer(
                 CertificateCertificateChainAndKeys.class,
                 new CertificateCertificateChainAndKeysSerializer()
         );
-        mapper.registerModule(module);
+        ObjectMapper mapper = JsonMapper.builder()
+                        .addModule(module).build();
         mapper.writerWithDefaultPrettyPrinter().writeValue(
                 writer,
                 responses
