@@ -6,7 +6,9 @@ import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponse
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Instant;
 import java.util.Set;
@@ -18,7 +20,7 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void createValidJson() throws JacksonException {
-        EndpointApiV1 endpoint = new EndpointApiV1("client1queue","b.c-its-interchange.eu", 5671);
+        EndpointApiV1 endpoint = new EndpointApiV1("client1queue", "b.c-its-interchange.eu", 5671);
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApiV1(
                 UUID.randomUUID().toString(),
                 "messageType='DENM' AND originatingCountry='NO'",
@@ -29,19 +31,27 @@ public class SubscriptionPollResponseApiTest {
                 Instant.now().toEpochMilli()
         );
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writeValueAsString(responseApi));
     }
 
     @Test
     public void parseUnknownJsonField() throws JacksonException {
-        String input = "{\"foo\":\"bar\",\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
-        ObjectMapper mapper = new ObjectMapper();
-        SubscriptionPollResponseApiV1 result = mapper.readValue(input,SubscriptionPollResponseApiV1.class);
+        String input = "{\"foo\":\"bar\",\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND " +
+                "originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\"," +
+                "\"status\":\"CREATED\",\"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange" +
+                ".eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
+
+        ObjectMapper mapper = JsonMapper.builder()
+                //TODO: Consider if this is wanted behaviour.
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .build();
+        SubscriptionPollResponseApiV1 result = mapper.readValue(input, SubscriptionPollResponseApiV1.class);
         System.out.println(mapper.writeValueAsString(result));
         assertThat(result.getConsumerCommonName()).isEqualTo("client1");
         assertThat(result.getVersion()).isEqualTo("1.2");
-        assertThat(result.getEndpoints().stream().findFirst().orElseThrow().getHost()).isEqualTo("b.c-its-interchange.eu");
+        assertThat(result.getEndpoints().stream().findFirst().orElseThrow().getHost()).isEqualTo("b.c-its-interchange" +
+                ".eu");
     }
 
     @Test
@@ -54,29 +64,38 @@ public class SubscriptionPollResponseApiTest {
                 "/subscriptions/1",
                 SubscriptionStatusApi.CREATED,
                 "neighbour1",
-                Set.of(endpoint1,endpoint2),
+                Set.of(endpoint1, endpoint2),
                 Instant.now().toEpochMilli()
         );
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writeValueAsString(responseApi));
     }
 
     @Test
     public void parseEndpointsToObject() throws JacksonException {
-        String input = "{\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
-        ObjectMapper mapper = new ObjectMapper();
+        String input = "{\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\"," +
+                "\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\"," +
+                "\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
+                ".c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}," +
+                "{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\"," +
+                "\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
 
-        SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
+        ObjectMapper mapper = JsonMapper.builder()
+                //TODO: --||--
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .build();
+
+        SubscriptionPollResponseApi result = mapper.readValue(input, SubscriptionPollResponseApi.class);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 
     @Test
     public void marshallAndUnmarshallPollResponseWithDynamicFilter() throws JacksonException {
-        String  uuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
         SubscriptionPollResponseApi responseApi = new SubscriptionPollResponseApiV2(
                 uuid,
                 "a = b",
-                "/subsctiptions/" +  uuid,
+                "/subsctiptions/" + uuid,
                 SubscriptionStatusApi.CREATED,
                 "neighboura",
                 Set.of(
@@ -89,7 +108,7 @@ public class SubscriptionPollResponseApiTest {
                 ),
                 Instant.now().toEpochMilli()
         );
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         String marshalled = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseApi);
         System.out.println(marshalled);
 
@@ -100,10 +119,19 @@ public class SubscriptionPollResponseApiTest {
 
     @Test
     public void parseEndpointsToObjectWitMissingVersion() throws JacksonException {
-        String input = "{\"selector\":\"messageType='DENM' AND originatingCountry='NO'\",\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\",\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null},{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
-        ObjectMapper mapper = new ObjectMapper();
+        String input = "{\"selector\":\"messageType='DENM' AND originatingCountry='NO'\"," +
+                "\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\"," +
+                "\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
+                ".c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}," +
+                "{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\"," +
+                "\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
 
-        SubscriptionPollResponseApi result = mapper.readValue(input,SubscriptionPollResponseApi.class);
+        ObjectMapper mapper = JsonMapper.builder()
+                //TODO: --||--
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .build();
+
+        SubscriptionPollResponseApi result = mapper.readValue(input, SubscriptionPollResponseApi.class);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 
