@@ -39,12 +39,11 @@ public class SubscriptionPollResponseApiTest {
     public void parseUnknownJsonField() throws JacksonException {
         String input = "{\"foo\":\"bar\",\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND " +
                 "originatingCountry='NO'\",\"consumerCommonName\":\"client1\",\"path\":\"/subscriptions/1\"," +
-                "\"status\":\"CREATED\",\"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange" +
+                "\"status\":\"CREATED\", \"lastUpdatedTimestamp\":0, \"endpoints\":[{\"source\":\"client1source\",\"host\":\"b.c-its-interchange" +
                 ".eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
 
+
         ObjectMapper mapper = JsonMapper.builder()
-                //TODO: Consider if this is wanted behaviour.
-                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .build();
         SubscriptionPollResponseApiV1 result = mapper.readValue(input, SubscriptionPollResponseApiV1.class);
         System.out.println(mapper.writeValueAsString(result));
@@ -75,14 +74,12 @@ public class SubscriptionPollResponseApiTest {
     public void parseEndpointsToObject() throws JacksonException {
         String input = "{\"version\":\"1.2\",\"selector\":\"messageType='DENM' AND originatingCountry='NO'\"," +
                 "\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\"," +
-                "\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
+                "\"lastUpdatedTimestamp\":0,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
                 ".c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}," +
                 "{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\"," +
                 "\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
 
         ObjectMapper mapper = JsonMapper.builder()
-                //TODO: --||--
-                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .build();
 
         SubscriptionPollResponseApi result = mapper.readValue(input, SubscriptionPollResponseApi.class);
@@ -121,14 +118,12 @@ public class SubscriptionPollResponseApiTest {
     public void parseEndpointsToObjectWitMissingVersion() throws JacksonException {
         String input = "{\"selector\":\"messageType='DENM' AND originatingCountry='NO'\"," +
                 "\"consumerCommonName\":\"neighbour1\",\"path\":\"/subscriptions/1\",\"status\":\"CREATED\"," +
-                "\"lastUpdatedTimestamp\":null,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
+                "\"lastUpdatedTimestamp\":0,\"endpoints\":[{\"source\":\"client1source\",\"host\":\"a" +
                 ".c-its-interchange.eu\",\"port\":\"5671\",\"maxBandwidth\":null,\"maxMessageRate\":null}," +
                 "{\"source\":\"client2queue\",\"host\":\"b.c-its-interchange.eu\",\"port\":\"5671\"," +
                 "\"maxBandwidth\":null,\"maxMessageRate\":null}]}";
 
         ObjectMapper mapper = JsonMapper.builder()
-                //TODO: --||--
-                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .build();
 
         SubscriptionPollResponseApi result = mapper.readValue(input, SubscriptionPollResponseApi.class);
