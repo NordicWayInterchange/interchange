@@ -1,9 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListDeliveriesResponse;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -28,7 +31,7 @@ public class ListDeliveries implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         ListDeliveriesResponse response = client.listDeliveries();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return 0;
