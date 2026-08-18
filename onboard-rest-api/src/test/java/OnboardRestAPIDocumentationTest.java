@@ -1,8 +1,8 @@
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -12,7 +12,7 @@ import java.util.*;
 public class OnboardRestAPIDocumentationTest {
 
     @Test
-    public void addSingleSubscriptionTest() throws JsonProcessingException {
+    public void addSingleSubscriptionTest() throws JacksonException {
         List<AddSubscription> addSubscriptions = new ArrayList<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "kyrre", "DENM Sub"));
         AddSubscriptionsRequest request = new AddSubscriptionsRequest(
@@ -24,7 +24,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addSubscriptionRequest() throws JsonProcessingException {
+    public void addSubscriptionRequest() throws JacksonException {
         List<AddSubscription> addSubscriptions = new ArrayList<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'NO' and messageType = 'DENM'", "DENM sub"));
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
@@ -37,7 +37,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addSingleSubscriptionForSystemTest() throws JsonProcessingException {
+    public void addSingleSubscriptionForSystemTest() throws JacksonException {
         //TODO for local
         List<AddSubscription> addSubscriptions = new ArrayList<>();
         addSubscriptions.add(new AddSubscription("originatingCountry = 'SE' and messageType = 'DENM'", "DENM sub"));
@@ -51,7 +51,7 @@ public class OnboardRestAPIDocumentationTest {
 
 
     @Test
-    public void addSubscriptionsResponse() throws JsonProcessingException {
+    public void addSubscriptionsResponse() throws JacksonException {
         List<LocalActorSubscription> subscriptions = new ArrayList<>();
         subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
@@ -82,7 +82,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void listSubscriptionsResponse() throws JsonProcessingException {
+    public void listSubscriptionsResponse() throws JacksonException {
         Set<LocalActorSubscription> subscriptions = new HashSet<>();
         subscriptions.add(new LocalActorSubscription(UUID.randomUUID().toString(),
                 "/serviceprovider1/subscriptions/1",
@@ -113,7 +113,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void getSubscriptionResponse() throws JsonProcessingException {
+    public void getSubscriptionResponse() throws JacksonException {
         Set<LocalEndpointApi> localEndpointApis = new HashSet<>();
         localEndpointApis.add(new LocalEndpointApi(
                 "amqps://myserver",
@@ -138,7 +138,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void createDENMCapability() throws JsonProcessingException {
+    public void createDENMCapability() throws JacksonException {
         CapabilityApi api = new CapabilityApi(
                 new DenmApplicationApi(
                 "NPRA",
@@ -155,7 +155,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addCapabilitiesRequest() throws JsonProcessingException {
+    public void addCapabilitiesRequest() throws JacksonException {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "sp-1",
                 Collections.singleton(
@@ -175,7 +175,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addCapabilitiesRequestForSystemtest() throws JsonProcessingException {
+    public void addCapabilitiesRequestForSystemtest() throws JacksonException {
         AddCapabilitiesRequest request = new AddCapabilitiesRequest(
                 "king_gustaf.bouvetinterchange.eu",
                 Collections.singleton(
@@ -195,7 +195,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addCapabilitiesResponse() throws JsonProcessingException {
+    public void addCapabilitiesResponse() throws JacksonException {
         AddCapabilitiesResponse response = new AddCapabilitiesResponse(
                 "sp-1",
                 Collections.singleton(
@@ -219,7 +219,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void listCapabilitiesResponse() throws JsonProcessingException {
+    public void listCapabilitiesResponse() throws JacksonException {
         ListCapabilitiesResponse response = new ListCapabilitiesResponse(
                 "sp-1",
                 Collections.singleton(
@@ -243,7 +243,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void getCapabilityResponse() throws JsonProcessingException {
+    public void getCapabilityResponse() throws JacksonException {
         GetCapabilityResponse response = new GetCapabilityResponse(
                 UUID.randomUUID().toString(),
                 "/sp-1/capabilities/1",
@@ -262,7 +262,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addDelieriesRequest() throws JsonProcessingException {
+    public void addDelieriesRequest() throws JacksonException {
         AddDeliveriesRequest request = new AddDeliveriesRequest(
                 "sp-1",
                 Collections.singleton(new AddDelivery(
@@ -275,7 +275,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addDeliveriesResponse() throws JsonProcessingException {
+    public void addDeliveriesResponse() throws JacksonException {
         AddDeliveriesResponse response = new AddDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
@@ -293,7 +293,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void listDeliveriesResponse() throws JsonProcessingException {
+    public void listDeliveriesResponse() throws JacksonException {
         ListDeliveriesResponse response = new ListDeliveriesResponse(
                 "sp-1",
                 Collections.singleton(new Delivery(
@@ -311,7 +311,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void getDeliveryResponse() throws JsonProcessingException {
+    public void getDeliveryResponse() throws JacksonException {
         GetDeliveryResponse response = new GetDeliveryResponse(
                 UUID.randomUUID().toString(),
                 Collections.singleton(new DeliveryEndpoint(
@@ -331,7 +331,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void fetchMatchingCapabilitiesResponseWithoutSelector() throws JsonProcessingException {
+    public void fetchMatchingCapabilitiesResponseWithoutSelector() throws JacksonException {
         FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
                 "service-provider",
                 Collections.singleton(
@@ -352,7 +352,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void fetchMatchingCapabilitiesResponseWithSelector() throws JsonProcessingException {
+    public void fetchMatchingCapabilitiesResponseWithSelector() throws JacksonException {
         FetchMatchingCapabilitiesResponse response = new FetchMatchingCapabilitiesResponse(
                 "service-provider",
                 "originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'",
@@ -375,28 +375,28 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addDelivery() throws JsonProcessingException {
+    public void addDelivery() throws JacksonException {
         AddDelivery selector = new AddDelivery("originatingCountry = 'NO' and messageType = 'DENM' and quadTree like 'quadTree like '%,0123%'", "DENM delivery");
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(selector));
     }
 
     @Test
-    public void addPrivateChannelApi() throws JsonProcessingException {
+    public void addPrivateChannelApi() throws JacksonException {
         PrivateChannelResponseApi api = new PrivateChannelResponseApi();
         api.setPeers(Collections.singleton("sp2"));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(api));
     }
 
     @Test
-    public void AddPrivateChannelRequest() throws JsonProcessingException {
+    public void AddPrivateChannelRequest() throws JacksonException {
         PrivateChannelRequestApi privateChannel = new PrivateChannelRequestApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), "my-channel");
         AddPrivateChannelRequest request = new AddPrivateChannelRequest("king_gustaf.bouvetinterchange.eu",List.of(privateChannel));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     }
 
     @Test
-    public void addPrivateChannelResponse() throws JsonProcessingException {
+    public void addPrivateChannelResponse() throws JacksonException {
         PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.REQUESTED, "my-channel", UUID.randomUUID().toString(), transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         AddPrivateChannelResponse response = new AddPrivateChannelResponse();
         response.setName("king_gustaf.bouvetinterchange.eu");
@@ -405,14 +405,14 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void getPrivateChannelResponse() throws JsonProcessingException {
+    public void getPrivateChannelResponse() throws JacksonException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
         GetPrivateChannelResponse response = new GetPrivateChannelResponse(UUID.randomUUID().toString(), Collections.singleton("king_olaf.bouvetinterchange.eu"), endpoint, "king_gustaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED, transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(response));
     }
 
     @Test
-    public void ListPrivateChannelsResponse()throws JsonProcessingException{
+    public void ListPrivateChannelsResponse()throws JacksonException{
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
         PrivateChannelResponseApi privateChannel = new PrivateChannelResponseApi(Collections.singleton("king_olaf.bouvetinterchange.eu"), PrivateChannelStatusApi.CREATED, "my-channel", endpoint, UUID.randomUUID().toString(), transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         ListPrivateChannelsResponse response = new ListPrivateChannelsResponse("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
@@ -420,7 +420,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void ListPeerPrivateChannels() throws JsonProcessingException {
+    public void ListPeerPrivateChannels() throws JacksonException {
         PrivateChannelEndpointApi endpoint = new PrivateChannelEndpointApi("hostname",5671,"550e8400-e29b-41d4-a716-446655440000");
         PeerPrivateChannelApi privateChannel = new PeerPrivateChannelApi(UUID.randomUUID().toString(), "king_olaf.bouvetinterchange.eu", PrivateChannelStatusApi.CREATED, endpoint, transformLocalDateTimeToEpochMili(LocalDateTime.now()));
         ListPeerPrivateChannels response = new ListPeerPrivateChannels("king_gustaf.bouvetinterchange.eu", List.of(privateChannel));
@@ -428,7 +428,7 @@ public class OnboardRestAPIDocumentationTest {
     }
 
     @Test
-    public void addMultipleCapabilitiesTest() throws JsonProcessingException {
+    public void addMultipleCapabilitiesTest() throws JacksonException {
         List<String> quadTree = List.of("12004");
         MetadataApi metadataApi = new MetadataApi(
                 1,
