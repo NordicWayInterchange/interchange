@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.qpid;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Map;
 public class QueryResult {
 
 
-    private List<Map<String,Object>> results;
+    private List<Map<String, Object>> results;
 
     private Integer total;
 
@@ -38,7 +38,7 @@ public class QueryResult {
     public String toString() {
         try {
             return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
