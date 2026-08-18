@@ -1,11 +1,13 @@
 package no.vegvesen.ixn.napcore.client.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
-import static picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "list",
