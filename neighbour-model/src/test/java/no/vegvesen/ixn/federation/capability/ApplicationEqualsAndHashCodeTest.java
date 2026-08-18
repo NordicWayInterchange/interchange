@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.capability;
 
-import tools.jackson.core.JsonProcessingException;
-import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.transformer.CapabilitiesTransformer;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -262,7 +262,7 @@ public class ApplicationEqualsAndHashCodeTest {
     }
 
     @Test
-    public void testFromJson() throws JsonProcessingException {
+    public void testFromJson() throws JacksonException {
         ObjectMapper mapper = new ObjectMapper();
         CapabilitiesApi capabilityApi = mapper.readValue(inputJson, CapabilitiesApi.class);
         CapabilitiesTransformer transformer = new CapabilitiesTransformer();
