@@ -83,11 +83,9 @@ public class TypeTransformer {
         List<MatchingCapabilityApi> matchingCapabilities = new ArrayList<>();
         for (Capability capability : capabilities) {
             Metadata metadata = capability.getMetadata();
-            RedirectStatus status = metadata.getRedirectPolicy();
-            RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
             matchingCapabilities.add(new MatchingCapabilityApi(
                     capability.getApplication().toApi(),
-                    new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval())
+                    metadataToMetadataApi(metadata)
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
@@ -100,6 +98,17 @@ public class TypeTransformer {
             ));
         }
         return matchingCapabilities;
+    }
+
+    private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+        return new MetadataApi(
+                metadata.getShardCount(),
+                metadata.getInfoUrl(),
+                redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()),
+                metadata.getMaxBandwidth(),
+                metadata.getMaxMessageRate(),
+                metadata.getRepetitionInterval()
+        );
     }
 
     private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus status) {

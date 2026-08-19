@@ -32,26 +32,27 @@ public class TypeTransformer {
 
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability, boolean hasDelivery){
         Metadata metadata = capability.getMetadata();
-        RedirectStatusApi result = RedirectStatusApi.OPTIONAL;
-        RedirectStatus status = metadata.getRedirectPolicy();
-        if (status != null) {
-            switch (status) {
-                case MANDATORY:
-                    result = RedirectStatusApi.MANDATORY;
-                    break;
-                case NOT_AVAILABLE:
-                    result = RedirectStatusApi.NOT_AVAILABLE;
-                    break;
-                default:
-                    break;
-            }
-        }
         return new OnboardingCapability(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
-                new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                metadataToMetadataApi(metadata),
                 hasDelivery,
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
+    }
+
+    private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+        return new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()), metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval());
+    }
+
+    private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus statusApi) {
+        if (statusApi != null) {
+            return switch (statusApi) {
+                case MANDATORY -> RedirectStatusApi.MANDATORY;
+                case NOT_AVAILABLE -> RedirectStatusApi.NOT_AVAILABLE;
+                default -> RedirectStatusApi.OPTIONAL;
+            };
+        }
+        return RedirectStatusApi.OPTIONAL;
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
@@ -165,45 +166,17 @@ public class TypeTransformer {
         List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
             Metadata metadata = capability.getMetadata();
-            RedirectStatusApi result = RedirectStatusApi.OPTIONAL;
-            RedirectStatus status = metadata.getRedirectPolicy();
-            if (status != null) {
-                switch (status) {
-                    case MANDATORY:
-                        result = RedirectStatusApi.MANDATORY;
-                        break;
-                    case NOT_AVAILABLE:
-                        result = RedirectStatusApi.NOT_AVAILABLE;
-                        break;
-                    default:
-                        break;
-                }
-            }
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     capability.getApplication().toApi(),
-                    new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                    metadataToMetadataApi(metadata),
                     transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
             Metadata metadata = neighbourCapability.getMetadata();
-            RedirectStatusApi result = RedirectStatusApi.OPTIONAL;
-            RedirectStatus status = metadata.getRedirectPolicy();
-            if (status != null) {
-                switch (status) {
-                    case MANDATORY:
-                        result = RedirectStatusApi.MANDATORY;
-                        break;
-                    case NOT_AVAILABLE:
-                        result = RedirectStatusApi.NOT_AVAILABLE;
-                        break;
-                    default:
-                        break;
-                }
-            }
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
                     neighbourCapability.getApplication().toApi(),
-                    new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                    metadataToMetadataApi(metadata),
                     transformLocalDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
             ));
         }

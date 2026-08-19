@@ -3,7 +3,6 @@ package no.vegvesen.ixn.federation.transformer;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.shared.capability.*;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,15 +21,17 @@ public class CapabilityToCapabilityApiTransformer {
 		Set<CapabilityApi> capabilityApis = new HashSet<>();
 		for (Capability capability : capabilities) {
 			Metadata metadata = capability.getMetadata();
-			RedirectStatus status = metadata.getRedirectPolicy();
-			RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
-			CapabilityApi capabilityApi = new CapabilityApi(
+            CapabilityApi capabilityApi = new CapabilityApi(
 					capability.getApplication().toApi(),
-					new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval())
+					metadataToMetadataApi(metadata)
 			);
 			capabilityApis.add(capabilityApi);
 		}
 		return capabilityApis;
+	}
+
+	private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+		return new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()), metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval());
 	}
 
 	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
@@ -64,40 +65,28 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	public CapabilityApi capabilityToCapabilityApi(Capability capability) {
-		Metadata metadata = capability.getMetadata();
-		RedirectStatus status = metadata.getRedirectPolicy();
-		RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
-		return new CapabilityApi(
+        return new CapabilityApi(
 				capability.getApplication().toApi(),
-				new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval())
+				metadataToMetadataApi(capability.getMetadata())
 		);
 	}
 
 	public CapabilityApi neighbourCapabilityToCapabilityApi(NeighbourCapability capability) {
-		Metadata metadata = capability.getMetadata();
-		RedirectStatus status = metadata.getRedirectPolicy();
-		RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
 		return new CapabilityApi(
 				capability.getApplication().toApi(),
-				new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval())
+				metadataToMetadataApi(capability.getMetadata())
 		);
 	}
 
 	private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus status) {
-		RedirectStatusApi result = RedirectStatusApi.OPTIONAL;
-		if (status != null) {
-			switch (status) {
-				case MANDATORY:
-					result = RedirectStatusApi.MANDATORY;
-					break;
-				case NOT_AVAILABLE:
-					result = RedirectStatusApi.NOT_AVAILABLE;
-					break;
-				default:
-					break;
-			}
+        if (status != null) {
+			return switch (status) {
+				case MANDATORY -> RedirectStatusApi.MANDATORY;
+				case NOT_AVAILABLE -> RedirectStatusApi.NOT_AVAILABLE;
+				default -> RedirectStatusApi.OPTIONAL;
+			};
 		}
-		return result;
+		return RedirectStatusApi.OPTIONAL;
 	}
 
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
