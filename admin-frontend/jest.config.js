@@ -1,6 +1,5 @@
 // jest.config.js
 // https://nextjs.org/docs/testing#setting-up-jest-with-the-rust-compiler
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({

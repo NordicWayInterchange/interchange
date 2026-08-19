@@ -98,7 +98,7 @@ const cheatsheetContent = [
 
 export const Cheatsheet = () => {
   return (
-    <Box flex={1}>
+    <Box sx={{flex: 1}}>
       <Subheading>Selector cheatsheet</Subheading>
       <Typography>Need assistance with writing your own selector? Check below for inspiration.</Typography>
       <Divider sx={{ marginY: 2 }} />

@@ -182,7 +182,7 @@ const Neighbours = () => {
     const displayControlConnectionDrawer = firstTableRow && firstTableRow?.controlConnection && !(firstTableFieldName === 'capabilities' || firstTableFieldName === 'ourRequestedSubscriptions'
         || firstTableFieldName === 'neighbourRequestedSubscriptions');
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <Mainheading>Neighbours</Mainheading>
             <Subheading>
                 These are all of neighbours. You can click on each row to see control connection details. You can also

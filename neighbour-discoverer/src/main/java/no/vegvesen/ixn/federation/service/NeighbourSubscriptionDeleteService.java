@@ -1,6 +1,6 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
+import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
 import no.vegvesen.ixn.federation.model.*;
@@ -22,16 +22,18 @@ public class NeighbourSubscriptionDeleteService {
     private final NeighbourRepository neighbourRepository;
     private final GracefulBackoffProperties backoffProperties;
     private final MatchRepository matchRepository;
+    private final NeighbourRESTFacade neighbourFacade;
 
 
     @Autowired
-    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository) {
+    public NeighbourSubscriptionDeleteService(NeighbourRepository neighbourRepository, GracefulBackoffProperties backoffProperties, MatchRepository matchRepository, NeighbourRESTFacade neighbourFacade) {
         this.neighbourRepository = neighbourRepository;
         this.backoffProperties = backoffProperties;
         this.matchRepository = matchRepository;
+        this.neighbourFacade = neighbourFacade;
     }
 
-    public void deleteSubscriptions (NeighbourFacade neighbourFacade) {
+    public void deleteSubscriptions () {
         List<Neighbour> neighbours = neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN);
         for (Neighbour neighbour : neighbours) {
             if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {

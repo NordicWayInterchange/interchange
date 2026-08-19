@@ -27,11 +27,11 @@ export default function QueueValidator ({ queueName }: Props) {
             {(data === undefined || data === null || isDataWithDescription(data) && data.description === "Page not found" || error) ? (
                 <Loading text="Queue"/>
             ) : data ? (
-                <Typography color="success.main" marginTop={2} style={validatorStyle}>
+                <Typography sx={{color:'success.main', marginTop:2}} style={validatorStyle}>
                     <CheckCircleIcon style={{ color: 'green', marginRight: 8 }} /> &quot;{queueName}&quot; queue exists!
                 </Typography>
             ) : (
-                <Typography color="warning.main" marginTop={2} style={validatorStyle}>
+                <Typography sx={{color:'success.main', marginTop:2}} style={validatorStyle}>
                     <WarningAmberIcon style={{ color: 'orange', marginRight: 8 }} /> &quot;{queueName}&quot; queue could not be found!
                 </Typography>
             )}

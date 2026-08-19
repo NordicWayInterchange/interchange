@@ -18,7 +18,7 @@ type Props = {
 };
 const NestedGridConnections = ({nestedConnectionData, nestedConnectionColumns, handleOnRowClick}: Props) => {
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <Mainheading>Connections</Mainheading>
             <Subheading>
                 These are all of connections.

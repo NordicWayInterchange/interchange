@@ -63,6 +63,12 @@ or VmsPublication
 ## Cause code
 Only applies for DENM publications.
 
+## Selector
+A selector is a message filtering mechanism that allows a consumer to receive only messages that match specified criteria.
+The selector is evaluated by the JMS broker before message delivery, reducing the need for filtering in application code.
+Selectors use a SQL-like syntax. For example: *messageType = 'DATEX_2' AND originatingCountry = 'SE'*
+In this example, the consumer will receive only messages whose messageType property is DATEX_2 and whose originatingCountry property is SE.
+
 ## Private channel
 A Private channel is a point-to point communication channel between Service Providers on the same interchange. Private 
 Channels do not enforce the constraints of Message Types like Capability-based streams do. 
@@ -73,5 +79,3 @@ A Private channel peer is another service provider that can have access to read 
 ## Bi-queues
 A Bi-queue provides an unfiltered view of all data for a message type produced on a single interchange. A Bi-queue 
 allows service providers to connect and receive messages over the Basic Interface as described in the [specification](https://www.c-roads.eu/).
-
-

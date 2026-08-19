@@ -1,7 +1,7 @@
-import { Box, Stack } from "@mui/system";
+import { Box } from "@mui/system";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { tooltipFontStyle } from "@/components/shared/styles/TooltipFontStyle";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -13,6 +13,7 @@ import Loading from "@/components/shared/actions/Loading";
 import { addBiqueueAccess } from "@/lib/fetchers/internalFetchers";
 import { IFeedback } from "@/interface/IFeedback";
 import Snackbar from "@/components/shared/feedback/Snackbar";
+import { Stack } from "@mui/material";
 
 const BiConsumer = () => {
   const { data: session } = useSession();
@@ -95,24 +96,29 @@ const BiConsumer = () => {
           <Loading text="Bi-queue access status" />
         ) : (
           <Box>
-            <Stack
-              direction="row"
-              alignItems="left"
-              spacing={1}
-              sx={{
-                flexWrap: "wrap",
-                rowGap: 1,
-              }}
+            <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  rowGap: 1,
+                }}
             >
               {hasAccess ? (
-                <Stack
-                  direction="row"
-                  alignItems="left"
-                  spacing={1}
-                  onClick={handleOpen(true)}
-                >
+                  <Box
+                      onClick={() => handleOpen(true)}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 1,
+                        cursor: "pointer",
+                      }}
+                  >
                   <IconButton size="small">
-                    <CheckCircleOutlineIcon color="success"/>
+                    <CheckCircleIcon color="success"/>
                   </IconButton>
                   <Typography
                     variant="body2"
@@ -133,15 +139,19 @@ allows service providers to connect and receive messages over the Basic Interfac
                       </IconButton>
                     </Tooltip>
                   </Typography>
-                </Stack>
+                </Box>
               ) : (
-                <Stack
-                  direction="row"
-                  alignItems="left"
-                  spacing={1}
-                  onClick={handleOpen(true)}
-                >
-                  <IconButton size="small">
+                  <Box
+                      onClick={() => handleOpen(true)}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        gap: 1,
+                        cursor: "pointer",
+                      }}
+                  >
+                  <IconButton size="small" sx={{mt: -1}}>
                     <LockOutlinedIcon color="action" />
                   </IconButton>
                   <Typography
@@ -163,7 +173,7 @@ allows service providers to connect and receive messages over the Basic Interfac
                       </IconButton>
                     </Tooltip>
                   </Typography>
-                </Stack>
+                  </Box>
               )}
 
               <StyledButton
@@ -180,7 +190,7 @@ allows service providers to connect and receive messages over the Basic Interfac
               >
                 {hasAccess ? "Remove my access" : "Give me access"}
               </StyledButton>
-            </Stack>
+            </Box>
           </Box>
         )}
         {feedback.feedback && (

@@ -54,10 +54,10 @@ const NewSubscription = () => {
   };
 
   return (
-    <Box flex={1}>
+    <Box sx={{flex:1}}>
       <Mainheading>Create subscription</Mainheading>
       <Subheading>
-        <Box position="relative" display="inline-flex">
+        <Box sx={{position:'relative', display:'inline-flex'}}>
         Create a subscription with the form, or specify your own selector in
         advanced mode.
           <UserAssistance/>
@@ -66,12 +66,15 @@ const NewSubscription = () => {
       <Divider sx={{ marginY: 1 }} />
       <BreadcrumbNavigation text="Subscriptions" />
       <Box
-        display="flex"
-        flexWrap="wrap"
-        gap={3}
+          sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 3
+              }}
       >
-        <Box flex={1}
+        <Box
              sx={{
+               flex: 1,
                width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" }
              }}
         >
@@ -84,8 +87,9 @@ const NewSubscription = () => {
             label="Subscription"
           />
         </Box>
-        <Box flex={1}
+        <Box
              sx={{
+               flex:1,
                width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" }
              }}
         >

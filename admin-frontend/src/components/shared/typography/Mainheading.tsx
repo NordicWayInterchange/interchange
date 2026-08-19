@@ -8,7 +8,7 @@ interface Props extends TypographyProps {
 
 const Mainheading = ({ children }: Props) => {
     return (
-        <Typography variant="h1" fontSize={40}>
+        <Typography variant="h4">
             {children}
         </Typography>
     );

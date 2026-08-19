@@ -91,7 +91,13 @@ export default function NetworkCapabilities() {
     handleMore(params.row);
   };
 
-  const rows = Array.isArray(data) ? data : [];
+  const rows = Array.isArray(data)
+      ? data.map((row, index) => ({
+        ...row,
+        uniqueId: `${row.publicationId}-${index}`,
+      }))
+      : [];
+
 
   const filteredCapabilitiesRows = searchId.trim()
     ? rows.filter((row) =>
@@ -100,11 +106,11 @@ export default function NetworkCapabilities() {
     : rows;
 
   return (
-    <Box flex={1}>
+      <Box sx={{flex: 1}}>
       <Mainheading>Network Capabilities</Mainheading>
       <Subheading>
-        These are the capabilities you can subscribe to. You can click a
-        capability to see details or subscribe.
+        These are the capabilities you can subscribe to. Neighbour capabilities and local capabilities with delivery
+        are listed below. You can click a capability to see details or subscribe.
       </Subheading>
       <Divider sx={{ marginY: 2 }} />
       <SearchBox searchId={searchId} setSearchId={setSearchId} label="capability" searchElement="publicationID"/>
@@ -114,7 +120,7 @@ export default function NetworkCapabilities() {
         rows={filteredCapabilitiesRows || []}
         onRowClick={handleOnRowClick}
         loading={isLoading}
-        getRowId={(row) => row.publicationId}
+        getRowId={(row) => row.uniqueId}
         sort={{ field: "lastUpdatedTimestamp", sort: "desc" }}
         slots={{
           noRowsOverlay: CustomEmptyOverlayCapabilites,

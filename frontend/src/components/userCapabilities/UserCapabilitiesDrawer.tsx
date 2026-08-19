@@ -155,7 +155,7 @@ const UserCapabilitiesDrawer = ({ capability, open, handleMoreClose, handleDelet
                   control={<Switch checked={dlqueue} onChange={enableDlqueue} />}
                   sx={{mt: 1 }}
                   label={
-                    <Box display="flex" alignItems="center">
+                    <Box sx={{display:'flex', alignItems:'center'}}>
                     <span>
                       Enable dead letter queue (DLQ) for this delivery
                     </span>

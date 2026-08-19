@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.service;
 
-import no.vegvesen.ixn.federation.discoverer.facade.NeighbourFacade;
 import no.vegvesen.ixn.federation.discoverer.facade.NeighbourRESTFacade;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionDeleteException;
 import no.vegvesen.ixn.federation.exceptions.SubscriptionNotFoundException;
@@ -63,7 +62,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
         Neighbour neighbour = new Neighbour(neighbourName, new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), subscriptionRequest);
         neighbourRepository.save(neighbour);
 
-        service.deleteSubscriptions(mockNeighbourFacade);
+        service.deleteSubscriptions();
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
@@ -83,7 +82,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
         neighbourRepository.save(neighbour);
 
         doThrow(new SubscriptionNotFoundException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
-        service.deleteSubscriptions(mockNeighbourFacade);
+        service.deleteSubscriptions();
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
@@ -100,7 +99,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
         neighbourRepository.save(neighbour);
 
         doThrow(new SubscriptionDeleteException("", new RuntimeException())).when(mockNeighbourFacade).deleteSubscription(any(), any());
-        service.deleteSubscriptions(mockNeighbourFacade);
+        service.deleteSubscriptions();
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
@@ -123,7 +122,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
 
         neighbourRepository.save(neighbour);
 
-        service.deleteSubscriptions(mockNeighbourFacade);
+        service.deleteSubscriptions();
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
     }
@@ -138,7 +137,7 @@ public class NeighbourSubscriptionDeleteServiceIT extends PostgresContainerBase 
 
         neighbourRepository.save(neighbour);
 
-        service.deleteSubscriptions(mockNeighbourFacade);
+        service.deleteSubscriptions();
 
         assertThat(neighbourRepository.findByName(neighbourName).getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }

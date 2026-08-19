@@ -20,8 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-@Primary
-public class NeighbourRESTFacade implements NeighbourFacade {
+public class NeighbourRESTFacade {
 
     private NeighbourRESTClient neighbourRESTClient;
     private Logger logger = LoggerFactory.getLogger(NeighbourRESTFacade.class);
@@ -44,7 +43,6 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		this.subscriptionRequestTransformer = subscriptionRequestTransformer;
 	}
 
-	@Override
 	public Set<NeighbourCapability> postCapabilitiesToCapabilities(Neighbour neighbour, String selfName, Set<Capability> localCapabilities) {
 		String controlChannelUrl = neighbour.getControlChannelUrl("/capabilities");
 		String name = neighbour.getName();
@@ -54,7 +52,6 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		return capabilityTransformer.capabilityApiToNeighbourCapabilities(result.getCapabilities());
 	}
 
-	@Override
 	public Set<Subscription> postSubscriptionRequest(Neighbour neighbour, Set<Subscription> subscriptions, String selfName) {
 		SubscriptionRequestApi subscriptionRequestApi = subscriptionRequestTransformer.subscriptionRequestToSubscriptionRequestApi(selfName,subscriptions);
 		String controlChannelUrl = neighbour.getControlChannelUrl("/subscriptions");
@@ -64,7 +61,6 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		return subscriptionTransformer.requestedSubscriptionResponseApiToSubscriptions(responseApi.getSubscriptions());
 	}
 
-	@Override
 	public Subscription pollSubscriptionStatus(Subscription subscription, Neighbour neighbour) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
 		String name = neighbour.getName();
@@ -75,7 +71,6 @@ public class NeighbourRESTFacade implements NeighbourFacade {
 		return returnSubscription;
 	}
 
-	@Override
 	public void deleteSubscription (Neighbour neighbour, Subscription subscription) {
 		String url = neighbour.getControlChannelUrl(subscription.getPath());
     	String neighbourName = neighbour.getName();
