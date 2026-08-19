@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Component
 public class CapabilityToCapabilityApiTransformer {
-	private static Logger logger = LoggerFactory.getLogger(CapabilityToCapabilityApiTransformer.class);
+	private static final Logger logger = LoggerFactory.getLogger(CapabilityToCapabilityApiTransformer.class);
 
 	public CapabilityToCapabilityApiTransformer() {
 	}

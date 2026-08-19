@@ -18,7 +18,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
-import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,12 +88,9 @@ public class TypeTransformer {
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
-            Metadata metadata = neighbourCapability.getMetadata();
-            RedirectStatus status = metadata.getRedirectPolicy();
-            RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
             matchingCapabilities.add(new MatchingCapabilityApi(
                     neighbourCapability.getApplication().toApi(),
-                    new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval())
+                    metadataToMetadataApi(neighbourCapability.getMetadata())
             ));
         }
         return matchingCapabilities;
@@ -267,13 +263,10 @@ public class TypeTransformer {
     public List<CapabilityApi> capabilitiesSetToCapabilitiesApiList(Set<Capability> capabilities) {
         List<CapabilityApi> capabilityApiList = new ArrayList<>();
         for (Capability capability : capabilities) {
-            Metadata metadata = capability.getMetadata();
-            RedirectStatus status = metadata.getRedirectPolicy();
-            RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
             capabilityApiList.add(new CapabilityApi(
                     capability.getUuid(),
                     capability.getApplication().toApi(),
-                    new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                    metadataToMetadataApi(capability.getMetadata()),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
                     capabilityStatusToCapabilityStatusApi(capability.getStatus()),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
@@ -458,13 +451,10 @@ public class TypeTransformer {
     }
 
     public NeighbourCapabilityApi neighbourCapabilityToNeighbourCapabilityApi(NeighbourCapability neighbourCapability) {
-        Metadata metadata = neighbourCapability.getMetadata();
-        RedirectStatus status = metadata.getRedirectPolicy();
-        RedirectStatusApi result = redirectStatusToRedirectStatusApi(status);
         return new NeighbourCapabilityApi(
                 neighbourCapability.getId(),
                 neighbourCapability.getApplication().toApi(),
-                new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                metadataToMetadataApi(neighbourCapability.getMetadata()),
                 localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
         );
     }
@@ -475,12 +465,10 @@ public class TypeTransformer {
 
     public no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi capabilitiesMatchedDeliveryBasedOnCapabilityId(OutgoingMatch match) {
         Capability capability = match.getCapability();
-        Metadata metadata = capability.getMetadata();
-        RedirectStatusApi result = redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy());
         return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
                 capability.getUuid(),
                 capability.getApplication().toApi(),
-                new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), result, metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval()),
+                metadataToMetadataApi(capability.getMetadata()),
                 capabilityShardSetToCapabilityShardIdSetApi(capability.getShards()),
                 localDateTimeToTimestamp(capability.getCreatedTimestamp())
         );
