@@ -22,7 +22,7 @@ public class CapabilityToCapabilityApiTransformer {
 		for (Capability capability : capabilities) {
 			Metadata metadata = capability.getMetadata();
             CapabilityApi capabilityApi = new CapabilityApi(
-					capability.getApplication().toApi(),
+					applicationApiToApplicationApi(capability.getApplication()),
 					metadataToMetadataApi(metadata)
 			);
 			capabilityApis.add(capabilityApi);
@@ -66,14 +66,14 @@ public class CapabilityToCapabilityApiTransformer {
 
 	public CapabilityApi capabilityToCapabilityApi(Capability capability) {
         return new CapabilityApi(
-				capability.getApplication().toApi(),
+				applicationApiToApplicationApi(capability.getApplication()),
 				metadataToMetadataApi(capability.getMetadata())
 		);
 	}
 
 	public CapabilityApi neighbourCapabilityToCapabilityApi(NeighbourCapability capability) {
 		return new CapabilityApi(
-				capability.getApplication().toApi(),
+				applicationApiToApplicationApi(capability.getApplication()),
 				metadataToMetadataApi(capability.getMetadata())
 		);
 	}
@@ -120,6 +120,72 @@ public class CapabilityToCapabilityApiTransformer {
 
 		metadata.setRedirectPolicy(transformRedirectStatusApiToRedirectStatus(metadataApi.getRedirectPolicy()));
 		return metadata;
+	}
+
+	private static ApplicationApi applicationApiToApplicationApi(Application application) {
+		return switch (application) {
+			case DatexApplication d -> new DatexApplicationApi(
+					d.getPublisherId(),
+					d.getPublicationId(),
+					d.getOriginatingCountry(),
+					d.getProtocolVersion(),
+					d.getQuadTree(),
+					d.getPublicationType(),
+					d.getPublisherName()
+			);
+			case DenmApplication d ->  new DenmApplicationApi(
+					d.getPublisherId(),
+					d.getPublicationId(),
+					d.getOriginatingCountry(),
+					d.getProtocolVersion(),
+					d.getQuadTree(),
+					d.getCauseCode()
+			);
+			case IvimApplication i ->  new IvimApplicationApi(
+					i.getPublisherId(),
+					i.getPublicationId(),
+					i.getOriginatingCountry(),
+					i.getProtocolVersion(),
+					i.getQuadTree()
+			);
+			case SpatemApplication sp ->  new SpatemApplicationApi(
+					sp.getPublisherId(),
+					sp.getPublicationId(),
+					sp.getOriginatingCountry(),
+					sp.getProtocolVersion(),
+					sp.getQuadTree()
+			);
+			case MapemApplication mapem ->  new MapemApplicationApi(
+					mapem.getPublisherId(),
+					mapem.getPublicationId(),
+					mapem.getOriginatingCountry(),
+					mapem.getProtocolVersion(),
+					mapem.getQuadTree()
+			);
+			case SremApplication srem ->  new SremApplicationApi(
+					srem.getPublisherId(),
+					srem.getPublicationId(),
+					srem.getOriginatingCountry(),
+					srem.getProtocolVersion(),
+					srem.getQuadTree()
+			);
+			case SsemApplication ssem ->  new SsemApplicationApi(
+					ssem.getPublisherId(),
+					ssem.getPublicationId(),
+					ssem.getOriginatingCountry(),
+					ssem.getProtocolVersion(),
+					ssem.getQuadTree()
+			);
+			case CamApplication cam ->  new CamApplicationApi(
+					cam.getPublisherId(),
+					cam.getPublicationId(),
+					cam.getOriginatingCountry(),
+					cam.getProtocolVersion(),
+					cam.getQuadTree()
+			);
+			default -> throw new IllegalArgumentException("Unknown application api");
+		};
+
 	}
 
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {

@@ -2,8 +2,6 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
 import no.vegvesen.ixn.shared.Constants;
-import no.vegvesen.ixn.shared.capability.ApplicationApi;
-import no.vegvesen.ixn.shared.capability.DenmApplicationApi;
 
 import java.util.*;
 
@@ -36,11 +34,6 @@ public class DenmApplication extends Application{
 
     public void setCauseCode(List<Integer> causeCode) {
         this.causeCode = causeCode;
-    }
-
-    @Override
-    public ApplicationApi toApi() {
-        return new DenmApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getCauseCode());
     }
 
     @Override
