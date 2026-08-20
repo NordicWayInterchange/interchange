@@ -76,7 +76,7 @@ public class SubscriptionRequestTransformer {
                             endpointApi.getPort(),
                             endpointApi.getMaxBandwidth(),
                             endpointApi.getMaxMessageRate(),
-                            subscriptionApi.getSelector()
+                            endpointApi.getRequiresDynamicFilter() ? subscriptionApi.getSelector() : null
                     );
                     endpoints.add(endpoint);
                 }
