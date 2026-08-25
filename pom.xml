@@ -76,6 +76,20 @@
                     </configuration>
                 </plugin>
 
+                <!-- Ved mvn clean slettes filene i /frontend/public/generated -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.1</version>
+                    <inherited>false</inherited>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${maven.multiModuleProjectDirectory}/frontend/public/generated</directory>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
