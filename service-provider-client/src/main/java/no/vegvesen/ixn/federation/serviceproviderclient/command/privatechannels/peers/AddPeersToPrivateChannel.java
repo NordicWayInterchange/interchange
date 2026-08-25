@@ -1,10 +1,10 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddPeersRequest;
 import picocli.CommandLine.*;
-import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -37,7 +37,7 @@ public class AddPeersToPrivateChannel implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         AddPeersRequest request = mapper.readValue(file, AddPeersRequest.class);
         client.addPeersToPrivateChannel(privateChannelId, request);
         return 0;

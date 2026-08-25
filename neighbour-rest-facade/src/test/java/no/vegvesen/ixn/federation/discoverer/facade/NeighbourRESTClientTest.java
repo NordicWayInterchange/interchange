@@ -4,8 +4,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
@@ -22,6 +22,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class NeighbourRESTClientTest {
     @BeforeEach
     public void setUp() {
         template = mock(RestTemplate.class);
-        mapper = new ObjectMapper();
+        mapper = JsonMapper.builder().build();
         logger = (Logger) LoggerFactory.getLogger(NeighbourRESTClient.class);
         appender = new ListAppender<>();
         appender.start();
@@ -98,7 +99,7 @@ public class NeighbourRESTClientTest {
     }
 
     @Test
-    public void doPostCapabilitiesErrorWithErrorDetails() throws JsonProcessingException {
+    public void doPostCapabilitiesErrorWithErrorDetails() throws JacksonException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.INTERNAL_SERVER_ERROR.toString(),"Huston, we have a problem");
         HttpServerErrorException exception = HttpServerErrorException.create(HttpStatus.INTERNAL_SERVER_ERROR,HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
 
@@ -193,7 +194,7 @@ public class NeighbourRESTClientTest {
     }
 
     @Test
-    public void postSubscriptionRequestErrorDetails() throws JsonProcessingException {
+    public void postSubscriptionRequestErrorDetails() throws JacksonException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.BAD_REQUEST.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
 
@@ -251,7 +252,7 @@ public class NeighbourRESTClientTest {
 
 
     @Test
-    public void doPollSubscriptionStatusClientError() throws JsonProcessingException {
+    public void doPollSubscriptionStatusClientError() throws JacksonException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.BAD_REQUEST.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
         when(template.getForEntity(any(String.class),any(Class.class)))
@@ -265,7 +266,7 @@ public class NeighbourRESTClientTest {
     }
 
     @Test
-    public void doPollSubscriptionStatusNotFound() throws JsonProcessingException {
+    public void doPollSubscriptionStatusNotFound() throws JacksonException {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),HttpStatus.NOT_FOUND.toString(),"You're doing it wrong");
         HttpClientErrorException exception = HttpClientErrorException.create(HttpStatus.NOT_FOUND,HttpStatus.NOT_FOUND.getReasonPhrase(),null,mapper.writeValueAsBytes(errorDetails),null);
         when(template.getForEntity(any(String.class),any(Class.class)))

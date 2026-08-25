@@ -1,13 +1,16 @@
 package no.vegvesen.ixn.napcore.client.command.subscriptions;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Capability;
-import static picocli.CommandLine.*;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "match",
@@ -24,9 +27,9 @@ public class FetchMatchingCapabilities implements Callable<Integer> {
     String selector;
 
     @Override
-    public Integer call() throws JsonProcessingException {
+    public Integer call() throws JacksonException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         List<Capability> capabilities = client.getMatchingCapabilities(selector);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(capabilities));
         return 0;

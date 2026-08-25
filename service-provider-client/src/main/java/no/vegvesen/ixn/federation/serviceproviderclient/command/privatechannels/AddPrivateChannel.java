@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddPrivateChannelResponse;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelRequestApi;
 import picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,13 +36,13 @@ public class AddPrivateChannel implements Callable<Integer> {
     @Override
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
-        if(option.file != null) {
+        ObjectMapper mapper = JsonMapper.builder().build();
+        if (option.file != null) {
             AddPrivateChannelRequest privateChannel = mapper.readValue(option.file, AddPrivateChannelRequest.class);
             AddPrivateChannelResponse result = client.addPrivateChannel(privateChannel);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
+        else {
             AddPrivateChannelRequest privateChannel = new AddPrivateChannelRequest(
                     List.of(new PrivateChannelRequestApi(
                             Set.of(),
@@ -52,16 +53,13 @@ public class AddPrivateChannel implements Callable<Integer> {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
         return 0;
-
     }
 
-    static class AddPrivateChannelOption{
+    static class AddPrivateChannelOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The private channel json file")
         File file;
 
         @Parameters(index = "0")
         String description;
-
-
     }
 }
