@@ -1,8 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
-import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.*;
+import no.vegvesen.ixn.serviceprovider.security.CNAndApiObjectMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;

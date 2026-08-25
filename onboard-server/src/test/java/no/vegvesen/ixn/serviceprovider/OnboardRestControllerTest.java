@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.serviceprovider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
@@ -10,7 +9,12 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import no.vegvesen.ixn.shared.capability.*;
+import no.vegvesen.ixn.serviceprovider.security.CertIdentityResolver;
+import no.vegvesen.ixn.serviceprovider.security.CertService;
+import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
+import no.vegvesen.ixn.shared.capability.MetadataApi;
+import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -36,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = OnboardRestController.class)
-@ContextConfiguration(classes = {CertService.class, OnboardRestController.class, InterchangeNodeProperties.class})
+@ContextConfiguration(classes = {CertService.class, OnboardRestController.class, InterchangeNodeProperties.class, CertIdentityResolver.class})
 public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
