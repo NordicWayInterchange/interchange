@@ -12,7 +12,6 @@ import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import no.vegvesen.ixn.serviceprovider.security.CertService;
-import no.vegvesen.ixn.serviceprovider.security.SecurityConfig;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -60,12 +58,6 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
     @MockitoBean
     private CertService certService;
-
-    @MockitoBean
-    private SecurityConfig securityConfig;
-
-    @MockitoBean
-    private HttpSecurity httpSecurity;
 
     @Autowired
     private InterchangeNodeProperties nodeProperties;
