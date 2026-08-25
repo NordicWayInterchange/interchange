@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TypeTransformerTest {
     @Test
     public void testTransformMapemCapability() {
+        TypeTransformer transformer = new TypeTransformer();
         MapemApplication app = new MapemApplication(
                 "NO-123",
                 "pub-1",
@@ -26,7 +27,7 @@ public class TypeTransformerTest {
                 List.of()
         );
 
-        ApplicationApi appApi = app.toApi();
+        ApplicationApi appApi = transformer.
         assertThat(appApi.getMessageType()).isEqualTo("MAPEM");
 
     }
