@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
+import no.vegvesen.ixn.federation.auth.CertIdentityResolver;
 import no.vegvesen.ixn.federation.auth.CertService;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotFoundException;
 import no.vegvesen.ixn.federation.exceptions.InterchangeNotInDNSException;
@@ -39,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = NeighbourRestController.class)
-@ContextConfiguration(classes = {NeighbourRestController.class, CertService.class, InterchangeNodeProperties.class})
+@ContextConfiguration(classes = {NeighbourRestController.class, CertService.class, InterchangeNodeProperties.class, CertIdentityResolver.class})
 class NeighbourRestControllerTest {
 
 	private MockMvc mockMvc;
