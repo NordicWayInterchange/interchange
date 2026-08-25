@@ -649,13 +649,13 @@ public class NeighbourServiceDiscoveryTest {
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1); //TODO this is the one in use!
 
 		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(new SubscriptionPollException("Error"));
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour);
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(0); //TODO we start at 0, which mght be a bit confusing. The first fail is not a backoff attempt, by the looks of things.
-		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour);
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(1);
-		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour);
 		assertThat(subscription.getNumberOfPolls()).isEqualTo(1); //TODO there was not actually a poll on the last call, so the attempts should not be changed.
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.GIVE_UP);
 		//TODO test that this actually works the same way when we do it through the triggered methods.
@@ -695,7 +695,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
 
 		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenReturn(returnSubscription);
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour);
 
 		assertThat(subscription.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 		verify(neighbourFacade,times(1)).pollSubscriptionStatus(any(),any());
@@ -725,7 +725,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
 		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
-		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour);
 		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
 	}
 
@@ -754,7 +754,7 @@ public class NeighbourServiceDiscoveryTest {
 		when(discovererProperties.getSubscriptionPollingNumberOfAttempts()).thenReturn(1);
 		when(backoffProperties.getNumberOfAttempts()).thenReturn(1);
 		when(neighbourFacade.pollSubscriptionStatus(subscription,neighbour)).thenThrow(SubscriptionNotFoundException.class);
-		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour,neighbourFacade);
+		neigbourDiscoveryService.pollSubscriptionsOneNeighbour(neighbour);
 		assertThat(subscription.getSubscriptionStatus().equals(SubscriptionStatus.TEAR_DOWN));
 	}
 
