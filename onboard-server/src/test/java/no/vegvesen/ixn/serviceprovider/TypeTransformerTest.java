@@ -3,34 +3,16 @@ package no.vegvesen.ixn.serviceprovider;
 import no.vegvesen.ixn.federation.model.Capabilities;
 import no.vegvesen.ixn.federation.model.LocalSubscription;
 import no.vegvesen.ixn.federation.model.ServiceProvider;
-import no.vegvesen.ixn.federation.model.capability.MapemApplication;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
-import no.vegvesen.ixn.shared.capability.ApplicationApi;
 import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeTransformerTest {
-    @Test
-    public void testTransformMapemCapability() {
-        TypeTransformer transformer = new TypeTransformer();
-        MapemApplication app = new MapemApplication(
-                "NO-123",
-                "pub-1",
-                "NO",
-                "MAPEM:1.1.0",
-                List.of()
-        );
-
-        ApplicationApi appApi = transformer.
-        assertThat(appApi.getMessageType()).isEqualTo("MAPEM");
-
-    }
 
     @Test
     public void testAddSubscriptionWithEmptyConsumerCommonName() {
@@ -40,7 +22,7 @@ public class TypeTransformerTest {
 
         LocalSubscription localSubscription = transformer.transformAddSubscriptionToLocalSubscription(subscription, "service-provider", "my-node");
 
-        System.out.println(localSubscription.toString());
+        assertThat(localSubscription.getSelector()).isEqualTo("originatingCountry = 'NO'");
     }
 
 
