@@ -15,14 +15,16 @@ import java.util.stream.Collectors;
 
 public class TypeTransformer {
 
-    public static AddCapabilitiesResponse addCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
+    private final CapabilityToCapabilityApiTransformer capabilityToCapabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
+
+    public AddCapabilitiesResponse addCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
         return new AddCapabilitiesResponse(
                serviceProviderName,
                capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    private static Set<LocalActorCapability> capabilitySetToLocalActorCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
+    private Set<LocalActorCapability> capabilitySetToLocalActorCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
         Set<LocalActorCapability> result = new HashSet<>();
         for (Capability capability : capabilities) {
             result.add(capabilityToLocalCapability(capabilityApiTransformer, serviceProviderName,capability));
@@ -30,7 +32,7 @@ public class TypeTransformer {
         return result;
     }
 
-    private static LocalActorCapability capabilityToLocalCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
+    private LocalActorCapability capabilityToLocalCapability(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
         String id = capability.getUuid();
         return new LocalActorCapability(
                 id,
@@ -246,60 +248,49 @@ public class TypeTransformer {
     }
 
     private LocalActorSubscriptionStatusApi transformLocalSubscriptionStatusToLocalActorSubscriptionStatusApi(LocalSubscriptionStatus status) {
-        switch (status) {
-            case REQUESTED:
-                return LocalActorSubscriptionStatusApi.REQUESTED;
-            case CREATED:
-                return LocalActorSubscriptionStatusApi.CREATED;
-            case TEAR_DOWN:
-                return LocalActorSubscriptionStatusApi.NOT_VALID;
-            case ERROR:
-                return LocalActorSubscriptionStatusApi.ERROR;
-            default:
-                return LocalActorSubscriptionStatusApi.ILLEGAL;
-        }
+        return switch (status) {
+            case REQUESTED -> LocalActorSubscriptionStatusApi.REQUESTED;
+            case CREATED -> LocalActorSubscriptionStatusApi.CREATED;
+            case TEAR_DOWN -> LocalActorSubscriptionStatusApi.NOT_VALID;
+            case ERROR -> LocalActorSubscriptionStatusApi.ERROR;
+            default -> LocalActorSubscriptionStatusApi.ILLEGAL;
+        };
     }
 
     private DeliveryStatus transformLocalDeliveryStatusToDeliveryStatus(LocalDeliveryStatus status) {
-        switch (status) {
-            case REQUESTED:
-                return DeliveryStatus.REQUESTED;
-            case CREATED:
-                return DeliveryStatus.CREATED;
-            case NOT_VALID:
-                return DeliveryStatus.NOT_VALID;
-            case NO_OVERLAP:
-                return DeliveryStatus.NO_OVERLAP;
-            case ERROR:
-                return DeliveryStatus.ERROR;
-            default:
-                return DeliveryStatus.ILLEGAL;
-        }
+        return switch (status) {
+            case REQUESTED -> DeliveryStatus.REQUESTED;
+            case CREATED -> DeliveryStatus.CREATED;
+            case NOT_VALID -> DeliveryStatus.NOT_VALID;
+            case NO_OVERLAP -> DeliveryStatus.NO_OVERLAP;
+            case ERROR -> DeliveryStatus.ERROR;
+            default -> DeliveryStatus.ILLEGAL;
+        };
     }
 
-    public List<Capability> capabilitiesRequestToCapabilities(CapabilityToCapabilityApiTransformer capabilityApiTransformer, AddCapabilitiesRequest capabilitiesRequest) {
+    public List<Capability> capabilitiesRequestToCapabilities(AddCapabilitiesRequest capabilitiesRequest) {
         List<Capability> capabilities = new ArrayList<>();
         for (CapabilityApi capabilityApi : capabilitiesRequest.getCapabilities()) {
-            Capability capability = capabilityApiTransformer.capabilityApiToCapability(capabilityApi);
+            Capability capability = capabilityToCapabilityApiTransformer.capabilityApiToCapability(capabilityApi);
             capabilities.add(capability);
 
         }
         return capabilities;
     }
 
-    public ListCapabilitiesResponse listCapabilitiesResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Set<Capability> capabilities) {
+    public ListCapabilitiesResponse listCapabilitiesResponse(String serviceProviderName, Set<Capability> capabilities) {
         return new ListCapabilitiesResponse(
                 serviceProviderName,
-                capabilitySetToLocalActorCapability(capabilityApiTransformer, serviceProviderName,capabilities)
+                capabilitySetToLocalActorCapability(capabilityToCapabilityApiTransformer, serviceProviderName,capabilities)
         );
     }
 
-    public GetCapabilityResponse getCapabilityResponse(CapabilityToCapabilityApiTransformer capabilityApiTransformer, String serviceProviderName, Capability capability) {
+    public GetCapabilityResponse getCapabilityResponse(String serviceProviderName, Capability capability) {
         String capabilityId = capability.getUuid();
         return new GetCapabilityResponse(
                 capabilityId,
                 createCapabilitiesPath(serviceProviderName,capabilityId),
-                capabilityApiTransformer.capabilityToCapabilityApi(capability)
+                capabilityToCapabilityApiTransformer.capabilityToCapabilityApi(capability)
         );
     }
 
