@@ -63,9 +63,8 @@ public class NeighbourRESTClient {
                 ErrorDetails errorDetails = mapper.readValue(errorResponse, ErrorDetails.class);
                 logger.debug("Received error object from server: {}", errorDetails.toString());
                 throw new CapabilityPostException(name, errorDetails);
-            // TODO: Check this exception. Used to be IOException.
-            } catch (Exception ex) {
-                logger.debug("Unable to cast error response as ErrorDetails object.", ex);
+            } catch (JacksonException ex) {
+               logger.debug("Unable to cast error response as ErrorDetails object.", ex);
                 throw new CapabilityPostException(name, e.getStatusCode().value(), e);
             }
         } catch (RestClientException e) {
