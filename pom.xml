@@ -83,9 +83,16 @@
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
                         <failsOnError>false</failsOnError>
-                        <consoleOutput>true</consoleOutput>
                         <outputFile>${project.build.directory}/checkstyle/checkstyle-report.xml</outputFile>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
             </plugins>
@@ -371,6 +378,21 @@
                             <inputDirectory>${project.build.directory}/md-input</inputDirectory>
                             <outputDirectory>frontend/public/generated</outputDirectory>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>checkstyle</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.6.0</version>
                     </plugin>
                 </plugins>
             </build>
