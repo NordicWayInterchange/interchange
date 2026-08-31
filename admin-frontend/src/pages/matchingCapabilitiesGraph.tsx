@@ -187,7 +187,7 @@ const MatchingCapabilitiesGraph: React.FC = () => {
     }, [matchingCapabilities]);
 
     return (
-        <Box flex={1}>
+        <Box sx={{flex:1}}>
             <Mainheading>Graphs</Mainheading>
             <Subheading>
                 These include only the service providers that have matching capabilities for each delivery. You can click on each service providers and the boxes inside

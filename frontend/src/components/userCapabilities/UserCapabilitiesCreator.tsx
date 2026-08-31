@@ -136,7 +136,8 @@ const UserCapabilitiesCreator = () => {
 
   const validateUniquePublicationId = (value: string) => {
     if (value && findPublicationIds(value)) {
-      setDuplicatePublicationIdError("Publisher ID and publication ID combination must be unique, please try another one.");
+      setDuplicatePublicationIdError("The combination of Publisher ID and publication ID must be unique. " +
+          "This combination already exists. Please try another one.");
       return true;
     } else {
       setDuplicatePublicationIdError("");
@@ -325,13 +326,13 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                       <FormHelperText>Originating country is required</FormHelperText>
                     )}
                     <Box
-                      position="absolute"
-                      right={30}
-                      top="50%"
-                      sx={{
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'auto',
-                      }}
+                        sx={{
+                          position: 'absolute',
+                          right: 30,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          pointerEvents: 'auto',
+                        }}
                     >
                       <Tooltip title="Country code is where the payload message created and is based on ISO 3166-1 alpha-2. " arrow    slotProps={{
                         tooltip: {
@@ -374,13 +375,13 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                       <FormHelperText>Message type is required</FormHelperText>
                     )}
                     <Box
-                      position="absolute"
-                      right={30}
-                      top="50%"
-                      sx={{
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'auto',
-                      }}
+                        sx={{
+                          position: 'absolute',
+                          right: 30,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          pointerEvents: 'auto',
+                        }}
                     >
                       <Tooltip title="Message type is the type of the published message" arrow slotProps={{
                         tooltip: {
@@ -412,12 +413,20 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                     disabled={!watchMessageType.includes(DENM)}
                   >
                     <InputLabel>Cause codes *</InputLabel>
-                    <Select
-                      MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
-                      multiple
-                      label="Cause codes *"
-                      {...field}
-                    >
+                      <Select
+                          MenuProps={{
+                              slotProps: {
+                                  paper: {
+                                      sx: {
+                                          maxHeight: 200,
+                                      },
+                                  },
+                              },
+                          }}
+                          multiple
+                          label="Cause codes *"
+                          {...field}
+                      >
                       {causeCodes.map((country, index) => (
                         <MenuItem key={index} value={country.value} sx={menuItemStyles}>
                           {country.value}: {country.label}
@@ -425,15 +434,15 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                       ))}
                     </Select>
                     {errors.causeCode && <FormHelperText>Cause code is required.</FormHelperText>}
-                    <Box
-                      position="absolute"
-                      right={32}
-                      top="50%"
-                      sx={{
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'auto',
-                      }}
-                    >
+                      <Box
+                          sx={{
+                              position: 'absolute',
+                              right: 30,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              pointerEvents: 'auto',
+                          }}
+                      >
                       <Tooltip title="DENM messages are covered by specifying an array of causeCode." arrow  slotProps={{
                         tooltip: {
                           sx: tooltipFontStyle,

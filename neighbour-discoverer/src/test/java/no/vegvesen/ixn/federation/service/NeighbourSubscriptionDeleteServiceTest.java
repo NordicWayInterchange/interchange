@@ -37,7 +37,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
     @BeforeEach
     public void setUp() {
-        neighbourSubscriptionDeleteService = new NeighbourSubscriptionDeleteService(neighbourRepository, backoffProperties, matchRepository);
+        neighbourSubscriptionDeleteService = new NeighbourSubscriptionDeleteService(neighbourRepository, backoffProperties, matchRepository,  neighbourFacade);
 
     }
 
@@ -53,7 +53,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-        neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
+        neighbourSubscriptionDeleteService.deleteSubscriptions();
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
     }
 
@@ -68,7 +68,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
 
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
-        neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
+        neighbourSubscriptionDeleteService.deleteSubscriptions();
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(0);
     }
 
@@ -82,7 +82,7 @@ public class NeighbourSubscriptionDeleteServiceTest {
         when(neighbourRepository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.TEAR_DOWN)).thenReturn(List.of(neighbour));
         when(neighbourRepository.save(neighbour)).thenReturn(neighbour);
         doThrow(SubscriptionNotFoundException.class).when(neighbourFacade).deleteSubscription(neighbour,subscription1);
-        neighbourSubscriptionDeleteService.deleteSubscriptions(neighbourFacade);
+        neighbourSubscriptionDeleteService.deleteSubscriptions();
         assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).isEmpty();
     }
 }

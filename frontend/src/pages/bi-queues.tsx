@@ -76,7 +76,7 @@ export default function BiQueues() {
     },
   ];
   return (
-    <Box flex={1}>
+    <Box sx={{flex:1}}>
       <Mainheading>Bi-queues</Mainheading>
       <Subheading>
         These are all of bi-queues per message type. You can click each row to
@@ -85,23 +85,36 @@ export default function BiQueues() {
       <Divider sx={{ marginY: 2 }} />
       <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
 
-      <Box display="flex" flexWrap="wrap" gap={3}>
+      <Box sx={{display:'flex', flexWrap:'wrap', gap:3}}>
         <Box
-          flex={1}
-          sx={{
-            width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" },
-          }}
+            sx={{
+              flex: 1,
+              width: {
+                xs: "100%",
+                sm: "100%",
+                md: "100%",
+                lg: "50%",
+                xl: "50%",
+              },
+            }}
         >
           <Subheading>My bi-queue access</Subheading>
           <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
           <BiConsumer></BiConsumer>
         </Box>
-        <Box
-          flex={1}
-          sx={{
-            width: { xs: "100%", sm: "100%", md: "100%", lg: "50%", xl: "50%" },
-          }}
-        >          <Subheading>My bi-queues list</Subheading>
+          <Box
+              sx={{
+                flex: 1,
+                width: {
+                  xs: "100%",
+                  sm: "100%",
+                  md: "100%",
+                  lg: "50%",
+                  xl: "50%",
+                },
+              }}
+          >
+          <Subheading>My bi-queues list</Subheading>
           <Divider style={{ margin: "5px 0", visibility: "hidden" }} />
             <DataGrid
               columns={tableHeaders}

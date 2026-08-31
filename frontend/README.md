@@ -153,9 +153,10 @@ callbacks: {
   }
 ```
 
-### Middleware
+### Proxy
 
-The middleware.ts allows us to run code before a request is completed. With NextAuth we can export a config object with a regex matcher, to specify allowed routings for an unauthenticated user.
+The proxy.ts file allows us to run code before a request is processed. Using NextAuth, we can export a config object with a matcher that specifies which routes the authentication middleware should apply to,
+allowing unauthenticated users to access only certain routes, such as the login page.
 
 Additionally, we check in the backend (for frontend), that all of these criteria are met:
 

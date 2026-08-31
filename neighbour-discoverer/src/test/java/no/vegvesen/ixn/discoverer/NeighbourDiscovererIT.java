@@ -1,4 +1,4 @@
-package no.vegvesen.ixn.federation.service;
+package no.vegvesen.ixn.discoverer;
 
 
 import no.vegvesen.ixn.federation.discoverer.DNSFacade;
@@ -10,6 +10,7 @@ import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
+import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.shared.Constants;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -59,13 +60,6 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	@Autowired
 	ListenerEndpointRepository listenerEndpointRepository;
 
-	/*
-    @Test
-	public void discovererIsAutowired() {
-		assertThat(neighbourService).isNotNull();
-	}
-
-	 */
 
 	@Test
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow() {
@@ -111,7 +105,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		));
 		when(mockNeighbourFacade.postSubscriptionRequest(any(), anySet(), any())).thenReturn(subscriptions);
 
-		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour1, neighbour2), Optional.of(lastUpdatedLocalSubscriptions), localSubscriptions, mockNeighbourFacade);
+		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(Arrays.asList(neighbour1, neighbour2), Optional.of(lastUpdatedLocalSubscriptions), localSubscriptions);
 
 		verify(mockNeighbourFacade, times(1)).postSubscriptionRequest(eq(neighbour1), any(), any());
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(eq(neighbour2), any(), any());
@@ -134,7 +128,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	public void messageCollectorWillStartAfterCompleteOptimisticControlChannelFlowAndExtraCapabilityExchange() {
 		messageCollectorWillStartAfterCompleteOptimisticControlChannelFlow();
 
-		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(4)).postCapabilitiesToCapabilities(any(), any(), any());
 
 		List<Neighbour> toConsumeMessagesFrom = repository.findDistinctNeighboursByIgnoreIsAndOurRequestedSubscriptions_Subscription_SubscriptionStatusIn(false, SubscriptionStatus.CREATED);
@@ -350,8 +344,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
 				Collections.singletonList(neighbour),
 				lastUpdatedTime,
-				localSubscriptions,
-				mockNeighbourFacade);
+				localSubscriptions);
 		verify(mockNeighbourFacade,times(1)).postSubscriptionRequest(any(Neighbour.class),anySet(),anyString());
 		assertThat(neighbour.getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 		assertThat(listenerEndpointRepository.findAll()).hasSize(0);
@@ -432,8 +425,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
 				Arrays.asList(neighbourA,neighbourB),
 				Optional.of(LocalDateTime.now()),
-				localSubscriptions,
-				mockNeighbourFacade);
+				localSubscriptions);
 
 		assertThat(repository.findByName("neighbourA").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
 		assertThat(repository.findByName("neighbourB").getOurRequestedSubscriptions().getSubscriptions()).isNotEmpty();
@@ -606,7 +598,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 						nodeProperties.getName()
 				));
 
-		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptions()).hasSize(1);
 
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
@@ -617,11 +609,11 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		for (int i=0; i<8; i++) {
 			neighbour.getControlConnection().setLastFailedConnectionAttempt(LocalDateTime.now().minusHours(3));
 			neighbour.getControlConnection().setBackoffStart(LocalDateTime.now().minusHours(1));
-			neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+			neighbourDiscoveryService.pollSubscriptions();
 		}
 		neighbour.getCapabilities().getCapabilities().clear();
 
-		neighbourDiscoveryService.retryUnreachable(mockNeighbourFacade, Collections.emptySet());
+		neighbourDiscoveryService.retryUnreachable(Collections.emptySet());
 
 		neighbourDiscoveryService.postSubscriptionRequest(neighbour, localSubscriptions, mockNeighbourFacade);
 		assertThat(repository.findByName("neighbour").getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.TEAR_DOWN)).hasSize(1);
@@ -705,7 +697,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 						polledSubscription
 				);
 
-		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.TEAR_DOWN);
 		assertThat(listenerEndpointRepository.findByTargetAndAndSourceAndNeighbourName("neighbour-endpoints-target", "neighbour-endpoints-source", "neighbour-endpoints")).isNull();
@@ -771,7 +763,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(Subscription.class), any(Neighbour.class)))
 				.thenThrow(new SubscriptionPollException("Subscription poll gone wrong"));
 
-		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 
 		assertThat(sub.getSubscriptionStatus()).isEqualTo(SubscriptionStatus.FAILED);
 		assertThat(sub.getEndpoints()).isNotEmpty();
@@ -1018,7 +1010,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	@Test
 	public void neighbourIsIgnoredDuringCapabilityExchange(){
 		String name = "ignoredNeighbour1";
-		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.of(LocalDateTime.now()));
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(Collections.emptySet(), Optional.of(LocalDateTime.now()));
 		verify(mockNeighbourFacade, times(0)).postCapabilitiesToCapabilities(any(),any(),any());
 	}
 
@@ -1035,8 +1027,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		neighbourDiscoveryService.evaluateAndPostSubscriptionRequest(
                 List.of(neighbour),
 				Optional.of(LocalDateTime.now()),
-				localSubscriptions,
-				mockNeighbourFacade);
+				localSubscriptions);
 		verify(mockNeighbourFacade, times(0)).postSubscriptionRequest(any(),any(),any());
 	}
 
@@ -1044,7 +1035,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 	public void neighbourIsIgnoredWhenPollingSubscription(){
 		String name = "ignoredNeighbour3";
 		Neighbour neighbour = ignoredNeighbour(name);
-		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptions();
 		verify(mockNeighbourFacade, times(0)).pollSubscriptionStatus(any(),any());
 	}
 
@@ -1059,7 +1050,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour1), any(), any())).thenReturn(c1.getCapabilities());
 		when(mockNeighbourFacade.postCapabilitiesToCapabilities(eq(neighbour2), any(), any())).thenReturn(c2.getCapabilities());
 
-		neighbourDiscoveryService.capabilityExchangeWithNeighbours(mockNeighbourFacade, Collections.emptySet(), Optional.empty());
+		neighbourDiscoveryService.capabilityExchangeWithNeighbours(Collections.emptySet(), Optional.empty());
 
 		verify(mockNeighbourFacade, times(2)).postCapabilitiesToCapabilities(any(), any(), any());
 		List<Neighbour> known = repository.findByCapabilities_StatusAndIgnoreIs(CapabilitiesStatus.KNOWN, false);
@@ -1068,7 +1059,7 @@ public class NeighbourDiscovererIT extends PostgresContainerBase {
 
 	private void performSubscriptionPolling(Neighbour neighbour, Subscription requestedSubscription) {
 		when(mockNeighbourFacade.pollSubscriptionStatus(any(), any())).thenReturn(new Subscription(requestedSubscription.getSelector(), SubscriptionStatus.CREATED, ""));
-		neighbourDiscoveryService.pollSubscriptions(mockNeighbourFacade);
+		neighbourDiscoveryService.pollSubscriptions();
 		Neighbour found1 = repository.findByName(neighbour.getName());
 		assertThat(found1).isNotNull();
 		assertThat(found1.getOurRequestedSubscriptions()).isNotNull();

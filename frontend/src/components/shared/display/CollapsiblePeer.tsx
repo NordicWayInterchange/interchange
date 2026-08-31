@@ -139,7 +139,7 @@ const CollapsiblePeer = ({ subItems, privateChannelId, actorCommonName, refetchP
   return (
     <Card variant="outlined">
       <CardContent sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Box display="flex">
+        <Box sx={{display: "flex"}}>
           <Typography>Your peers</Typography>
         </Box>
         <IconButton onClick={handleExpandClick} size="small">
@@ -157,10 +157,22 @@ const CollapsiblePeer = ({ subItems, privateChannelId, actorCommonName, refetchP
           {peerItems.length > 0 ? peerItems.map((item, index) => (
             <React.Fragment key={index}>
               <ListItem>
-                <ListItemText primary={<Box sx={primaryTextStyle}>{item}</Box>}
-                              primaryTypographyProps={{ component: "div" }}
-                              secondary={<Box sx={secondaryContainerStyle}><ContentCopy value={item} /></Box>}
-                              secondaryTypographyProps={{ component: "div" }} />
+                <ListItemText
+                    primary={<Box sx={primaryTextStyle}>{item}</Box>}
+                    secondary={
+                      <Box sx={secondaryContainerStyle}>
+                        <ContentCopy value={item} />
+                      </Box>
+                    }
+                    slotProps={{
+                      primary: {
+                        component: "div",
+                      },
+                      secondary: {
+                        component: "div",
+                      },
+                    }}
+                />
                 <Box>
                   <IconButton sx={{ left: "13px", position: "relative", top: "-16px" }}
                               onClick={() => handleDelete(index)}>
@@ -218,7 +230,7 @@ const CollapsiblePeer = ({ subItems, privateChannelId, actorCommonName, refetchP
           )}
         </List>
 
-        <Box textAlign="center" sx={{ paddingY: 1, color: "primary.main" }}>
+        <Box sx={{ paddingY: 1, color: "primary.main", textAlign: 'center' }}>
           {!isAdding && (
             <StyledButton
               ref={addButtonRef}
