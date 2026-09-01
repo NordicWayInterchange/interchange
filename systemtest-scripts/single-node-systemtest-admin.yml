@@ -34,7 +34,7 @@ services:
     ports:
       - 32666:8797
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -55,27 +55,30 @@ services:
       context: ../admin-server-app
     depends_on:
       - a-db
+      - a-keycloak
     ports:
       - 32665:8899
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
       - POSTGRES_PASSWORD=federation
       - SP_CHNL_PORT=8899
-      - KEY_STORE=/keys/ca.a.interchangedomain.com.p12
+      - KEY_STORE=/keys/a-admin-server.p12
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a-admin-server
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
       - SERVER_NAME=a.interchangedomain.com
-      - ADMIN_NAME=a-admin.interchangedomain.com
+      - ADMIN_NAME=admin.a-admin.interchangedomain.com
       - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
       - SIGN_STORE_PASSWORD=password
       - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
       - DOMAIN_NAME=interchangedomain.com
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://a-keycloak:8080/realms/a-admin.interchangedomain.com
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://a-keycloak:8080/realms/a-admin.interchangedomain.com/protocol/openid-connect/certs
     networks:
       - testing_net
 
@@ -87,13 +90,13 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - "single-node-systemtest-keys-volume:/app/keys"
+      - "single-node-systemtest-admin-keys-volume:/app/keys"
     environment:
-      - PFX_KEY_FILENAME=/keys/a-admin.internal.interchangedomain.com.p12
+      - PFX_KEY_FILENAME=/keys/admin.a-admin.interchangedomain.com.p12
       - PFX_PASSPHRASE=password
       - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
       - INTERCHANGE_URI=https://a-admin-server:8899/admin/
-      - INTERCHANGE_PREFIX=a-admin.interchangedomain.com.admin.
+      - INTERCHANGE_PREFIX=admin.a-admin.interchangedomain.com.admin.
       - NEXTAUTH_SECRET=supersecret
       - NEXTAUTH_URL=http://localhost:3000
       - USE_KEYCLOAK=true
@@ -112,6 +115,8 @@ services:
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
     volumes:
       - ./a-admin.interchangedomain.com-realm.json:/opt/keycloak/data/import/a-admin.interchangedomain.com-realm.json:ro
     command: [ "start-dev", "--import-realm" ]
@@ -127,7 +132,7 @@ services:
       - 5672
     volumes:
       - "../qpid/single-node-systemtest:/qpid-broker-j/work-override"
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
@@ -149,7 +154,7 @@ services:
     ports:
       - 8090
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -171,7 +176,7 @@ services:
     depends_on:
       - a-db
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -192,7 +197,7 @@ services:
     depends_on:
       - a-db
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -217,7 +222,7 @@ services:
     links:
       - "a-qpid:a.qpid.interchangedomain.com"
     volumes:
-      - "single-node-systemtest-keys-volume:/keys"
+      - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
       - POSTGRES_USER=federation
@@ -242,6 +247,6 @@ networks:
         - subnet: 172.26.0.0/16
 
 volumes:
-  single-node-systemtest-keys-volume:
+  single-node-systemtest-admin-keys-volume:
     external: true
 

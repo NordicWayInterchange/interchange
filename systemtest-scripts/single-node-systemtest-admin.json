@@ -20,8 +20,12 @@
       "name" : "a-admin.interchangedomain.com",
       "country" : "NO",
       "email" : "admin@a.admin.interchangedomain.com"
+    },{
+      "name" : "admin.a-admin.interchangedomain.com",
+      "country" : "NO",
+      "email" : "admin@a-admin.interchangedomain.com"
     } ]
-  }],
+  } ],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
 } ]

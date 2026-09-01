@@ -7,7 +7,7 @@ echo "Running system test on branch $BRANCH with tag $BRANCH_TAG, jar version $J
 docker build ../service-provider-client -t onboard_rest_client --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../admin-frontend -t admin_frontend --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../keys-generator -t keys-generator --build-arg JAR_VERSION=$JAR_VERSION
-VOLUME_NAME=single-node-systemtest-keys-volume
+VOLUME_NAME=single-node-systemtest-admin-keys-volume
 VOL_EXISTS=$( docker volume ls --format '{{.Name}}' -f name=${VOLUME_NAME})
 [ -n "$VOL_EXISTS" ] || ./single-node-systemtest-keys-admin.sh
 docker compose -f single-node-systemtest-admin.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker compose -f single-node-systemtest-admin.yml up
