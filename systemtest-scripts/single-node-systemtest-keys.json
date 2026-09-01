@@ -9,7 +9,10 @@
       "name" : "a.interchangedomain.com"
     }, {
       "name" : "a.qpid.interchangedomain.com"
-    }],
+    },
+      {
+        "name" : "a-admin.interchangedomain.com"
+      }],
     "clientRequests" : [ {
       "name" : "king_olav.a.interchangedomain.com",
       "country" : "NO",
@@ -21,7 +24,9 @@
   "subCaRequests" : [ ],
   "hostRequests" : [ {
     "name" : "a-napcore-server"
-  }, {
+  },{
+    "name" : "a-admin-server"
+    },{
     "name" : "a-admin"
   },{
     "name" : "a-qpid"
@@ -34,7 +39,12 @@
       "name" : "a-admin.internal.interchangedomain.com",
       "country" : "NO",
       "email" : "admin@a.internal.interchangedomain.com"
-    } ]
+    },
+    {
+      "name" : "admin.a-admin.interchangedomain.com",
+      "country" : "NO",
+      "email" : "admin@a-admin.interchangedomain.com"
+    }]
   }],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
