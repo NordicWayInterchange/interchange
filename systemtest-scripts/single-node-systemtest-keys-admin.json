@@ -9,6 +9,8 @@
       "name" : "a.interchangedomain.com"
     }, {
       "name" : "a.qpid.interchangedomain.com"
+    }, {
+      "name" : "a-admin.interchangedomain.com"
     }],
     "clientRequests" : [ {
       "name" : "king_olav.a.interchangedomain.com",
@@ -23,7 +25,7 @@
       "name" : "a-admin-server"
     }, {
       "name" : "a-admin"
-    },{
+    }, {
       "name" : "a-qpid"
     }],
     "clientRequests" : [{
@@ -35,7 +37,7 @@
       "country" : "NO",
       "email" : "admin@a-admin.interchangedomain.com"
     }]
-}],
+  }],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
 }]

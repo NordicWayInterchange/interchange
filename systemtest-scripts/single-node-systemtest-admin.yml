@@ -131,7 +131,7 @@ services:
       - 63003:5671
       - 5672
     volumes:
-      - "../qpid/single-node-systemtest:/qpid-broker-j/work-override"
+      - "../qpid/single-node-systemtest-admin:/qpid-broker-j/work-override"
       - "single-node-systemtest-admin-keys-volume:/keys"
     environment:
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
