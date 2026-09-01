@@ -16,6 +16,7 @@ import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import no.vegvesen.ixn.shared.capability.RedirectStatusApi;
 import org.assertj.core.util.Sets;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,11 @@ public class OnboardRestControllerTest {
 				.setMessageConverters(OnboardStrictWebConfig.strictJsonMessageConverter())
 				.setControllerAdvice(OnboardServerErrorAdvice.class)
 				.build();
+	}
+
+	@AfterEach
+	void tearDown() {
+		SecurityContextHolder.clearContext();
 	}
 
 	private void mockCertificate(String commonName) {
