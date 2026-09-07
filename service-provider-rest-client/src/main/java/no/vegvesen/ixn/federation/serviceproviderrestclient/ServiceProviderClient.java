@@ -4,7 +4,7 @@ import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,16 +17,18 @@ import java.util.List;
 import java.util.Objects;
 
 public class ServiceProviderClient {
-
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     private final String server;
     private final String user;
 
     public ServiceProviderClient(SSLContext sslContext, String server, String user) {
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
                 .create()
-                .setSSLSocketFactory(sslConnectionSocketFactory)
+                .setTlsSocketStrategy(
+                        ClientTlsStrategyBuilder.create()
+                                .setSslContext(sslContext)
+                                .buildClassic()
+                )
                 .build();
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
@@ -43,7 +45,7 @@ public class ServiceProviderClient {
     public AddCapabilitiesResponse addCapability(AddCapabilitiesRequest capability) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddCapabilitiesRequest> entity = new HttpEntity<>(capability,headers);
+        HttpEntity<AddCapabilitiesRequest> entity = new HttpEntity<>(capability, headers);
         return restTemplate.exchange(server + "/" + user + "/capabilities", HttpMethod.POST, entity, AddCapabilitiesResponse.class).getBody();
     }
 
@@ -56,10 +58,10 @@ public class ServiceProviderClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String url = String.format("%s/%s/network/capabilities?selector={selector}", server, user);
-        return restTemplate.getForEntity(url,FetchMatchingCapabilitiesResponse.class,selector).getBody();
+        return restTemplate.getForEntity(url, FetchMatchingCapabilitiesResponse.class, selector).getBody();
     }
 
-    public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilitiesResponse(String selector){
+    public FetchMatchingCapabilitiesResponse fetchMatchingDeliveryCapabilitiesResponse(String selector) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -79,7 +81,7 @@ public class ServiceProviderClient {
     public AddSubscriptionsResponse addSubscription(AddSubscriptionsRequest subscription) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddSubscriptionsRequest> entity = new HttpEntity<>(subscription,headers);
+        HttpEntity<AddSubscriptionsRequest> entity = new HttpEntity<>(subscription, headers);
         String url = String.format("/%s/subscriptions", user) ;
         return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddSubscriptionsResponse.class).getBody();
     }
@@ -96,30 +98,30 @@ public class ServiceProviderClient {
     public AddDeliveriesResponse addDeliveries(AddDeliveriesRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request,headers);
+        HttpEntity<AddDeliveriesRequest> entity = new HttpEntity<>(request, headers);
         String url = String.format("/%s/deliveries", user) ;
         return restTemplate.exchange(server + url, HttpMethod.POST, entity, AddDeliveriesResponse.class).getBody();
     }
 
     public ListDeliveriesResponse listDeliveries() {
-        String url = String.format("%s/%s/deliveries",server,user);
-        return restTemplate.getForEntity(url,ListDeliveriesResponse.class).getBody();
+        String url = String.format("%s/%s/deliveries", server, user);
+        return restTemplate.getForEntity(url, ListDeliveriesResponse.class).getBody();
     }
 
     public GetDeliveryResponse getDelivery(String deliveryId) {
-        String url = String.format("%s/%s/deliveries/%s",server,user,deliveryId);
-        return restTemplate.getForEntity(url,GetDeliveryResponse.class).getBody();
+        String url = String.format("%s/%s/deliveries/%s", server, user, deliveryId);
+        return restTemplate.getForEntity(url, GetDeliveryResponse.class).getBody();
     }
 
     public void deleteDelivery(String id) {
-        String url = String.format("%s/%s/deliveries/%s",server,user,id);
+        String url = String.format("%s/%s/deliveries/%s", server, user, id);
         restTemplate.delete(url);
     }
 
     public AddPrivateChannelResponse addPrivateChannel(AddPrivateChannelRequest privateChannelApi) {
         HttpHeaders headers =  new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddPrivateChannelRequest> entity = new HttpEntity<>(privateChannelApi,headers);
+        HttpEntity<AddPrivateChannelRequest> entity = new HttpEntity<>(privateChannelApi, headers);
         String url = server + "/" + user + "/privatechannels";
         System.out.println(url);
         return restTemplate.exchange(url, HttpMethod.POST, entity, AddPrivateChannelResponse.class).getBody();
@@ -134,18 +136,18 @@ public class ServiceProviderClient {
         return restTemplate.getForEntity(url, ListPrivateChannelsResponse.class).getBody();
     }
 
-    public GetPrivateChannelResponse getPrivateChannel(String privateChannelId){
-        String url = String.format("%s/%s/privatechannels/%s", server, user,privateChannelId);
+    public GetPrivateChannelResponse getPrivateChannel(String privateChannelId) {
+        String url = String.format("%s/%s/privatechannels/%s", server, user, privateChannelId);
         return restTemplate.getForEntity(url, GetPrivateChannelResponse.class).getBody();
     }
 
-    public PeerPrivateChannelApi getPrivateChannelPeerById(String privateChannelId){
-        String url = String.format("%s/%s/privatechannels/peer/%s", server, user,privateChannelId);
+    public PeerPrivateChannelApi getPrivateChannelPeerById(String privateChannelId) {
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         return restTemplate.getForEntity(url, PeerPrivateChannelApi.class).getBody();
     }
 
-    public ListPeerPrivateChannels getPeerPrivateChannels(){
-        String url = String.format("%s/%s/privatechannels/peer", server,user);
+    public ListPeerPrivateChannels getPeerPrivateChannels() {
+        String url = String.format("%s/%s/privatechannels/peer", server, user);
         return restTemplate.getForEntity(url, ListPeerPrivateChannels.class).getBody();
     }
 
@@ -156,17 +158,17 @@ public class ServiceProviderClient {
     public BiqueueAccessResponse addServiceProviderBiconsumerAccess(BiqueueAccessResponse withBiQueueAccess) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(new AddBiqueueAccessRequest(withBiQueueAccess.isAccess()),headers);
+        HttpEntity<AddBiqueueAccessRequest> entity = new HttpEntity<>(new AddBiqueueAccessRequest(withBiQueueAccess.isAccess()), headers);
         String url = String.format("/%s/biconsumer", user) ;
         return restTemplate.exchange(server + url, HttpMethod.PUT, entity, BiqueueAccessResponse.class).getBody();
     }
 
     public List<GetBiqueueEndpointsResponsePerMessageType> listBiqueues() {
-        String url = String.format("%s/%s/biqueueendpoints",server,user);
+        String url = String.format("%s/%s/biqueueendpoints", server, user);
         return List.of(Objects.requireNonNull(restTemplate.getForEntity(url, GetBiqueueEndpointsResponsePerMessageType[].class).getBody()));
     }
 
-    public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest){
+    public void addPeersToPrivateChannel(String privateChannelId, AddPeersRequest peersRequest) {
         String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -174,18 +176,18 @@ public class ServiceProviderClient {
         restTemplate.exchange(url, HttpMethod.PATCH, entity, AddPeersRequest.class);
     }
 
-    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName){
+    public void deletePeerFromPrivateChannel(String privateChannelId, String peerName) {
         String url = String.format("%s/%s/privatechannels/peer/%s/%s", server, user, privateChannelId, peerName);
         restTemplate.delete(url);
     }
 
 
-    public PeerPrivateChannelApi getPeerPrivateChannelById(String privateChannelId){
-        String url = String.format("%s/%s/privatechannels/peer/%s", server,user, privateChannelId);
+    public PeerPrivateChannelApi getPeerPrivateChannelById(String privateChannelId) {
+        String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         return restTemplate.getForEntity(url, PeerPrivateChannelApi.class).getBody();
     }
 
-    public void peerDeletePeerFromPrivateChannel(String privateChannelId){
+    public void peerDeletePeerFromPrivateChannel(String privateChannelId) {
         String url = String.format("%s/%s/privatechannels/peer/%s", server, user, privateChannelId);
         restTemplate.delete(url);
     }
