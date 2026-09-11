@@ -21,7 +21,9 @@
   "subCaRequests" : [ ],
   "hostRequests" : [ {
     "name" : "a-napcore-server"
-  }, {
+  },{
+    "name" : "a-admin-server"
+    },{
     "name" : "a-admin"
   },{
     "name" : "a-qpid"
