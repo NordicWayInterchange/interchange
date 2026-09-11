@@ -35,7 +35,7 @@
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.81.0",
     "react-leaflet": "^5.0.0",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
