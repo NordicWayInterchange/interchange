@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.FetchMatchingCapabilitiesResponse;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -30,7 +34,7 @@ public class FetchMatchingDeliveryCapabilities implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         System.out.println(String.format("using selector: %s", selector));
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         FetchMatchingCapabilitiesResponse result = client.fetchMatchingDeliveryCapabilitiesResponse(selector);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         return 0;

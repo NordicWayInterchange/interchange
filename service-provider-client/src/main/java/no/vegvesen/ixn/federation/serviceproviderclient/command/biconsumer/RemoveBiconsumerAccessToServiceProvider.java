@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
 import picocli.CommandLine;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -30,7 +31,7 @@ public class RemoveBiconsumerAccessToServiceProvider implements Callable<Integer
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         BiqueueAccessResponse response = new BiqueueAccessResponse(client.getUser(), false);
         BiqueueAccessResponse withAccess = client.addServiceProviderBiconsumerAccess(response);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(withAccess));

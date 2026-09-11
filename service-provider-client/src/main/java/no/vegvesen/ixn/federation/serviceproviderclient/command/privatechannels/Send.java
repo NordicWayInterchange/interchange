@@ -1,13 +1,16 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
-import no.vegvesen.ixn.serviceprovider.model.*;
+import no.vegvesen.ixn.serviceprovider.model.GetPrivateChannelResponse;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
+import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;
 import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.Set;
@@ -57,7 +60,8 @@ public class Send implements Callable<Integer> {
             throw new RuntimeException(String.format("Private channel %s is still in REQUESTED state after the timeout", privateChannel.getId()));
         }
         if (!privateChannel.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannel.getStatus(), privateChannel.getId()));
+            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s",
+                    privateChannel.getStatus(), privateChannel.getId()));
         }
 
         PrivateChannelEndpointApi privateChannelEndpoint = privateChannel.getEndpoint();
@@ -67,7 +71,7 @@ public class Send implements Callable<Integer> {
         String queueName = privateChannelEndpoint.getQueueName();
         String url = "amqps://" + privateChannelEndpoint.getHost();
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
 
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
             source.start();

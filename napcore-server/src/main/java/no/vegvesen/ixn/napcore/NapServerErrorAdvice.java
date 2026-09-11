@@ -79,7 +79,7 @@ public class NapServerErrorAdvice {
 
     @ExceptionHandler({SignExeption.class})
     public ResponseEntity<ErrorDetails> cannotSign(SignExeption e) {
-        return error(INTERNAL_SERVER_ERROR,e);
+        return error(BAD_REQUEST, e);
     }
 
     @ExceptionHandler({PrivateChannelException.class})

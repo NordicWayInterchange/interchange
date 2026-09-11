@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class PrivateTextMessagesTest {
 
     @Test
-    public void createPrivateTextMessages() throws JsonProcessingException {
+    public void createPrivateTextMessages() throws JacksonException {
         Map<String, Object> properties = new HashMap<>();
         properties.put("textProperty", "this is text");
         properties.put("booleanProperty", true);
@@ -26,7 +27,7 @@ public class PrivateTextMessagesTest {
                         )
                 )
         );
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(privateTextMessages));
     }
 

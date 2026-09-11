@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.*;
 import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CapabilitiesApiTest {
 
     @Test
-    public void createEmptyCapabilitiesApiJson() throws JsonProcessingException {
+    public void createEmptyCapabilitiesApiJson() throws JacksonException {
         CapabilitiesApi capabilitiesApi = new CapabilitiesApi();
         capabilitiesApi.setName("a.itsinterchange.eu");
         Set<CapabilityApi> capSet = new HashSet<>();
@@ -64,7 +64,7 @@ public class CapabilitiesApiTest {
     }
 
     @Test
-    public void capabilitiesWithUnknownField() throws JsonProcessingException {
+    public void capabilitiesWithUnknownField() throws JacksonException {
         ObjectMapper mapper = new ObjectMapper();
         String json = "{\"version\":\"1.1\",\"foo\":\"bar\",\"name\":\"test\",\"capabilities\":[]}";
         CapabilitiesApi result = mapper.readValue(json, CapabilitiesApi.class);
