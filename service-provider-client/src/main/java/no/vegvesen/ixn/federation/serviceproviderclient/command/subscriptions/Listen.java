@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ExceptionListener;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.WriteToFileMessageListener;
@@ -12,6 +11,8 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.List;
@@ -55,18 +56,20 @@ public class Listen implements Callable<Integer> {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
         String id;
-        if(option.file != null){
-            ObjectMapper mapper = new ObjectMapper();
+        if (option.file != null) {
+            ObjectMapper mapper = JsonMapper.builder().build();
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
             id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
+                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(
+                            () -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
         }
-        else if(option.selector != null){
-            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description))));
+        else if (option.selector != null) {
+            AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(
+                    new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description))));
             id = addSubscriptionsResponse.getSubscriptions().stream()
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
@@ -85,7 +88,8 @@ public class Listen implements Callable<Integer> {
         }
 
         if (! subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",subscription.getStatus(),subscription.getId()));
+            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",
+                    subscription.getStatus(), subscription.getId()));
 
         }
 
@@ -94,8 +98,8 @@ public class Listen implements Callable<Integer> {
                 .getEndpoints()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s",id)));
-        String url = "amqps://"+endpointApi.getHost();
+                .orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s", id)));
+        String url = "amqps://" + endpointApi.getHost();
 
         System.out.printf("Listening for messages from queue [%s] on server [%s]%n", endpointApi.getHost(), url);
         ExceptionListener exceptionListener = e -> {

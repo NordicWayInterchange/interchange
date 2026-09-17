@@ -4,7 +4,7 @@
 
     <groupId>net.nordicway.interchange</groupId>
     <artifactId>interchange-parent</artifactId>
-    <version>1.0.45-SNAPSHOT</version>
+    <version>1.0.46-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <distributionManagement>
@@ -76,6 +76,20 @@
                     </configuration>
                 </plugin>
 
+                <!-- Ved mvn clean slettes filene i /frontend/public/generated -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.1</version>
+                    <inherited>false</inherited>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${maven.multiModuleProjectDirectory}/frontend/public/generated</directory>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -92,7 +106,7 @@
         <dnsjava.version>3.6.4</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
         <bouncycastle.version>1.84</bouncycastle.version>
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.12</postgresql.version>
         <swagger-annotations-jakarta.version>2.2.49</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <license-maven-plugin.version>2.6.0</license-maven-plugin.version>

@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.napcore.client.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,14 +32,14 @@ public class AddNapSubscription implements Callable<Integer> {
     @Override
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
 
-        if(option.file != null) {
+        if (option.file != null) {
             SubscriptionRequest request = mapper.readValue(option.file, SubscriptionRequest.class);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
+        else {
             SubscriptionRequest request = new SubscriptionRequest(option.selector, description);
             Subscription result = client.addSubscription(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
@@ -46,7 +47,7 @@ public class AddNapSubscription implements Callable<Integer> {
         return 0;
     }
 
-    static class AddNapSubscriptionOption{
+    static class AddNapSubscriptionOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;
 

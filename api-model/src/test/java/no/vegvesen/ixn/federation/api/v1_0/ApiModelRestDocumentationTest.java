@@ -1,7 +1,5 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.api.v1_0.capability.CapabilitiesApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
@@ -9,15 +7,16 @@ import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponse
 import no.vegvesen.ixn.shared.Constants;
 import no.vegvesen.ixn.shared.capability.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class ApiModelRestDocumentationTest {
 
     @Test
-    public void postCapabilitiesRequest() throws JsonProcessingException {
+    public void postCapabilitiesRequest() throws JacksonException {
         CapabilitiesApi request = new CapabilitiesApi(
                 "sp-1",
                 Collections.singleton(
@@ -45,7 +44,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void datexCapability() throws JsonProcessingException {
+    public void datexCapability() throws JacksonException {
         CapabilityApi capabilityApi = new CapabilityApi(
                 new DatexApplicationApi(
                         "NPRA",
@@ -70,7 +69,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void iviCapability() throws JsonProcessingException {
+    public void iviCapability() throws JacksonException {
         CapabilityApi capability = new CapabilityApi(
                 new IvimApplicationApi(
                         "NPRA",
@@ -94,7 +93,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void CapabilitiesResponse() throws JsonProcessingException {
+    public void CapabilitiesResponse() throws JacksonException {
         CapabilitiesApi response = new CapabilitiesApi(
                 "",
                 Collections.singleton(
@@ -123,7 +122,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void postSubscriptionRequest() throws JsonProcessingException {
+    public void postSubscriptionRequest() throws JacksonException {
         SubscriptionRequestApi request = new SubscriptionRequestApi(
                 "node-1",
                 Collections.singleton(
@@ -138,7 +137,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void subscriptionRequestResponse() throws JsonProcessingException {
+    public void subscriptionRequestResponse() throws JacksonException {
         SubscriptionResponseApi response = new SubscriptionResponseApi(
                 "node-1",
                 Collections.singleton(
@@ -156,7 +155,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void subscriptionRequestResponseWithList() throws JsonProcessingException {
+    public void subscriptionRequestResponseWithList() throws JacksonException {
         SubscriptionResponseApi response = new SubscriptionResponseApi(
                 "node-1",
                 new HashSet<>(Arrays.asList(
@@ -181,7 +180,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void subscriptionPollResponse() throws JsonProcessingException {
+    public void subscriptionPollResponse() throws JacksonException {
         SubscriptionPollResponseApi response = new SubscriptionPollResponseApiV1(
                 UUID.randomUUID().toString(),
                 "originatingCountry = 'NO' and messageType = 'DENM'",
@@ -220,7 +219,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void testMetadataApplicationSplit() throws JsonProcessingException {
+    public void testMetadataApplicationSplit() throws JacksonException {
         ApplicationApi application = new ApplicationApi(
                 Constants.DENM,
                 "NO00000",
@@ -253,7 +252,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void testDenmMetadataApplicationSplit() throws JsonProcessingException {
+    public void testDenmMetadataApplicationSplit() throws JacksonException {
         DenmApplicationApi application = new DenmApplicationApi(
                 "NO00000",
                 "BOUV01",
@@ -286,7 +285,7 @@ public class ApiModelRestDocumentationTest {
     }
 
     @Test
-    public void testDenmMetadataApplicationSplitWithoutAllProps() throws JsonProcessingException {
+    public void testDenmMetadataApplicationSplitWithoutAllProps() throws JacksonException {
         DenmApplicationApi application = new DenmApplicationApi(
                 "NO00000",
                 "BOUV01",

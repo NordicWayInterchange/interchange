@@ -1,9 +1,13 @@
 package no.vegvesen.ixn.napcore.client.command.privatechannels;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.PrivateChannelResponse;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -25,7 +29,7 @@ public class GetPrivateChannel implements Callable<Integer> {
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         PrivateChannelResponse privateChannel = client.getPrivateChannel(privateChannelId);
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(privateChannel));
         return 0;
     }

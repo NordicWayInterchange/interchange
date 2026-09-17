@@ -1,10 +1,13 @@
 package no.vegvesen.ixn.napcore.client.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
-import static picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "get",
@@ -21,10 +24,10 @@ public class GetNapDelivery implements Callable<Integer> {
     String deliveryId;
 
     @Override
-    public Integer call() throws Exception{
+    public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         Delivery delivery = client.getDelivery(deliveryId);
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
         return 0;
     }

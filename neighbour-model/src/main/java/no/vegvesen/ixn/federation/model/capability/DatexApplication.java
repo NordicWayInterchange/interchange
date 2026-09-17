@@ -2,8 +2,6 @@ package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
 import no.vegvesen.ixn.shared.Constants;
-import no.vegvesen.ixn.shared.capability.ApplicationApi;
-import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,11 +38,6 @@ public class DatexApplication extends Application{
 
     public void setPublisherName(String publisherName) {
         this.publisherName = publisherName;
-    }
-
-    @Override
-    public ApplicationApi toApi() {
-        return new DatexApplicationApi(getPublisherId(), getPublicationId(), getOriginatingCountry(), getProtocolVersion(), getQuadTree(), getPublicationType(), getPublisherName());
     }
 
     @Override

@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.BiqueueAccessResponse;
 import picocli.CommandLine;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -26,10 +27,10 @@ public class GetBiconsumerAccessToServiceProvider implements Callable<Integer> {
     BiconsumerCommand parentCommand;
 
     @Override
-    public Integer call() throws JsonProcessingException {
+    public Integer call() throws JacksonException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         BiqueueAccessResponse biQueueAccess = client.getServiceProviderBiconsumerAccess();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(biQueueAccess));
         return 0;
     }
