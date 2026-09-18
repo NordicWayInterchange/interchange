@@ -105,7 +105,7 @@
         <testcontainers.version>2.0.5</testcontainers.version>
         <dnsjava.version>3.6.4</dnsjava.version>
         <qpid-broker.version>9.2.1</qpid-broker.version>
-        <bouncycastle.version>1.84</bouncycastle.version>
+        <bouncycastle.version>1.85</bouncycastle.version>
         <postgresql.version>42.7.12</postgresql.version>
         <swagger-annotations-jakarta.version>2.2.49</swagger-annotations-jakarta.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
