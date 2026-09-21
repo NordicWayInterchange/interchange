@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.PeerPrivateChannelApi;
 import picocli.CommandLine;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -30,7 +31,7 @@ public class GetPeerPrivateChannels implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         PeerPrivateChannelApi result = client.getPeerPrivateChannelById(privateChannelId);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         return 0;

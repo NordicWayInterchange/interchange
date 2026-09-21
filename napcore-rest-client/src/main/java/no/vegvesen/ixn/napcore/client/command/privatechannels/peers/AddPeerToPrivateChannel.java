@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.napcore.client.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.AddPeerRequest;
 import picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -28,7 +29,7 @@ public class AddPeerToPrivateChannel implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParent().getParentCommand().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         AddPeerRequest request = mapper.readValue(file, AddPeerRequest.class);
         client.addPeerToPrivateChannel(privateChannelId, request);
         System.out.printf("successfully added %s to private channel with id %s", request.getPeerToAdd(), privateChannelId);

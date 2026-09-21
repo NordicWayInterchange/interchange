@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddCapabilitiesResponse;
@@ -8,6 +7,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class AddServiceProviderCapability implements Callable<Integer> {
     public Integer call() throws IOException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         AddCapabilitiesRequest capability = mapper.readValue(file, AddCapabilitiesRequest.class);
         AddCapabilitiesResponse result = client.addCapability(capability);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));

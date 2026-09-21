@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.federation.api.v1_0;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SubscriptionResponseApiTest {
 
     @Test
-    public void testUnknownJsonFields() throws JsonProcessingException {
+    public void testUnknownJsonFields() throws JacksonException {
         SubscriptionResponseApi example = new SubscriptionResponseApi("test",new HashSet<>());
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(example));
