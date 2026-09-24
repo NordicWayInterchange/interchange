@@ -46,11 +46,10 @@ public class OnboardRestController {
 	private final PrivateChannelRepository privateChannelRepository;
 	private final CertService certService;
 	private final InterchangeNodeProperties nodeProperties;
-	private CapabilityToCapabilityApiTransformer capabilityApiTransformer = new CapabilityToCapabilityApiTransformer();
-	private Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
-	private TypeTransformer typeTransformer = new TypeTransformer();
-	private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
+	private final Logger logger = LoggerFactory.getLogger(OnboardRestController.class);
+	private final TypeTransformer typeTransformer = new TypeTransformer();
 	private final OutgoingMatchRepository outgoingMatchRepository;
+	private static Pattern pattern = Pattern.compile("[a-zA-Z0-9_.@-]+");
 
 	@Autowired
 	public OnboardRestController(ServiceProviderRepository serviceProviderRepository,
@@ -119,7 +118,7 @@ public class OnboardRestController {
 			}
 		}
 
-		List<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApiTransformer,capabilityApi);
+		List<Capability> newLocalCapabilities = typeTransformer.capabilitiesRequestToCapabilities(capabilityApi);
 		ServiceProvider serviceProviderToUpdate = getOrCreateServiceProvider(serviceProviderName);
 
 		Capabilities capabilities = serviceProviderToUpdate.getCapabilities();
@@ -135,7 +134,7 @@ public class OnboardRestController {
 				addedCapabilities.add(savedCapability);
 			}
 		}
-		AddCapabilitiesResponse response = TypeTransformer.addCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,addedCapabilities);
+		AddCapabilitiesResponse response = typeTransformer.addCapabilitiesResponse(new CapabilityToCapabilityApiTransformer(), serviceProviderName,addedCapabilities);
 		logger.info("Returning updated Service Provider: {}", serviceProviderToUpdate.toString());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
@@ -162,7 +161,7 @@ public class OnboardRestController {
 		validatePathVariable(serviceProviderName);
 		certService.checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
-		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(capabilityApiTransformer, serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
+		ListCapabilitiesResponse response = typeTransformer.listCapabilitiesResponse(serviceProviderName,serviceProvider.getCapabilities().getCapabilities());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
@@ -187,7 +186,7 @@ public class OnboardRestController {
 			}
 		}
 
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, localCapabilities, neighbourCapabilities);
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(new CapabilityToCapabilityApiTransformer(), serviceProviderName, selector, localCapabilities, neighbourCapabilities);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
@@ -249,7 +248,7 @@ public class OnboardRestController {
 
 		Capability capability = serviceProvider.getCapability(capabilityId);
 
-		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(capabilityApiTransformer, serviceProviderName, capability);
+		GetCapabilityResponse response = typeTransformer.getCapabilityResponse(serviceProviderName, capability);
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}
@@ -690,7 +689,7 @@ public class OnboardRestController {
 				allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
 			}
 		}
-		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(capabilityApiTransformer, serviceProviderName, selector, allCapabilities, Set.of());
+		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(new CapabilityToCapabilityApiTransformer(), serviceProviderName, selector, allCapabilities, Set.of());
 		OnboardMDCUtil.removeLogVariables();
 		return response;
 	}

@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.transformer;
 import no.vegvesen.ixn.federation.api.v1_0.*;
 import no.vegvesen.ixn.federation.api.v1_0.SubscriptionResponseApi;
 import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV1;
+import no.vegvesen.ixn.federation.api.v1_0.subscription.SubscriptionPollResponseApiV2;
 import no.vegvesen.ixn.federation.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SubscriptionRequestTransformerTest {
 
-	private SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
-	private SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
+	private final SubscriptionTransformer subscriptionTransformer = new SubscriptionTransformer();
+	private final SubscriptionRequestTransformer subscriptionRequestTransformer = new SubscriptionRequestTransformer(subscriptionTransformer);
 
 	@Test
 	public void emptySubscriptionsToRequestedSubscriptionResponseApi() {
@@ -84,12 +85,56 @@ public class SubscriptionRequestTransformerTest {
 		);
 		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(apiV1);
 		assertThat(subscription.getEndpoints()).isEmpty();
+	}
 
+	@Test
+	public void subscriptionPollApiV2WithDynamicFilter() {
+		SubscriptionPollResponseApiV2 v2 =  new SubscriptionPollResponseApiV2(
+				UUID.randomUUID().toString(),
+				"a = b",
+				"/a/subscriptions/b",
+				SubscriptionStatusApi.CREATED,
+				"mynode",
+				Set.of(
+						new EndpointApiV2(
+								"source",
+								"host",
+								1234,
+								true
+						)
+				),
+				Instant.now().toEpochMilli()
+		);
+		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(v2);
+		Endpoint actual = subscription.getEndpoints().stream().findFirst().orElseThrow();
+		assertThat(actual.getDynamicFilter()).isEqualTo("a = b");
+	}
+
+	@Test
+	public void subscriptionPollApiV2WithoutDynamicFilter() {
+		SubscriptionPollResponseApiV2 v2 =  new SubscriptionPollResponseApiV2(
+				UUID.randomUUID().toString(),
+				"a = b",
+				"/a/subscriptions/b",
+				SubscriptionStatusApi.CREATED,
+				"mynode",
+				Set.of(
+						new EndpointApiV2(
+								"source",
+								"host",
+								1234,
+								false
+						)
+				),
+				Instant.now().toEpochMilli()
+		);
+		Subscription subscription = subscriptionRequestTransformer.subscriptionPollApiToSubscription(v2);
+		Endpoint actual = subscription.getEndpoints().stream().findFirst().orElseThrow();
+		assertThat(actual.getDynamicFilter()).isNull();
 	}
 
 	@Test
 	public void subscriptionPollResponseApiWithStatusCreated() {
-		String neighbourName = "myNeighbour";
 		String hostName = "myName";
 		String port = "5671";
 		String selector = "originatingCountry = 'NO'";
@@ -98,8 +143,9 @@ public class SubscriptionRequestTransformerTest {
 		subscription.setEndpoints(new HashSet<>(Collections.singleton(new NeighbourEndpoint("my-queue", hostName, Integer.parseInt(port)))));
 		SubscriptionPollResponseApiV1 responseApiV1 = subscriptionRequestTransformer.neighbourSubscriptionToSubscriptionPollResponseApiV1(subscription);
 		assertThat(responseApiV1.getEndpoints().size()).isEqualTo(1);
-		assertThat(new ArrayList<>(responseApiV1.getEndpoints()).get(0).getHost()).isEqualTo(hostName);
-		assertThat(new ArrayList<>(responseApiV1.getEndpoints()).get(0).getPort().toString()).isEqualTo(port);
+		EndpointApiV1 endpointApiV1 = responseApiV1.getEndpoints().stream().findFirst().orElseThrow();
+		assertThat(endpointApiV1.getHost()).isEqualTo(hostName);
+		assertThat(endpointApiV1.getPort().toString()).isEqualTo(port);
 	}
 
 	@Test

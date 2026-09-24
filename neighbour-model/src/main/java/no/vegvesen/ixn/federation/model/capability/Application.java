@@ -1,7 +1,6 @@
 package no.vegvesen.ixn.federation.model.capability;
 
 import jakarta.persistence.*;
-import no.vegvesen.ixn.shared.capability.ApplicationApi;
 
 import java.util.*;
 
@@ -91,8 +90,6 @@ public abstract class Application {
             this.quadTree.addAll(quadTree);
         }
     }
-
-    public abstract ApplicationApi toApi();
 
     public abstract String getMessageType();
 

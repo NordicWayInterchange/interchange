@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessage;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.messages.PrivateTextMessages;
@@ -10,6 +9,8 @@ import no.vegvesen.ixn.serviceprovider.model.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.serviceprovider.model.PrivateChannelStatusApi;
 import org.apache.qpid.jms.message.JmsMessage;
 import picocli.CommandLine;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.Set;
@@ -58,7 +59,8 @@ public class Send implements Callable<Integer> {
             throw new RuntimeException(String.format("Private channel %s is still in REQUESTED state after the timeout", privateChannelPeer.getId()));
         }
         if (!privateChannelPeer.getStatus().equals(PrivateChannelStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s", privateChannelPeer.getStatus(), privateChannelPeer.getId()));
+            throw new RuntimeException(String.format("Unexpected private channel status: %s for privatechannel %s",
+                    privateChannelPeer.getStatus(), privateChannelPeer.getId()));
         }
 
         PrivateChannelEndpointApi privateChannelEndpoint = privateChannelPeer.getEndpoint();
@@ -68,7 +70,7 @@ public class Send implements Callable<Integer> {
         String queueName = privateChannelEndpoint.getQueueName();
         String url = "amqps://" + privateChannelEndpoint.getHost();
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
 
         try (Source source = new Source(url, queueName, parentCommand.getParent().getParent().createSSLContext())) {
             source.start();

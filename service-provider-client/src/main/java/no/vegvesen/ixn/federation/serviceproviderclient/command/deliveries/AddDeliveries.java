@@ -1,12 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddDeliveriesResponse;
 import no.vegvesen.ixn.serviceprovider.model.AddDelivery;
-
 import picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.Set;
@@ -46,14 +46,14 @@ public class AddDeliveries implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
 
         if (option.file != null) {
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
             AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         }
-        else{
+        else {
             AddDeliveriesRequest request = new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description, dlqueue)));
             AddDeliveriesResponse response = client.addDeliveries(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
@@ -61,7 +61,7 @@ public class AddDeliveries implements Callable<Integer> {
         return 0;
     }
 
-    private static class AddDeliveriesOption{
+    private static class AddDeliveriesOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The deliveries json file")
         File file;
 

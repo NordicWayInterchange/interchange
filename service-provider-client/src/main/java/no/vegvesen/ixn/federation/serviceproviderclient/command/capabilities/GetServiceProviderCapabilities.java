@@ -1,10 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.ListCapabilitiesResponse;
 import picocli.CommandLine;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.ParentCommand;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -30,7 +32,7 @@ public class GetServiceProviderCapabilities implements Callable<Integer> {
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         ListCapabilitiesResponse serviceProviderCapabilities = client.getServiceProviderCapabilities();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(serviceProviderCapabilities));
         return 0;
     }

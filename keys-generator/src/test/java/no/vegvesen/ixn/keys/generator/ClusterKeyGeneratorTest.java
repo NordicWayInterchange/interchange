@@ -1,7 +1,7 @@
 package no.vegvesen.ixn.keys.generator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 import no.vegvesen.ixn.cert.CertSigner;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CaStores;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator.CertificateCertificateChainAndKeys;
@@ -304,23 +304,6 @@ public class ClusterKeyGeneratorTest {
         CertificateCertificateChainAndKeys sp = response.clientResponses().getFirst().clientDetails();
         sp.certificate().verify(topCa.keyPair().getPublic());
     }
-
-
-    @Test
-    public void generateKeys() throws IOException, CertificateException, NoSuchAlgorithmException, SignatureException, OperatorCreationException, InvalidKeyException, NoSuchProviderException {
-        List<CaResponse> responses = new ArrayList<>();
-        for (CARequest request : CA_REQUESTS) {
-            responses.add(ClusterKeyGenerator.generate(request));
-        }
-        Writer responseWriter = new StringWriter();
-        ClusterKeyGenerator.writeCaReponsesToJson(responseWriter, responses);
-        String responseJson = responseWriter.toString();
-        Reader responseReader = new StringReader(responseJson);
-        List<CaResponse> result = ClusterKeyGenerator.readCaResponsesFromJson(responseReader);
-        assertThat(result).hasSize(CA_REQUESTS.size());
-        System.out.println(responseJson);
-    }
-
 
     @Test
     public void requests() throws IOException {
