@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.InvalidDestinationException;
 import no.vegvesen.ixn.MessageBuilder;
 import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.messages.*;
 import no.vegvesen.ixn.serviceprovider.model.*;
-
 import picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import static no.vegvesen.ixn.shared.Constants.*;
 
-@Command(name="send",
+@Command(name = "send",
         description = "Add delivery and send message",
         defaultValueProvider = PropertiesDefaultProvider.class,
         mixinStandardHelpOptions = true,
@@ -56,17 +56,20 @@ public class Send implements Callable<Integer> {
 
         ServiceProviderClient client = parentCommand.getParent().createClient();
         String deliveryId;
-        if(option.file != null){
-            ObjectMapper mapper = new ObjectMapper();
+        if (option.file != null) {
+            ObjectMapper mapper = JsonMapper.builder().build();
             AddDeliveriesRequest request = mapper.readValue(option.file, AddDeliveriesRequest.class);
             AddDeliveriesResponse response = client.addDeliveries(request);
-            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
+            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(
+                    () -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
-        else if(option.selector != null){
-            AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(client.getUser(), Set.of(new AddDelivery(option.selector, description))));
-            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(() -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
+        else if (option.selector != null) {
+            AddDeliveriesResponse response = client.addDeliveries(new AddDeliveriesRequest(
+                    client.getUser(), Set.of(new AddDelivery(option.selector, description))));
+            deliveryId = response.getDeliveries().stream().findFirst().orElseThrow(
+                    () -> new RuntimeException("Server indicated delivery was created, but could not find it in response")).getId();
         }
-        else{
+        else {
             deliveryId = option.id;
         }
 
@@ -77,24 +80,25 @@ public class Send implements Callable<Integer> {
             delivery = client.getDelivery(deliveryId);
         }
         if (! delivery.getStatus().equals(DeliveryStatus.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(),delivery.getId()));
+            throw new RuntimeException(String.format("Unexpected delivery status: %s for delivery %s", delivery.getStatus(), delivery.getId()));
         }
-        DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not determine delivery endpoint from response"));
+        DeliveryEndpoint deliveryEndpoint = delivery.getEndpoints().stream().findFirst().orElseThrow(
+                () -> new RuntimeException("Could not determine delivery endpoint from response"));
         String queueName = deliveryEndpoint.getTarget();
         String url = "amqps://" + deliveryEndpoint.getHost();
 
-        System.out.printf("Sending message from file %s%n",messageFile);
-        ObjectMapper mapper = new ObjectMapper();
+        System.out.printf("Sending message from file %s%n", messageFile);
+        ObjectMapper mapper = JsonMapper.builder().build();
         Messages messages = mapper.readValue(messageFile, Messages.class);
         validateInput(messages);
         try (Source source = new Source(url, queueName, parentCommand.getParent().createSSLContext())) {
 
-            while(true) {
+            while (true) {
              try {
                  source.start();
                  break;
              }
-             catch (InvalidDestinationException e){
+             catch (InvalidDestinationException e) {
                  System.out.println("\nRetrying\n");
                  TimeUnit.SECONDS.sleep(3);
              }
@@ -102,10 +106,11 @@ public class Send implements Callable<Integer> {
 
             for (Message message : messages.getMessages()) {
                 MessageBuilder messageBuilder = source.createMessageBuilder();
-                switch (message){
+                switch (message) {
                     case DenmMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(DENM)
                                 .causeCode(((DenmMessage) message).getCauseCode())
                                 .subCauseCode(((DenmMessage) message).getSubCauseCode());
@@ -120,7 +125,8 @@ public class Send implements Callable<Integer> {
                     }
                     case IvimMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(IVIM)
                                 .iviType(((IvimMessage) message).getIviType())
                                 .pictogramCategoryCode(((IvimMessage) message).getPictogramCategoryCode())
@@ -128,33 +134,38 @@ public class Send implements Callable<Integer> {
                     }
                     case SpatemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SPATEM)
                                 .id(((SpatemMessage) message).getId())
                                 .name(((SpatemMessage) message).getName());
                     }
                     case MapemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(MAPEM)
                                 .id(((MapemMessage) message).getId())
                                 .name(((MapemMessage) message).getName());
                     }
                     case SsemMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SSEM)
                                 .id(((SsemMessage) message).getId());
                     }
                     case SremMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(SREM)
                                 .id(((SremMessage) message).getId());
                     }
                     case CamMessage ignored -> {
                         messageBuilder
-                                .bytesMessage(binary ? convertFileToByteArray(message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
+                                .bytesMessage(binary ? convertFileToByteArray(
+                                        message.getFileName()) : message.getMessageText().getBytes(StandardCharsets.UTF_8))
                                 .messageType(CAM)
                                 .stationType(((CamMessage) message).getStationType())
                                 .vehicleRole(((CamMessage) message).getVehicleRole());
@@ -189,24 +200,24 @@ public class Send implements Callable<Integer> {
     }
 
     private void validateInput(Messages messages) throws Exception {
-        for(Message message : messages.getMessages()){
-            if(binary) {
-                if(message.getMessageType().equals(DATEX_2)){
+        for (Message message : messages.getMessages()) {
+            if (binary) {
+                if (message.getMessageType().equals(DATEX_2)) {
                     throw new Exception("DATEX messages can not be sent binary.");
                 }
                 if (message.getFile() == null) {
                     throw new Exception("Message does not contain file");
                 }
             }
-            else{
-                if(message.getMessageText() == null){
+            else {
+                if (message.getMessageText() == null) {
                     throw new Exception("Message does not contain messageText");
                 }
             }
         }
     }
 
-    private static class DeliveriesOption{
+    private static class DeliveriesOption {
         @Option(names = {"-f", "--file"}, required = true, description = "The deliveries json file")
         File file;
 

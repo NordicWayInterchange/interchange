@@ -1,19 +1,21 @@
 package no.vegvesen.ixn.federation.adminserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilitiesLinkedDeliveryApi;
 import no.vegvesen.ixn.federation.adminserver.model.match.CapabilityMatchApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalDeliveryEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
-import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
-import no.vegvesen.ixn.federation.model.*;
+import no.vegvesen.ixn.federation.model.LocalDelivery;
+import no.vegvesen.ixn.federation.model.LocalDeliveryEndpoint;
+import no.vegvesen.ixn.federation.model.OutgoingMatch;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class QpidService {
@@ -102,7 +104,7 @@ public class QpidService {
     public List<Exchange> getAllExchanges() {
         try {
             return adminQpidClient.getAllExchanges();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -110,7 +112,7 @@ public class QpidService {
     public List<Queue> getAllQueues() {
         try {
             return adminQpidClient.getAllQueues();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

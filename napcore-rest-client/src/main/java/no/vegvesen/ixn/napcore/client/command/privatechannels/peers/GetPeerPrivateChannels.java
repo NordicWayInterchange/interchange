@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.napcore.client.command.privatechannels.peers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.PeerPrivateChannel;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ParentCommand;
 import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -25,7 +26,7 @@ public class GetPeerPrivateChannels implements Callable<Integer> {
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParent().getParentCommand().createClient();
         List<PeerPrivateChannel> response = client.getPeerPrivateChannels();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return 0;
     }

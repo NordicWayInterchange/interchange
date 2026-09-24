@@ -73,6 +73,10 @@ public class LocalActorSubscription {
         this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
     }
 
+    public long getLastUpdatedTimeStamp() {
+        return lastUpdatedTimeStamp;
+    }
+
     public LocalActorSubscriptionStatusApi getStatus() {
         return status;
     }

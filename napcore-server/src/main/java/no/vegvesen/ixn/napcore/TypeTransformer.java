@@ -2,9 +2,8 @@ package no.vegvesen.ixn.napcore;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.Peer;
+import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
-import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.transformer.CapabilityToCapabilityApiTransformer;
 import no.vegvesen.ixn.napcore.model.*;
 import no.vegvesen.ixn.napcore.model.PrivateChannelEndpoint;
@@ -12,6 +11,7 @@ import no.vegvesen.ixn.napcore.model.PrivateChannelStatus;
 import no.vegvesen.ixn.napcore.model.Subscription;
 import no.vegvesen.ixn.napcore.model.SubscriptionRequest;
 import no.vegvesen.ixn.napcore.model.SubscriptionStatus;
+import no.vegvesen.ixn.shared.capability.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,12 +29,28 @@ public class TypeTransformer {
     }
 
     public OnboardingCapability transformCapabilityToOnboardingCapability(no.vegvesen.ixn.federation.model.capability.Capability capability, boolean hasDelivery){
+        Metadata metadata = capability.getMetadata();
         return new OnboardingCapability(
                 capability.getUuid(),
-                capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
+                applicationApiToApplicationApi(capability.getApplication()),
+                metadataToMetadataApi(metadata),
                 hasDelivery,
                 transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp()));
+    }
+
+    private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+        return new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()), metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval());
+    }
+
+    private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus statusApi) {
+        if (statusApi != null) {
+            return switch (statusApi) {
+                case MANDATORY -> RedirectStatusApi.MANDATORY;
+                case NOT_AVAILABLE -> RedirectStatusApi.NOT_AVAILABLE;
+                default -> RedirectStatusApi.OPTIONAL;
+            };
+        }
+        return RedirectStatusApi.OPTIONAL;
     }
 
     public LocalSubscription transformNapSubscriptionToLocalSubscription(SubscriptionRequest subscription, String nodeName) {
@@ -147,16 +163,18 @@ public class TypeTransformer {
     public List<no.vegvesen.ixn.napcore.model.Capability> transformCapabilitiesToGetMatchingCapabilitiesResponse(Set<no.vegvesen.ixn.federation.model.capability.Capability> capabilities, Set<NeighbourCapability> neighbourCapabilities) {
         List<no.vegvesen.ixn.napcore.model.Capability> matchingCapabilities = new ArrayList<>();
         for (no.vegvesen.ixn.federation.model.capability.Capability capability : capabilities) {
+            Metadata metadata = capability.getMetadata();
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
-                    capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
+                    applicationApiToApplicationApi(capability.getApplication()),
+                    metadataToMetadataApi(metadata),
                     transformLocalDateTimeToTimestamp(capability.getCreatedTimestamp())
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
+            Metadata metadata = neighbourCapability.getMetadata();
             matchingCapabilities.add(new no.vegvesen.ixn.napcore.model.Capability(
-                    neighbourCapability.getApplication().toApi(),
-                    neighbourCapability.getMetadata().toApi(),
+                    applicationApiToApplicationApi(neighbourCapability.getApplication()),
+                    metadataToMetadataApi(metadata),
                     transformLocalDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
             ));
         }
@@ -227,6 +245,72 @@ public class TypeTransformer {
             onboardingCapabilities.add(transformCapabilityToOnboardingCapability(capabilityAndDelivery.capability(),capabilityAndDelivery.hasDelivery()));
         }
         return onboardingCapabilities;
+    }
+
+    private static ApplicationApi applicationApiToApplicationApi(Application application) {
+        return switch (application) {
+            case DatexApplication d -> new DatexApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getPublicationType(),
+                    d.getPublisherName()
+            );
+            case DenmApplication d ->  new DenmApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getCauseCode()
+            );
+            case IvimApplication i ->  new IvimApplicationApi(
+                    i.getPublisherId(),
+                    i.getPublicationId(),
+                    i.getOriginatingCountry(),
+                    i.getProtocolVersion(),
+                    i.getQuadTree()
+            );
+            case SpatemApplication sp ->  new SpatemApplicationApi(
+                    sp.getPublisherId(),
+                    sp.getPublicationId(),
+                    sp.getOriginatingCountry(),
+                    sp.getProtocolVersion(),
+                    sp.getQuadTree()
+            );
+            case MapemApplication mapem ->  new MapemApplicationApi(
+                    mapem.getPublisherId(),
+                    mapem.getPublicationId(),
+                    mapem.getOriginatingCountry(),
+                    mapem.getProtocolVersion(),
+                    mapem.getQuadTree()
+            );
+            case SremApplication srem ->  new SremApplicationApi(
+                    srem.getPublisherId(),
+                    srem.getPublicationId(),
+                    srem.getOriginatingCountry(),
+                    srem.getProtocolVersion(),
+                    srem.getQuadTree()
+            );
+            case SsemApplication ssem ->  new SsemApplicationApi(
+                    ssem.getPublisherId(),
+                    ssem.getPublicationId(),
+                    ssem.getOriginatingCountry(),
+                    ssem.getProtocolVersion(),
+                    ssem.getQuadTree()
+            );
+            case CamApplication cam ->  new CamApplicationApi(
+                    cam.getPublisherId(),
+                    cam.getPublicationId(),
+                    cam.getOriginatingCountry(),
+                    cam.getProtocolVersion(),
+                    cam.getQuadTree()
+            );
+            default -> throw new IllegalArgumentException("Unknown application api");
+        };
+
     }
 
     public record CapabilityAndDelivery(Capability capability, boolean hasDelivery) {}

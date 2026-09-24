@@ -1,13 +1,17 @@
 package no.vegvesen.ixn.federation.capability;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.matcher.SelectorCapabilityMatcher;
-import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.*;
+import no.vegvesen.ixn.federation.model.LocalSubscription;
+import no.vegvesen.ixn.federation.model.RedirectStatus;
+import no.vegvesen.ixn.federation.model.capability.Application;
+import no.vegvesen.ixn.federation.model.capability.Capability;
+import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,11 +74,11 @@ public class CapabilityMatcher {
 	}
 
 	public static boolean matchApplicationToSelector(Application application, String selector, Integer shardCount) {
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = JsonMapper.builder().build();
 		String capabilityJson = null;
 		if (shardCount > 1) {
 			for (int i = 0; i < shardCount; i++) {
-				int shardId = i+1;
+				int shardId = i + 1;
 				if (matchCapabilityApplicationWithShardToSelector(application, shardId, selector)) {
 					return true;
 				}
@@ -83,7 +87,7 @@ public class CapabilityMatcher {
 			if (!selectorIsSharded(selector)) {
 				try {
 					capabilityJson = mapper.writeValueAsString(application);
-				} catch (JsonProcessingException e) {
+				} catch (JacksonException e) {
 					throw new RuntimeException(e);
 				}
 				return matcher.match(selector, capabilityJson);
@@ -93,11 +97,11 @@ public class CapabilityMatcher {
 	}
 
 	public static boolean matchCapabilityApplicationWithShardToSelector(Application application, Integer shardId, String selector) {
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = JsonMapper.builder().build();
 		String capabilityJson = null;
 		try {
 			capabilityJson = mapper.writeValueAsString(application).replace("}", ",\"shardId\":" + shardId + "}");
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new RuntimeException(e);
 		}
 		return matcher.match(selector, capabilityJson);

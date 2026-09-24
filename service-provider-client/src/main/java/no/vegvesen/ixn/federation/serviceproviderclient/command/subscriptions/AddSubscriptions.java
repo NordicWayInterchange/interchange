@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscription;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsRequest;
 import no.vegvesen.ixn.serviceprovider.model.AddSubscriptionsResponse;
 import picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.List;
@@ -40,15 +41,16 @@ public class AddSubscriptions implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         ServiceProviderClient client = parentCommand.getParent().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
 
-        if(option.file != null) {
+        if (option.file != null) {
             AddSubscriptionsRequest requestApi = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }
-        else{
-            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(), List.of(new AddSubscription(option.selector, description)));
+        else {
+            AddSubscriptionsRequest requestApi = new AddSubscriptionsRequest(client.getUser(),
+                    List.of(new AddSubscription(option.selector, description)));
             AddSubscriptionsResponse result = client.addSubscription(requestApi);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
         }

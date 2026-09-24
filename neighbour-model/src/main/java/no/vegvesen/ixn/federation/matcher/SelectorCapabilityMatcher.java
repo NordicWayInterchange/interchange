@@ -1,8 +1,10 @@
 package no.vegvesen.ixn.federation.matcher;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import no.vegvesen.ixn.federation.matcher.filter.TrileanExpression;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
  * SelectorCapabilityMatcher developed by Monotch
  */
 public class SelectorCapabilityMatcher {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = JsonMapper.builder().build();
     private final String[] quadKeyIdentifiers;
 
     public SelectorCapabilityMatcher() {
@@ -42,7 +44,8 @@ public class SelectorCapabilityMatcher {
                     while (regexMatcher.find()) {
                         quadKeysUsedInSelector.add(regexMatcher.group("quadKey"));
                     }
-                    capabilityMultiValueMap.put(quadKeyIdentifier, expandQuadKeyValuesToIncludeSubQuadrantKeys(capabilityMultiValueMap.get(quadKeyIdentifier), quadKeysUsedInSelector));
+                    capabilityMultiValueMap.put(quadKeyIdentifier, expandQuadKeyValuesToIncludeSubQuadrantKeys(
+                            capabilityMultiValueMap.get(quadKeyIdentifier), quadKeysUsedInSelector));
                 }
             }
             for (Iterator<Map<String, Object>> iterator = new CombinationExpandingIterator<>(capabilityMultiValueMap); iterator.hasNext(); ) {
@@ -52,7 +55,7 @@ public class SelectorCapabilityMatcher {
                 }
             }
             return false;
-        } catch (JsonProcessingException | ParseException e) {
+        } catch (JacksonException | ParseException e) {
             throw new RuntimeException(e);
         }
     }
