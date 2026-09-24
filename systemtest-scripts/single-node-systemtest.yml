@@ -49,7 +49,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
       - KEYCLOAK_TOKEN_ENDPOINT=http://a-keycloak:8080/realms/a.interchangedomain.com/protocol/openid-connect/token
-      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com.onboard
+      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com-onboard
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
     networks:
       - testing_net
