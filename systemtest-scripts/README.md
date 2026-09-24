@@ -25,3 +25,15 @@ instance registered and configured, and the details filled in a file called `nap
 The exact variables are listed in `napcoresettings.example`.
 Please refer to the [Aut0 documentation](https://auth0.com/docs/quickstart/webapp/nextjs/interactive).
 To actually run the project, use the `systemtest-napcore.sh` script.
+
+
+## Keycloak for the onboard server
+
+The Onboard server is able to connect to Keycloak. We have created a configuration in Keycloak to test the onboard functionality.
+After running `systemtest.sh` or `single-node-systemtest.sh` script,
+a new client `a.interchangedomain.com-onboard` is created in Keycloak which can also be displayed in the keycloak admin UI.
+This client has `Client authentication` and `Service account roles` activated. These are the properties that are configured when creating 
+a client in the Keycloak Admin UI and are imported as json file in this project.
+
+The Service Provider client is also able to connect to Keycloak to retrieve a token for a user. The same client credentials can be used 
+to test retrieving a token from the service Provider client.

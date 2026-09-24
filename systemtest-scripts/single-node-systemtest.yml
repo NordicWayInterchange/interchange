@@ -31,6 +31,7 @@ services:
       context: ../onboard-server-app
     depends_on:
       - a-db
+      - a-keycloak
     ports:
       - 32666:8797
     volumes:
@@ -47,6 +48,9 @@ services:
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+      - KEYCLOAK_TOKEN_ENDPOINT=http://a-keycloak:8080/realms/a.interchangedomain.com/protocol/openid-connect/token
+      - KEYCLOAK_CLIENT_ID=a.interchangedomain.com-onboard
+      - KEYCLOAK_CLIENT_SECRET=anothersupersecret
     networks:
       - testing_net
 
