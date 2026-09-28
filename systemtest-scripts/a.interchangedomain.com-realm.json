@@ -338,6 +338,25 @@
     }
   },
   "groups" : [ ],
+  "organizations": [
+    {
+      "name": "BOUVET",
+      "alias": "Bouvet",
+      "enabled": true,
+      "description": "",
+      "domains": [
+        {
+          "name": "a.interchangedomain.com",
+          "verified": false
+        }
+      ],
+      "members": [
+        {
+          "id": "61a3c88a-b63e-466a-81c5-f48d6ee591f2"
+        }
+      ]
+    }
+  ],
   "defaultRole" : {
     "id" : "22b392b6-0d50-45ce-811f-a26d2a0d2ce8",
     "name" : "default-roles-a.interchangedomain.com",
@@ -2210,7 +2229,7 @@
   },
   "keycloakVersion" : "26.5.2",
   "userManagedAccessAllowed" : false,
-  "organizationsEnabled" : false,
+  "organizationsEnabled" : true,
   "verifiableCredentialsEnabled" : false,
   "adminPermissionsEnabled" : false,
   "clientProfiles" : {
