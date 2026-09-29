@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.adminserver.qpid;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.federation.adminserver.properties.AdminQpidClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.core.JacksonException;
 
 import java.util.List;
 
@@ -127,7 +127,7 @@ public class AdminQpidClient {
     }
 
 
-    public List<Queue> getAllQueues() throws JsonProcessingException {
+    public List<Queue> getAllQueues() throws JacksonException {
         ResponseEntity<List<Queue>> allQueuesResponse = restTemplate.exchange(
                 allQueuesUrl,
                 HttpMethod.GET,
@@ -137,7 +137,7 @@ public class AdminQpidClient {
         return allQueuesResponse.getBody();
     }
 
-    public List<Exchange> getAllExchanges() throws JsonProcessingException {
+    public List<Exchange> getAllExchanges() throws JacksonException {
         ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
                 allExchangesUrl,
                 HttpMethod.GET,

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.Sink;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.*;
@@ -8,6 +7,8 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.util.List;
@@ -47,11 +48,12 @@ public class CountMessages implements Callable<Integer> {
 
         String id;
         if (option.file != null) {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = JsonMapper.builder().build();
             AddSubscriptionsRequest request = mapper.readValue(option.file, AddSubscriptionsRequest.class);
             AddSubscriptionsResponse addSubscriptionsResponse = client.addSubscription(request);
             id = addSubscriptionsResponse.getSubscriptions().stream()
-                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(() -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
+                    .filter(sub -> sub.getSelector().equals(addSubscriptionsResponse.getSubscriptions().stream().findFirst().orElseThrow(
+                            () -> new RuntimeException("Could not find subscription with requested selector")).getSelector()))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Server indicated subscription was added, but could not find it in response"))
                     .getId();
@@ -79,11 +81,13 @@ public class CountMessages implements Callable<Integer> {
         }
 
         if (!subscription.getStatus().equals(LocalActorSubscriptionStatusApi.CREATED)) {
-            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s", subscription.getStatus(), subscription.getId()));
+            throw new RuntimeException(String.format("Unexpected subscription status %s for subscription %s",
+                    subscription.getStatus(), subscription.getId()));
 
         }
 
-        LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().orElseThrow(() -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s", id)));
+        LocalEndpointApi endpointApi = client.getSubscription(subscription.getId()).getEndpoints().stream().findFirst().orElseThrow(
+                () -> new RuntimeException(String.format("Could not determine endpoint for subscription with id %s", id)));
         String url = "amqps://" + endpointApi.getHost();
 
         CountDownLatch latch = new CountDownLatch(1);

@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.federation.qpid;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.core.JacksonException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,9 +79,9 @@ public class QpidClient {
 		this.aclRulesUrl = String.format(ACL_RULE_PATTERN, baseUrl, vhostName);
 		this.allQueuesUrl = String.format(ALL_QUEUES_URL_PATTERN, baseUrl);
 		this.allExchangesUrl = String.format(ALL_EXCHANGES_URL_PATTERN, baseUrl);
-		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN,baseUrl);
-		this.connectionUrl = String.format(CONNECTION_URL_PATTERN,baseUrl);
-		this.queryApiUrl = String.format(QUERY_API_PATTERN,baseUrl);
+		this.queryEngineApiUrl = String.format(QUERY_ENGINE_API_PATTERN, baseUrl);
+		this.connectionUrl = String.format(CONNECTION_URL_PATTERN, baseUrl);
+		this.queryApiUrl = String.format(QUERY_API_PATTERN, baseUrl);
 		this.restTemplate = restTemplate;
 	}
 
@@ -107,7 +107,7 @@ public class QpidClient {
 		AddBindingRequest request = new AddBindingRequest(binding);
 		logger.info("Add binding {} from {} ", binding, source);
 		String url = exchangesURL + "/" + source + "/bind";
-		logger.debug("POSTint {} to URL {}",request,url);
+		logger.debug("POSTint {} to URL {}", request, url);
 		Boolean result = restTemplate.postForEntity(url, request, Boolean.class).getBody();
 		return result.booleanValue();
 	}
@@ -121,24 +121,24 @@ public class QpidClient {
 	}
 
 	public Exchange createHeadersExchange(String name) {
-		return createExchange(new CreateExchangeRequest(name,"headers"));
+		return createExchange(new CreateExchangeRequest(name, "headers"));
 	}
 
 	public Exchange createHeadersExchangeWithDlq(String name, String dlqName) {
-		return createExchange(new CreateExchangeRequest(name,"headers",new AlternateBinding(dlqName)));
+		return createExchange(new CreateExchangeRequest(name, "headers", new AlternateBinding(dlqName)));
 	}
 
 	private Queue createQueue(CreateQueueRequest request) {
 		logger.info("Create queue {}", request.getName());
 		String url = queuesURL + "/";
-		logger.debug("POSTin {} to {}", request,url);
+		logger.debug("POSTin {} to {}", request, url);
         return restTemplate.postForEntity(url, request, Queue.class).getBody();
 	}
 
 	private Exchange createExchange(CreateExchangeRequest request) {
 		logger.info("Create exchange {} of type {}", request.getName(), request.getType());
 		String url = exchangesURL + "/";
-		logger.debug("POSTing {} to {}",request,url);
+		logger.debug("POSTing {} to {}", request, url);
 		ResponseEntity<Exchange> response = restTemplate.postForEntity(url, request, Exchange.class);
 		return response.getBody();
 	}
@@ -184,14 +184,14 @@ public class QpidClient {
 
 	public void removeQueue(Queue queue) {
 		String url = queuesURL + "/" + queue.getName();
-		logger.debug("DELETE to URL {}",url );
+		logger.debug("DELETE to URL {}", url );
 		restTemplate.delete(url);
 		logger.info("Removed queue {}", queue.getName());
 	}
 
 	public void removeExchange(Exchange exchange) {
 		String url = exchangesURL + "/" + exchange.getName();
-		logger.debug("DELETE to URL {}",url);
+		logger.debug("DELETE to URL {}", url);
 		restTemplate.delete(url);
 		logger.info("Removed exchange {}", exchange.getName());
 	}
@@ -223,7 +223,7 @@ public class QpidClient {
 
 	public void removeServiceProviderMemberFromGroup(ServiceProviderMember member) {
 		String url = groupMembersURL + SERVICE_PROVIDERS_GROUP_NAME + "/" + member.getName();
-		logger.debug("DELETE to URL {}",url);
+		logger.debug("DELETE to URL {}", url);
 		logger.info("Removing service provider member '{}' from group", member.getName());
 		restTemplate.delete(url);
 	}
@@ -247,14 +247,14 @@ public class QpidClient {
 
 	public PrivateChannelMember addPrivateChannelMemberToGroup(String memberName) {
 		PrivateChannelMember privateChannelMember = new PrivateChannelMember(memberName);
-		logger.info("Adding private channel member '{}' to group",memberName);
+		logger.info("Adding private channel member '{}' to group", memberName);
 		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME;
-		return restTemplate.postForEntity(url,privateChannelMember,PrivateChannelMember.class).getBody();
+		return restTemplate.postForEntity(url, privateChannelMember, PrivateChannelMember.class).getBody();
 	}
 
 	public void removePrivateChannelMemberFromGroup(PrivateChannelMember member) {
 		String url = groupMembersURL + CLIENTS_PRIVATE_CHANNELS_GROUP_NAME + "/" + member.name();
-		logger.debug("DELETE to URL {}",url);
+		logger.debug("DELETE to URL {}", url);
 		logger.info("Removing private channel member '{}' from group", member.name());
 		restTemplate.delete(url);
 	}
@@ -278,14 +278,14 @@ public class QpidClient {
 
 	public BiConsumerMember addBiConsumerMemberToGroup(String memberName) {
 		BiConsumerMember biConsumerMember = new BiConsumerMember(memberName);
-		logger.info("Adding bi consumer member '{}' to group",memberName);
+		logger.info("Adding bi consumer member '{}' to group", memberName);
 		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME;
-		return restTemplate.postForEntity(url,biConsumerMember, BiConsumerMember.class).getBody();
+		return restTemplate.postForEntity(url, biConsumerMember, BiConsumerMember.class).getBody();
 	}
 
 	public void removeBiConsumerMemberFromGroup(BiConsumerMember member) {
 		String url = groupMembersURL + BI_CONSUMERS_GROUP_NAME + "/" + member.name();
-		logger.debug("DELETE to URL {}",url);
+		logger.debug("DELETE to URL {}", url);
 		logger.info("Removing bi consumer member '{}' from group", member.name());
 		restTemplate.delete(url);
 	}
@@ -302,14 +302,14 @@ public class QpidClient {
 
 	public RemoteServiceProviderMember addRemoteServiceProvicerMemberToGroup(String memberName) {
 		RemoteServiceProviderMember member = new RemoteServiceProviderMember(memberName);
-		logger.info("Adding remote service provider member '{}' to group",memberName);
+		logger.info("Adding remote service provider member '{}' to group", memberName);
 		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME;
-		return restTemplate.postForEntity(url,member,RemoteServiceProviderMember.class).getBody();
+		return restTemplate.postForEntity(url, member, RemoteServiceProviderMember.class).getBody();
 	}
 
 	public void removeRemoteServiceProviderMemberFromGroup(RemoteServiceProviderMember member) {
 		String url = groupMembersURL + REMOTE_SERVICE_PROVIDERS_GROUP_NAME + "/" + member.getName();
-		logger.info("Removing remote service provider member '{}' from group",member.getName());
+		logger.info("Removing remote service provider member '{}' from group", member.getName());
 		restTemplate.delete(url);
 	}
 
@@ -325,16 +325,16 @@ public class QpidClient {
 
 	public void removeNeighbourMemberFromGroup(NeighbourMember member) {
 		String url = groupMembersURL + FEDERATED_GROUP_NAME + "/" + member.name();
-		logger.debug("DELETE to URL {}",url);
-		logger.info("Removing neighbour member '{}' from group",member.name());
+		logger.debug("DELETE to URL {}", url);
+		logger.info("Removing neighbour member '{}' from group", member.name());
 		restTemplate.delete(url);
 	}
 
 	public NeighbourMember addNeighbourMemberToGroup(String memberName) {
 		NeighbourMember member = new NeighbourMember(memberName);
-		logger.info("Adding neighbour member '{}' to group",memberName);
+		logger.info("Adding neighbour member '{}' to group", memberName);
 		String url = groupMembersURL + FEDERATED_GROUP_NAME;
-		return restTemplate.postForEntity(url,member,NeighbourMember.class).getBody();
+		return restTemplate.postForEntity(url, member, NeighbourMember.class).getBody();
 	}
 
 	public GroupMember getGroupMember(String memberName, String groupName) {
@@ -349,37 +349,37 @@ public class QpidClient {
 
 	public GroupMember addMemberToGroup(String memberName, String groupName) {
 		GroupMember groupMember = new GroupMember(memberName);
-		logger.info("Adding member {} to group {}",memberName,groupName);
+		logger.info("Adding member {} to group {}", memberName, groupName);
 		String url = groupMembersURL + groupName;
-		return restTemplate.postForEntity(url,groupMember,GroupMember.class).getBody();
+		return restTemplate.postForEntity(url, groupMember, GroupMember.class).getBody();
 	}
 
 
 	public void addReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
 		provider.addQueueReadAccess(subscriberName, queue);
-		logger.info("Adding read access for {} to queue {}",subscriberName,queue);
+		logger.info("Adding read access for {} to queue {}", subscriberName, queue);
         postQpidAcl(provider);
 	}
 
 	public void addWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
 		provider.addExchangeWriteAccess(subscriberName, queue);
-		logger.info("Adding write access for {} to queue {}",subscriberName,queue);
+		logger.info("Adding write access for {} to queue {}", subscriberName, queue);
         postQpidAcl(provider);
 	}
 
 	public void removeReadAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.removeQueueReadAccess(subscriberName,queue);
+		provider.removeQueueReadAccess(subscriberName, queue);
 		logger.info("Removing read access for {} to queue {}", subscriberName, queue);
 		postQpidAcl(provider);
 	}
 
 	public void removeWriteAccess(String subscriberName, String queue) {
 		VirtualHostAccessController provider = getQpidAcl();
-		provider.removeQueueWriteAccess(subscriberName,queue);
-		logger.info("Removing write access for {} to queue {}", subscriberName,queue);
+		provider.removeQueueWriteAccess(subscriberName, queue);
+		logger.info("Removing write access for {} to queue {}", subscriberName, queue);
 		postQpidAcl(provider);
 	}
 
@@ -395,23 +395,25 @@ public class QpidClient {
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String where, String orderBy, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}&orderBy={orderBy}",ConnectionQueryResult.class,select,where,orderBy).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain +
+                "?select={query}&where={where}&orderBy={orderBy}", ConnectionQueryResult.class, select, where, orderBy).getBody();
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String where, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}&where={where}",ConnectionQueryResult.class,select,where).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain +
+                "?select={query}&where={where}", ConnectionQueryResult.class, select, where).getBody();
 	}
 
 	public ConnectionQueryResult executeConnectionQuery(String select, String domain) {
-		return restTemplate.getForEntity(queryApiUrl  +"/" + domain + "?select={query}",ConnectionQueryResult.class,select).getBody();
+		return restTemplate.getForEntity(queryApiUrl  + "/" + domain + "?select={query}", ConnectionQueryResult.class, select).getBody();
 	}
 
 	public QueryResult executeQuery(Query query) {
-		return restTemplate.postForEntity(queryEngineApiUrl,query,QueryResult.class).getBody();
+		return restTemplate.postForEntity(queryEngineApiUrl, query, QueryResult.class).getBody();
 	}
 
 	public String getConnection(String port, String connectionName) {
-		return restTemplate.getForEntity(connectionUrl + "/" + port + "/" + connectionName,String.class).getBody();
+		return restTemplate.getForEntity(connectionUrl + "/" + port + "/" + connectionName, String.class).getBody();
 	}
 
 	public void deleteConnection(String connectionName) {
@@ -419,7 +421,7 @@ public class QpidClient {
 		restTemplate.delete(connectionUrl + "/AMQPS/" + connectionName);
 	}
 
-	public List<Queue> getAllQueues() throws JsonProcessingException {
+	public List<Queue> getAllQueues() throws JacksonException {
 		ResponseEntity<List<Queue>> allQueuesResponse  = restTemplate.exchange(
 				allQueuesUrl,
 				HttpMethod.GET,
@@ -429,7 +431,7 @@ public class QpidClient {
 		return allQueuesResponse.getBody();
 	}
 
-	public List<Exchange> getAllExchanges() throws JsonProcessingException {
+	public List<Exchange> getAllExchanges() throws JacksonException {
 		ResponseEntity<List<Exchange>> allExchangesResponse = restTemplate.exchange(
 				allExchangesUrl,
 				HttpMethod.GET,
@@ -446,9 +448,9 @@ public class QpidClient {
 			List<PrivateChannelMember> privateChannelUsers = getPrivateChannelGroupMembers();
 			List<BiConsumerMember> biConsumerMembers = getBiConsumerMembers();
 			List<ServiceProviderMember> serviceProviderMembers = getServiceProviderMembers();
-			return new QpidDelta(allExchanges,allQueues, privateChannelUsers, biConsumerMembers, serviceProviderMembers);
+			return new QpidDelta(allExchanges, allQueues, privateChannelUsers, biConsumerMembers, serviceProviderMembers);
 
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			logger.error("Could not parse qpid delta");
 			throw new RuntimeException(e);
 		}

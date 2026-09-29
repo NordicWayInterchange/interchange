@@ -51,6 +51,7 @@ public class NeigbourDiscoveryService {
         this.discovererProperties = discovererProperties;
         this.neighbourFacade = neighbourFacade;
     }
+
     public void checkForNewNeighbours() {
         logger.debug("Checking DNS for new neighbours using {}.", dnsFacade.getClass().getSimpleName());
         List<Neighbour> neighbours = dnsFacade.lookupNeighbours();
@@ -150,7 +151,7 @@ public class NeigbourDiscoveryService {
                 if (neighbour.hasCapabilities()) {
                     if (neighbour.shouldCheckSubscriptionRequestsForUpdates(lastUpdatedLocalSubscriptions)) {
                         logger.info("Posting subscription request to neighbour {}", neighbour.getName());
-                        postSubscriptionRequest(neighbour, localSubscriptions, neighbourFacade);
+                        postSubscriptionRequest(neighbour, localSubscriptions);
                     } else {
                         logger.debug("No need to calculateCustomSubscriptionForNeighbour based on timestamps on local subscriptions, neighbour capabilities, last subscription request");
                     }
@@ -174,7 +175,7 @@ public class NeigbourDiscoveryService {
     //3. N LocalSubscriptions, each matching the same capability, thus making a n-to-n relationship LocalSubscription -> Subscription
                 //There will only be one Subscription for the Neighbour, even though we might match several capabilities on the neighbour.
                 //So, this is really a n-to-1 relationship.
-    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions, NeighbourRESTFacade neighbourFacade) {
+    public void postSubscriptionRequest(Neighbour neighbour, Set<LocalSubscription> localSubscriptions) {
         String neighbourName = neighbour.getName();
         Set<NeighbourCapability> neighbourCapabilities = neighbour.getCapabilities().getCapabilities();
         SubscriptionRequest ourRequestedSubscriptionsFromNeighbour = neighbour.getOurRequestedSubscriptions();
@@ -227,7 +228,7 @@ public class NeigbourDiscoveryService {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    pollSubscriptionsOneNeighbour(neighbour, neighbourFacade);
+                    pollSubscriptionsOneNeighbour(neighbour);
                 }
                 //TODO find a better solution to this
             } catch (Exception e) {
@@ -247,7 +248,7 @@ public class NeigbourDiscoveryService {
             try {
                 NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), neighbour.getName());
                 if (neighbour.getControlConnection().canBeContacted(backoffProperties)) {
-                    pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour, neighbourFacade);
+                    pollSubscriptionsWithStatusCreatedOneNeighbour(neighbour);
                 }
             } catch (Exception e) {
                 logger.error("Unknown error while polling subscription with status CREATED",e);
@@ -258,7 +259,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsOneNeighbour(Neighbour neighbour, NeighbourRESTFacade neighbourFacade) {
+    public void pollSubscriptionsOneNeighbour(Neighbour neighbour) {
         try {
             Set<Subscription> subscriptionsForPolling = neighbour.getSubscriptionsForPolling();
             for (Subscription subscription : subscriptionsForPolling) {
@@ -306,7 +307,7 @@ public class NeigbourDiscoveryService {
         }
     }
 
-    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour, NeighbourRESTFacade neighbourFacade) {
+    public void pollSubscriptionsWithStatusCreatedOneNeighbour(Neighbour neighbour) {
         try {
             Set<Subscription> createdSubscriptions = neighbour.getOurRequestedSubscriptions().getSubscriptionsByStatus(SubscriptionStatus.CREATED);
             for (Subscription subscription : createdSubscriptions) {

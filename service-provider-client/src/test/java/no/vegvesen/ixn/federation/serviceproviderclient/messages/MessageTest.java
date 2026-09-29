@@ -1,9 +1,10 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.messages;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.messages.*;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +13,10 @@ import java.util.Arrays;
 
 public class MessageTest {
 
+    private final ObjectMapper mapper = JsonMapper.builder().build();
+
     @Test
-    public void testDenmMessage() throws JsonProcessingException {
+    public void testDenmMessage() throws JacksonException {
         Message denmMessage = new DenmMessage(
                 "This is my message",
                 "king_olav",
@@ -32,12 +35,11 @@ public class MessageTest {
                 61
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(denmMessage));
     }
 
     @Test
-    public void testDatexMessage() throws JsonProcessingException {
+    public void testDatexMessage() throws JacksonException {
         Message datexMessage = new DatexMessage(
                 "This is my message",
                 "king_olav",
@@ -57,12 +59,11 @@ public class MessageTest {
                 "publisherName"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(datexMessage));
     }
 
     @Test
-    public void testIvimMessage() throws JsonProcessingException {
+    public void testIvimMessage() throws JacksonException {
         Message ivimMessage = new IvimMessage(
                 "This is my message",
                 "king_olav",
@@ -82,12 +83,11 @@ public class MessageTest {
                 ",giv,"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ivimMessage));
     }
 
     @Test
-    public void testSpatemMessage() throws JsonProcessingException {
+    public void testSpatemMessage() throws JacksonException {
         Message spatemMessage = new SpatemMessage(
                 "This is my message",
                 "king_olav",
@@ -106,12 +106,11 @@ public class MessageTest {
                 ",name1,"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(spatemMessage));
     }
 
     @Test
-    public void testMapemMessage() throws JsonProcessingException {
+    public void testMapemMessage() throws JacksonException {
         Message mapemMessage = new MapemMessage(
                 "This is my message",
                 "king_olav",
@@ -130,12 +129,11 @@ public class MessageTest {
                 ",name1,"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapemMessage));
     }
 
     @Test
-    public void testSremMessage() throws JsonProcessingException {
+    public void testSremMessage() throws JacksonException {
         Message sremMessage = new SremMessage(
                 "This is my message",
                 "king_olav",
@@ -153,12 +151,11 @@ public class MessageTest {
                 ",5-57,"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(sremMessage));
     }
 
     @Test
-    public void testSsemMessage() throws JsonProcessingException {
+    public void testSsemMessage() throws JacksonException {
         Message ssemMessage = new SsemMessage(
                 "This is my message",
                 "king_olav",
@@ -176,12 +173,11 @@ public class MessageTest {
                 ",5-57,"
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ssemMessage));
     }
 
     @Test
-    public void testCamMessage() throws JsonProcessingException {
+    public void testCamMessage() throws JacksonException {
         Message camMessage = new CamMessage(
                 "This is my message",
                 "king_olav",
@@ -200,12 +196,11 @@ public class MessageTest {
                 5
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(camMessage));
     }
 
     @Test
-    public void testJsonMessages() throws JsonProcessingException {
+    public void testJsonMessages() throws JacksonException {
         Message denmMessage = new DenmMessage(
                 "This is my message",
                 "king_olav",
@@ -361,14 +356,12 @@ public class MessageTest {
                 camMessage
         ));
 
-        ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(messages));
     }
 
     @Test
     public void jsonToMessageObject() throws IOException {
         File jsonfile = Path.of("src","test","resources","messages_king_olav.json").toFile();
-        ObjectMapper mapper = new ObjectMapper();
         Messages messages = mapper.readValue(jsonfile, Messages.class);
 
         for (Message message : messages.getMessages()) {
