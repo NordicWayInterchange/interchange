@@ -11,7 +11,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import no.vegvesen.ixn.serviceprovider.security.CertService;
+import no.vegvesen.ixn.serviceprovider.security.OnboardCertService;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
@@ -57,7 +57,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
     private PrivateChannelRepository privateChannelRepository;
 
     @MockitoBean
-    private CertService certService;
+    private OnboardCertService onboardCertService;
 
     @Autowired
     private InterchangeNodeProperties nodeProperties;
@@ -348,7 +348,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), selector);
         assertThat(response.getCapabilities()).hasSize(1);
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -566,7 +566,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -614,7 +614,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), "");
         assertThat(response.getCapabilities()).hasSize(2);
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -688,7 +688,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         FetchMatchingCapabilitiesResponse response = restController.listMatchingCapabilities(serviceProvider.getName(), null);
         assertThat(response.getCapabilities()).hasSize(3);
         assertThat(serviceProviderRepository.findAll()).hasSize(2);
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -717,7 +717,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         restController.deleteCapability(serviceProviderName, saved.getId().toString());
 
         //We did four calls to the controller, thus we should have checked the cert 4 times
-        verify(certService, times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(4)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -761,7 +761,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         UUID.fromString(response.getId());
         assertThat(response.getId()).isEqualTo(capability.getId());
 
-        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -795,7 +795,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(addedSubscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -832,7 +832,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThat(response.getSubscriptions()).hasSize(1);
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProvider);
     }
 
     @Test
@@ -846,7 +846,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.REQUESTED);
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -860,7 +860,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         LocalActorSubscription subscription = response.getSubscriptions().stream().findFirst().get();
         assertThat(subscription.getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -892,7 +892,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThat(response.getSubscriptions()).hasSize(1);
         assertThat(response.getSubscriptions().stream().findFirst().get().getErrorMessage()).isNotBlank();
         assertThat(response.getSubscriptions().stream().findFirst().get().getStatus()).isEqualTo(LocalActorSubscriptionStatusApi.ERROR);
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -914,7 +914,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ListSubscriptionsResponse subscriptions = restController.listSubscriptions(serviceProviderName);
         Set<LocalActorSubscription> localSubscriptionApis = subscriptions.getSubscriptions();
         assertThat(localSubscriptionApis.size()).isEqualTo(1);
-        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -922,7 +922,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         String serviceProviderName = "service-provider-create-new-queue";
         String selector = "messageType = 'DATEX2' AND originatingCountry = 'NO'";
         AddSubscriptionsResponse serviceProviderSubscriptions = restController.addSubscriptions(serviceProviderName, new AddSubscriptionsRequest(serviceProviderName, List.of(new AddSubscription(selector, serviceProviderName, "DATEX SUB"))));
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(serviceProviderSubscriptions.getSubscriptions()).hasSize(1);
     }
 
@@ -959,7 +959,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         ServiceProvider afterDeletedSubscription = serviceProviderRepository.findByName(serviceProviderName);
         assertThat(afterDeletedSubscription.getSubscriptionUpdated()).isPresent().hasValueSatisfying(v -> v.isAfter(beforeDeleteTime));
-        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -968,7 +968,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         assertThatExceptionOfType(NotFoundException.class).isThrownBy(
                 () -> restController.deleteSubscription(serviceProviderName, "notAnId")
         );
-        verify(certService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService, times(1)).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -1000,7 +1000,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ServiceProvider savedSPAfterDelete = serviceProviderRepository.findByName(serviceProviderName);
 
         assertThat(savedSPAfterDelete.getSubscriptionUpdated()).isEqualTo(subscriptionUpdated);
-        verify(certService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(3)).checkIfCommonNameMatchesNameInApiObject(anyString());
     }
 
     @Test
@@ -1033,7 +1033,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         LocalActorSubscription subscription = anySubscription.get();
         GetSubscriptionResponse getSubscriptionResponse = restController.getSubscription("king_olav.bouvetinterchange.eu", subscription.getId());
         assertThat(getSubscriptionResponse).isNotNull();
-        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
         assertThat(subscription.getConsumerCommonName()).isEqualTo("king_olav.bouvetinterchange.eu");
     }
 
@@ -1322,7 +1322,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
 
         assertThat(response.getDeliveries()).hasSize(1);
         assertThat(addedDelivery.getStatus()).isEqualTo(DeliveryStatus.ERROR);
-        verify(certService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
+        verify(onboardCertService).checkIfCommonNameMatchesNameInApiObject(serviceProviderName);
     }
 
     @Test
@@ -1419,7 +1419,7 @@ public class OnboardRestControllerIT extends PostgresContainerBase {
         ListDeliveriesResponse response = restController.listDeliveries(serviceProviderName);
 
         assertThat(response.getDeliveries().size()).isEqualTo(1);
-        verify(certService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
+        verify(onboardCertService, times(2)).checkIfCommonNameMatchesNameInApiObject(anyString());
 
     }
 

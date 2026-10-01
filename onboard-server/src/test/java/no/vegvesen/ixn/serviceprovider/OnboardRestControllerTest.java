@@ -9,8 +9,7 @@ import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.PrivateChannelRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.serviceprovider.model.*;
-import no.vegvesen.ixn.serviceprovider.security.CertIdentityResolver;
-import no.vegvesen.ixn.serviceprovider.security.CertService;
+import no.vegvesen.ixn.serviceprovider.security.OnboardCertService;
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
@@ -44,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = OnboardRestController.class)
-@ContextConfiguration(classes = {CertService.class, OnboardRestController.class, InterchangeNodeProperties.class, CertIdentityResolver.class})
+@ContextConfiguration(classes = {OnboardCertService.class, OnboardRestController.class, InterchangeNodeProperties.class })
 public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;

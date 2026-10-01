@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CertService {
+public class OnboardCertService {
     private final IdentityResolver identityResolver;
-    private static final Logger logger = LoggerFactory.getLogger(CertService.class);
+    private static final Logger logger = LoggerFactory.getLogger(OnboardCertService.class);
 
-    public CertService(@Autowired CertIdentityResolver identityResolver) {
+    public OnboardCertService(@Autowired JwtIdentityResolver identityResolver) {
         this.identityResolver = identityResolver;
     }
 

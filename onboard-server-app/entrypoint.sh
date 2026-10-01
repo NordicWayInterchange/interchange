@@ -15,5 +15,6 @@ java -Dspring.datasource.url=${POSTGRES_URI} \
      -Dserver.ssl.trust-store-password=${TRUST_STORE_PASSWORD} \
      -Dinterchange.node-provider.name=${SERVER_NAME} \
      -Dinterchange.node-provider.brokerExternalName=${BROKER_EXTERNAL_NAME} \
+     -Dspring.security.oauth2.resourceserver.jwt.issuer-uri=${OPENID_ISSUER} \
      ${LOG_LEVELS} \
      -jar onboard-server.jar
