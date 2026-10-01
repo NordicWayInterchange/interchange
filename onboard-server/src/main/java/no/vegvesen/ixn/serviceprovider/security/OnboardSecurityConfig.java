@@ -16,7 +16,7 @@ public class OnboardSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated()
                 )
-                .oauth2AuthorizationServer(Customizer.withDefaults())
+                .oauth2ResourceServer(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.NEVER)
                 )
