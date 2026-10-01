@@ -1,5 +1,8 @@
 package no.vegvesen.ixn.serviceprovider;
 
+import no.vegvesen.ixn.serviceprovider.security.JwtIdentityResolver;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import tools.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.Capability;
@@ -43,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = OnboardRestController.class)
-@ContextConfiguration(classes = {OnboardCertService.class, OnboardRestController.class, InterchangeNodeProperties.class })
+@ContextConfiguration(classes = {OnboardCertService.class, OnboardRestController.class, InterchangeNodeProperties.class, JwtIdentityResolver.class})
 public class OnboardRestControllerTest {
 
 	private MockMvc mockMvc;
@@ -78,8 +81,12 @@ public class OnboardRestControllerTest {
 	}
 
 	private void mockCertificate(String commonName) {
-		Authentication principal = mock(Authentication.class);
-		when(principal.getName()).thenReturn(commonName);
+		Jwt jwt = mock(Jwt.class);
+		when(jwt.getClaimAsString("organization")).thenReturn(commonName);
+
+		JwtAuthenticationToken principal = mock(JwtAuthenticationToken.class);
+		when(principal.getToken()).thenReturn(jwt);
+
 		SecurityContext securityContext = mock(SecurityContext.class);
 		when(securityContext.getAuthentication()).thenReturn(principal);
 		SecurityContextHolder.setContext(securityContext);

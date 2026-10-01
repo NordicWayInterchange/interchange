@@ -2,20 +2,19 @@ package no.vegvesen.ixn.federation.auth;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CertService {
-	private final IdentityResolver identityResolver;
-	private static final Logger logger = LoggerFactory.getLogger(CertService.class);
+public class CertService{
 
-	public CertService(@Autowired CertIdentityResolver identityResolver) {
-		this.identityResolver = identityResolver;
-    }
+	private static Logger logger = LoggerFactory.getLogger(CertService.class);
 
 	public void checkIfCommonNameMatchesNameInApiObject(String apiName) {
-		String commonName = identityResolver.getCallerName();
+
+		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = principal.getName();
 
 		if (!commonName.equals(apiName)) {
 			logger.error("Received request for {}, but CN on certificate was {}. Rejecting...", apiName, commonName);
@@ -25,7 +24,8 @@ public class CertService {
 	}
 
 	public void checkIfCommonNameMatchesNapName(String napName) {
-		String commonName = identityResolver.getCallerName();
+		Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+		String commonName = principal.getName();
 
 		if (!commonName.equals(napName)) {
 			logger.error("Received request from {}, but CN on certificate did not match the NAP. Rejecting...", commonName);
