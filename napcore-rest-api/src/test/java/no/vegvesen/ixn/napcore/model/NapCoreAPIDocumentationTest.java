@@ -1,11 +1,12 @@
 package no.vegvesen.ixn.napcore.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.DenmApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NapCoreAPIDocumentationTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = JsonMapper.builder().build();
 
     @Test
     public void testCertificateResponse() throws IOException {
@@ -32,7 +33,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addNapSubscriptionRequestTest() throws JsonProcessingException {
+    public void addNapSubscriptionRequestTest() throws JacksonException {
         SubscriptionRequest subscriptionRequest = new SubscriptionRequest(
                 "originatingCountry = 'SE' and messageType = 'DENM' and quadTree like '%,12003%'", "DENM Sub");
 
@@ -40,7 +41,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addNapSubscriptionResponseTest() throws JsonProcessingException {
+    public void addNapSubscriptionResponseTest() throws JacksonException {
         SubscriptionEndpoint endpoint = new SubscriptionEndpoint(
                 "my-host",
                 5671,
@@ -62,7 +63,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void napSubscriptionCapabilityResponse() throws JsonProcessingException {
+    public void napSubscriptionCapabilityResponse() throws JacksonException {
         Capability capability = new Capability(
                 new DenmApplicationApi(
                         "ID0001,",
@@ -74,11 +75,11 @@ public class NapCoreAPIDocumentationTest {
                 ),
                 new MetadataApi()
         );
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(Arrays.asList(capability)));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(List.of(capability)));
     }
 
     @Test
-    public void getSubscriptionsResponse() throws JsonProcessingException {
+    public void getSubscriptionsResponse() throws JacksonException {
         List<Subscription> subscriptions = new ArrayList<>();
         subscriptions.add(new Subscription(UUID.randomUUID().toString(), SubscriptionStatus.CREATED, "originatingCountry='NO'", Set.of(new SubscriptionEndpoint(
                 "a.bouvetinterchange.eu",
@@ -97,7 +98,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getSubscriptionResponse() throws JsonProcessingException {
+    public void getSubscriptionResponse() throws JacksonException {
         Subscription subscription = new Subscription(UUID.randomUUID().toString(), SubscriptionStatus.CREATED, "originatingCountry='NO'", Set.of(new SubscriptionEndpoint(
                 "a.bouvetinterchange.eu",
                 1337,
@@ -108,19 +109,19 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addDeliveryRequest() throws JsonProcessingException {
+    public void addDeliveryRequest() throws JacksonException {
         DeliveryRequest delivery = new DeliveryRequest("originatingCountry='NO'", "NO Delivery");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
     }
 
     @Test
-    public void addDeliveryResponse() throws JsonProcessingException {
+    public void addDeliveryResponse() throws JacksonException {
         Delivery delivery = new Delivery(UUID.randomUUID().toString(), "originatingCountry='NO'", DeliveryStatus.REQUESTED, null, 93124429L, "NO delivery", false);
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(delivery));
     }
 
     @Test
-    public void getDeliveryResponse() throws JsonProcessingException {
+    public void getDeliveryResponse() throws JacksonException {
         Delivery delivery = new Delivery(UUID.randomUUID().toString(), "originatingCountry='NO'", DeliveryStatus.REQUESTED, List.of(new DeliveryEndpoint(
                 "a.bouvetinterchange.eu",
                 1337,
@@ -134,7 +135,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getDeliveriesResponse() throws JsonProcessingException {
+    public void getDeliveriesResponse() throws JacksonException {
         List<Delivery> deliveries = new ArrayList<>();
         deliveries.add(new Delivery(UUID.randomUUID().toString(), "originatingCountry='NO'", DeliveryStatus.REQUESTED, List.of(new DeliveryEndpoint(
                 "a.bouvetinterchange.eu",
@@ -158,7 +159,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getDeliveryCapabilityResponse() throws JsonProcessingException {
+    public void getDeliveryCapabilityResponse() throws JacksonException {
         Capability capability = new Capability(
                 new DenmApplicationApi(
                         "ID0001,",
@@ -170,11 +171,11 @@ public class NapCoreAPIDocumentationTest {
                 ),
                 new MetadataApi()
         );
-        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(Arrays.asList(capability)));
+        System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(List.of(capability)));
     }
 
     @Test
-    public void addCapabilityRequest() throws JsonProcessingException {
+    public void addCapabilityRequest() throws JacksonException {
         CapabilitiesRequest capability = new CapabilitiesRequest(
                 new DatexApplicationApi(
                         "ID1",
@@ -192,7 +193,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addCapabilityResponse() throws JsonProcessingException {
+    public void addCapabilityResponse() throws JacksonException {
         OnboardingCapability capability = new OnboardingCapability(
                 UUID.randomUUID().toString(),
                 new DatexApplicationApi(
@@ -212,7 +213,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getCapabilitiesResponse() throws JsonProcessingException {
+    public void getCapabilitiesResponse() throws JacksonException {
         List<OnboardingCapability> capabilities = new ArrayList<>();
         capabilities.add(new OnboardingCapability(
                 UUID.randomUUID().toString(),
@@ -245,7 +246,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getCapabilityResponse() throws JsonProcessingException {
+    public void getCapabilityResponse() throws JacksonException {
         OnboardingCapability capability = new OnboardingCapability(
                 UUID.randomUUID().toString(),
                 new DatexApplicationApi(
@@ -265,7 +266,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getCapabilityWithhasDeliveryResponse() throws JsonProcessingException {
+    public void getCapabilityWithhasDeliveryResponse() throws JacksonException {
         OnboardingCapability capability = new OnboardingCapability(
                 UUID.randomUUID().toString(),
                 new DatexApplicationApi(
@@ -285,13 +286,13 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getPublicationIdsResponse() throws JsonProcessingException {
+    public void getPublicationIdsResponse() throws JacksonException {
         Set<String> publicationIds = Set.of("bouvet:1", "bouvet:2", "bouvet:3");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(publicationIds));
     }
 
     @Test
-    public void addPrivateChannelRequest() throws JsonProcessingException {
+    public void addPrivateChannelRequest() throws JacksonException {
         PrivateChannelRequest privateChannel = new PrivateChannelRequest(
                 Set.of("king_gustaf.bouvetinterchange.eu", "king_olav.bouvetinterchange.eu"),
                 "private channel for gustaf and olav"
@@ -300,7 +301,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addPrivateChanelResponse() throws JsonProcessingException {
+    public void addPrivateChanelResponse() throws JacksonException {
         PrivateChannelResponse privateChannel = new PrivateChannelResponse(
                 UUID.randomUUID().toString(),
                 Set.of("king_gustaf.bouvetinterchange.eu", "king_olav.bouvetinterchange.eu"),
@@ -313,7 +314,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getPrivateChannelsResponse() throws JsonProcessingException {
+    public void getPrivateChannelsResponse() throws JacksonException {
         List<PrivateChannelResponse> privateChannels = new ArrayList<>();
         privateChannels.add(new PrivateChannelResponse(
                 UUID.randomUUID().toString(),
@@ -335,7 +336,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getPrivateChannelResponse() throws JsonProcessingException {
+    public void getPrivateChannelResponse() throws JacksonException {
         PrivateChannelResponse privateChannel = new PrivateChannelResponse(
                 UUID.randomUUID().toString(),
                 Set.of("king_gustaf.bouvetinterchange.eu", "king_olav.bouvetinterchange.eu"),
@@ -348,7 +349,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getPeerPrivateChannelsResponse() throws JsonProcessingException {
+    public void getPeerPrivateChannelsResponse() throws JacksonException {
         List<PeerPrivateChannel> peerPrivateChannels = new ArrayList<>();
         peerPrivateChannels.add(
                 new PeerPrivateChannel(
@@ -374,7 +375,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void getPeerPrivateChannelResponse() throws JsonProcessingException {
+    public void getPeerPrivateChannelResponse() throws JacksonException {
         PeerPrivateChannel peerPrivateChannel = new PeerPrivateChannel(
                 UUID.randomUUID().toString(),
                 "king_bjarne",
@@ -387,7 +388,7 @@ public class NapCoreAPIDocumentationTest {
     }
 
     @Test
-    public void addPeerToPrivateChannelRequest() throws JsonProcessingException {
+    public void addPeerToPrivateChannelRequest() throws JacksonException {
         AddPeerRequest peerRequest = new AddPeerRequest("king_olav.bouvetinterchange.eu");
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(peerRequest));
     }

@@ -1,10 +1,14 @@
 package no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
 import no.vegvesen.ixn.serviceprovider.model.GetSubscriptionResponse;
-import picocli.CommandLine.*;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParentCommand;
+import picocli.CommandLine.PropertiesDefaultProvider;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.Callable;
 
@@ -30,11 +34,11 @@ public class GetSubscription implements Callable<Integer> {
     String subscriptionId;
 
     @Override
-    public Integer call() throws JsonProcessingException {
+    public Integer call() throws JacksonException {
         ServiceProviderClient client = parentCommand.getParent().createClient();
         GetSubscriptionResponse subscription = client.getSubscription(subscriptionId);
         System.out.printf("Subscription %s successfully polled with %n", subscriptionId);
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscription));
         return 0;
     }

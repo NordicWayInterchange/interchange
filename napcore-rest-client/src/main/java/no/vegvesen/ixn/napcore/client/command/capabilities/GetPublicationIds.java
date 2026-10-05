@@ -1,7 +1,8 @@
 package no.vegvesen.ixn.napcore.client.command.capabilities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class GetPublicationIds implements Callable<Integer> {
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
         Set<String> response = client.getPublicationIds();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return 0;
     }

@@ -4,6 +4,7 @@ package no.vegvesen.ixn.federation.service;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
 import no.vegvesen.ixn.federation.service.exportmodel.*;
+import no.vegvesen.ixn.shared.capability.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -80,7 +81,7 @@ public class ExportTransformer {
     public CapabilityExportApi transformCapabilityToCapabilityExportApi(Capability capability) {
         return new CapabilityExportApi(
                 capability.getUuid(),
-                capability.getApplication().toApi(),
+                applicationApiToApplicationApi(capability.getApplication()),
                 transformMetadataToMetadataExportApi(capability.getMetadata()),
                 transformCapabilityStatusToCapabilityStatusExportApi(capability.getStatus()),
                 capability.getShards().stream().map(this::transformCapabilityShardToCapabilityShardExportApi).collect(Collectors.toSet()));
@@ -98,6 +99,72 @@ public class ExportTransformer {
                 return CapabilityExportApi.CapabilityStatusExportApi.REQUESTED;
             }
         }
+    }
+
+    private static ApplicationApi applicationApiToApplicationApi(Application application) {
+        return switch (application) {
+            case DatexApplication d -> new DatexApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getPublicationType(),
+                    d.getPublisherName()
+            );
+            case DenmApplication d ->  new DenmApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getCauseCode()
+            );
+            case IvimApplication i ->  new IvimApplicationApi(
+                    i.getPublisherId(),
+                    i.getPublicationId(),
+                    i.getOriginatingCountry(),
+                    i.getProtocolVersion(),
+                    i.getQuadTree()
+            );
+            case SpatemApplication sp ->  new SpatemApplicationApi(
+                    sp.getPublisherId(),
+                    sp.getPublicationId(),
+                    sp.getOriginatingCountry(),
+                    sp.getProtocolVersion(),
+                    sp.getQuadTree()
+            );
+            case MapemApplication mapem ->  new MapemApplicationApi(
+                    mapem.getPublisherId(),
+                    mapem.getPublicationId(),
+                    mapem.getOriginatingCountry(),
+                    mapem.getProtocolVersion(),
+                    mapem.getQuadTree()
+            );
+            case SremApplication srem ->  new SremApplicationApi(
+                    srem.getPublisherId(),
+                    srem.getPublicationId(),
+                    srem.getOriginatingCountry(),
+                    srem.getProtocolVersion(),
+                    srem.getQuadTree()
+            );
+            case SsemApplication ssem ->  new SsemApplicationApi(
+                    ssem.getPublisherId(),
+                    ssem.getPublicationId(),
+                    ssem.getOriginatingCountry(),
+                    ssem.getProtocolVersion(),
+                    ssem.getQuadTree()
+            );
+            case CamApplication cam ->  new CamApplicationApi(
+                    cam.getPublisherId(),
+                    cam.getPublicationId(),
+                    cam.getOriginatingCountry(),
+                    cam.getProtocolVersion(),
+                    cam.getQuadTree()
+            );
+            default -> throw new IllegalArgumentException("Unknown application api");
+        };
+
     }
 
     public MetadataExportApi transformMetadataToMetadataExportApi(Metadata metadata) {
@@ -192,7 +259,7 @@ public class ExportTransformer {
     }
 
     public NeighbourCapabilityExportApi transformNeighbourCapabilityToNeighbourCapabilityExportApi(NeighbourCapability neighbourCapability) {
-        return new NeighbourCapabilityExportApi(neighbourCapability.getApplication().toApi(),
+        return new NeighbourCapabilityExportApi(applicationApiToApplicationApi(neighbourCapability.getApplication()),
                 transformMetadataToMetadataExportApi(neighbourCapability.getMetadata())
         );
     }
