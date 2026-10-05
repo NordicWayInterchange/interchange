@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.MatchingCapa
 import no.vegvesen.ixn.federation.adminserver.qpid.*;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.auth.CertService;
+import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
@@ -122,12 +123,36 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Test
     public void handleRunTimeExceptionReturnsInternalServerError() throws Exception {
         String adminUser = "adminUser";
+        String message = "Something went wrong";
+        doThrow(new RuntimeException(message)).when(certService).checkIfCommonNameMatchesNameInApiObject(any());
+
+        mockMvc.perform(get(String.format("/admin/%s/neighbours", adminUser)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.toString()))
+                .andExpect(jsonPath("$.message").value(message));
+    }
+
+    @Test
+    public void handleNotFoundExceptionReturnsNotFound() throws Exception {
+        String adminUser = "adminUser";
         String actorCommonName = "non-existing-service-provider";
 
         mockMvc.perform(get(String.format("/admin/%s/serviceproviders/%s/deliveries", adminUser, actorCommonName)))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.toString()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.NOT_FOUND.toString()))
                 .andExpect(jsonPath("$.message").value("Service provider " + actorCommonName + " not found"));
+    }
+
+    @Test
+    public void handleCNAndApiObjectMismatchExceptionReturnsForbidden() throws Exception {
+        String adminUser = "adminUser";
+        String message = "Common name does not match the name in the api object";
+        doThrow(new CNAndApiObjectMismatchException(message)).when(certService).checkIfCommonNameMatchesNameInApiObject(any());
+
+        mockMvc.perform(get(String.format("/admin/%s/neighbours", adminUser)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.FORBIDDEN.toString()))
+                .andExpect(jsonPath("$.message").value(message));
     }
 
     @Test
