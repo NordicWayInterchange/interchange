@@ -5,6 +5,7 @@ import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateCh
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelEndpointApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PrivateChannelStatusApi;
+import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.CapabilityApi;
 import no.vegvesen.ixn.federation.adminserver.model.serviceProvider.LocalConnectionApi;
 import no.vegvesen.ixn.federation.adminserver.model.neighbour.*;
 import no.vegvesen.ixn.federation.adminserver.model.queue.QueueApi;
@@ -15,17 +16,13 @@ import no.vegvesen.ixn.federation.adminserver.qpid.CapabilityShardIdApi;
 import no.vegvesen.ixn.federation.adminserver.qpid.Exchange;
 import no.vegvesen.ixn.federation.adminserver.qpid.Queue;
 import no.vegvesen.ixn.federation.model.*;
-import no.vegvesen.ixn.federation.model.capability.Capability;
-import no.vegvesen.ixn.federation.model.capability.CapabilityShard;
-import no.vegvesen.ixn.federation.model.capability.CapabilityStatus;
-import no.vegvesen.ixn.federation.model.capability.NeighbourCapability;
+import no.vegvesen.ixn.federation.model.capability.*;
+import no.vegvesen.ixn.shared.Constants;
+import no.vegvesen.ixn.shared.capability.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -82,18 +79,113 @@ public class TypeTransformer {
 
         List<MatchingCapabilityApi> matchingCapabilities = new ArrayList<>();
         for (Capability capability : capabilities) {
+            Metadata metadata = capability.getMetadata();
             matchingCapabilities.add(new MatchingCapabilityApi(
-                    capability.getApplication().toApi(),
-                    capability.getMetadata().toApi()
+                    applicationApiToApplicationApi(capability.getApplication()),
+                    metadataToMetadataApi(metadata)
             ));
         }
         for (NeighbourCapability neighbourCapability : neighbourCapabilities) {
             matchingCapabilities.add(new MatchingCapabilityApi(
-                    neighbourCapability.getApplication().toApi(),
-                    neighbourCapability.getMetadata().toApi()
+                    applicationApiToApplicationApi(neighbourCapability.getApplication()),
+                    metadataToMetadataApi(neighbourCapability.getMetadata())
             ));
         }
         return matchingCapabilities;
+    }
+
+    private static ApplicationApi applicationApiToApplicationApi(Application application) {
+        return switch (application) {
+            case DatexApplication d -> new DatexApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getPublicationType(),
+                    d.getPublisherName()
+            );
+            case DenmApplication d ->  new DenmApplicationApi(
+                    d.getPublisherId(),
+                    d.getPublicationId(),
+                    d.getOriginatingCountry(),
+                    d.getProtocolVersion(),
+                    d.getQuadTree(),
+                    d.getCauseCode()
+            );
+            case IvimApplication i ->  new IvimApplicationApi(
+                    i.getPublisherId(),
+                    i.getPublicationId(),
+                    i.getOriginatingCountry(),
+                    i.getProtocolVersion(),
+                    i.getQuadTree()
+            );
+            case SpatemApplication sp ->  new SpatemApplicationApi(
+                    sp.getPublisherId(),
+                    sp.getPublicationId(),
+                    sp.getOriginatingCountry(),
+                    sp.getProtocolVersion(),
+                    sp.getQuadTree()
+            );
+            case MapemApplication mapem ->  new MapemApplicationApi(
+                    mapem.getPublisherId(),
+                    mapem.getPublicationId(),
+                    mapem.getOriginatingCountry(),
+                    mapem.getProtocolVersion(),
+                    mapem.getQuadTree()
+            );
+            case SremApplication srem ->  new SremApplicationApi(
+                    srem.getPublisherId(),
+                    srem.getPublicationId(),
+                    srem.getOriginatingCountry(),
+                    srem.getProtocolVersion(),
+                    srem.getQuadTree()
+            );
+            case SsemApplication ssem ->  new SsemApplicationApi(
+                    ssem.getPublisherId(),
+                    ssem.getPublicationId(),
+                    ssem.getOriginatingCountry(),
+                    ssem.getProtocolVersion(),
+                    ssem.getQuadTree()
+            );
+            case CamApplication cam ->  new CamApplicationApi(
+                    cam.getPublisherId(),
+                    cam.getPublicationId(),
+                    cam.getOriginatingCountry(),
+                    cam.getProtocolVersion(),
+                    cam.getQuadTree()
+            );
+            default -> throw new IllegalArgumentException("Unknown application api");
+        };
+
+    }
+
+    private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+        return new MetadataApi(
+                metadata.getShardCount(),
+                metadata.getInfoUrl(),
+                redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()),
+                metadata.getMaxBandwidth(),
+                metadata.getMaxMessageRate(),
+                metadata.getRepetitionInterval()
+        );
+    }
+
+    private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus status) {
+        RedirectStatusApi result = RedirectStatusApi.OPTIONAL;
+        if (status != null) {
+            switch (status) {
+                case MANDATORY:
+                    result = RedirectStatusApi.MANDATORY;
+                    break;
+                case NOT_AVAILABLE:
+                    result = RedirectStatusApi.NOT_AVAILABLE;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return result;
     }
 
     public List<PrivateChannelApi> privateChannelListToPrivateChannelApiList(List<PrivateChannel> privateChannelList) {
@@ -237,8 +329,8 @@ public class TypeTransformer {
         for (Capability capability : capabilities) {
             capabilityApiList.add(new CapabilityApi(
                     capability.getUuid(),
-                    capability.getApplication().toApi(),
-                    capability.getMetadata().toApi(),
+                    applicationApiToApplicationApi(capability.getApplication()),
+                    metadataToMetadataApi(capability.getMetadata()),
                     capabilityShardSetToCapabilityShardSetApi(capability.getShards()),
                     capabilityStatusToCapabilityStatusApi(capability.getStatus()),
                     localDateTimeToTimestamp(capability.getCreatedTimestamp())
@@ -425,8 +517,8 @@ public class TypeTransformer {
     public NeighbourCapabilityApi neighbourCapabilityToNeighbourCapabilityApi(NeighbourCapability neighbourCapability) {
         return new NeighbourCapabilityApi(
                 neighbourCapability.getId(),
-                neighbourCapability.getApplication().toApi(),
-                neighbourCapability.getMetadata().toApi(),
+                applicationApiToApplicationApi(neighbourCapability.getApplication()),
+                metadataToMetadataApi(neighbourCapability.getMetadata()),
                 localDateTimeToTimestamp(neighbourCapability.getCreatedTimestamp())
         );
     }
@@ -439,8 +531,8 @@ public class TypeTransformer {
         Capability capability = match.getCapability();
         return new no.vegvesen.ixn.federation.adminserver.qpid.CapabilityApi(
                 capability.getUuid(),
-                capability.getApplication().toApi(),
-                capability.getMetadata().toApi(),
+                applicationApiToApplicationApi(capability.getApplication()),
+                metadataToMetadataApi(capability.getMetadata()),
                 capabilityShardSetToCapabilityShardIdSetApi(capability.getShards()),
                 localDateTimeToTimestamp(capability.getCreatedTimestamp())
         );

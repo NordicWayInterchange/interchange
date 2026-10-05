@@ -1,10 +1,11 @@
 package no.vegvesen.ixn.napcore.client.command.deliveries;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Delivery;
 import no.vegvesen.ixn.napcore.model.DeliveryRequest;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,8 @@ public class AddNapDelivery implements Callable<Integer> {
     @Override
     public Integer call() throws IOException {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        ObjectMapper mapper = new ObjectMapper();
-        if(option.file != null) {
+        ObjectMapper mapper = JsonMapper.builder().build();
+        if (option.file != null) {
             DeliveryRequest request = mapper.readValue(option.file, DeliveryRequest.class);
             Delivery response = client.addDelivery(request);
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
@@ -46,7 +47,7 @@ public class AddNapDelivery implements Callable<Integer> {
         return 0;
     }
 
-    static class AddNapDeliveryOption{
+    static class AddNapDeliveryOption {
         @Option(names = {"-f", "--filename"}, required = true, description = "The subscription json file")
         File file;
 

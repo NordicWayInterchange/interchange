@@ -1,6 +1,5 @@
 package no.vegvesen.ixn.napcore.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.vegvesen.ixn.cert.CsrGenerator;
 import no.vegvesen.ixn.cert.KeyPairAndCsr;
 import no.vegvesen.ixn.napcore.model.*;
@@ -13,6 +12,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.core.JacksonException;
 
 import javax.net.ssl.SSLContext;
 import java.security.NoSuchAlgorithmException;
@@ -82,7 +82,7 @@ public class NapRESTClient {
         restTemplate.delete(String.format("%s/nap/%s/subscriptions/%s", server, user, subscriptionId));
     }
 
-    public List<Capability> getMatchingCapabilities(String selector) throws JsonProcessingException {
+    public List<Capability> getMatchingCapabilities(String selector) throws JacksonException {
         String url = String.format("%s/nap/%s/subscriptions/capabilities?selector={selector}", server, user);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("selector", selector);

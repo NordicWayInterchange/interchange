@@ -1,14 +1,14 @@
 package no.vegvesen.ixn.napcore.client.command.subscriptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.vegvesen.ixn.napcore.client.NapRESTClient;
 import no.vegvesen.ixn.napcore.model.Subscription;
-import static picocli.CommandLine.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.ParentCommand;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
 
 @Command(
         name = "list",
@@ -24,7 +24,7 @@ public class GetNapSubscriptions implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         NapRESTClient client = parentCommand.getParentCommand().createClient();
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().build();
         List<Subscription> subscriptions = client.getSubscriptions();
         System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(subscriptions));
         return 0;

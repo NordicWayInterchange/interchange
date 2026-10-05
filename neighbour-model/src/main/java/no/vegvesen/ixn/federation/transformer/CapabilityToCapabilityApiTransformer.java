@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Component
 public class CapabilityToCapabilityApiTransformer {
-	private static Logger logger = LoggerFactory.getLogger(CapabilityToCapabilityApiTransformer.class);
+	private static final Logger logger = LoggerFactory.getLogger(CapabilityToCapabilityApiTransformer.class);
 
 	public CapabilityToCapabilityApiTransformer() {
 	}
@@ -20,13 +20,18 @@ public class CapabilityToCapabilityApiTransformer {
 	public Set<CapabilityApi> capabilitiesToCapabilitiesApi(Set<Capability> capabilities) {
 		Set<CapabilityApi> capabilityApis = new HashSet<>();
 		for (Capability capability : capabilities) {
-			CapabilityApi capabilityApi = new CapabilityApi(
-					capability.getApplication().toApi(),
-					capability.getMetadata().toApi()
+			Metadata metadata = capability.getMetadata();
+            CapabilityApi capabilityApi = new CapabilityApi(
+					applicationApiToApplicationApi(capability.getApplication()),
+					metadataToMetadataApi(metadata)
 			);
 			capabilityApis.add(capabilityApi);
 		}
 		return capabilityApis;
+	}
+
+	private static MetadataApi metadataToMetadataApi(Metadata metadata) {
+		return new MetadataApi(metadata.getShardCount(), metadata.getInfoUrl(), redirectStatusToRedirectStatusApi(metadata.getRedirectPolicy()), metadata.getMaxBandwidth(), metadata.getMaxMessageRate(), metadata.getRepetitionInterval());
 	}
 
 	public Capability capabilityApiToCapability(CapabilityApi capabilityApi) {
@@ -60,17 +65,28 @@ public class CapabilityToCapabilityApiTransformer {
 	}
 
 	public CapabilityApi capabilityToCapabilityApi(Capability capability) {
-		return new CapabilityApi(
-				capability.getApplication().toApi(),
-				capability.getMetadata().toApi()
+        return new CapabilityApi(
+				applicationApiToApplicationApi(capability.getApplication()),
+				metadataToMetadataApi(capability.getMetadata())
 		);
 	}
 
 	public CapabilityApi neighbourCapabilityToCapabilityApi(NeighbourCapability capability) {
 		return new CapabilityApi(
-				capability.getApplication().toApi(),
-				capability.getMetadata().toApi()
+				applicationApiToApplicationApi(capability.getApplication()),
+				metadataToMetadataApi(capability.getMetadata())
 		);
+	}
+
+	private static RedirectStatusApi redirectStatusToRedirectStatusApi(RedirectStatus status) {
+        if (status != null) {
+			return switch (status) {
+				case MANDATORY -> RedirectStatusApi.MANDATORY;
+				case NOT_AVAILABLE -> RedirectStatusApi.NOT_AVAILABLE;
+				default -> RedirectStatusApi.OPTIONAL;
+			};
+		}
+		return RedirectStatusApi.OPTIONAL;
 	}
 
 	public Application applicationApiToApplication(ApplicationApi applicationApi) {
@@ -106,17 +122,80 @@ public class CapabilityToCapabilityApiTransformer {
 		return metadata;
 	}
 
+	private static ApplicationApi applicationApiToApplicationApi(Application application) {
+		return switch (application) {
+			case DatexApplication d -> new DatexApplicationApi(
+					d.getPublisherId(),
+					d.getPublicationId(),
+					d.getOriginatingCountry(),
+					d.getProtocolVersion(),
+					d.getQuadTree(),
+					d.getPublicationType(),
+					d.getPublisherName()
+			);
+			case DenmApplication d ->  new DenmApplicationApi(
+					d.getPublisherId(),
+					d.getPublicationId(),
+					d.getOriginatingCountry(),
+					d.getProtocolVersion(),
+					d.getQuadTree(),
+					d.getCauseCode()
+			);
+			case IvimApplication i ->  new IvimApplicationApi(
+					i.getPublisherId(),
+					i.getPublicationId(),
+					i.getOriginatingCountry(),
+					i.getProtocolVersion(),
+					i.getQuadTree()
+			);
+			case SpatemApplication sp ->  new SpatemApplicationApi(
+					sp.getPublisherId(),
+					sp.getPublicationId(),
+					sp.getOriginatingCountry(),
+					sp.getProtocolVersion(),
+					sp.getQuadTree()
+			);
+			case MapemApplication mapem ->  new MapemApplicationApi(
+					mapem.getPublisherId(),
+					mapem.getPublicationId(),
+					mapem.getOriginatingCountry(),
+					mapem.getProtocolVersion(),
+					mapem.getQuadTree()
+			);
+			case SremApplication srem ->  new SremApplicationApi(
+					srem.getPublisherId(),
+					srem.getPublicationId(),
+					srem.getOriginatingCountry(),
+					srem.getProtocolVersion(),
+					srem.getQuadTree()
+			);
+			case SsemApplication ssem ->  new SsemApplicationApi(
+					ssem.getPublisherId(),
+					ssem.getPublicationId(),
+					ssem.getOriginatingCountry(),
+					ssem.getProtocolVersion(),
+					ssem.getQuadTree()
+			);
+			case CamApplication cam ->  new CamApplicationApi(
+					cam.getPublisherId(),
+					cam.getPublicationId(),
+					cam.getOriginatingCountry(),
+					cam.getProtocolVersion(),
+					cam.getQuadTree()
+			);
+			default -> throw new IllegalArgumentException("Unknown application api");
+		};
+
+	}
+
 	private RedirectStatus transformRedirectStatusApiToRedirectStatus(RedirectStatusApi status) {
 		if (status == null) {
 			return RedirectStatus.OPTIONAL;
 		}
-		switch (status) {
-			case MANDATORY:
-				return RedirectStatus.MANDATORY;
-			case NOT_AVAILABLE:
-				return RedirectStatus.NOT_AVAILABLE;
-			default:
-				return RedirectStatus.OPTIONAL;
-		}
+        return switch (status) {
+            case MANDATORY -> RedirectStatus.MANDATORY;
+            case NOT_AVAILABLE -> RedirectStatus.NOT_AVAILABLE;
+            default -> RedirectStatus.OPTIONAL;
+        };
 	}
 }
