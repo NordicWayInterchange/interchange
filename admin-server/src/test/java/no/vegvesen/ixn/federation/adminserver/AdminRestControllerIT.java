@@ -22,6 +22,7 @@ import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -42,14 +43,17 @@ import java.util.*;
 import static no.vegvesen.ixn.federation.adminserver.QpidServiceIT.HOST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {TestApplication.class, MockSslBundle.class})
 public class AdminRestControllerIT extends PostgresContainerBase {
 
+    private MockMvc mockMvc;
 
     @Autowired
     NeighbourRepository neighbourRepository;
@@ -84,6 +88,9 @@ public class AdminRestControllerIT extends PostgresContainerBase {
         outgoingMatchRepository.deleteAll();
         neighbourRepository.deleteAll();
         serviceProviderRepository.deleteAll();
+
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(restController).setControllerAdvice(AdminServerErrorAdvice.class).build();
     }
 
     @Test
@@ -100,6 +107,27 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @Test
     public void pathVariableWithInvalidCharsThrowsException(){
         assertThrows(PathVariableException.class, () -> restController.getNeighbours("*hal"));
+    }
+
+    @Test
+    public void handlePathVariableExceptionReturnsBadRequest() throws Exception {
+        String adminUser = "admin*";
+
+        mockMvc.perform(get(String.format("/admin/%s/neighbours", adminUser)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.BAD_REQUEST.toString()))
+                .andExpect(jsonPath("$.message").value(String.format("Path variable %s contains illegal characters", adminUser)));
+    }
+
+    @Test
+    public void handleRunTimeExceptionReturnsInternalServerError() throws Exception {
+        String adminUser = "adminUser";
+        String actorCommonName = "non-existing-service-provider";
+
+        mockMvc.perform(get(String.format("/admin/%s/serviceproviders/%s/deliveries", adminUser, actorCommonName)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorCode").value(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.toString()))
+                .andExpect(jsonPath("$.message").value("Service provider " + actorCommonName + " not found"));
     }
 
     @Test
