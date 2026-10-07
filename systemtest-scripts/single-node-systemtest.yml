@@ -161,7 +161,7 @@ services:
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
       - KEYCLOAK_REALM=a-admin.interchangedomain.com
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
-      - EXTERNAL_KEYCLOAK_URL=http://localhost:8889
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
 
     networks:
       - testing_net
@@ -175,6 +175,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
       - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+      - ./a-admin.interchangedomain.com-realm.json:/opt/keycloak/data/import/a-admin.interchangedomain.com-realm.json:ro
     command: [ "start-dev", "--import-realm" ]
     networks:
       - testing_net
