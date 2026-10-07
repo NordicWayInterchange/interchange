@@ -124,6 +124,7 @@ services:
       - KEY_STORE_PASSWORD=password
       - KEY_ALIAS=a-admin-server
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - BASE_URL=https://a-qpid
       - TRUST_STORE_PASSWORD=password
       - SERVER_NAME=a.interchangedomain.com
       - ADMIN_NAME=admin.a-admin.interchangedomain.com
