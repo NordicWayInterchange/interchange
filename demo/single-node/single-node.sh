@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-# tear down anything left over from a previous run, then prune unused
+# Tear down anything left over from a previous run, then prune unused
 # volumes/containers/networks. This runs both before starting (clean slate)
 # and automatically when this script exits/is stopped (Ctrl+C, error, etc.).
 cleanup() {

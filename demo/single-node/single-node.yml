@@ -1,22 +1,7 @@
 services:
 
-  #This DNS server mocks the SRV records for a_interchangedomain.com
-  mock-dns-server:
-    build:
-      context: ./
-      dockerfile: dns-single-node-dockerfile
-    cap_add:
-    - NET_ADMIN
-    networks:
-      singletest:
-        ipv4_address: 172.29.1.1
-        aliases:
-          - dns.lookupdomain.com
-
   a-db:
     image: postgres:18.1
-    depends_on:
-      - mock-dns-server
     ports:
       - 15432:5432
     environment:
@@ -66,33 +51,8 @@ services:
       - INTERNAL_KEY_STORE=/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
       - GROUPS_FILE=/qpid-broker-j/work/groups
-    depends_on:
-    - mock-dns-server
     networks:
     - singletest
-
-  a-neighbour-server:
-    image: ghcr.io/nordicwayinterchange/neighbour-server-app:${IMAGE_TAG}
-    depends_on:
-      - a-db
-    ports:
-      - 8090
-    volumes:
-      - "single-node-keys-volume:/keys"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=lookupdomain.com
-      - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
-      - KEY_STORE_PASSWORD=password
-    networks:
-    - singletest
-    dns: 172.28.1.1
 
   a-routing-configurer:
     image: ghcr.io/nordicwayinterchange/routing-configurer-app:${IMAGE_TAG}
@@ -113,51 +73,6 @@ services:
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
-    networks:
-    - singletest
-
-  a-neighbour-discoverer:
-    image: ghcr.io/nordicwayinterchange/neighbour-discoverer-app:${IMAGE_TAG}
-    depends_on:
-      - a-db
-    volumes:
-      - "single-node-keys-volume:/keys"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=lookupdomain.com
-      - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
-      - KEY_STORE_PASSWORD=password
-      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
-    dns: 172.29.1.1
-    networks:
-    - singletest
-
-  a-message-collector-app:
-    image: ghcr.io/nordicwayinterchange/message-collector-app:${IMAGE_TAG}
-    depends_on:
-    - a-db
-    links:
-    - "a-qpid:a.qpid.interchangedomain.com"
-    volumes:
-    - "single-node-keys-volume:/keys"
-    environment:
-    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-    - POSTGRES_USER=federation
-    - POSTGRES_PASSWORD=federation
-    - KEY_STORE=/keys/a.interchangedomain.com.p12
-    - KEY_STORE_PASSWORD=password
-    - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-    - TRUST_STORE_PASSWORD=password
-    - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=a.interchangedomain.com
-    - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
     - singletest
 
