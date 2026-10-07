@@ -215,6 +215,7 @@ services:
     image: ghcr.io/nordicwayinterchange/admin-server-app:${IMAGE_TAG}
     depends_on:
       - a-db
+      - a-keycloak
     ports:
       - 32665:8899
     volumes:
@@ -229,6 +230,7 @@ services:
       - KEY_ALIAS=a-admin-server
       - TRUST_STORE=/keys/ca.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
+      - BASE_URL=https://a-qpid
       - SERVER_NAME=a.interchangedomain.com
       - ADMIN_NAME=admin.a-admin.interchangedomain.com
       - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
@@ -243,6 +245,9 @@ services:
 
   a-admin-frontend:
     image: ghcr.io/nordicwayinterchange/admin-frontend:${NAP_TAG}
+    depends_on:
+      - a-admin-server
+      - a-keycloak
     ports:
       - 3001:3000
     volumes:
@@ -260,7 +265,7 @@ services:
       - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
       - KEYCLOAK_REALM=a-admin.interchangedomain.com
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
-      - EXTERNAL_KEYCLOAK_URL=http://localhost:8889
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
     networks:
       - singletest
 
@@ -273,6 +278,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
       - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+      - ./a-admin.interchangedomain.com-realm.json:/opt/keycloak/data/import/a-admin.interchangedomain.com-realm.json:ro
     command: ["start-dev", "--import-realm"]
     networks:
       - singletest

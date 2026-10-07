@@ -9,12 +9,10 @@
       "name" : "a.interchangedomain.com"
     },{
       "name": "a.qpid.interchangedomain.com"
-    }, {
-        "name": "a-qpid"
-    }, {
-      "name" : "a-admin-server"
     },{
-      "name" : "a-admin"
+        "name" : "a-qpid"
+    },{
+        "name" : "a-admin-server"
     },{
         "name" : "a-admin.interchangedomain.com"
       }],
