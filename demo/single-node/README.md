@@ -169,3 +169,12 @@ Additionally, you have sent a message on one side, and received it on the other.
 This is all done on one interchange, and with a single user. Of course, this being a clustered system, it is fully possible to send data on one node, 
 and receive data on another node.
 
+## Using the admin portal
+
+Admin portal is a system administrator view of the system. It is currently view-only, and intended to aid an administrator to track down problems in the system.
+The administrators can view list of service providers, neighbours, exchanges, queues, biqueues, and graphs.
+
+In a browser, go to https://localhost:3001/
+
+The portal is already logged in with the same username and password.
+The previously added capability, subscription and delivery should be listed in this portal as well.
