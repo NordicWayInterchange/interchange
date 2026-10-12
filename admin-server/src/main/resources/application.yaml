@@ -11,6 +11,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+      jakarta:
+        persistence:
+          query:
+            timeout: 30000
     hibernate:
       ddl-auto: update
     open-in-view: false
