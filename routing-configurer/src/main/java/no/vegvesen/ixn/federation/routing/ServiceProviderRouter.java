@@ -163,6 +163,7 @@ public class ServiceProviderRouter {
                     PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
                     if (peerMember == null) {
                         peerMember = qpidClient.addPrivateChannelMemberToGroup(peerName);
+                        delta.addPrivateChannelUser(peerMember);
                         logger.debug("Adding member {} to private channel group", peer.getName());
                     }
                     peer.setStatus(PeerStatus.CREATED);
@@ -188,9 +189,10 @@ public class ServiceProviderRouter {
                         }
                         peer.setStatus(PeerStatus.CREATED);
                         provider.addQueueReadAccess(peer.getName(), queueName);
-                        privateChannel.setLastUpdated(LocalDateTime.now());
-                        privateChannelRepository.save(privateChannel);
                     }
+                    qpidClient.postQpidAcl(provider);
+                    privateChannel.setLastUpdated(LocalDateTime.now());
+                    privateChannelRepository.save(privateChannel);
                 }
 
                 Set<Peer> peersToRemove = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.TEAR_DOWN)).collect(Collectors.toSet());
@@ -211,6 +213,7 @@ public class ServiceProviderRouter {
                         }
                         provider.removeQueueReadAccess(peerName, queueName);
                     }
+                    qpidClient.postQpidAcl(provider);
                     privateChannel.removePeers(peersToRemove);
                     privateChannel.setLastUpdated(LocalDateTime.now());
                     privateChannelRepository.save(privateChannel);
