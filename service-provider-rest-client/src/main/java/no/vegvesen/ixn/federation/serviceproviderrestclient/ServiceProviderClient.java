@@ -2,9 +2,7 @@ package no.vegvesen.ixn.federation.serviceproviderrestclient;
 
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,30 +10,33 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLContext;
 import java.util.List;
 import java.util.Objects;
 
 public class ServiceProviderClient {
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     private final String server;
     private final String user;
 
-    public ServiceProviderClient(SSLContext sslContext, String server, String user) {
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
-        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder
-                .create()
-                .setSSLSocketFactory(sslConnectionSocketFactory)
-                .build();
+    /**
+     * Creates a client that authenticates towards onboard with an OAuth2 access token (fetched
+     * from Keycloak) rather than a client certificate. TLS transport security still relies on the
+     * JVM's default trust store to validate the server's certificate.
+     */
+    public ServiceProviderClient(String server, String user, String accessToken) {
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
                                 .custom()
-                                .setConnectionManager(connectionManager)
+                                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create().build())
                                 .build()
                 )
         );
+        this.restTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().setBearerAuth(accessToken);
+            return execution.execute(request, body);
+        });
         this.server = server;
         this.user = user;
     }
