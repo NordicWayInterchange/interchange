@@ -520,6 +520,21 @@
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
+    "protocolMappers" : [ {
+      "id" : "9b6a0f6b-b1d1-4a1a-9b3b-6f1a2a9c1e01",
+      "name" : "organization",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-hardcoded-claim-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "claim.name" : "organization",
+        "claim.value" : "king_olav.a.interchangedomain.com",
+        "jsonType.label" : "String",
+        "access.token.claim" : "true",
+        "id.token.claim" : "true",
+        "userinfo.token.claim" : "true"
+      }
+    } ],
     "defaultClientScopes" : [ "web-origins", "service_account", "acr", "profile", "roles", "basic", "email" ],
     "optionalClientScopes" : [ "address", "phone", "organization", "offline_access", "microprofile-jwt" ]
   }, {
