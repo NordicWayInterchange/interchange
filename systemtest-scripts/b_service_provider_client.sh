@@ -11,6 +11,7 @@ docker run \
   --dns=172.28.1.1 \
   -v systemtest-keys-volume:/keys \
   -v $PWD:/work \
+  -e SERVICEPROVIDERCLIENT_TOKEN_FILE=/work/.serviceproviderclient-token.json \
   --link b_onboard_server:b.bouvetinterchange.eu \
   --link b_qpid:b.qpid.bouvetinterchange.eu \
   service_provider_client -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.bouvetinterchange.eu.jks  -w password $URL -u ${SERVICE_PROVIDER} "$@"
