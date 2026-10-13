@@ -30,6 +30,9 @@ public class TokenFetcher {
     }
 
     public String fetchToken() {
+        return fetchTokenResponse().getAccessToken();
+    }
+    public TokenResponse fetchTokenResponse() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -57,6 +60,6 @@ public class TokenFetcher {
             throw new TokenFetchException("Token endpoint " + tokenEndpoint + " did not return an access token");
         }
 
-        return tokenResponse.getAccessToken();
+        return tokenResponse;
     }
 }

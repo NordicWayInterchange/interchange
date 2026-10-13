@@ -9,7 +9,6 @@ import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.Deliv
 import no.vegvesen.ixn.federation.serviceproviderclient.command.keys.PortalStores;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.token.FetchTokenCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.token.NotAuthenticatedException;
 import no.vegvesen.ixn.federation.serviceproviderclient.token.StoredToken;
 import no.vegvesen.ixn.federation.serviceproviderclient.token.TokenStore;
@@ -47,8 +46,7 @@ import static picocli.CommandLine.*;
                 DeliveriesCommand.class,
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
-                PortalStores.class,
-                FetchTokenCommand.class
+                PortalStores.class
         },
         mixinStandardHelpOptions = true,
         version = "1.0")
@@ -152,6 +150,31 @@ public class ServiceProviderClientApplication{
 
     }
 
+    private SSLContext createTrustOnlySSLContext() {
+        if (tlsArgs == null) {
+            return null;
+        }
+        if (tlsArgs.keystoreArgs != null) {
+            KeyStore trustStore = SSLContextFactory.loadKeyStore(new KeystoreDetails(
+                    tlsArgs.keystoreArgs.trustStorePath.toString(),
+                    tlsArgs.keystoreArgs.trustStorePassword,
+                    KeystoreType.JKS));
+            return SSLContextFactory.trustOnlySSLContext(trustStore);
+        } else {
+            KeyStore trustStore;
+            try {
+                trustStore = ClusterKeyGenerator.newTrustStore(
+                        ClusterKeyGenerator.loadSingleCertificate(Files.newBufferedReader(tlsArgs.pemArgs.rootCertPath)),
+                        new URI(server).getHost()
+                );
+            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                     URISyntaxException e) {
+                throw new InvalidSSLConfig("Could not load trust store", e);
+            }
+            return SSLContextFactory.trustOnlySSLContext(trustStore);
+        }
+    }
+
     public ServiceProviderClient createClient() {
         StoredToken token = new TokenStore().loadIfValid();
         if (token == null) {
@@ -159,6 +182,6 @@ public class ServiceProviderClientApplication{
                     "Not authenticated, or the access token has expired. Run 'serviceproviderclient login " +
                             "--token-endpoint=<url> --client-id=<id> --client-secret=<secret>' first.");
         }
-        return new ServiceProviderClient(server, user, token.getAccessToken());
+        return new ServiceProviderClient(server, user, token.getAccessToken(), createTrustOnlySSLContext());
     }
 }

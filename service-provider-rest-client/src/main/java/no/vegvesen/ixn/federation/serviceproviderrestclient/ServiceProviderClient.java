@@ -3,6 +3,7 @@ package no.vegvesen.ixn.federation.serviceproviderrestclient;
 import no.vegvesen.ixn.serviceprovider.model.*;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -10,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,17 +21,20 @@ public class ServiceProviderClient {
     private final String server;
     private final String user;
 
-    /**
-     * Creates a client that authenticates towards onboard with an OAuth2 access token (fetched
-     * from Keycloak) rather than a client certificate. TLS transport security still relies on the
-     * JVM's default trust store to validate the server's certificate.
-     */
     public ServiceProviderClient(String server, String user, String accessToken) {
+        this(server, user, accessToken, null);
+    }
+
+    public ServiceProviderClient(String server, String user, String accessToken, SSLContext trustContext) {
+        var connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create();
+        if (trustContext != null) {
+            connectionManagerBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(trustContext));
+        }
         this.restTemplate = new RestTemplate(
                 new HttpComponentsClientHttpRequestFactory(
                         HttpClients
                                 .custom()
-                                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create().build())
+                                .setConnectionManager(connectionManagerBuilder.build())
                                 .build()
                 )
         );

@@ -22,6 +22,10 @@ public class SSLContextFactory {
 		return newSSLContext(keystore, keystoreDetails.getPassword(), truststore);
 	}
 
+	public static KeyStore loadKeyStore(KeystoreDetails keystoreDetails) {
+		return getKeyStore(keystoreDetails);
+	}
+
 	private static KeyStore getKeyStore(KeystoreDetails keystoreDetails) {
 		KeyStore keystore = null;
 		try {
@@ -64,6 +68,19 @@ public class SSLContextFactory {
 			// Get the SSLContext to help create SSLSocketFactory
 			final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
 			sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+			return sslContext;
+		} catch (final GeneralSecurityException e) {
+			throw new InvalidSSLConfig(e);
+		}
+	}
+
+	public static SSLContext trustOnlySSLContext(final KeyStore trustStore) {
+		try {
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			tmf.init(trustStore);
+
+			final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
+			sslContext.init(null, tmf.getTrustManagers(), null);
 			return sslContext;
 		} catch (final GeneralSecurityException e) {
 			throw new InvalidSSLConfig(e);
