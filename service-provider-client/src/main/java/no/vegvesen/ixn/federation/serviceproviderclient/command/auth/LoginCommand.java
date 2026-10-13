@@ -24,7 +24,7 @@ import java.util.concurrent.Callable;
                         """
         }
 )
-public class Login implements Callable<Integer> {
+public class LoginCommand implements Callable<Integer> {
 
     @Option(names = {"--token-endpoint"}, required = true, description = "URL of the Keycloak (or other OIDC compliant) token endpoint")
     private String tokenEndpoint;

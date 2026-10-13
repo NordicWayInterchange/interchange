@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
         mixinStandardHelpOptions = true,
         version = "1.0"
 )
-public class Logout implements Callable<Integer> {
+public class LogoutCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {

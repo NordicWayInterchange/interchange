@@ -1,5 +1,7 @@
 package no.vegvesen.ixn.federation.serviceproviderclient;
 
+import no.vegvesen.ixn.federation.serviceproviderclient.command.auth.LoginCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.auth.LogoutCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.biconsumer.BiconsumerCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.biqueue.BiqueueCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.capabilities.CapabilitiesCommand;
@@ -7,7 +9,10 @@ import no.vegvesen.ixn.federation.serviceproviderclient.command.deliveries.Deliv
 import no.vegvesen.ixn.federation.serviceproviderclient.command.keys.PortalStores;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.privatechannels.PrivateChannelsCommand;
 import no.vegvesen.ixn.federation.serviceproviderclient.command.subscriptions.SubscriptionsCommand;
-import no.vegvesen.ixn.federation.serviceproviderclient.command.token.FetchToken;
+import no.vegvesen.ixn.federation.serviceproviderclient.command.token.FetchTokenCommand;
+import no.vegvesen.ixn.federation.serviceproviderclient.token.NotAuthenticatedException;
+import no.vegvesen.ixn.federation.serviceproviderclient.token.StoredToken;
+import no.vegvesen.ixn.federation.serviceproviderclient.token.TokenStore;
 import no.vegvesen.ixn.keys.generator.ClusterKeyGenerator;
 import no.vegvesen.ixn.ssl.InvalidSSLConfig;
 import no.vegvesen.ixn.federation.serviceproviderrestclient.ServiceProviderClient;
@@ -34,6 +39,8 @@ import static picocli.CommandLine.*;
         showAtFileInUsageHelp = true,
         defaultValueProvider = PropertiesDefaultProvider.class,
         subcommands = {
+                LoginCommand.class,
+                LogoutCommand.class,
                 BiconsumerCommand.class,
                 BiqueueCommand.class,
                 CapabilitiesCommand.class,
@@ -41,7 +48,7 @@ import static picocli.CommandLine.*;
                 SubscriptionsCommand.class,
                 PrivateChannelsCommand.class,
                 PortalStores.class,
-                FetchToken.class
+                FetchTokenCommand.class
         },
         mixinStandardHelpOptions = true,
         version = "1.0")
@@ -88,15 +95,29 @@ public class ServiceProviderClientApplication{
         private KeystoreArgs keystoreArgs;
     }
 
-    @ArgGroup(exclusive = true, heading = "TLS arguments\n")
+    @ArgGroup(exclusive = true, heading = "TLS arguments, only needed for commands connecting directly to the message broker (e.g. listen/send on queues and private channels)\n")
     private TlsArgs tlsArgs;
 
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new ServiceProviderClientApplication()).execute(args);
+        CommandLine commandLine = new CommandLine(new ServiceProviderClientApplication());
+        commandLine.setExecutionExceptionHandler((ex, cmd, parseResult) -> {
+            if (ex instanceof NotAuthenticatedException) {
+                cmd.getErr().println(cmd.getColorScheme().errorText(ex.getMessage()));
+                return 1;
+            }
+            throw ex;
+        });
+        int exitCode = commandLine.execute(args);
         System.exit(exitCode);
     }
 
     public SSLContext createSSLContext() {
+        if (tlsArgs == null) {
+            throw new InvalidSSLConfig(
+                    "This command needs TLS arguments (either --cacert/--cert/--key or " +
+                            "--keystorepath/--keystorepassword/--truststorepath/--truststorepassword) to connect to the message broker",
+                    null);
+        }
         if (tlsArgs.keystoreArgs != null) {
             KeystoreDetails keystoreDetails = new KeystoreDetails(tlsArgs.keystoreArgs.keystorePath.toString(),
                     tlsArgs.keystoreArgs.keystorePassword,
@@ -132,6 +153,12 @@ public class ServiceProviderClientApplication{
     }
 
     public ServiceProviderClient createClient() {
-        return new ServiceProviderClient(createSSLContext(),server,user);
+        StoredToken token = new TokenStore().loadIfValid();
+        if (token == null) {
+            throw new NotAuthenticatedException(
+                    "Not authenticated, or the access token has expired. Run 'serviceproviderclient login " +
+                            "--token-endpoint=<url> --client-id=<id> --client-secret=<secret>' first.");
+        }
+        return new ServiceProviderClient(server, user, token.getAccessToken());
     }
 }

@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
                         """
         }
 )
-public class FetchToken implements Callable<Integer> {
+public class FetchTokenCommand implements Callable<Integer> {
 
     @Option(names = {"--token-endpoint"}, required = true, description = "URL of the Keycloak (or other OIDC compliant) token endpoint")
     private String tokenEndpoint;
