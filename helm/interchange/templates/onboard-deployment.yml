@@ -45,6 +45,10 @@ spec:
               value: "{{ .Values.self.secret_mount_path }}key_store.p12"
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
+            {{- if .Values.onboard_server.oauth2_issuer_uri }}
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: {{ .Values.onboard_server.oauth2_issuer_uri | quote }}
+            {{- end }}
             - name: LOG_LEVELS
               value: "{{- range .Values.onboard_server.logging -}}
                   -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}

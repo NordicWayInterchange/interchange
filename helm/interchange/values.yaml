@@ -55,6 +55,7 @@ neighbour_server:
 
 onboard_server:
   replicas: 1
+  oauth2_issuer_uri: ""
 
 routing_configurer:
   replicas: 1
