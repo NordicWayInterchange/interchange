@@ -56,7 +56,6 @@ public class TokenStore {
             Set<java.nio.file.attribute.PosixFilePermission> ownerOnly = EnumSet.of(OWNER_READ, OWNER_WRITE);
             Files.setPosixFilePermissions(tokenFile, ownerOnly);
         } catch (UnsupportedOperationException | IOException ignored) {
-            // Best-effort hardening; not supported on all platforms (e.g. Windows) and not fatal.
         }
     }
 

@@ -15,7 +15,24 @@ For some more help on bash and aliases, see [W3Scools tutorial on Bash alias](ht
 
 For help with any subcommand, type ```serviceprovicerclient <command> --help```
 
+## Authentication
+
+Commands that call onboard (capabilities, subscriptions, deliveries, privatechannels, biconsumer, bi-queue list)
+authenticate with an OAuth2 access token fetched from Keycloak, rather than a client certificate.
+
+Log in once with your client credentials:
+```serviceproviderclient login --token-endpoint=https://keycloak.example.com/realms/myrealm/protocol/openid-connect/token --client-id=myclient --client-secret=mysecret```
+
+This fetches an access token and caches it in ```~/.serviceproviderclient/token.json```. As long as the token
+remains valid, any other command can be used without logging in again. Once it expires (or after running
+```serviceproviderclient logout```), you will need to run ```login``` again before using other commands.
+
+Note: commands that connect directly to the message broker (```bi-queue listen```, ```subscriptions listen```,
+```privatechannels listen/send```, ```deliveries send/dlq listen```) still require a client certificate, supplied
+via the TLS arguments described below, in addition to being logged in.
+
 ## Auto-completion
+
 This tool supports auto-completion in bash and zsh. To use, first create a completion 
 file using the command ```java -cp service-provider-client-1.0.33-SNAPSHOT.jar picocli.AutoComplete no.vegvesen.ixn.federation.serviceproviderclient.ServiceProviderClientApplication```
 The new file will be created in the folder the command is called from.

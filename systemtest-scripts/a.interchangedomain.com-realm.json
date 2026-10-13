@@ -515,7 +515,8 @@
       "oauth2.device.authorization.grant.enabled" : "false",
       "display.on.consent.screen" : "false",
       "backchannel.logout.revoke.offline.tokens" : "false",
-      "dpop.bound.access.tokens" : "false"
+      "dpop.bound.access.tokens" : "false",
+      "access.token.lifespan" : "7200"
     },
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
