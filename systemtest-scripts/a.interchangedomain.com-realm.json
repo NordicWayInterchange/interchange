@@ -414,7 +414,10 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-a.interchangedomain.com" ],
     "notBefore" : 0,
-    "groups" : [ ]
+    "groups" : [ ],
+    "attributes" : {
+      "organization" : [ "king_olav.a.interchangedomain.com" ]
+    }
   }, {
     "id" : "ac902913-b194-483b-9980-e4ad7d9f9421",
     "username" : "service-account-a.interchangedomain.com-onboard",
@@ -477,6 +480,23 @@
     "authenticationFlowBindingOverrides" : { },
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
+    "protocolMappers" : [ {
+      "id" : "c1a2b3c4-d5e6-4f70-8a91-0b1c2d3e4f50",
+      "name" : "organization",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-usermodel-attribute-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
+        "user.attribute" : "organization",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "organization",
+        "jsonType.label" : "String",
+        "multivalued" : "true"
+      }
+    } ],
     "defaultClientScopes" : [ "web-origins", "acr", "profile", "roles", "basic", "email" ],
     "optionalClientScopes" : [ "address", "phone", "organization", "offline_access", "microprofile-jwt" ]
   }, {

@@ -96,7 +96,7 @@ services:
       - PFX_PASSPHRASE=password
       - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
       - INTERCHANGE_URI=https://a-napcore-server:8898/nap/
-      - INTERCHANGE_PREFIX=a.interchangedomain.com.nap.
+      - INTERCHANGE_PREFIX=
       - NEXTAUTH_SECRET=supersecret
       - NEXTAUTH_URL=http://localhost:3000
       - USE_KEYCLOAK=true

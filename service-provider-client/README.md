@@ -29,7 +29,7 @@ remains valid, any other command can be used without logging in again. Once it e
 
 Note: commands that connect directly to the message broker (```bi-queue listen```, ```subscriptions listen```,
 ```privatechannels listen/send```, ```deliveries send/dlq listen```) still require a client certificate, supplied
-via the TLS arguments described below, in addition to being logged in.
+via the TLS arguments, in addition to being logged in.
 
 ## Auto-completion
 

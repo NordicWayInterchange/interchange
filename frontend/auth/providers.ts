@@ -18,6 +18,15 @@ export default function buildProviders() {
             name: `Keycloak (${process.env.KEYCLOAK_REALM})`,
             token: `${baseInternal}/protocol/openid-connect/token`,
             userinfo:  `${baseInternal}/protocol/openid-connect/userinfo`,
+            profile(profile) {
+                return {
+                    id: profile.sub,
+                    name: profile.name ?? profile.preferred_username,
+                    email: profile.email,
+                    image: profile.picture,
+                    organization: profile.organization,
+                };
+            },
         })
 
     } else {
