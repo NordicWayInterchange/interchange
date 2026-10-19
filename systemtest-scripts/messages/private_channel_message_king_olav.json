@@ -1,0 +1,11 @@
+{
+  "privateTextMessages" : [ {
+    "messageText" : "This is my private channel message",
+    "messageProperties" : {
+      "textProperty" : "this is text",
+      "booleanProperty" : true,
+      "integerProperty" : 1
+    }
+  } ]
+}
+
