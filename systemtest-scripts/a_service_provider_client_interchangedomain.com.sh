@@ -19,5 +19,5 @@ docker run \
   -e SERVICEPROVIDERCLIENT_TOKEN_FILE=/work/.serviceproviderclient-token.json \
   --link a-onboard-server:a.interchangedomain.com \
   --link a-qpid:a.qpid.interchangedomain.com \
-  service_provider_client -k /keys/${SERVICE_PROVIDER}.p12 -s password -t /keys/ca.interchangedomain.com.jks -w password $URL -u ${SERVICE_PROVIDER} "$@"
+  service_provider_client -t /keys/ca.interchangedomain.com.jks -w password $URL -u ${SERVICE_PROVIDER} "$@"
 
