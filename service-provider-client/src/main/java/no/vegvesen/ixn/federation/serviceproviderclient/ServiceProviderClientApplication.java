@@ -59,10 +59,10 @@ public class ServiceProviderClientApplication{
     private String user;
 
     static class KeystoreArgs {
-        @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore")
+        @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore (needed for commands connecting directly to the message broker)")
         private Path keystorePath;
 
-        @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore")
+        @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore (needed for commands connecting directly to the message broker)")
         String keystorePassword;
 
         @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
@@ -77,10 +77,10 @@ public class ServiceProviderClientApplication{
        @Option(names = {"--cacert"}, required = true, description = "CA certificate to verify interchange against" )
        private Path rootCertPath;
 
-       @Option(names = {"--cert"}, required = true, description = "Client certificate file name")
+       @Option(names = {"--cert"}, description = "Client certificate file name (needed for commands connecting directly to the message broker)")
        private Path certificatePath;
 
-       @Option(names = {"--key"}, required = true, description = "Client private key file name")
+       @Option(names = {"--key"}, description = "Client private key file name (needed for commands connecting directly to the message broker)")
        private Path privateKeyPath;
 
     }
@@ -117,6 +117,11 @@ public class ServiceProviderClientApplication{
                     null);
         }
         if (tlsArgs.keystoreArgs != null) {
+            if (tlsArgs.keystoreArgs.keystorePath == null || tlsArgs.keystoreArgs.keystorePassword == null) {
+                throw new InvalidSSLConfig(
+                        "This command needs a client keystore (--keystorepath/--keystorepassword) in addition to " +
+                                "the trust store, to connect to the message broker", null);
+            }
             KeystoreDetails keystoreDetails = new KeystoreDetails(tlsArgs.keystoreArgs.keystorePath.toString(),
                     tlsArgs.keystoreArgs.keystorePassword,
                     KeystoreType.PKCS12);
@@ -124,6 +129,11 @@ public class ServiceProviderClientApplication{
                     tlsArgs.keystoreArgs.trustStorePassword, KeystoreType.JKS);
             return SSLContextFactory.sslContextFromKeyAndTrustStores(keystoreDetails, trustStoreDetails);
         } else {
+            if (tlsArgs.pemArgs.certificatePath == null || tlsArgs.pemArgs.privateKeyPath == null) {
+                throw new InvalidSSLConfig(
+                        "This command needs a client certificate and key (--cert/--key) in addition to " +
+                                "--cacert, to connect to the message broker", null);
+            }
             KeyStore keyStore;
             try {
                 keyStore = ClusterKeyGenerator.newKeyStore(
