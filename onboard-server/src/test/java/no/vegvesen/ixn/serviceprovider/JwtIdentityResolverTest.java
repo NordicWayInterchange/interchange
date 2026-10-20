@@ -20,7 +20,7 @@ public class JwtIdentityResolverTest {
     void setUp() {
         jwt = Jwt.withTokenValue("token-value")
                 .header("abc", "value")
-                .claim("organization", "test-org")
+                .claim("client_id", "test-org")
                 .build();
     }
 

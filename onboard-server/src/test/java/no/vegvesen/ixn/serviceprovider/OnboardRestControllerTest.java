@@ -82,7 +82,7 @@ public class OnboardRestControllerTest {
 
 	private void mockCertificate(String commonName) {
 		Jwt jwt = mock(Jwt.class);
-		when(jwt.getClaimAsString("organization")).thenReturn(commonName);
+		when(jwt.getClaimAsString("client_id")).thenReturn(commonName);
 
 		JwtAuthenticationToken principal = mock(JwtAuthenticationToken.class);
 		when(principal.getToken()).thenReturn(jwt);
