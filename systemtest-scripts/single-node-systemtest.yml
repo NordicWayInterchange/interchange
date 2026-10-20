@@ -51,7 +51,7 @@ services:
       - OPENID_ISSUER=http://a-keycloak:8080/realms/a.interchangedomain.com
       - KEYCLOAK_CLIENT_ID=a.interchangedomain.com-onboard
       - KEYCLOAK_CLIENT_SECRET=anothersupersecret
-      - LOG_LEVELS="-Dlogging.level.no.vegvesen.serviceprovider.security=debug"
+      - LOG_LEVELS=-Dlogging.level.no.vegvesen.serviceprovider.security=debug
     networks:
       - testing_net
 
