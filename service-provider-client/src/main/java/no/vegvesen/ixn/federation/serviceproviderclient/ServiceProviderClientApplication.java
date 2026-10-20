@@ -59,10 +59,10 @@ public class ServiceProviderClientApplication{
     private String user;
 
     static class KeystoreArgs {
-        @Option(names = {"-k","--keystorepath"}, required = true, description = "Path to the service provider p12 keystore (needed for commands connecting directly to the message broker)")
+        @Option(names = {"-k","--keystorepath"}, required = false, description = "Path to the service provider p12 keystore (needed for commands connecting directly to the message broker)")
         private Path keystorePath;
 
-        @Option(names = {"-s","--keystorepassword"}, required = true,  description = "The password of the service provider keystore (needed for commands connecting directly to the message broker)")
+        @Option(names = {"-s","--keystorepassword"}, required = false,  description = "The password of the service provider keystore (needed for commands connecting directly to the message broker)")
         String keystorePassword;
 
         @Option(names = {"-t","--truststorepath"}, required = true, description = "The path of the jks trust store")
