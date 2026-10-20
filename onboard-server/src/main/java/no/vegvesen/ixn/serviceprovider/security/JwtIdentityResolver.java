@@ -19,12 +19,6 @@ public class JwtIdentityResolver implements IdentityResolver {
     public String getCallerName() {
         Authentication principal = SecurityContextHolder.getContext().getAuthentication();
         JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) principal;
-        Map<String, Object> tokenAttributes = jwtAuthenticationToken.getTokenAttributes();
-        //TODO this is for debugging during development. Remove when done
-        for (String key : tokenAttributes.keySet()) {
-            Object value = tokenAttributes.get(key);
-            logger.debug("{}, value class: {}, value: {}", key, value.getClass(), value);
-        }
         return Objects.requireNonNull(jwtAuthenticationToken).getToken().getClaimAsString("client_id");
     }
 }
