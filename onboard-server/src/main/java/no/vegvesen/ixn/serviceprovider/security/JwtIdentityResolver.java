@@ -25,6 +25,6 @@ public class JwtIdentityResolver implements IdentityResolver {
             Object value = tokenAttributes.get(key);
             logger.debug("{}, value class: {}, value: {}", key, value.getClass(), value);
         }
-        return Objects.requireNonNull(jwtAuthenticationToken).getToken().getClaimAsString("organization");
+        return Objects.requireNonNull(jwtAuthenticationToken).getToken().getClaimAsString("client_id");
     }
 }
