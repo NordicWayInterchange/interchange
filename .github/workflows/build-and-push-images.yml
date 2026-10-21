@@ -138,6 +138,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Install built reactor into local repo
+        run: mvn -B install -DskipTests -q -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+
       - name: Run integration tests with Maven (no clean)
         run: mvn -B verify -pl ${{ matrix.group.modules }} -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
 
