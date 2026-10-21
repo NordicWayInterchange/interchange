@@ -20,6 +20,7 @@ public abstract class PostgresContainerBase {
         registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
         registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
         registry.add("spring.jpa.properties.jakarta.persistence.query.timeout", () -> "15000");
+        registry.add("spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults", () -> "false");
     }
 
     @BeforeAll
