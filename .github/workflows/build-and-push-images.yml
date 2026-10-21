@@ -68,23 +68,53 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build with Maven (compile and package, skip tests)
-        run: mvn -B package -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+      - name: Build with Maven (compile, package and install, skip tests)
+        run: mvn -B install -DskipTests -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
 
       - name: Save tags to files
         run: |
           echo "$(git rev-parse --short HEAD)" >> IMAGE_TAG.txt
           echo "$(git rev-parse --abbrev-ref HEAD)" >> BRANCH_TAG.txt
+          mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout >> PROJECT_VERSION.txt
 
       - name: Persist to workspace
         uses: actions/upload-artifact@v7.0.0
         with:
           name: interchange
-          path: ./
+          path: |
+            ./
+            !./.git/**
 
   verify:
     runs-on: ubuntu-latest
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        # Each group runs 'mvn verify' only for its own modules
+        group:
+          - name: neighbour-model
+            modules: neighbour-model
+          - name: neighbour-service
+            modules: neighbour-service
+          - name: napcore-server
+            modules: napcore-server
+          - name: routing-configurer
+            modules: routing-configurer
+          - name: jms-client
+            modules: jms-client
+          - name: qpid-client
+            modules: qpid-client
+          - name: onboard-server
+            modules: onboard-server
+          - name: admin-server
+            modules: admin-server
+          - name: neighbour-server
+            modules: neighbour-server
+          - name: neighbour-discoverer
+            modules: neighbour-discoverer
+          - name: rest
+            modules: ssl-utils,testcontainers-base,api-model,interchange-spring-security,interchange-spring-security-client,neighbour-dns,dns-client,neighbour-rest-facade,message-collector,quadtree-tool,onboard-rest-api,onboard-server-app,message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,napcore-rest-api,napcore-server-app,napcore-rest-client,csr-signer,keys-generator,service-provider-client,admin-server-app,csr-generator,shared-api-model,local-delivery-service,import-application,export-application,local-subscription-service,match-service,service-provider-rest-client
     defaults:
       run:
         shell: bash
@@ -109,13 +139,15 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run integration tests with Maven (no clean)
-        run: mvn -B verify -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
+        run: mvn -B verify -pl ${{ matrix.group.modules }} -Dorg.slf4j.simpleLogger.log.org.apache.maven=warn
 
       - name: Persist verified workspace
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: interchange-verified
-          path: ./
+          name: interchange-verified-${{ matrix.group.name }}
+          path: |
+            ./
+            !./.git/**
 
   push-generated-docs:
     runs-on: ubuntu-latest
@@ -127,10 +159,11 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: Download verified workspace
+      - name: Download verified workspaces (all groups, merged)
         uses: actions/download-artifact@v8.0.1
         with:
-          name: interchange-verified
+          pattern: interchange-verified-*
+          merge-multiple: true
 
       - name: Checkout to interchange-swagger-docs
         uses: actions/checkout@v5
@@ -331,11 +364,20 @@ jobs:
             ghcr.io/nordicwayinterchange/admin-frontend:${{ env.IMAGE_TAG }}-arm64
 
   docker-push-svv:
-    runs-on: ubuntu-latest
+    # Build each architecture natively instead of emulating arm64 via QEMU, same as
+    # build-napcore/build-admin-frontend
+    runs-on: ${{ matrix.arch.runner }}
     needs: build
     strategy:
       matrix:
         Images: [message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
+        arch:
+          - platform: linux/amd64
+            suffix: amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            suffix: arm64
+            runner: ubuntu-24.04-arm
     defaults:
       run:
         shell: bash
@@ -349,6 +391,7 @@ jobs:
         run: |
           echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
           echo "BRANCH_TAG=$(cat BRANCH_TAG.txt)" >> "$GITHUB_ENV"
+          echo "PROJECT_VERSION=$(cat PROJECT_VERSION.txt)" >> "$GITHUB_ENV"
 
       - name: Login to Github container registry
         uses: docker/login-action@v4.0.0
@@ -357,21 +400,46 @@ jobs:
           username: "Github Actions"
           password: ${{ secrets.REPO_ACCESS_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4.1.0
-        with:
-          cache-image: false
-
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-        id: setup-buildx
-        with:
-          driver: docker-container
-          name: buildx-${{ matrix.Images }}-${{ github.run_id }}
 
-      - name: Build the Docker image
+      - name: Build and push the Docker image (native arch)
         run: |
-          cd ./${{ matrix.Images }}          
-          docker buildx build --builder ${{ steps.setup-buildx.outputs.name }}  --platform linux/amd64,linux/arm64 . -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} --build-arg JAR_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -q -DforceStdout) --push
+          cd ./${{ matrix.Images }}
+          docker buildx build --platform ${{ matrix.arch.platform }} . \
+            -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}-${{ matrix.arch.suffix }} \
+            --build-arg JAR_VERSION=${{ env.PROJECT_VERSION }} \
+            --cache-from type=gha,scope=${{ matrix.Images }}-${{ matrix.arch.suffix }} \
+            --cache-to type=gha,mode=max,scope=${{ matrix.Images }}-${{ matrix.arch.suffix }} \
+            --push
+
+  docker-push-svv-manifest:
+    runs-on: ubuntu-latest
+    needs: [build, docker-push-svv]
+    strategy:
+      matrix:
+        Images: [message-collector-app,neighbour-discoverer-app,neighbour-server-app,routing-configurer-app,onboard-server-app,napcore-server-app,service-provider-client,keys-generator, admin-server-app]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download persisted workspace
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: interchange
+      - name: Tags to variables
+        run: |
+          echo "IMAGE_TAG=$(cat IMAGE_TAG.txt)" >> "$GITHUB_ENV"
+      - name: Login to Github container registry
+        uses: docker/login-action@v4.0.0
+        with:
+          registry: ghcr.io
+          username: "Github Actions"
+          password: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Create and push multi-arch manifest
+        run: |
+          docker buildx imagetools create \
+            -t ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }} \
+            ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}-amd64 \
+            ghcr.io/nordicwayinterchange/${{ matrix.Images }}:${{ env.IMAGE_TAG }}-arm64
 
