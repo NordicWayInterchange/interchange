@@ -5,7 +5,7 @@
 #     --client-id=a.interchangedomain.com-onboard --client-secret=anothersupersecret
 #   ./a_service_provider_client_interchangedomain.com.sh capabilities list
 
-SERVICE_PROVIDER="king_olav.a.interchangedomain.com"
+SERVICE_PROVIDER="king_olav@slottet.no"
 URL="https://a.interchangedomain.com:8797/"
 VOLUME_NAME=single-node-systemtest-keys-volume
 
