@@ -176,5 +176,5 @@ The administrators can view list of service providers, neighbours, exchanges, qu
 
 In a browser, go to https://localhost:3001/
 
-The portal is already logged in with the same username and password.
+The pre-created user `a-admin@slottet.no`, password `password` has access to the administrator portal.
 The previously added capability, subscription and delivery should be listed in this portal as well.
