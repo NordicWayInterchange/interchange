@@ -153,8 +153,6 @@ services:
       - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
       - DOMAIN_NAME=interchangedomain.com
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://a-keycloak:8080/realms/a-admin.interchangedomain.com
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://a-keycloak:8080/realms/a-admin.interchangedomain.com/protocol/openid-connect/certs
     networks:
       - singletest
 
