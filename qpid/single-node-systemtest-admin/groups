@@ -1,0 +1,6 @@
+federated-interchanges.users=
+administrators.users=qpid-admin,a.interchangedomain.com
+service-providers.users=
+remote-service-providers.users=
+clients-private-channels.users=
+bi-consumers.users=
