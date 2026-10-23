@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.adminserver;
 
+import jakarta.transaction.Transactional;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import no.vegvesen.ixn.federation.adminserver.model.endpoint.LocalDeliveryEndpointAdminApi;
 import no.vegvesen.ixn.federation.adminserver.model.privateChannel.PeerPrivateChannelApi;
@@ -51,7 +52,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {TestApplication.class, MockSslBundle.class})
+@SpringBootTest
+@Transactional
 public class AdminRestControllerIT extends PostgresContainerBase {
 
     private MockMvc mockMvc;
@@ -77,19 +79,8 @@ public class AdminRestControllerIT extends PostgresContainerBase {
     @MockitoBean
     QpidService qpidService;
 
-    @DynamicPropertySource
-    static void datasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("KEY_STORE_PASSWORD", () -> "password");
-        registry.add("TRUST_STORE_PASSWORD", () -> "password");
-    }
-
     @BeforeEach
     public void beforeEach(){
-        privateChannelRepository.deleteAll();
-        outgoingMatchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(restController).setControllerAdvice(AdminServerErrorAdvice.class).build();
     }
