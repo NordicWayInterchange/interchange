@@ -65,7 +65,7 @@ public class PrivateChannelEndpoint {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LocalEndpoint)) return false;
+        if (!(o instanceof PrivateChannelEndpoint)) return false;
         PrivateChannelEndpoint that = (PrivateChannelEndpoint) o;
         return host.equals(that.host) &&
                 host.equals(that.host) &&
