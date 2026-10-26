@@ -17,6 +17,12 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
+            <artifactId>service-provider-model</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
             <artifactId>qpid-client</artifactId>
             <version>${project.version}</version>
         </dependency>
