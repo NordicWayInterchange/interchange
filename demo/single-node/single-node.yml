@@ -212,7 +212,7 @@ services:
       - singletest
 
   a-keycloak:
-    image: quay.io/keycloak/keycloak:26.5.2
+    image: quay.io/keycloak/keycloak:26.8.1
     ports:
       - 8888:8080
     environment:

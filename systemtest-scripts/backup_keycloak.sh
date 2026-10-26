@@ -24,7 +24,7 @@ docker run -d \
   -v "$PWD/$REALM_FILE:/opt/keycloak/data/import/realm.json" \
   -v $VOLUME_NAME:/opt/keycloak/data \
   -p 8080:8080 \
-  quay.io/keycloak/keycloak:26.5.2 \
+  quay.io/keycloak/keycloak:26.8.1 \
   start-dev --import-realm
 
 echo "✓ Running at http://localhost:8080/admin"
@@ -43,7 +43,7 @@ echo "Exporting realm to file..."
 docker run --rm \
   -v $VOLUME_NAME:/opt/keycloak/data \
   -v "$EXPORT_DIR:/tmp/export" \
-  quay.io/keycloak/keycloak:26.5.2 \
+  quay.io/keycloak/keycloak:26.8.1 \
   export --users realm_file \
         --dir /tmp/export \
         --realm a.interchangedomain.com
