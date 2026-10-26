@@ -1,0 +1,13 @@
+{
+  "nullProperty": null,
+  "numberProperty": 1,
+  "numberArrayProperty": [
+    1,
+    2
+  ],
+  "stringProperty": "string",
+  "stringArrayProperty": [
+    "string1",
+    "string2"
+  ]
+}
