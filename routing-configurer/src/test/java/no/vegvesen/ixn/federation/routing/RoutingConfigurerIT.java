@@ -13,6 +13,7 @@ import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.qpid.*;
 import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
+import no.vegvesen.ixn.federation.repository.MatchRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
@@ -121,10 +122,98 @@ public class RoutingConfigurerIT extends QpidDockerBaseIT {
 	OutgoingMatchRepository outgoingMatchRepository;
 
 	@Autowired
+	MatchRepository matchRepository;
+
+	@Autowired
     NeighbourRepository neighbourRepository;
 
 	@Autowired
 	InterchangeNodeProperties interchangeNodeProperties;
+
+	@Test
+	public void redirectEndpointsAreSavedFromNeighbour() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "originatingCountry = 'NO'";
+
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
+
+		ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName,Set.of(localSubscription));
+
+		serviceProviderRepository.save(serviceProvider);
+
+		Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, serviceProviderName);
+		Endpoint endpoint = new Endpoint("re-queue", "neighbour", 5671);
+
+		subscription.setEndpoints(Collections.singleton(endpoint));
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(Collections.singleton(subscription))
+		);
+
+		neighbourRepository.save(neighbour);
+
+		Match match = new Match(localSubscription, subscription);
+		matchRepository.save(match);
+
+		routingConfigurer.syncServiceProviders();
+
+		ServiceProvider savedServiceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
+		assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
+
+		routingConfigurer.syncServiceProviders();
+
+		ServiceProvider savedAgainServiceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
+	}
+
+	@Test
+	public void redirectEndpointIsRemovedWhenSubscriptionToNeighbourIsRemoved() {
+		String serviceProviderName = "my-service-provider";
+		String selector = "originatingCountry = 'NO'";
+		LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
+		ServiceProvider serviceProvider = new ServiceProvider(
+				serviceProviderName,
+				Set.of(localSubscription));
+		serviceProviderRepository.save(serviceProvider);
+
+		Endpoint endpoint = new Endpoint("re-queue", "neighbour", 5671);
+		Subscription subscription = new Subscription(
+				SubscriptionStatus.CREATED,
+				selector,
+				"/",
+				serviceProviderName,
+				Set.of(endpoint));
+
+		Neighbour neighbour = new Neighbour(
+				"neighbour",
+				new NeighbourCapabilities(),
+				new NeighbourSubscriptionRequest(),
+				new SubscriptionRequest(Collections.singleton(subscription))
+		);
+
+		neighbourRepository.save(neighbour);
+
+		Match match = new Match(localSubscription, subscription);
+		matchRepository.save(match);
+
+		routingConfigurer.syncServiceProviders();
+
+		ServiceProvider savedServiceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
+		assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
+
+		matchRepository.deleteAll();
+		neighbourRepository.deleteAll();
+
+		routingConfigurer.syncServiceProviders();
+
+		ServiceProvider savedAgainServiceProvider = serviceProviderRepository.findByName(serviceProviderName);
+		assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);
+	}
 
 	@Test
 	public void neighbourWithOneSubscriptionIsCreated() {

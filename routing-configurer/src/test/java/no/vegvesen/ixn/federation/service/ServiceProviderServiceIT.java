@@ -2,8 +2,6 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
-import no.vegvesen.ixn.federation.repository.MatchRepository;
-import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
@@ -25,12 +23,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     ServiceProviderRepository repository;
 
     @Autowired
-    NeighbourRepository neighbourRepository;
-
-    @Autowired
-    MatchRepository matchRepository;
-
-    @Autowired
     ServiceProviderService service;
 
     @Autowired
@@ -44,91 +36,6 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
     @Test
     public void serviceIsAutowired() {
         assertThat(repository).isNotNull();
-    }
-
-    @Test
-    public void redirectEndpointsAreSavedFromNeighbour() {
-        String serviceProviderName = "my-service-provider";
-        String selector = "originatingCountry = 'NO'";
-
-        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
-
-        ServiceProvider serviceProvider = new ServiceProvider(serviceProviderName,Set.of(localSubscription));
-
-        repository.save(serviceProvider);
-
-        Subscription subscription = new Subscription(selector, SubscriptionStatus.CREATED, serviceProviderName);
-        Endpoint endpoint = new Endpoint("re-queue", "neighbour", 5671);
-
-        subscription.setEndpoints(Collections.singleton(endpoint));
-
-        Neighbour neighbour = new Neighbour(
-                "neighbour",
-                new NeighbourCapabilities(),
-                new NeighbourSubscriptionRequest(),
-                new SubscriptionRequest(Collections.singleton(subscription))
-        );
-
-        neighbourRepository.save(neighbour);
-
-        Match match = new Match(localSubscription, subscription);
-        matchRepository.save(match);
-
-        service.syncServiceProviders();
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
-        assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
-        assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
-
-        service.syncServiceProviders();
-
-        ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
-        assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
-    }
-
-    @Test
-    public void redirectEndpointIsRemovedWhenSubscriptionToNeighbourIsRemoved() {
-        String serviceProviderName = "my-service-provider";
-        String selector = "originatingCountry = 'NO'";
-        LocalSubscription localSubscription = new LocalSubscription(LocalSubscriptionStatus.CREATED, selector, serviceProviderName);
-        ServiceProvider serviceProvider = new ServiceProvider(
-                serviceProviderName,
-                Set.of(localSubscription));
-        repository.save(serviceProvider);
-
-        Endpoint endpoint = new Endpoint("re-queue", "neighbour", 5671);
-        Subscription subscription = new Subscription(
-                SubscriptionStatus.CREATED,
-                selector,
-                "/",
-                serviceProviderName,
-                Set.of(endpoint));
-
-        Neighbour neighbour = new Neighbour(
-                "neighbour",
-                new NeighbourCapabilities(),
-                new NeighbourSubscriptionRequest(),
-                new SubscriptionRequest(Collections.singleton(subscription))
-        );
-
-        neighbourRepository.save(neighbour);
-
-        Match match = new Match(localSubscription, subscription);
-        matchRepository.save(match);
-
-        service.syncServiceProviders();
-
-        ServiceProvider savedServiceProvider = repository.findByName(serviceProviderName);
-        assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).isNotEmpty();
-        assertThat(savedServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(1);
-
-        matchRepository.deleteAll();
-        neighbourRepository.deleteAll();
-
-        service.syncServiceProviders();
-
-        ServiceProvider savedAgainServiceProvider = repository.findByName(serviceProviderName);
-        assertThat(savedAgainServiceProvider.getSubscriptions().stream().findFirst().get().getLocalEndpoints()).hasSize(0);
     }
 
     @Test
@@ -217,3 +124,4 @@ public class ServiceProviderServiceIT extends PostgresContainerBase {
 
 
 }
+

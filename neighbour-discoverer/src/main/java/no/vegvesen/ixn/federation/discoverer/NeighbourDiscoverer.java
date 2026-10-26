@@ -9,10 +9,10 @@ import no.vegvesen.ixn.federation.model.ServiceProvider;
 import no.vegvesen.ixn.federation.model.capability.Capability;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
+import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeigbourDiscoveryService;
 import no.vegvesen.ixn.federation.service.NeighbourService;
 import no.vegvesen.ixn.federation.service.NeighbourSubscriptionDeleteService;
-import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.subscription.SubscriptionCalculator;
 import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class NeighbourDiscoverer {
 	private Logger logger = LoggerFactory.getLogger(NeighbourDiscoverer.class);
 
 	private final NeighbourService neighbourService;
-	private final ServiceProviderService serviceProviderService;
+	private final ServiceProviderRepository serviceProviderRepository;
 	private final NeigbourDiscoveryService neigbourDiscoveryService;
     private final NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService;
 	private final OutgoingMatchRepository outgoingMatchRepository;
@@ -53,13 +53,13 @@ public class NeighbourDiscoverer {
 	@Autowired
 	NeighbourDiscoverer(NeighbourService neighbourService,
 						NeighbourRESTFacade neighbourFacade,
-						ServiceProviderService serviceProviderService,
+						ServiceProviderRepository serviceProviderRepository,
 						NeigbourDiscoveryService neigbourDiscoveryService,
 						InterchangeNodeProperties interchangeNodeProperties,
 						NeighbourSubscriptionDeleteService neighbourSubscriptionDeleteService,
 						OutgoingMatchRepository outgoingMatchRepository) {
 		this.neighbourService = neighbourService;
-		this.serviceProviderService = serviceProviderService;
+		this.serviceProviderRepository = serviceProviderRepository;
 		this.neigbourDiscoveryService = neigbourDiscoveryService;
         this.neighbourSubscriptionDeleteService = neighbourSubscriptionDeleteService;
 		this.outgoingMatchRepository = outgoingMatchRepository;
@@ -75,7 +75,7 @@ public class NeighbourDiscoverer {
 	public void scheduleCapabilityExchangeWithNeighbours() {
 		// Perform capability exchange with all neighbours either found through the DNS, exchanged before, failed before
 		logger.debug("CapabilityExchangeWithNeighbours");
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		Set<Capability> localCapabilities = outgoingMatchRepository.findAll().stream()
 				.map(OutgoingMatch::getCapability)
 				.collect(Collectors.toSet());
@@ -96,7 +96,7 @@ public class NeighbourDiscoverer {
 		// Perform subscription request with all neighbours with capabilities KNOWN
 		logger.debug("Checking for any Neighbours with KNOWN capabilities");
 		List<Neighbour> neighboursForSubscriptionRequest = neighbourService.findNeighboursWithKnownCapabilities();
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
 		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursForSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions);
@@ -105,7 +105,7 @@ public class NeighbourDiscoverer {
 	@Scheduled(fixedRateString = "${graceful-backoff.check-interval}", initialDelayString = "${graceful-backoff.check-offset}")
 	public void gracefulBackoffPostSubscriptionRequest() {
 		List<Neighbour> neighboursWithFailedSubscriptionRequest = neighbourService.getNeighboursFailedSubscriptionRequest();
-		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
 		Optional<LocalDateTime> lastUpdatedLocalSubscriptions = Optional.ofNullable(SubscriptionCalculator.calculateLastUpdatedSubscriptions(serviceProviders));
 		Set<LocalSubscription> localSubscriptions = SubscriptionCalculator.calculateSelfSubscriptions(serviceProviders);
 		neigbourDiscoveryService.evaluateAndPostSubscriptionRequest(neighboursWithFailedSubscriptionRequest, lastUpdatedLocalSubscriptions, localSubscriptions);
@@ -121,10 +121,6 @@ public class NeighbourDiscoverer {
 		neigbourDiscoveryService.pollSubscriptionsWithStatusCreated();
 	}
 
-	@Scheduled(fixedRateString = "${discoverer.local-subscription-update-interval}", initialDelayString = "${discoverer.local-subscription-initial-delay}")
-	public void syncServiceProviders() {
-		serviceProviderService.syncServiceProviders();
-	}
 
 	@Scheduled(fixedRateString = "${discoverer.subscription-request-update-interval}", initialDelayString = "${discoverer.subscription-request-initial-delay}")
 	public void deleteSubscriptionAtKnownNeighbours() {
