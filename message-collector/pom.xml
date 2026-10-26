@@ -18,6 +18,11 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
+            <artifactId>service-provider-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
             <artifactId>ssl-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -63,6 +68,12 @@
             <artifactId>neighbour-service</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>interchange-parent</artifactId>
+            <version>1.0.46-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
