@@ -212,11 +212,6 @@ jobs:
           git push https://${{ secrets.REPO_ACCESS_TOKEN }}@github.com/NordicWayInterchange/interchange-handbook.git --force
         working-directory: ./
 
-
-  # Frontend images are built natively per architecture instead of emulating arm64 via
-  # QEMU: QEMU-emulated `npm ci`/`yarn install` can be 10-20x slower than native, which
-  # was the real bottleneck in the pipeline (not the Maven build). The two architectures
-  # are later stitched together into one manifest by push-frontend-manifests below.
   build-frontend-images:
     runs-on: ${{ matrix.arch.runner }}
     needs: build
@@ -265,8 +260,6 @@ jobs:
             --cache-to type=gha,mode=max,scope=${{ matrix.image.name }}-${{ matrix.arch.suffix }} \
             --push
 
-  # Combines the amd64 + arm64 tags built above into one multi-arch manifest per image,
-  # so consumers can pull a single tag regardless of their platform.
   push-frontend-manifests:
     runs-on: ubuntu-latest
     needs: [build, build-frontend-images]
@@ -300,8 +293,6 @@ jobs:
             ghcr.io/nordicwayinterchange/${{ matrix.image }}:${{ env.IMAGE_TAG }}-amd64 \
             ghcr.io/nordicwayinterchange/${{ matrix.image }}:${{ env.IMAGE_TAG }}-arm64
 
-  # Backend service images are small enough that building both architectures in one
-  # QEMU-emulated buildx invocation is fine.
   build-service-images:
     runs-on: ubuntu-latest
     needs: build

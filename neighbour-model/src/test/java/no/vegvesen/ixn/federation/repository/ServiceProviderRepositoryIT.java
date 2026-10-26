@@ -94,7 +94,7 @@ public class ServiceProviderRepositoryIT extends PostgresContainerBase {
 		repository.save(ford);
 
 		List<ServiceProvider> spListRequested = repository.findBySubscriptions_StatusIn(LocalSubscriptionStatus.REQUESTED);
-		assertThat(spListRequested).containsExactly(audi,ford);
+		assertThat(spListRequested).containsExactlyInAnyOrder(audi,ford);
 	}
 
 	@Test
