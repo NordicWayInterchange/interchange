@@ -25,6 +25,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.nordicway.interchange</groupId>
+            <artifactId>service-provider-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>dnsjava</groupId>
             <artifactId>dnsjava</artifactId>
         </dependency>

@@ -41,6 +41,11 @@
         </dependency>
         <dependency>
             <groupId>net.nordicway.interchange</groupId>
+            <artifactId>service-provider-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.nordicway.interchange</groupId>
             <artifactId>interchange-spring-security</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
