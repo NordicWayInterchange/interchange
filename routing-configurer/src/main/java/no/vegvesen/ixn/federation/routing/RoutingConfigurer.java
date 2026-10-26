@@ -11,6 +11,7 @@ import no.vegvesen.ixn.federation.qpid.Queue;
 import no.vegvesen.ixn.federation.repository.ListenerEndpointRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
+import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.federation.service.routing.match.MatchDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +42,19 @@ public class RoutingConfigurer {
 
 	private final ServiceProviderRepository  serviceProviderRepository;
 
+	private final ServiceProviderService serviceProviderService;
+
 
 	@Autowired
 	public RoutingConfigurer(NeighbourService neighbourService, QpidClient qpidClient, InterchangeNodeProperties interchangeNodeProperties, ListenerEndpointRepository listenerEndpointRepository, MatchDiscoveryService matchDiscoveryService,
-							 ServiceProviderRepository serviceProviderRepository) {
+							 ServiceProviderRepository serviceProviderRepository, ServiceProviderService serviceProviderService) {
 		this.neighbourService = neighbourService;
 		this.qpidClient = qpidClient;
 		this.interchangeNodeProperties = interchangeNodeProperties;
 		this.listenerEndpointRepository = listenerEndpointRepository;
         this.matchDiscoveryService = matchDiscoveryService;
 		this.serviceProviderRepository = serviceProviderRepository;
+		this.serviceProviderService = serviceProviderService;
     }
 
 	@Scheduled(fixedRateString = "${routing-configurer.interval}")
@@ -356,6 +360,16 @@ public class RoutingConfigurer {
 		}
 	}
 
+
+	@Scheduled(fixedRateString = "${routing-configurer.local-subscription-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
+	public void syncServiceProviders() {
+		List<ServiceProvider> serviceProviders = serviceProviderService.getServiceProviders();
+		for (ServiceProvider serviceProvider : serviceProviders) {
+			String name = serviceProvider.getName();
+			serviceProviderService.updateLocalSubscriptionWithRedirectEndpoints(name);
+			serviceProviderService.removeTearDownCapabilities(name);
+		}
+	}
 
 	@Scheduled(fixedRateString = "${routing-configurer.match-update-interval}", initialDelayString = "${routing-configurer.local-subscription-initial-delay}")
 	public void createMatches() {

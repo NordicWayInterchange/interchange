@@ -10,7 +10,6 @@ import no.vegvesen.ixn.federation.exceptions.SubscriptionRequestException;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.shared.capability.*;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +44,6 @@ class NeighbourRestControllerTest {
 	private MockMvc mockMvc;
 
 
-	@MockitoBean
-	private ServiceProviderService serviceProviderService;
 
 	@MockitoBean
 	NeighbourService neighbourService;

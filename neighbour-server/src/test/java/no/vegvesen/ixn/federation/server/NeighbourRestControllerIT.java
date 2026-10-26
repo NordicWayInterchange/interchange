@@ -10,7 +10,6 @@ import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.properties.InterchangeNodeProperties;
 import no.vegvesen.ixn.federation.repository.NeighbourRepository;
 import no.vegvesen.ixn.federation.service.NeighbourService;
-import no.vegvesen.ixn.federation.service.ServiceProviderService;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +42,6 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
     @Autowired
     InterchangeNodeProperties interchangeNodeProperties;
 
-    @Autowired
-    ServiceProviderService serviceProviderService;
 
     @Autowired
     NeighbourService neighbourService;

@@ -32,15 +32,6 @@ public class ServiceProviderService {
         this.matchRepository = matchRepository;
     }
 
-    public void syncServiceProviders() {
-        List<ServiceProvider> serviceProviders = serviceProviderRepository.findAll();
-        for (ServiceProvider serviceProvider : serviceProviders) {
-            String name = serviceProvider.getName();
-            updateLocalSubscriptionWithRedirectEndpoints(name);
-            removeTearDownCapabilities(name);
-        }
-    }
-
     public void updateLocalSubscriptionWithRedirectEndpoints(String serviceProviderName) {
         ServiceProvider serviceProvider = serviceProviderRepository.findByName(serviceProviderName);
         Set<LocalSubscription> redirectSubscriptions = serviceProvider.getSubscriptions().stream()
@@ -124,3 +115,4 @@ public class ServiceProviderService {
     }
 
 }
+
