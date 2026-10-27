@@ -557,4 +557,22 @@ public class CapabilityValidatorTest {
         );
         assertThat(CapabilityValidator.capabilityHasValidProperties(datexNO)).isEmpty();
     }
+
+    @Test
+    public void testDatexCapabilityWithSpaceInPublisherNameIsValid() {
+        CapabilityApi capability = new CapabilityApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000:pub-1",
+                        "NO",
+                        "DATEX2:3.2",
+                        List.of("12001"),
+                        "SituationPublication",
+                        "publisher Name"
+                ),
+                new MetadataApi()
+        );
+
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability)).isEmpty();
+    }
 }
