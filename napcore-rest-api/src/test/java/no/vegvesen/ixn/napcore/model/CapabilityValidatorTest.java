@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore.model;
 
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.IvimApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,23 @@ public class CapabilityValidatorTest {
                         "NO",
                         "IVIM",
                         List.of("1")
+                ),
+                new MetadataApi()
+        );
+        assertThat(CapabilityValidator.napcoreCapabilityHasValidProperties(capability1)).isEmpty();
+    }
+
+    @Test
+    public void testDatexCapabilityWithSpaceInPublisherNameIsValid(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000:pub-1",
+                        "NO",
+                        "DATEX2:3.2",
+                        List.of("12001"),
+                        "SituationPublication",
+                        "publisher Name"
                 ),
                 new MetadataApi()
         );
