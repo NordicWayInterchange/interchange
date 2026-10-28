@@ -15,6 +15,7 @@ import no.vegvesen.ixn.federation.utils.NeighbourMDCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,25 +83,24 @@ public class NeigbourDiscoveryService {
         List<ListenerEndpoint> listenerEndpoints = null;
         for (Neighbour neighbour : neighbourRepository.findAll()) {
             String name = neighbour.getName();
-            if (namesInDns.contains(name) || name.equals(interchangeNodeProperties.getName())) {
-                continue;
-            }
-            try {
-                NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), name);
-                logger.info("Neighbour {} is no longer in DNS. Removing from database", name);
-                if (listenerEndpoints == null) {
-                    listenerEndpoints = listenerEndpointRepository.findAll();
-                }
-                for (ListenerEndpoint endpoint : listenerEndpoints) {
-                    if (name.equals(endpoint.getNeighbourName())) {
-                        listenerEndpointRepository.delete(endpoint);
+            if (!namesInDns.contains(name) && !name.equals(interchangeNodeProperties.getName())) {
+                try {
+                    NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), name);
+                    logger.info("Neighbour {} is no longer in DNS. Removing from database", name);
+                    if (listenerEndpoints == null) {
+                        listenerEndpoints = listenerEndpointRepository.findAll();
                     }
+                    for (ListenerEndpoint endpoint : listenerEndpoints) {
+                        if (name.equals(endpoint.getNeighbourName())) {
+                            listenerEndpointRepository.delete(endpoint);
+                        }
+                    }
+                    neighbourRepository.delete(neighbour);
+                } catch (DataAccessException e) {
+                    logger.error("Could not remove neighbour that has left", e);
+                } finally {
+                    NeighbourMDCUtil.removeLogVariables();
                 }
-                neighbourRepository.delete(neighbour);
-            } catch (Exception e) {
-                logger.error("Could not remove neighbour that has left", e);
-            } finally {
-                NeighbourMDCUtil.removeLogVariables();
             }
         }
     }
