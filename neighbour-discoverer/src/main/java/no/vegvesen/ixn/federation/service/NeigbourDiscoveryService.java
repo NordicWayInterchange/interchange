@@ -69,6 +69,40 @@ public class NeigbourDiscoveryService {
             }
             NeighbourMDCUtil.removeLogVariables();
         }
+        removeNeighboursThatHaveLeft(neighbours);
+    }
+
+    void removeNeighboursThatHaveLeft(List<Neighbour> neighboursInDns) {
+        // lookupNeighbours() returns an empty list on DNS errors, so an empty result is not trusted
+        if (neighboursInDns.isEmpty()) {
+            logger.warn("No neighbours returned from DNS, skipping check for neighbours that have left");
+            return;
+        }
+        Set<String> namesInDns = neighboursInDns.stream().map(Neighbour::getName).collect(Collectors.toSet());
+        List<ListenerEndpoint> listenerEndpoints = null;
+        for (Neighbour neighbour : neighbourRepository.findAll()) {
+            String name = neighbour.getName();
+            if (namesInDns.contains(name) || name.equals(interchangeNodeProperties.getName())) {
+                continue;
+            }
+            try {
+                NeighbourMDCUtil.setLogVariables(interchangeNodeProperties.getName(), name);
+                logger.info("Neighbour {} is no longer in DNS. Removing from database", name);
+                if (listenerEndpoints == null) {
+                    listenerEndpoints = listenerEndpointRepository.findAll();
+                }
+                for (ListenerEndpoint endpoint : listenerEndpoints) {
+                    if (name.equals(endpoint.getNeighbourName())) {
+                        listenerEndpointRepository.delete(endpoint);
+                    }
+                }
+                neighbourRepository.delete(neighbour);
+            } catch (Exception e) {
+                logger.error("Could not remove neighbour that has left", e);
+            } finally {
+                NeighbourMDCUtil.removeLogVariables();
+            }
+        }
     }
 
     public void capabilityExchangeWithNeighbours(Set<Capability> localCapabilities, Optional<LocalDateTime> lastUpdatedLocalCapabilities) {

@@ -119,7 +119,35 @@ public class NeighbourServiceDiscoveryTest {
 		verify(neighbourRepository, times(0)).save(any(Neighbour.class));
 	}
 
-	//TODO Make a test for having a Neighbour that is in the database, but not in DNS (in other words, removed).
+	@Test
+	public void testNeighbourMissingFromDnsIsRemoved(){
+		Neighbour ericsson = new Neighbour("ericsson.itsinterchange.eu", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "8080");
+		Neighbour gone = new Neighbour("gone.itsinterchange.eu", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "8080");
+		ListenerEndpoint goneEndpoint = new ListenerEndpoint("gone.itsinterchange.eu", "source", "host", 5671, new Connection(), "target");
+		ListenerEndpoint keptEndpoint = new ListenerEndpoint("ericsson.itsinterchange.eu", "source", "host", 5671, new Connection(), "target");
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.singletonList(ericsson));
+		when(neighbourRepository.findByName(any(String.class))).thenReturn(ericsson);
+		when(neighbourRepository.findAll()).thenReturn(List.of(ericsson, gone));
+		when(listenerEndpointRepository.findAll()).thenReturn(List.of(goneEndpoint, keptEndpoint));
+
+		neigbourDiscoveryService.checkForNewNeighbours();
+
+		verify(neighbourRepository).delete(gone);
+		verify(neighbourRepository, times(0)).delete(ericsson);
+		verify(listenerEndpointRepository).delete(goneEndpoint);
+		verify(listenerEndpointRepository, times(0)).delete(keptEndpoint);
+	}
+
+	@Test
+	public void testNothingIsRemovedWhenDnsReturnsNoNeighbours(){
+		Neighbour gone = new Neighbour("gone.itsinterchange.eu", new NeighbourCapabilities(), new NeighbourSubscriptionRequest(), new SubscriptionRequest(), "8080");
+		when(dnsFacade.lookupNeighbours()).thenReturn(Collections.emptyList());
+		when(neighbourRepository.findAll()).thenReturn(List.of(gone));
+
+		neigbourDiscoveryService.checkForNewNeighbours();
+
+		verify(neighbourRepository, times(0)).delete(any(Neighbour.class));
+	}
 
 	/**
 	 * Capabilities exchange and subscription request
