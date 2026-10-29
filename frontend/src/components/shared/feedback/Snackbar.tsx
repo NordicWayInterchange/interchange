@@ -8,13 +8,14 @@ import {
 
 interface Props extends SnackbarProps {
   open: boolean;
-  message: string;
+  message: string | string[];
   severity: AlertColor;
   handleClose: (event?: React.SyntheticEvent | Event, reason?: string) => void;
 }
 
 const Snackbar = (props: Props) => {
   const { open, handleClose, severity, message } = props;
+  const messages = Array.isArray(message) ? message : [message];
   return (
     <MuiSnackbar
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
@@ -29,7 +30,9 @@ const Snackbar = (props: Props) => {
         severity={severity}
         sx={{ width: "100%" }}
       >
-        {message}
+        {messages.map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
       </Alert>
     </MuiSnackbar>
   );
