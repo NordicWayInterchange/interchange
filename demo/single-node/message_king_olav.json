@@ -6,8 +6,11 @@
     "originatingCountry" : "NO",
     "protocolVersion" : "DENM:1.2.2",
     "messageType" : "DENM",
+    "longitude" : 124.0,
+    "latitude" : 213.0,
     "quadTree" : ",12003,",
-    "causeCode" : 6,
-    "subCauseCode" : 61
-  } ]
+    "shardCount" : 1,
+    "causeCode": 6,
+    "subCauseCode": 6
+  }]
 }

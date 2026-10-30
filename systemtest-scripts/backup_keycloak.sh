@@ -1,7 +1,13 @@
 #!/bin/bash
 
+if [[ $# -ne 1 ]] 
+then
+    echo "Usage: $0 <realm>"
+    exit 1
+fi
 # --- Configuration ---
-REALM_FILE="./a.interchangedomain.com-realm.json"
+REALM=$1
+REALM_FILE="./${REALM}-realm.json"
 EXPORT_DIR="$PWD/export"
 VOLUME_NAME="keycloak-db-data"
 CONTAINER_NAME="keycloak-dev"
@@ -18,6 +24,7 @@ docker volume rm $VOLUME_NAME 2>/dev/null || true
 # and a named volume to store the changes you make in the UI
 echo "Starting Keycloak..."
 docker run -d \
+  --rm \
   --name $CONTAINER_NAME \
   -e KEYCLOAK_ADMIN=admin \
   -e KEYCLOAK_ADMIN_PASSWORD=admin \
@@ -46,14 +53,11 @@ docker run --rm \
   quay.io/keycloak/keycloak:26.5.2 \
   export --users realm_file \
         --dir /tmp/export \
-        --realm a.interchangedomain.com
+        --realm ${REALM}
 
 # 4. Overwrite your local config file with the exported one
-cp "$EXPORT_DIR/a.interchangedomain.com-realm.json" "$REALM_FILE"
+cp "$EXPORT_DIR/${REALM_FILE}" "$REALM_FILE"
 echo "✓ Local $REALM_FILE has been updated."
-
-# Clean up the server container
-docker rm $CONTAINER_NAME
 
 # Clean up export 
 rm -r "$EXPORT_DIR"

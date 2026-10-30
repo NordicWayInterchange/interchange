@@ -1,22 +1,7 @@
 services:
 
-  #This DNS server mocks the SRV records for a_interchangedomain.com
-  mock-dns-server:
-    build:
-      context: ./
-      dockerfile: dns-single-node-dockerfile
-    cap_add:
-    - NET_ADMIN
-    networks:
-      singletest:
-        ipv4_address: 172.29.1.1
-        aliases:
-          - dns.lookupdomain.com
-
   a-db:
     image: postgres:18.1
-    depends_on:
-      - mock-dns-server
     ports:
       - 15432:5432
     environment:
@@ -66,33 +51,8 @@ services:
       - INTERNAL_KEY_STORE=/keys/a-qpid.p12
       - INTERNAL_KEY_STORE_PASSWORD=password
       - GROUPS_FILE=/qpid-broker-j/work/groups
-    depends_on:
-    - mock-dns-server
     networks:
     - singletest
-
-  a-neighbour-server:
-    image: ghcr.io/nordicwayinterchange/neighbour-server-app:${IMAGE_TAG}
-    depends_on:
-      - a-db
-    ports:
-      - 8090
-    volumes:
-      - "single-node-keys-volume:/keys"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=lookupdomain.com
-      - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
-      - KEY_STORE_PASSWORD=password
-    networks:
-    - singletest
-    dns: 172.28.1.1
 
   a-routing-configurer:
     image: ghcr.io/nordicwayinterchange/routing-configurer-app:${IMAGE_TAG}
@@ -113,51 +73,6 @@ services:
       - KEY_STORE=/keys/a.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
-    networks:
-    - singletest
-
-  a-neighbour-discoverer:
-    image: ghcr.io/nordicwayinterchange/neighbour-discoverer-app:${IMAGE_TAG}
-    depends_on:
-      - a-db
-    volumes:
-      - "single-node-keys-volume:/keys"
-    environment:
-      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-      - POSTGRES_USER=federation
-      - POSTGRES_PASSWORD=federation
-      - SERVER_NAME=a.interchangedomain.com
-      - DOMAIN_NAME=lookupdomain.com
-      - CTRL_CHNL_PORT=8090
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-      - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
-      - KEY_STORE_PASSWORD=password
-      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
-    dns: 172.29.1.1
-    networks:
-    - singletest
-
-  a-message-collector-app:
-    image: ghcr.io/nordicwayinterchange/message-collector-app:${IMAGE_TAG}
-    depends_on:
-    - a-db
-    links:
-    - "a-qpid:a.qpid.interchangedomain.com"
-    volumes:
-    - "single-node-keys-volume:/keys"
-    environment:
-    - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
-    - POSTGRES_USER=federation
-    - POSTGRES_PASSWORD=federation
-    - KEY_STORE=/keys/a.interchangedomain.com.p12
-    - KEY_STORE_PASSWORD=password
-    - KEY_STORE_TYPE=PKCS12
-    - TRUST_STORE=/keys/ca.interchangedomain.com.jks
-    - TRUST_STORE_PASSWORD=password
-    - TRUST_STORE_TYPE=JKS
-    - SERVER_NAME=a.interchangedomain.com
-    - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
     - singletest
 
@@ -211,6 +126,62 @@ services:
     networks:
       - singletest
 
+  a-admin-server:
+    image: ghcr.io/nordicwayinterchange/admin-server-app:${IMAGE_TAG}
+    depends_on:
+      - a-db
+      - a-keycloak
+    ports:
+      - 32665:8899
+    volumes:
+      - "single-node-keys-volume:/keys"
+    environment:
+      - POSTGRES_URI=jdbc:postgresql://a-db:5432/federation
+      - POSTGRES_USER=federation
+      - POSTGRES_PASSWORD=federation
+      - SP_CHNL_PORT=8899
+      - KEY_STORE=/keys/a-admin-server.p12
+      - KEY_STORE_PASSWORD=password
+      - KEY_ALIAS=a-admin-server
+      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE_PASSWORD=password
+      - BASE_URL=https://a-qpid
+      - SERVER_NAME=a.interchangedomain.com
+      - ADMIN_NAME=admin.a-admin.interchangedomain.com
+      - SIGN_STORE=/keys/ca.a.interchangedomain.com.p12
+      - SIGN_STORE_PASSWORD=password
+      - SIGN_STORE_ALIAS=ca.a.interchangedomain.com
+      - DOMAIN_NAME=interchangedomain.com
+      - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
+    networks:
+      - singletest
+
+  a-admin-frontend:
+    image: ghcr.io/nordicwayinterchange/admin-frontend:${NAP_TAG}
+    depends_on:
+      - a-admin-server
+      - a-keycloak
+    ports:
+      - 3001:3000
+    volumes:
+      - single-node-keys-volume:/app/keys
+    environment:
+      - PFX_KEY_FILENAME=/keys/admin.a-admin.interchangedomain.com.p12
+      - PFX_PASSPHRASE=password
+      - NODE_EXTRA_CA_CERTS=/app/keys/ca.a.interchangedomain.com.crt.pem
+      - INTERCHANGE_URI=https://a-admin-server:8899/admin/
+      - INTERCHANGE_PREFIX=admin.a-admin.interchangedomain.com.admin.
+      - NEXTAUTH_SECRET=supersecret
+      - NEXTAUTH_URL=http://localhost:3001
+      - USE_KEYCLOAK=true
+      - KEYCLOAK_CLIENT_ID=a-admin.interchangedomain.com
+      - INTERNAL_KEYCLOAK_URL=http://a-keycloak:8080
+      - KEYCLOAK_REALM=a-admin.interchangedomain.com
+      - KEYCLOAK_CLIENT_SECRET=anothersupersecret
+      - EXTERNAL_KEYCLOAK_URL=http://localhost:8888
+    networks:
+      - singletest
+
   a-keycloak:
     image: quay.io/keycloak/keycloak:26.5.2
     ports:
@@ -220,6 +191,7 @@ services:
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
       - ./a.interchangedomain.com-realm.json:/opt/keycloak/data/import/a.interchangedomain.com-realm.json:ro
+      - ./a-admin.interchangedomain.com-realm.json:/opt/keycloak/data/import/a-admin.interchangedomain.com-realm.json:ro
     command: ["start-dev", "--import-realm"]
     networks:
       - singletest
