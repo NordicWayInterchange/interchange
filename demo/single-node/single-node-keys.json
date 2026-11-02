@@ -9,9 +9,13 @@
       "name" : "a.interchangedomain.com"
     },{
       "name": "a.qpid.interchangedomain.com"
-    }, {
-        "name": "a-qpid"
-    } ],
+    },{
+        "name" : "a-qpid"
+    },{
+        "name" : "a-admin-server"
+    },{
+        "name" : "a-admin.interchangedomain.com"
+      }],
     "clientRequests" : [ {
       "name" : "a.interchangedomain.lookupdomain.king_olav@slottet.no",
       "country" : "NO",
@@ -20,7 +24,16 @@
       "name" : "nap.a.interchangedomain.com",
       "country" : "NO",
       "email" : "nap@a.interchangedomain.com"
-    } ]
+    },{
+      "name" : "a-admin.internal.interchangedomain.com",
+      "country" : "NO",
+      "email" : "admin@a.internal.interchangedomain.com"
+    },
+    {
+      "name" : "admin.a-admin.interchangedomain.com",
+      "country" : "NO",
+      "email" : "admin@a-admin.interchangedomain.com"
+    }]
   }],
   "hostRequests" : [ ],
   "clientRequests" : [ ]
