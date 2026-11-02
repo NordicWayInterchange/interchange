@@ -493,9 +493,12 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                           render={({ field }) => (
                             <TextField
                               {...field}
+                              {...register('publisherName', {
+                                required: 'Publisher name is required.'
+                              })}
                               fullWidth
                               error={!!errors.publisherName}
-                              helperText={errors.publisherName ? "Publisher name is required." : ""}
+                              helperText={errors.publisherName ? errors.publisherName.message : ""}
                               label="Publisher name *"
                               slotProps={{
                                 input: {
@@ -527,9 +530,12 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                           render={({ field }) => (
                             <TextField
                               {...field}
+                              {...register('publicationType', {
+                                required: 'Publication type is required.'
+                              })}
                               fullWidth
                               error={!!errors.publicationType}
-                              helperText={errors.publicationType ? "publication type is required." : ""}
+                              helperText={errors.publicationType ? errors.publicationType.message : ""}
                               label="Publication type *"
                               slotProps={{
                                 input: {
