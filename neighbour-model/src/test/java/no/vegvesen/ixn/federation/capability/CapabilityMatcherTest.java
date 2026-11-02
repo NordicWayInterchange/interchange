@@ -33,6 +33,33 @@ class CapabilityMatcherTest {
 
 
 	@Test
+	void capabilityWithoutPropertyIsConsideredAPossibleMatchByDefault() {
+		CamApplication camApplication = new CamApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Capability capability = new Capability(camApplication, meta);
+		Set<Capability> matches = CapabilityMatcher.matchCapabilitiesToSelector(Sets.newLinkedHashSet(capability), "causeCode = 6");
+		assertThat(matches).containsExactly(capability);
+	}
+
+	@Test
+	void capabilityWithoutPropertyIsNotAMatchWhenMatchingStrictly() {
+		CamApplication camApplication = new CamApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122);
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Capability capability = new Capability(camApplication, meta);
+		Set<Capability> matches = CapabilityMatcher.matchCapabilitiesToSelectorStrict(Sets.newLinkedHashSet(capability), "causeCode = 6");
+		assertThat(matches).isEmpty();
+	}
+
+	@Test
+	void capabilityStillMatchesStrictlyWhenThePropertyExistsAndMatches() {
+		DenmApplication denmApplication = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, List.of(6));
+		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);
+		Capability capability = new Capability(denmApplication, meta);
+		Set<Capability> matches = CapabilityMatcher.matchCapabilitiesToSelectorStrict(Sets.newLinkedHashSet(capability), "causeCode = 6");
+		assertThat(matches).containsExactly(capability);
+	}
+
+	@Test
 	void denmCapabilitiesDoesNotMatchDatexSelector() {
 		DenmApplication denm_a_b_causeCode_1_2 = new DenmApplication("publ-id-1", "pub-123", "NO", "1.0", QUAD_TREE_0121_0122, List.of(6));
 		Metadata meta = new Metadata(RedirectStatus.OPTIONAL);

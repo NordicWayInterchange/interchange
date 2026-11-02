@@ -431,11 +431,11 @@ public class AdminRestController {
     }
 
     private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+        return CapabilityMatcher.matchCapabilitiesToSelectorStrict(allCapabilities, selector);
     }
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
-        return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
+        return CapabilityMatcher.matchNeighbourCapabilitiesToSelectorStrict(neighbourCapabilities, selector);
     }
 
     private void validatePathVariable(String pathVariable){

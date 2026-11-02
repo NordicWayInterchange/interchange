@@ -2,10 +2,12 @@ package no.vegvesen.ixn.federation.matcher;
 
 
 import no.vegvesen.ixn.federation.matcher.filter.TrileanExpression;
+import org.apache.qpid.server.filter.selector.SelectorParser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,12 +19,18 @@ import java.util.stream.Collectors;
 public class SelectorCapabilityMatcher {
     private final ObjectMapper mapper = JsonMapper.builder().build();
     private final String[] quadKeyIdentifiers;
+    private final Trilean missingPropertyValue;
 
     public SelectorCapabilityMatcher() {
-        this( "quadTree");
+        this(Trilean.UNKNOWN, "quadTree");
     }
 
     public SelectorCapabilityMatcher(String... quadKeyIdentifiers) {
+        this(Trilean.UNKNOWN, quadKeyIdentifiers);
+    }
+
+    public SelectorCapabilityMatcher(Trilean missingPropertyValue, String... quadKeyIdentifiers) {
+        this.missingPropertyValue = missingPropertyValue;
         this.quadKeyIdentifiers = quadKeyIdentifiers;
     }
 
@@ -33,8 +41,8 @@ public class SelectorCapabilityMatcher {
         try {
             Map<String, Object> map = mapper.readValue(capabilityJson, Map.class);
             SelectorParser<Map<String, Object>> selectorParser = new SelectorParser<>();
-            selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.getOrDefault(value, Trilean.UNKNOWN));
-            TrileanExpression<Map<String, Object>> matcher = selectorParser.parse(selector);
+            selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.getOrDefault(value, missingPropertyValue));
+            TrileanExpression<Map<String, Object>> matcher = (TrileanExpression<Map<String, Object>>) selectorParser.parse(selector);
             Map<String, Set<Object>> capabilityMultiValueMap = convertMapValuesToCollections(map);
             for (String quadKeyIdentifier : quadKeyIdentifiers) {
                 if (capabilityMultiValueMap.containsKey(quadKeyIdentifier)) {

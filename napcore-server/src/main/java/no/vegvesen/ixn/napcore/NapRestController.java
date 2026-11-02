@@ -231,6 +231,9 @@ public class NapRestController {
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
         if (selector != null) {
             if (!selector.isEmpty()) {
+                if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
+                    throw new SubscriptionRequestException(String.format("Invalid selector: %s", selector));
+                }
                 localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
                 neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
             }
@@ -348,6 +351,9 @@ public class NapRestController {
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
         if(selector != null){
             if(!selector.isEmpty()){
+                if (!JMSSelectorFilterFactory.isValidSelector(selector)) {
+                    throw new DeliveryPostException(String.format("Invalid selector: %s", selector));
+                }
                 allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
             }
         }
@@ -749,11 +755,11 @@ public class NapRestController {
     }
 
     private Set<Capability> getAllMatchingLocalCapabilities(String selector, Set<Capability> allCapabilities) {
-        return CapabilityMatcher.matchCapabilitiesToSelector(allCapabilities, selector);
+        return CapabilityMatcher.matchCapabilitiesToSelectorStrict(allCapabilities, selector);
     }
 
     private Set<NeighbourCapability> getAllMatchingNeighbourCapabilities(String selector, Set<NeighbourCapability> neighbourCapabilities) {
-        return CapabilityMatcher.matchNeighbourCapabilitiesToSelector(neighbourCapabilities, selector);
+        return CapabilityMatcher.matchNeighbourCapabilitiesToSelectorStrict(neighbourCapabilities, selector);
     }
 
     private Set<Capability> getAllLocalCapabilities() {

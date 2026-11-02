@@ -628,6 +628,42 @@ public class NapRestControllerIT extends PostgresContainerBase {
     }
 
     @Test
+    public void testGetMatchingSubscriptionCapabilitiesWithAlwaysTrueSelectorThrowsException() {
+        String actorCommonName = "actor";
+        String alwaysTrueSelector = "originatingCountry like '%'";
+
+        assertThrows(SubscriptionRequestException.class,
+                () -> napRestController.getMatchingSubscriptionCapabilities(actorCommonName, alwaysTrueSelector));
+    }
+
+    @Test
+    public void testGetMatchingSubscriptionCapabilitiesWithUnparsableSelectorThrowsException() {
+        String actorCommonName = "actor";
+        String garbageSelector = "this is not == a valid selector!!!";
+
+        assertThrows(SubscriptionRequestException.class,
+                () -> napRestController.getMatchingSubscriptionCapabilities(actorCommonName, garbageSelector));
+    }
+
+    @Test
+    public void testGetMatchingDeliveryCapabilitiesWithAlwaysTrueSelectorThrowsException() {
+        String actorCommonName = "actor";
+        String alwaysTrueSelector = "originatingCountry like '%'";
+
+        assertThrows(DeliveryPostException.class,
+                () -> napRestController.getMatchingDeliveryCapabilities(actorCommonName, alwaysTrueSelector));
+    }
+
+    @Test
+    public void testGetMatchingDeliveryCapabilitiesWithUnparsableSelectorThrowsException() {
+        String actorCommonName = "actor";
+        String garbageSelector = "this is not == a valid selector!!!";
+
+        assertThrows(DeliveryPostException.class,
+                () -> napRestController.getMatchingDeliveryCapabilities(actorCommonName, garbageSelector));
+    }
+
+    @Test
     public void testDeletingCapability(){
         String actorCommonName = "actor";
         CapabilitiesRequest request = new CapabilitiesRequest(
