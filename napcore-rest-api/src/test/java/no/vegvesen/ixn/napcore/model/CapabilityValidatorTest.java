@@ -79,7 +79,7 @@ public class CapabilityValidatorTest {
     }
 
     @Test
-    public void testDatexCapabilityWithSpaceInPublicatioIdIsNotValid(){
+    public void testDatexCapabilityWithSpaceInPublicationIdIsNotValid(){
         CapabilityApi capability1 = new CapabilityApi(
                 new DatexApplicationApi(
                         "NO00000",

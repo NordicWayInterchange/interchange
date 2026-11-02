@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityValidatorTest {
 
@@ -574,5 +575,23 @@ public class CapabilityValidatorTest {
         );
 
         assertThat(CapabilityValidator.capabilityHasValidProperties(capability)).isEmpty();
+    }
+
+    @Test
+    public void testDatexCapabilityWithSpaceInPublicationIdIsNotValid(){
+        CapabilityApi capability = new CapabilityApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000:  pub-1",
+                        "NO",
+                        "DATEX2:3.2",
+                        List.of("12001"),
+                        "SituationPublication",
+                        "publisher Name"
+                ),
+                new MetadataApi()
+        );
+
+        assertThat(CapabilityValidator.capabilityHasValidProperties(capability)).contains("publicationId contains illegal characters");
     }
 }
