@@ -14,6 +14,17 @@ export const CustomEmptyOverlayMatching = () => {
     );
 };
 
+export const CustomEmptyOverlayError = ({ message }: { message?: string }) => {
+    return (
+        <StyledGridOverlay>
+            <StyledBox>
+                <SentimentNeutralIcon fontSize="medium" color="disabled" sx={{mt: -0.5}}/>
+                {message || "The selector is invalid"}
+            </StyledBox>
+        </StyledGridOverlay>
+    );
+};
+
 export const CustomEmptyOverlaySubscription = () => {
     return (
         <StyledGridOverlay>

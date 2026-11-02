@@ -4,7 +4,7 @@ import React from "react";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import {useSession} from "next-auth/react";
 import {Box} from "@mui/system";
-import {CustomEmptyOverlayMatching} from "@/components/shared/datagrid/CustomEmptyOverlay";
+import {CustomEmptyOverlayError, CustomEmptyOverlayMatching} from "@/components/shared/datagrid/CustomEmptyOverlay";
 import Subheading from "@/components/shared/display/typography/Subheading";
 import Mainheading from "@/components/shared/display/typography/Mainheading";
 import SelectorBuilder from "@/components/shared/forms/SelectorBuilder";
@@ -20,7 +20,7 @@ const NewDelivery = () => {
     const [selector, setSelector] = useState<string>(" ");
     const [publicationIdRow, setPublicationIdRow] = useState<string>("");
 
-    const {data, isLoading} = useMatchingCapabilitiesForDeliveries(
+    const {data, isLoading, isError, error} = useMatchingCapabilitiesForDeliveries(
         session?.user.commonName as string,
         selector
     );
@@ -83,13 +83,20 @@ const NewDelivery = () => {
                 >
                     <DataGrid
                         columns={NewFormDataGrid}
-                        rows={data || []}
+                        rows={isError ? [] : data || []}
                         onRowClick={handleOnRowClick}
                         loading={isLoading}
                         getRowId={(row) => row.publicationId}
                         sort={{field: "lastUpdatedTimestamp", sort: "desc"}}
                         slots={{
-                            noRowsOverlay: CustomEmptyOverlayMatching,
+                            noRowsOverlay: () =>
+                                isError ? (
+                                    <CustomEmptyOverlayError
+                                        message={error instanceof Error ? error.message : undefined}
+                                    />
+                                ) : (
+                                    <CustomEmptyOverlayMatching />
+                                ),
                         }}
                     />
                 </Box>

@@ -5,7 +5,7 @@ import { useMatchingCapabilities } from "@/hooks/useMatchingCapabilities";
 import DataGrid from "@/components/shared/datagrid/DataGrid";
 import { useSession } from "next-auth/react";
 import { Box } from "@mui/system";
-import { CustomEmptyOverlayMatching } from "@/components/shared/datagrid/CustomEmptyOverlay";
+import { CustomEmptyOverlayError, CustomEmptyOverlayMatching } from "@/components/shared/datagrid/CustomEmptyOverlay";
 import Subheading from "@/components/shared/display/typography/Subheading";
 import Mainheading from "@/components/shared/display/typography/Mainheading";
 import SelectorBuilder from "@/components/shared/forms/SelectorBuilder";
@@ -21,7 +21,7 @@ const NewSubscription = () => {
   const [publicationIdRow, setPublicationIdRow] = useState<string>("");
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useMatchingCapabilities(
+  const { data, isLoading, isError, error } = useMatchingCapabilities(
     session?.user.commonName as string,
     selector
   );
@@ -95,13 +95,20 @@ const NewSubscription = () => {
         >
           <DataGrid
             columns={NewFormDataGrid}
-            rows={data || []}
+            rows={isError ? [] : data || []}
             onRowClick={handleOnRowClick}
             loading={isLoading}
             getRowId={(row) => row.publicationId}
             sort={{ field: "lastStatusChange", sort: "desc" }}
             slots={{
-              noRowsOverlay: CustomEmptyOverlayMatching
+              noRowsOverlay: () =>
+                isError ? (
+                  <CustomEmptyOverlayError
+                    message={error instanceof Error ? error.message : undefined}
+                  />
+                ) : (
+                  <CustomEmptyOverlayMatching />
+                ),
             }}
           />
         </Box>
