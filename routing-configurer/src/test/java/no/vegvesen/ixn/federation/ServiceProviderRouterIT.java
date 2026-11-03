@@ -363,6 +363,66 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 
 
 	@Test
+	public void createPrivateChannelAddsPeersToQpidAcl() {
+		ServiceProvider serviceProvider = new ServiceProvider("acl-sp-create");
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange", 5671, "acl-queue-create");
+		Peer peer1 = new Peer("acl-peer-create-1");
+		Peer peer2 = new Peer("acl-peer-create-2");
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer1, peer2), PrivateChannelStatus.REQUESTED, "acl-channel-create", endpoint, "acl-sp-create");
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-create-1", "acl-queue-create"))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-create-2", "acl-queue-create"))).isTrue();
+	}
+
+	@Test
+	public void addPeerAfterPrivateChannelCreationAddsPeerToQpidAcl() {
+		ServiceProvider serviceProvider = new ServiceProvider("acl-sp-add");
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange", 5671, "acl-queue-add");
+		Peer peer = new Peer("acl-peer-add-1");
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer), PrivateChannelStatus.REQUESTED, "acl-channel-add", endpoint, "acl-sp-add");
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+
+		privateChannel.addPeer(new Peer("acl-peer-add-2"));
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-add-1", "acl-queue-add"))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-add-2", "acl-queue-add"))).isTrue();
+	}
+
+	@Test
+	public void removePeerFromPrivateChannelRemovesPeerFromQpidAcl() {
+		ServiceProvider serviceProvider = new ServiceProvider("acl-sp-remove");
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint("my-interchange", 5671, "acl-queue-remove");
+		Peer peer1 = new Peer("acl-peer-remove-1");
+		Peer peer2 = new Peer("acl-peer-remove-2");
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer1, peer2), PrivateChannelStatus.REQUESTED, "acl-channel-remove", endpoint, "acl-sp-remove");
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(client.getQpidAcl().containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-remove-2", "acl-queue-remove"))).isTrue();
+
+		peer2.setStatus(PeerStatus.TEAR_DOWN);
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-remove-1", "acl-queue-remove"))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule("acl-peer-remove-2", "acl-queue-remove"))).isFalse();
+	}
+
+	@Test
 	public void newServiceProviderCanReadDedicatedOutQueue() throws NamingException, JMSException {
 		String source = "king_gustaf_source";
 
