@@ -118,6 +118,7 @@ admin_frontend:
     generated_username_prefix: admin.example-node.itsinterchange.eu
     admin_auth0_issuer: my_auth0_issuer
     home_url: https://portal.example-node.itsinterchange.eu
+    interchange_ca_pem: /secrets/my_pem.crt
 ingress:
   enabled: true
   name: my-admin-ingress
