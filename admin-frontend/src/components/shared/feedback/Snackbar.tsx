@@ -3,6 +3,7 @@ import {
     Alert,
     AlertColor,
     Snackbar as MuiSnackbar,
+    SnackbarCloseReason,
     SnackbarProps,
 } from "@mui/material";
 
@@ -10,7 +11,10 @@ interface Props extends SnackbarProps {
     open: boolean;
     message: string;
     severity: AlertColor;
-    handleClose: (event?: React.SyntheticEvent | Event, reason?: string) => void;
+    handleClose: (
+        event: React.SyntheticEvent | Event | null,
+        reason?: SnackbarCloseReason
+    ) => void;
 }
 
 const Snackbar = (props: Props) => {
