@@ -323,6 +323,35 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void removePeerFromGroupWhenLastReferenceInMultipleChannelsIsTornDown() {
+		ServiceProvider serviceProvider = new ServiceProvider("my-service-provider");
+		PrivateChannelEndpoint endpoint1 = new PrivateChannelEndpoint("my-interchange", 5671, "queueName-1");
+		PrivateChannelEndpoint endpoint2 = new PrivateChannelEndpoint("my-interchange", 5671, "queueName-2");
+		Peer peer1 = new Peer("peer");
+		Peer peer2 = new Peer("peer");
+
+		PrivateChannel privateChannel1 = new PrivateChannel(Set.of(peer1), PrivateChannelStatus.REQUESTED, "my-channel-1", endpoint1, "my-service-provider");
+		PrivateChannel privateChannel2 = new PrivateChannel(Set.of(peer2), PrivateChannelStatus.REQUESTED, "my-channel-2", endpoint2, "my-service-provider");
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(privateChannel1.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(privateChannel2.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNotNull();
+
+		peer1.setStatus(PeerStatus.TEAR_DOWN);
+		peer2.setStatus(PeerStatus.TEAR_DOWN);
+		privateChannelRepository.save(privateChannel1);
+		privateChannelRepository.save(privateChannel2);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(privateChannel1.getPeers()).isEmpty();
+		assertThat(privateChannel2.getPeers()).isEmpty();
+		assertThat(client.getPrivateChannelGroupMember("peer")).isNull();
+	}
+
+	@Test
 	public void removePeerToPrivateChannelAfterCreationWhenServiceProviderInOtherChannel() {
 		ServiceProvider serviceProvider1 = new ServiceProvider("my-service-provider-1");
 		ServiceProvider serviceProvider2 = new ServiceProvider("my-service-provider-2");

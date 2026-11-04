@@ -200,8 +200,11 @@ class ServiceProviderRouterPrivateChannelTest {
 		PrivateChannel channel = channel(PrivateChannelStatus.CREATED, "queue-6", Set.of(peer));
 		stubChannels(channel);
 
+		Peer otherPeer = new Peer("shared-peer");
+		otherPeer.setStatus(PeerStatus.CREATED);
+		PrivateChannel otherChannel = channel(PrivateChannelStatus.CREATED, "queue-6-other", Set.of(otherPeer));
 		when(privateChannelRepository.findAllByPeerNameAndStatus(eq("shared-peer"), eq(PrivateChannelStatus.CREATED)))
-				.thenReturn(List.of(channel, mock(PrivateChannel.class)));
+				.thenReturn(List.of(channel, otherChannel));
 
 		PrivateChannelMember peerMember = new PrivateChannelMember("shared-peer");
 		QpidDelta delta = new QpidDelta(List.of(), List.of(), List.of(peerMember), List.of(), List.of());
@@ -260,7 +263,7 @@ class ServiceProviderRouterPrivateChannelTest {
 	}
 
 	@Test
-	void tearDownChannelReCreatesThenRemovesServiceProviderMembershipWhenItWasMissingFromDeltaAtStartOfRun() {
+	void tearDownChannelDoesNotReAddServiceProviderMembershipWhenItIsMissingFromDeltaAtStartOfRun() {
 		PrivateChannel channel = channel(PrivateChannelStatus.TEAR_DOWN, "queue-10", Collections.emptySet());
 		stubChannels(channel);
 
@@ -269,8 +272,8 @@ class ServiceProviderRouterPrivateChannelTest {
 
 		assertThatNoException().isThrownBy(() -> router.syncPrivateChannels(serviceProvider(), delta));
 
-		verify(qpidClient).addPrivateChannelMemberToGroup(SERVICE_PROVIDER);
-		verify(qpidClient).removePrivateChannelMemberFromGroup(argThat(m -> m.name().equals(SERVICE_PROVIDER)));
+		verify(qpidClient, never()).addPrivateChannelMemberToGroup(anyString());
+		verify(qpidClient, never()).removePrivateChannelMemberFromGroup(any());
 		verify(qpidClient).removeQueue(queue);
 	}
 
@@ -279,8 +282,11 @@ class ServiceProviderRouterPrivateChannelTest {
 		PrivateChannel channel = channel(PrivateChannelStatus.TEAR_DOWN, "queue-11", Collections.emptySet());
 		stubChannels(channel);
 
+		Peer serviceProviderPeer = new Peer(SERVICE_PROVIDER);
+		serviceProviderPeer.setStatus(PeerStatus.CREATED);
+		PrivateChannel otherChannel = channel(PrivateChannelStatus.CREATED, "queue-12", Set.of(serviceProviderPeer));
 		when(privateChannelRepository.findAllByPeerNameAndStatus(eq(SERVICE_PROVIDER), eq(PrivateChannelStatus.CREATED)))
-				.thenReturn(List.of(mock(PrivateChannel.class)));
+				.thenReturn(List.of(otherChannel));
 
 		Queue queue = new Queue("queue-11");
 		PrivateChannelMember spMember = new PrivateChannelMember(SERVICE_PROVIDER);
@@ -289,5 +295,101 @@ class ServiceProviderRouterPrivateChannelTest {
 		router.syncPrivateChannels(serviceProvider(), delta);
 
 		verify(qpidClient, never()).removePrivateChannelMemberFromGroup(spMember);
+	}
+
+	@Test
+	void noPrivateChannelsDoesNotTouchQpid() {
+		stubChannels();
+
+		router.syncPrivateChannels(serviceProvider(), new QpidDelta(List.of(), List.of()));
+
+		verifyNoInteractions(qpidClient);
+	}
+
+	@Test
+	void syncingAlreadyCreatedChannelTwiceDoesNotRepeatQpidSideEffects() {
+		PrivateChannel channel = channel(PrivateChannelStatus.CREATED, "queue-idempotent", Collections.emptySet());
+		stubChannels(channel);
+
+		PrivateChannelMember spMember = new PrivateChannelMember(SERVICE_PROVIDER);
+		QpidDelta delta = new QpidDelta(List.of(), List.of(), List.of(spMember), List.of(), List.of());
+
+		router.syncPrivateChannels(serviceProvider(), delta);
+		router.syncPrivateChannels(serviceProvider(), delta);
+
+		verify(qpidClient, never()).createNonDestructiveQueue(anyString());
+		verify(qpidClient, never()).getQpidAcl();
+		verify(qpidClient, never()).postQpidAcl(any());
+		verify(privateChannelRepository, never()).save(any());
+	}
+
+	@Test
+	void removingSamePeerFromAllCreatedChannelsRemovesGroupMembershipOnlyOnce() {
+		Peer firstPeer = new Peer("shared-leaving-peer");
+		firstPeer.setStatus(PeerStatus.TEAR_DOWN);
+		Peer secondPeer = new Peer("shared-leaving-peer");
+		secondPeer.setStatus(PeerStatus.TEAR_DOWN);
+		PrivateChannel firstChannel = channel(PrivateChannelStatus.CREATED, "queue-13", Set.of(firstPeer));
+		PrivateChannel secondChannel = channel(PrivateChannelStatus.CREATED, "queue-14", Set.of(secondPeer));
+		stubChannels(firstChannel, secondChannel);
+
+		when(privateChannelRepository.findAllByPeerNameAndStatus(eq("shared-leaving-peer"), eq(PrivateChannelStatus.CREATED)))
+				.thenReturn(List.of(firstChannel, secondChannel));
+
+		PrivateChannelMember peerMember = new PrivateChannelMember("shared-leaving-peer");
+		QpidDelta delta = new QpidDelta(List.of(), List.of(), List.of(peerMember), List.of(), List.of());
+
+		router.syncPrivateChannels(serviceProvider(), delta);
+
+		assertThat(firstChannel.getPeers()).isEmpty();
+		assertThat(secondChannel.getPeers()).isEmpty();
+		verify(qpidClient, times(1)).removePrivateChannelMemberFromGroup(peerMember);
+		assertThat(delta.findByPrivateChannelUserName("shared-leaving-peer")).isNull();
+	}
+
+	@Test
+	void tearDownAndRequestForSameServiceProviderKeepsMembershipAndCreatesNewChannel() {
+		PrivateChannel tearDownChannel = channel(PrivateChannelStatus.TEAR_DOWN, "queue-old", Collections.emptySet());
+		PrivateChannel requestedChannel = channel(PrivateChannelStatus.REQUESTED, "queue-new", Collections.emptySet());
+		stubChannels(tearDownChannel, requestedChannel);
+
+		when(qpidClient.createNonDestructiveQueue("queue-new")).thenReturn(new Queue("queue-new"));
+
+		Queue oldQueue = new Queue("queue-old");
+		QpidDelta delta = new QpidDelta(List.of(), List.of(oldQueue));
+
+		router.syncPrivateChannels(serviceProvider(), delta);
+
+		assertThat(requestedChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		verify(qpidClient).addPrivateChannelMemberToGroup(SERVICE_PROVIDER);
+		verify(qpidClient, never()).removePrivateChannelMemberFromGroup(any());
+		verify(qpidClient).createNonDestructiveQueue("queue-new");
+		verify(qpidClient).removeQueue(argThat(queue -> queue.getName().equals("queue-old")));
+		assertThat(delta.findByPrivateChannelUserName(SERVICE_PROVIDER)).isNotNull();
+	}
+
+	@Test
+	void tearDownChannelRemovesOnlyUnusedPeerMembership() {
+		Peer unusedPeer = new Peer("unused-leaving-peer");
+		unusedPeer.setStatus(PeerStatus.TEAR_DOWN);
+		Peer usedPeer = new Peer("used-leaving-peer");
+		usedPeer.setStatus(PeerStatus.TEAR_DOWN);
+		PrivateChannel channel = channel(PrivateChannelStatus.TEAR_DOWN, "queue-15", Set.of(unusedPeer, usedPeer));
+		stubChannels(channel);
+
+		Peer remainingPeer = new Peer("used-leaving-peer");
+		remainingPeer.setStatus(PeerStatus.CREATED);
+		PrivateChannel otherChannel = channel(PrivateChannelStatus.CREATED, "queue-16", Set.of(remainingPeer));
+		when(privateChannelRepository.findAllByPeerNameAndStatus(eq("used-leaving-peer"), eq(PrivateChannelStatus.CREATED)))
+				.thenReturn(List.of(otherChannel));
+
+		PrivateChannelMember unusedMember = new PrivateChannelMember("unused-leaving-peer");
+		PrivateChannelMember usedMember = new PrivateChannelMember("used-leaving-peer");
+		QpidDelta delta = new QpidDelta(List.of(), List.of(new Queue("queue-15")), List.of(unusedMember, usedMember), List.of(), List.of());
+
+		router.syncPrivateChannels(serviceProvider(), delta);
+
+		verify(qpidClient).removePrivateChannelMemberFromGroup(unusedMember);
+		verify(qpidClient, never()).removePrivateChannelMemberFromGroup(usedMember);
 	}
 }

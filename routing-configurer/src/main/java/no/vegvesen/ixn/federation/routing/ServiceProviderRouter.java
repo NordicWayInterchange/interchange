@@ -137,21 +137,29 @@ public class ServiceProviderRouter {
     }
 
     private void syncPrivateChannelsWithQpid(List<PrivateChannel> privateChannels, String name, QpidDelta delta) {
-        List<PrivateChannel> privateChannelsWithStatusCreated = privateChannelRepository.findAllByStatusAndServiceProviderName(PrivateChannelStatus.CREATED, name);
-        addPrivateChannelGroupMemberIfMissing(name, delta);
+        List<PrivateChannel> activeChannels = privateChannels.stream()
+                .filter(privateChannel -> !privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN))
+                .toList();
 
-        for (PrivateChannel privateChannel : privateChannels) {
+        if (!activeChannels.isEmpty()) {
+            addPrivateChannelGroupMemberIfMissing(name, delta);
+        }
+
+        for (PrivateChannel privateChannel : activeChannels) {
             String queueName = privateChannel.getEndpoint().getQueueName();
 
             if (privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
                 createPrivateChannel(privateChannel, name, queueName, delta);
-            }
-            if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
+            } else if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
                 addRequestedPeersToPrivateChannel(privateChannel, queueName, delta);
                 removeTornDownPeersFromPrivateChannel(privateChannel, queueName, delta);
             }
+        }
+
+        boolean hasActiveChannels = !activeChannels.isEmpty();
+        for (PrivateChannel privateChannel : privateChannels) {
             if (privateChannel.getStatus().equals(PrivateChannelStatus.TEAR_DOWN)) {
-                tearDownPrivateChannel(privateChannel, name, queueName, delta, privateChannelsWithStatusCreated);
+                tearDownPrivateChannel(privateChannel, name, privateChannel.getEndpoint().getQueueName(), delta, hasActiveChannels);
             }
         }
     }
@@ -165,8 +173,11 @@ public class ServiceProviderRouter {
         }
     }
 
-    private long countCreatedChannelsWherePeerIsPeer(String peerName) {
-        return privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).size();
+    private long countCreatedChannelsWherePeerRemains(String peerName) {
+        return privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).stream()
+                .filter(privateChannel -> privateChannel.getPeers().stream()
+                        .anyMatch(peer -> peer.getName().equals(peerName) && !peer.getStatus().equals(PeerStatus.TEAR_DOWN)))
+                .count();
     }
 
     private long countCreatedChannelsWherePeerIsServiceProvider(String peerName) {
@@ -227,15 +238,15 @@ public class ServiceProviderRouter {
         VirtualHostAccessController provider = qpidClient.getQpidAcl();
         for (Peer peer : peersToRemove) {
             String peerName = peer.getName();
-            long channelsWithPeerAsPeer = countCreatedChannelsWherePeerIsPeer(peerName);
+            long channelsWithPeerRemaining = countCreatedChannelsWherePeerRemains(peerName);
             long channelsWithPeerAsServiceProvider = countCreatedChannelsWherePeerIsServiceProvider(peerName);
 
-            if (channelsWithPeerAsPeer <= 1 && channelsWithPeerAsServiceProvider == 0) {
+            if (channelsWithPeerRemaining == 0 && channelsWithPeerAsServiceProvider == 0) {
                 PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
                 if (peerMember != null) {
                     qpidClient.removePrivateChannelMemberFromGroup(peerMember);
                     delta.removePrivateChannelUser(peerMember);
-                    logger.info("Adding member {} to private channel group", peerName);
+                    logger.info("Removing member {} from private channel group", peerName);
                 }
             }
             provider.removeQueueReadAccess(peerName, queueName);
@@ -246,8 +257,8 @@ public class ServiceProviderRouter {
         privateChannelRepository.save(privateChannel);
     }
 
-    private void tearDownPrivateChannel(PrivateChannel privateChannel, String name, String queueName, QpidDelta delta, List<PrivateChannel> privateChannelsWithStatusCreated) {
-        removeServiceProviderPrivateChannelMembershipIfUnused(privateChannel, name, delta, privateChannelsWithStatusCreated);
+    private void tearDownPrivateChannel(PrivateChannel privateChannel, String name, String queueName, QpidDelta delta, boolean hasActiveChannels) {
+        removeServiceProviderPrivateChannelMembershipIfUnused(privateChannel, name, delta, hasActiveChannels);
 
         VirtualHostAccessController provider = qpidClient.getQpidAcl();
         for (Peer peer : privateChannel.getPeers()) {
@@ -267,31 +278,31 @@ public class ServiceProviderRouter {
         privateChannelRepository.save(privateChannel);
     }
 
-    private void removeServiceProviderPrivateChannelMembershipIfUnused(PrivateChannel privateChannel, String name, QpidDelta delta, List<PrivateChannel> privateChannelsWithStatusCreated) {
-        long channelsWithServiceProviderAsPeer = countCreatedChannelsWherePeerIsPeer(privateChannel.getServiceProviderName());
+    private void removeServiceProviderPrivateChannelMembershipIfUnused(PrivateChannel privateChannel, String name, QpidDelta delta, boolean hasActiveChannels) {
+        long channelsWithServiceProviderAsPeer = countCreatedChannelsWherePeerRemains(privateChannel.getServiceProviderName());
         long channelsWithServiceProviderAsServiceProvider = countCreatedChannelsWherePeerIsServiceProvider(privateChannel.getServiceProviderName());
 
-        if (channelsWithServiceProviderAsServiceProvider == 0 && channelsWithServiceProviderAsPeer == 0) {
+        if (channelsWithServiceProviderAsServiceProvider == 0 && channelsWithServiceProviderAsPeer == 0 && !hasActiveChannels) {
             PrivateChannelMember groupMember = delta.findByPrivateChannelUserName(name);
-            if (groupMember != null && privateChannelsWithStatusCreated.isEmpty()) {
+            if (groupMember != null) {
                 qpidClient.removePrivateChannelMemberFromGroup(groupMember);
                 delta.removePrivateChannelUser(groupMember);
-                logger.debug("Adding member {} to private channel group", name);
+                logger.debug("Removing member {} from private channel group", name);
             }
         }
     }
 
     private void removePeerPrivateChannelAccessAndMembershipIfUnused(Peer peer, String queueName, VirtualHostAccessController provider, QpidDelta delta) {
         String peerName = peer.getName();
-        long channelsWithPeerAsPeer = countCreatedChannelsWherePeerIsPeer(peerName);
+        long channelsWithPeerRemaining = countCreatedChannelsWherePeerRemains(peerName);
         long channelsWithPeerAsServiceProvider = countCreatedChannelsWherePeerIsServiceProvider(peerName);
 
-        if (channelsWithPeerAsPeer == 0 && channelsWithPeerAsServiceProvider == 0) {
+        if (channelsWithPeerRemaining == 0 && channelsWithPeerAsServiceProvider == 0) {
             PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
             if (peerMember != null) {
                 qpidClient.removePrivateChannelMemberFromGroup(peerMember);
                 delta.removePrivateChannelUser(peerMember);
-                logger.info("Adding member {} to private channel group", peerName);
+                logger.info("Removing member {} from private channel group", peerName);
             }
         }
         provider.removeQueueReadAccess(peerName, queueName);
