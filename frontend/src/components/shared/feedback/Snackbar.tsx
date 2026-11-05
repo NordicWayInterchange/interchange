@@ -20,7 +20,7 @@ const Snackbar = (props: Props) => {
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       open={open}
       autoHideDuration={4000}
-      onClose={handleClose}
+      onClose={(event, reason) => handleClose(event ?? undefined, reason)}
     >
       <Alert
         elevation={6}
