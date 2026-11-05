@@ -189,10 +189,10 @@ public class ServiceProviderRouter {
                         }
                         peer.setStatus(PeerStatus.CREATED);
                         provider.addQueueReadAccess(peer.getName(), queueName);
+                        privateChannel.setLastUpdated(LocalDateTime.now());
+                        privateChannelRepository.save(privateChannel);
                     }
                     qpidClient.postQpidAcl(provider);
-                    privateChannel.setLastUpdated(LocalDateTime.now());
-                    privateChannelRepository.save(privateChannel);
                 }
 
                 Set<Peer> peersToRemove = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.TEAR_DOWN)).collect(Collectors.toSet());
