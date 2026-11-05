@@ -2,11 +2,13 @@ package no.vegvesen.ixn.federation.service;
 
 import no.vegvesen.ixn.federation.model.*;
 import no.vegvesen.ixn.federation.model.capability.*;
+import no.vegvesen.ixn.federation.repository.NeighbourModelRepositoryConfig;
 import no.vegvesen.ixn.federation.repository.OutgoingMatchRepository;
 import no.vegvesen.ixn.federation.repository.ServiceProviderRepository;
 import no.vegvesen.ixn.docker.PostgresContainerBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
@@ -15,8 +17,8 @@ import jakarta.transaction.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@SpringBootTest
-@Transactional
+@EnableAutoConfiguration
+@SpringBootTest(classes = {ServiceProviderService.class, NeighbourModelRepositoryConfig.class})
 public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Autowired
