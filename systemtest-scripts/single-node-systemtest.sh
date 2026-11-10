@@ -1,4 +1,5 @@
 #!/bin/bash -eu
+set -euo pipefail
 
 cleanup() {
   echo "Cleaning up docker environment..."
