@@ -13,7 +13,7 @@ export const ContentCopy = (props: Props) => {
     const [openSnack, setOpenSnack] = useState<boolean>(false);
 
     const handleSnackClose = (
-        _event?: React.SyntheticEvent | Event,
+        _event: React.SyntheticEvent | Event | null,
         reason?: string
     ) => {
         if (reason === "clickaway") {
