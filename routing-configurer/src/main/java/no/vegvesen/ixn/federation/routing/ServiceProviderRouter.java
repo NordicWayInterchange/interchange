@@ -163,6 +163,7 @@ public class ServiceProviderRouter {
                     PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
                     if (peerMember == null) {
                         peerMember = qpidClient.addPrivateChannelMemberToGroup(peerName);
+                        delta.addPrivateChannelUser(peerMember);
                         logger.debug("Adding member {} to private channel group", peer.getName());
                     }
                     peer.setStatus(PeerStatus.CREATED);
