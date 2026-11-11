@@ -2,8 +2,6 @@ package no.vegvesen.ixn.federation.matcher;
 
 
 import no.vegvesen.ixn.federation.matcher.filter.TrileanExpression;
-import org.apache.qpid.server.filter.selector.ParseException;
-import org.apache.qpid.server.filter.selector.SelectorParser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -42,7 +40,7 @@ public class SelectorCapabilityMatcher {
             Map<String, Object> map = mapper.readValue(capabilityJson, Map.class);
             SelectorParser<Map<String, Object>> selectorParser = new SelectorParser<>();
             selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.getOrDefault(value, missingPropertyValue));
-            TrileanExpression<Map<String, Object>> matcher = (TrileanExpression<Map<String, Object>>) selectorParser.parse(selector);
+            TrileanExpression<Map<String, Object>> matcher = selectorParser.parse(selector);
             Map<String, Set<Object>> capabilityMultiValueMap = convertMapValuesToCollections(map);
             for (String quadKeyIdentifier : quadKeyIdentifiers) {
                 if (capabilityMultiValueMap.containsKey(quadKeyIdentifier)) {
