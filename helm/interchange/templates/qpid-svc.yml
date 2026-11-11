@@ -1,3 +1,4 @@
+{{- if .Values.qpid.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -45,4 +46,5 @@ spec:
     - name: amqps
       protocol: TCP
       port: {{ .Values.qpid.amqps.port }}
+{{- end }}
 {{- end }}

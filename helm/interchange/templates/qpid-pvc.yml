@@ -1,4 +1,4 @@
-{{- if .Values.qpid.persistence.enabled }}
+{{- if and .Values.qpid.enabled .Values.qpid.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

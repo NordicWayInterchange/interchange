@@ -1,3 +1,4 @@
+{{- if .Values.qpid.enabled }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -94,3 +95,4 @@ spec:
       {{- else }}
           emptyDir: {}
       {{- end }}
+  {{- end }}
