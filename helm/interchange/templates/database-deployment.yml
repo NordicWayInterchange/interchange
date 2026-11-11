@@ -1,3 +1,4 @@
+{{- if .Values.database.enabled }}
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
@@ -48,3 +49,4 @@ spec:
       {{- else }}
           emptyDir: {}
       {{- end -}}
+  {{- end }}

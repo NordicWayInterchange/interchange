@@ -12,6 +12,9 @@ self:                                                               # ------ Gen
   trust_store: truststore.jks
   key_store: keystore.p12
 
+database:
+  enabled: true
+
 qpid:
   replicas: 1
   persistence:
