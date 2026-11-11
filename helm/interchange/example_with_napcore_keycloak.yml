@@ -124,7 +124,7 @@ napcore_frontend:
     internal_keycloak_url: https://login.example-node.itsinterchange.eu
     image:
       repository: quay.io/keycloak/keycloak
-      tag: "26.6.0"
+      tag: "26.8.1"
 letsencrypt:
   server: https://letsencrypt-server
   email: my-email@mycompany.com
