@@ -1,6 +1,14 @@
 #!/bin/bash 
 set -euo pipefail
 
+cleanup() {
+  echo "Cleaning up docker environment..."
+  docker-compose -f systemtest.yml down --volumes
+  docker volume rm systemtest-keys-volume
+}
+
+trap cleanup EXIT INT TERM
+
 #Set environment variable to choose what docker image tag to use in the test
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"

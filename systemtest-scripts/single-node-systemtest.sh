@@ -1,4 +1,13 @@
 #!/bin/bash -eu
+set -euo pipefail
+
+cleanup() {
+  echo "Cleaning up docker environment..."
+  docker-compose -f single-node-systemtest.yml down --volumes
+  docker volume rm single-node-systemtest-keys-volume
+}
+
+trap cleanup EXIT INT TERM
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
