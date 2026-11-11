@@ -61,6 +61,7 @@ onboard_server:
   replicas: 1
 
 routing_configurer:
+  enabled: true
   replicas: 1
 
 napcore_server:
