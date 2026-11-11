@@ -2,12 +2,12 @@ package no.vegvesen.ixn.federation.matcher;
 
 
 import no.vegvesen.ixn.federation.matcher.filter.TrileanExpression;
+import org.apache.qpid.server.filter.selector.ParseException;
 import org.apache.qpid.server.filter.selector.SelectorParser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
