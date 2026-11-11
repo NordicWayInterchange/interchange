@@ -17,6 +17,8 @@ import { originatingCountries } from "@/lib/data/originatingCountries";
 import { causeCodes } from "@/lib/data/causeCodes";
 import Snackbar from "@/components/shared/feedback/Snackbar";
 import { IFeedback } from "@/interface/IFeedback";
+import { ICapabilityValidationErrorResponse } from "@/interface/ICapabilityValidationError";
+import { mapErrorMessageToField, formatCapabilityError } from "@/lib/capabilityErrorMapping";
 import { useSession } from "next-auth/react";
 import MapDialog from "@/components/map/MapDialog";
 import { IFormCapabilityInputs } from "@/interface/IFormCapabilityInputs";
@@ -115,14 +117,35 @@ const UserCapabilitiesCreator = () => {
       });
       await router.push('/capabilities');
     } else {
-      const errorData = await response.json();
-      const errorMessage = errorData.message || "Capability could not be created, try again!";
+      const errorData: Partial<ICapabilityValidationErrorResponse> & { message?: string } = await response.json();
+      const validationErrors = errorData.errors;
 
-      setFeedback({
-        feedback: true,
-        message: errorMessage,
-        severity: "warning",
-      });
+      if (validationErrors && validationErrors.length > 0) {
+        validationErrors.forEach((validationError) => {
+          const field = mapErrorMessageToField(validationError.message);
+          if (field) {
+            setError(field, {
+              type: "server",
+              message: validationError.message,
+            });
+          }
+        });
+
+
+        setFeedback({
+          feedback: true,
+          message: validationErrors.map(formatCapabilityError),
+          severity: "warning",
+        });
+      } else {
+        const errorMessage = errorData.message || "Capability could not be created, try again!";
+
+        setFeedback({
+          feedback: true,
+          message: errorMessage,
+          severity: "warning",
+        });
+      }
     }
   };
 
@@ -470,9 +493,12 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                           render={({ field }) => (
                             <TextField
                               {...field}
+                              {...register('publisherName', {
+                                required: 'Publisher name is required.'
+                              })}
                               fullWidth
                               error={!!errors.publisherName}
-                              helperText={errors.publisherName ? "Publisher name is required." : ""}
+                              helperText={errors.publisherName ? errors.publisherName.message : ""}
                               label="Publisher name *"
                               slotProps={{
                                 input: {
@@ -504,9 +530,12 @@ E.g. 'DENM:1.2.2'." placement="top"    slotProps={{
                           render={({ field }) => (
                             <TextField
                               {...field}
+                              {...register('publicationType', {
+                                required: 'Publication type is required.'
+                              })}
                               fullWidth
                               error={!!errors.publicationType}
-                              helperText={errors.publicationType ? "publication type is required." : ""}
+                              helperText={errors.publicationType ? errors.publicationType.message : ""}
                               label="Publication type *"
                               slotProps={{
                                 input: {
