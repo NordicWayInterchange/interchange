@@ -60,6 +60,7 @@ public class MatchDiscoveryServiceIT  { //extends PostgresContainerBase {
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
         registry.add("spring.jpa.hibernate.ddl-auto", ()-> "create-drop");
+        registry.add("spring.jpa.properties.jakarta.persistence.query.timeout", () -> "15000");
         registry.add("routing-configurer.interval",()->"999");
         registry.add("routing-configurer.baseUrl", qpidContainer::getHttpsUrl);
         registry.add("routing-configurer.vhost",() -> HOST_NAME);
