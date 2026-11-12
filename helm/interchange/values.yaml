@@ -47,6 +47,7 @@ admin_server:
   enabled: false
 
 message_collector:
+  enabled: true
   replicas: 1
   key_store_type: P12
   trust_store_type: JKS
