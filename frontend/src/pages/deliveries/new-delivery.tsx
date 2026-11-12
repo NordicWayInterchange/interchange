@@ -25,11 +25,6 @@ const NewDelivery = () => {
         selector
     );
     const queryClient = useQueryClient();
-    const selectorError = error
-        ? error instanceof Error
-            ? error.message
-            : String(error)
-        : null;
 
     const handleChange = (nextSelector: string) => {
         if (nextSelector === selector) {
@@ -72,13 +67,13 @@ const NewDelivery = () => {
                     }}
                 >
                     <SelectorBuilder
-                        matchingElements={selectorError ? [] : data || []}
+                        matchingElements={error ? [] : data || []}
                         selectorCallback={handleChange}
                         publicationIdRow={publicationIdRow}
                         label="Delivery"
                         dialogMessage={false}
                         subscriptionConfirmationText=""
-                        selectorError={selectorError}
+                        selectorError={error}
                     />
                 </Box>
                 <Box
@@ -95,7 +90,7 @@ const NewDelivery = () => {
                 >
                     <DataGrid
                         columns={NewFormDataGrid}
-                        rows={selectorError ? [] : data || []}
+                        rows={error ? [] : data || []}
                         onRowClick={handleOnRowClick}
                         loading={isLoading}
                         getRowId={(row) => row.publicationId}

@@ -27,11 +27,6 @@ const NewSubscription = () => {
   );
   const [dialogMessage, setDialogMessage] = useState<boolean>(false);
   const [subscriptionConfirmationText, setSubscriptionConfirmationText] = useState<string>("");
-  const selectorError = error
-    ? error instanceof Error
-      ? error.message
-      : String(error)
-    : null;
 
   useEffect(() => {
     let fullText = "";
@@ -90,12 +85,12 @@ const NewSubscription = () => {
              }}
         >
           <SelectorBuilder
-            matchingElements={selectorError ? [] : data || []}
+            matchingElements={error ? [] : data || []}
             selectorCallback={handleChange}
             publicationIdRow={publicationIdRow}
             dialogMessage={dialogMessage}
             subscriptionConfirmationText={subscriptionConfirmationText}
-            selectorError={selectorError}
+            selectorError={error}
             label="Subscription"
           />
         </Box>
@@ -107,7 +102,7 @@ const NewSubscription = () => {
         >
           <DataGrid
             columns={NewFormDataGrid}
-            rows={selectorError ? [] : data || []}
+            rows={error ? [] : data || []}
             onRowClick={handleOnRowClick}
             loading={isLoading}
             getRowId={(row) => row.publicationId}
