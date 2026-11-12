@@ -11,6 +11,7 @@ self:                                                               # ------ Gen
 
   trust_store: truststore.jks
   key_store: keystore.p12
+  internal_tls_secret: true #if true, use internal "dev-no" secret. If false, use custom secret name.
 
 database:
   enabled: true # NOTE: Setting this to false removes all database resources including persistence, which might lead to data loss!
