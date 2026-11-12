@@ -61,6 +61,7 @@ neighbour_server:
   replicas: 1
 
 onboard_server:
+  enabled: true
   replicas: 1
 
 routing_configurer:
