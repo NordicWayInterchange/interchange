@@ -179,11 +179,10 @@ public class OnboardRestController {
 				.map(OutgoingMatch::getCapability)
 				.collect(Collectors.toSet());
 		Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
-		if (selector != null) {
-			if (!selector.isEmpty()) {
-				localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
-				neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
-			}
+		if (selector != null && !selector.isBlank()) {
+			CapabilityMatcher.validateSelector(selector);
+			localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+			neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
 		}
 
 		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(new CapabilityToCapabilityApiTransformer(), serviceProviderName, selector, localCapabilities, neighbourCapabilities);
@@ -684,10 +683,9 @@ public class OnboardRestController {
 
 		ServiceProvider serviceProvider = getOrCreateServiceProvider(serviceProviderName);
 		Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-		if (selector != null) {
-			if (!selector.isEmpty()) {
-				allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
-			}
+		if (selector != null && !selector.isBlank()) {
+			CapabilityMatcher.validateSelector(selector);
+			allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
 		}
 		FetchMatchingCapabilitiesResponse response = typeTransformer.transformCapabilitiesToFetchMatchingCapabilitiesResponse(new CapabilityToCapabilityApiTransformer(), serviceProviderName, selector, allCapabilities, Set.of());
 		OnboardMDCUtil.removeLogVariables();

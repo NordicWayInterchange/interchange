@@ -229,11 +229,10 @@ public class NapRestController {
                 .map(OutgoingMatch::getCapability)
                 .collect(Collectors.toSet());
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
-        if (selector != null) {
-            if (!selector.isEmpty()) {
-                localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
-                neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
-            }
+        if (selector != null && !selector.isBlank()) {
+            CapabilityMatcher.validateSelector(selector);
+            localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
+            neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
         }
         List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(localCapabilities, neighbourCapabilities);
         Collections.sort(capabilities);
@@ -346,10 +345,9 @@ public class NapRestController {
 
         ServiceProvider serviceProvider = getOrCreateServiceProvider(actorCommonName);
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if(selector != null){
-            if(!selector.isEmpty()){
-                allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
-            }
+        if(selector != null && !selector.isBlank()){
+            CapabilityMatcher.validateSelector(selector);
+            allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
         }
         List<no.vegvesen.ixn.napcore.model.Capability> capabilities = typeTransformer.transformCapabilitiesToGetMatchingCapabilitiesResponse(allCapabilities, Collections.emptySet());
         Collections.sort(capabilities);

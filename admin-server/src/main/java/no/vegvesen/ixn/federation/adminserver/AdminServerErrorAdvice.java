@@ -2,6 +2,7 @@ package no.vegvesen.ixn.federation.adminserver;
 
 import no.vegvesen.ixn.federation.api.v1_0.ErrorDetails;
 import no.vegvesen.ixn.federation.auth.CNAndApiObjectMismatchException;
+import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.exceptions.PathVariableException;
 import no.vegvesen.ixn.serviceprovider.NotFoundException;
 import org.slf4j.Logger;
@@ -22,6 +23,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class AdminServerErrorAdvice {
 
     private Logger logger = LoggerFactory.getLogger(AdminServerErrorAdvice.class);
+
+    @ExceptionHandler({InvalidSelectorException.class})
+    public ResponseEntity<ErrorDetails> handleInvalidSelectorException(InvalidSelectorException e) {
+        return error(BAD_REQUEST, e);
+    }
 
     @ExceptionHandler({RuntimeException.class})
     public ResponseEntity<ErrorDetails> handleRunTimeException(RuntimeException e) {

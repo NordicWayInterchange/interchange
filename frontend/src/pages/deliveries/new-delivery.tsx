@@ -17,18 +17,29 @@ import {useMatchingCapabilitiesForDeliveries} from "@/hooks/useMatchingCapabilit
 
 const NewDelivery = () => {
     const {data: session} = useSession();
-    const [selector, setSelector] = useState<string>(" ");
+    const [selector, setSelector] = useState<string>("");
     const [publicationIdRow, setPublicationIdRow] = useState<string>("");
 
-    const {data, isLoading} = useMatchingCapabilitiesForDeliveries(
+    const {data, isLoading, error, refetch} = useMatchingCapabilitiesForDeliveries(
         session?.user.commonName as string,
         selector
     );
     const queryClient = useQueryClient();
+    const selectorError = error
+        ? error instanceof Error
+            ? error.message
+            : String(error)
+        : null;
 
-    const handleChange = (selector: string) => {
-        setSelector(selector);
-        queryClient.removeQueries({queryKey: ['matchingDeliveries']});
+    const handleChange = (nextSelector: string) => {
+        if (nextSelector === selector) {
+            void refetch();
+            return;
+        }
+        queryClient.removeQueries({
+            queryKey: ['matchingDeliveries', session?.user.commonName, nextSelector],
+        });
+        setSelector(nextSelector);
     };
 
     const handleOnRowClick: GridEventListener<"rowClick"> = (params) => {
@@ -61,12 +72,13 @@ const NewDelivery = () => {
                     }}
                 >
                     <SelectorBuilder
-                        matchingElements={data || []}
+                        matchingElements={selectorError ? [] : data || []}
                         selectorCallback={handleChange}
                         publicationIdRow={publicationIdRow}
                         label="Delivery"
                         dialogMessage={false}
                         subscriptionConfirmationText=""
+                        selectorError={selectorError}
                     />
                 </Box>
                 <Box
@@ -83,7 +95,7 @@ const NewDelivery = () => {
                 >
                     <DataGrid
                         columns={NewFormDataGrid}
-                        rows={data || []}
+                        rows={selectorError ? [] : data || []}
                         onRowClick={handleOnRowClick}
                         loading={isLoading}
                         getRowId={(row) => row.publicationId}

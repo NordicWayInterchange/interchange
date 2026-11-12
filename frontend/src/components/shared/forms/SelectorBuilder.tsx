@@ -52,6 +52,7 @@ type Props = {
   publicationIdRow: string;
   dialogMessage: boolean;
   subscriptionConfirmationText: string;
+  selectorError?: string | null;
 };
 
 const MATCHING_CAP_LIMIT = 1;
@@ -75,8 +76,10 @@ const SelectorBuilder = (props: Props) => {
     publicationIdRow,
     dialogMessage,
     subscriptionConfirmationText,
+    selectorError,
   } = props;
   const [selector, setSelector] = useState<string>("");
+  const [verifiedSelector, setVerifiedSelector] = useState<string | null>(null);
   const [descriptionError, setDescriptionError] = useState(false);
   const [description, setDescription] = useState<string>("");
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
@@ -163,7 +166,11 @@ const SelectorBuilder = (props: Props) => {
     setValue("publicationId", publicationIdRow, { shouldValidate: true });
   }, [publicationIdRow, setValue, reset]);
 
+  const showSelectorError =
+    Boolean(selectorError) && verifiedSelector === selector;
+
   const onSubmit: SubmitHandler<IFormInputs> = async () => {
+    if (showSelectorError) return;
     if (matchingElements.length < MATCHING_CAP_LIMIT) {
       setFeedback({
         feedback: true,
@@ -228,9 +235,11 @@ const SelectorBuilder = (props: Props) => {
     setDescription("");
     setDescriptionError(false);
     setDialogOpen(false);
+    setVerifiedSelector(null);
   };
 
   const handleVerify = () => {
+    setVerifiedSelector(selector);
     selectorCallback(selector);
   };
 
@@ -265,10 +274,12 @@ const SelectorBuilder = (props: Props) => {
   */
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdvancedMode(event.target.checked);
+    setVerifiedSelector(null);
     if (!advancedMode) {
       setPersistSelector(selector);
     } else {
       setSelector(persistSelector);
+      selectorCallback(persistSelector);
     }
   };
 
@@ -636,7 +647,7 @@ or VmsPublication"
             {advancedMode && (
               <>
                 <Divider />{" "}
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                   <TextField
                     multiline
                     rows={4}
@@ -645,6 +656,8 @@ or VmsPublication"
                     label="Selector"
                     sx={{ marginRight: 1 }}
                     onChange={handleTextArea}
+                    error={showSelectorError}
+                    helperText={showSelectorError ? selectorError : ""}
                     slotProps={{
                       input: {
                         endAdornment: (
@@ -709,7 +722,9 @@ or VmsPublication"
                 color="buttonThemeColor"
                 variant="contained"
                 type="submit"
-                disabled={!!getFieldState("quadTree").error}
+                disabled={
+                  !!getFieldState("quadTree").error || showSelectorError
+                }
               >
                 Save {label}
               </StyledButton>

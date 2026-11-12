@@ -29,6 +29,11 @@ public class OnboardServerErrorAdvice {
 		return error(BAD_REQUEST, e);
 	}
 
+	@ExceptionHandler({InvalidSelectorException.class})
+	public ResponseEntity<ErrorDetails> handleInvalidSelectorException(InvalidSelectorException e) {
+		return error(BAD_REQUEST, e);
+	}
+
 	@ExceptionHandler({RuntimeException.class})
 	public ResponseEntity<ErrorDetails> handleRunTimeException(RuntimeException e) {
 		return error(INTERNAL_SERVER_ERROR, e);

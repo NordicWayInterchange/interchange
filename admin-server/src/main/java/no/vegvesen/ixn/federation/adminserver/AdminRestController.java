@@ -144,7 +144,8 @@ public class AdminRestController {
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAll();
         Set<Capability> localCapabilities = getAllLocalCapabilities(serviceProviderList);
         Set<NeighbourCapability> neighbourCapabilities = getAllNeighbourCapabilities();
-        if (selector != null && !selector.isEmpty()) {
+        if (selector != null && !selector.isBlank()) {
+            CapabilityMatcher.validateSelector(selector);
             localCapabilities = getAllMatchingLocalCapabilities(selector, localCapabilities);
             neighbourCapabilities = getAllMatchingNeighbourCapabilities(selector, neighbourCapabilities);
         }
@@ -165,10 +166,9 @@ public class AdminRestController {
         ServiceProvider serviceProvider = serviceProviderExists(actorCommonName);
 
         Set<Capability> allCapabilities = serviceProvider.getCapabilities().getCapabilities();
-        if(selector != null){
-            if(!selector.isEmpty()){
-                allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
-            }
+        if(selector != null && !selector.isBlank()){
+            CapabilityMatcher.validateSelector(selector);
+            allCapabilities = getAllMatchingLocalCapabilities(selector, allCapabilities);
         }
 
         return typeTransformer.capabilitiesToGetMatchingCapabilitiesApiList(allCapabilities, Collections.emptySet());
