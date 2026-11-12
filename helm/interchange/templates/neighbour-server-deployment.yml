@@ -1,3 +1,4 @@
+{{- if .Values.neighbour_server.enabled }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -59,3 +60,5 @@ spec:
         - name: secure
           secret:
             secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+
+  {{- end }}

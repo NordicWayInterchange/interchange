@@ -1,3 +1,4 @@
+{{- if .Values.neighbour_server.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -20,3 +21,5 @@ spec:
   ports:
     - name: https-control
       port: {{ .Values.self.control_channel_port }}
+
+  {{- end }}
