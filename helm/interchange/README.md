@@ -3,6 +3,14 @@
 The helm charts in this folder is uploaded to the registry at oci://ghcr.io/nordicwayinterchange/interchange
 The current version can be located by looking at the version listed in the chart file [here](https://raw.githubusercontent.com/NordicWayInterchange/interchange/federation-master/helm/interchange/Chart.yaml)
 
+# Enabling and disabling resources
+
+For testing, the different components of the interchange can be enabled or disabled using switches called "enabled". 
+These are by default set to ```true```, except for the ones controlling the portal and admin frontend, which are set to 
+```false``` by default.
+In addition, the broker template has a switch to turn on and off the external service. This can be used if a new broker
+version is installed, and one needs to populate the broker from the database before letting producers and consumers in.
+
 # Exposing
 
 If you want to expose the application to the world, the IP's/ports for onboard-server, neighbour-server and qpid-secure
