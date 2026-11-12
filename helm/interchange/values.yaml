@@ -53,6 +53,7 @@ message_collector:
   trust_store_type: JKS
 
 neighbour_discoverer:
+  enabled: true
   replicas: 1
 
 neighbour_server:
