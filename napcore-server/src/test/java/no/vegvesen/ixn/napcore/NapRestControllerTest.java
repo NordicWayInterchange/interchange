@@ -219,6 +219,51 @@ public class NapRestControllerTest {
     }
 
     @Test
+    public void getMatchingSubscriptionCapabilitiesWithInvalidSelectorReturnsStatusBadRequest() throws Exception {
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                        get(String.format("/nap/%s/subscriptions/capabilities", NAP_USER_NAME))
+                                .param("selector", "LIKE")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("LIKE")));
+    }
+
+    @Test
+    public void getMatchingDeliveryCapabilitiesWithInvalidSelectorReturnsStatusBadRequest() throws Exception {
+        ServiceProvider serviceProvider = new ServiceProvider(
+                1,
+                NAP_USER_NAME,
+                new Capabilities(),
+                Collections.emptySet(),
+                null
+        );
+        when(serviceProviderRepository.findByName(NAP_USER_NAME)).thenReturn(serviceProvider);
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                        get(String.format("/nap/%s/deliveries/capabilities", NAP_USER_NAME))
+                                .param("selector", "LIKE")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", containsString("LIKE")));
+    }
+
+    @Test
+    public void getMatchingSubscriptionCapabilitiesWithBlankSelectorReturnsStatusOk() throws Exception {
+        doNothing().when(certService).checkIfCommonNameMatchesNapName(NAP_USER_NAME);
+        mockMvc.perform(
+                        get(String.format("/nap/%s/subscriptions/capabilities", NAP_USER_NAME))
+                                .param("selector", " ")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     public void postingNapSubscriptionWithExtraFieldsReturnsStatusBadRequest() throws Exception {
         String request = """
                 {

@@ -1,5 +1,6 @@
 package no.vegvesen.ixn.federation.matcher;
 
+import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -7,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -23,6 +25,38 @@ public class SelectorCapabilityMatcherTest {
     @Test
     public void match_emptySelector_true() {
         assertTrue(matcher.match("", capabilityJson));
+    }
+
+    @Test
+    public void match_nullSelector_true() {
+        assertTrue(matcher.match(null, capabilityJson));
+    }
+
+    @Test
+    public void match_blankSelector_true() {
+        assertTrue(matcher.match("   ", capabilityJson));
+    }
+
+    @Test
+    public void match_invalidSelector_throwsInvalidSelectorException() {
+        InvalidSelectorException exception = assertThrows(
+                InvalidSelectorException.class,
+                () -> matcher.match("LIKE", capabilityJson)
+        );
+        assertTrue(exception.getMessage().contains("LIKE"));
+    }
+
+    @Test
+    public void match_selectorWithUnterminatedString_throwsInvalidSelectorException() {
+        assertThrows(
+                InvalidSelectorException.class,
+                () -> matcher.match("stringProperty = 'string", capabilityJson)
+        );
+    }
+
+    @Test
+    public void validate_invalidSelector_throwsInvalidSelectorException() {
+        assertThrows(InvalidSelectorException.class, () -> SelectorCapabilityMatcher.validate("LIKE"));
     }
 
     @Test

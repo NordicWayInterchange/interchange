@@ -678,4 +678,16 @@ public class OnboardRestControllerTest {
 		verify(privateChannelRepository, times(1)).findAllByPeerName(any());
 	}
 
+	@Test
+	public void listMatchingCapabilitiesWithInvalidSelectorReturnsStatusBadRequest() throws Exception {
+		String serviceProviderName = "king_olaf.bouvetinterchange.eu";
+		mockCertificate(serviceProviderName);
+
+		mockMvc.perform(
+				get(String.format("/%s/network/capabilities", serviceProviderName))
+						.param("selector", "LIKE")
+						.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isBadRequest());
+	}
+
 }

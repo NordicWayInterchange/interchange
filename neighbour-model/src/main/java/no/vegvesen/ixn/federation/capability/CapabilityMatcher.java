@@ -73,6 +73,10 @@ public class CapabilityMatcher {
 		return matches;
 	}
 
+	public static void validateSelector(String selector) {
+		SelectorCapabilityMatcher.validate(selector);
+	}
+
 	public static boolean matchApplicationToSelector(Application application, String selector, Integer shardCount) {
 		ObjectMapper mapper = JsonMapper.builder().build();
 		String capabilityJson = null;

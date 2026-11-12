@@ -17,16 +17,21 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const NewSubscription = () => {
   const { data: session } = useSession();
-  const [selector, setSelector] = useState<string>(" ");
+  const [selector, setSelector] = useState<string>("");
   const [publicationIdRow, setPublicationIdRow] = useState<string>("");
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useMatchingCapabilities(
+  const { data, isLoading, error, refetch } = useMatchingCapabilities(
     session?.user.commonName as string,
     selector
   );
   const [dialogMessage, setDialogMessage] = useState<boolean>(false);
   const [subscriptionConfirmationText, setSubscriptionConfirmationText] = useState<string>("");
+  const selectorError = error
+    ? error instanceof Error
+      ? error.message
+      : String(error)
+    : null;
 
   useEffect(() => {
     let fullText = "";
@@ -44,9 +49,15 @@ const NewSubscription = () => {
     }
   }, [data]);
 
-  const handleChange = (selector: string) => {
-    setSelector(selector);
-    queryClient.removeQueries({ queryKey: ['matchingCapabilities'] });
+  const handleChange = (nextSelector: string) => {
+    if (nextSelector === selector) {
+      void refetch();
+      return;
+    }
+    queryClient.removeQueries({
+      queryKey: ["matchingCapabilities", session?.user.commonName, nextSelector],
+    });
+    setSelector(nextSelector);
   };
 
   const handleOnRowClick: GridEventListener<"rowClick"> = (params) => {
@@ -79,11 +90,12 @@ const NewSubscription = () => {
              }}
         >
           <SelectorBuilder
-            matchingElements={data || []}
+            matchingElements={selectorError ? [] : data || []}
             selectorCallback={handleChange}
             publicationIdRow={publicationIdRow}
             dialogMessage={dialogMessage}
             subscriptionConfirmationText={subscriptionConfirmationText}
+            selectorError={selectorError}
             label="Subscription"
           />
         </Box>
@@ -95,7 +107,7 @@ const NewSubscription = () => {
         >
           <DataGrid
             columns={NewFormDataGrid}
-            rows={data || []}
+            rows={selectorError ? [] : data || []}
             onRowClick={handleOnRowClick}
             loading={isLoading}
             getRowId={(row) => row.publicationId}

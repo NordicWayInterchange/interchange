@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.federation.matcher;
 
 
+import no.vegvesen.ixn.federation.exceptions.InvalidSelectorException;
 import no.vegvesen.ixn.federation.matcher.filter.TrileanExpression;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -27,36 +28,51 @@ public class SelectorCapabilityMatcher {
     }
 
     public boolean match(String selector, String capabilityJson) {
-        if (selector.isEmpty()) {
+        if (selector == null || selector.isBlank()) {
             return true;
         }
+        Map<String, Object> map;
         try {
-            Map<String, Object> map = mapper.readValue(capabilityJson, Map.class);
+            map = mapper.readValue(capabilityJson, Map.class);
+        } catch (JacksonException e) {
+            throw new RuntimeException(e);
+        }
+        TrileanExpression<Map<String, Object>> matcher = parse(selector);
+        Map<String, Set<Object>> capabilityMultiValueMap = convertMapValuesToCollections(map);
+        for (String quadKeyIdentifier : quadKeyIdentifiers) {
+            if (capabilityMultiValueMap.containsKey(quadKeyIdentifier)) {
+                Pattern quadKeyRegexPattern = Pattern.compile("(?:'[\\%\\,]*,)(?<quadKey>[0-3]+)(?:[\\%\\,]*')", Pattern.CASE_INSENSITIVE);
+                Matcher regexMatcher = quadKeyRegexPattern.matcher(selector);
+                Set<String> quadKeysUsedInSelector = new HashSet<>();
+                while (regexMatcher.find()) {
+                    quadKeysUsedInSelector.add(regexMatcher.group("quadKey"));
+                }
+                capabilityMultiValueMap.put(quadKeyIdentifier, expandQuadKeyValuesToIncludeSubQuadrantKeys(
+                        capabilityMultiValueMap.get(quadKeyIdentifier), quadKeysUsedInSelector));
+            }
+        }
+        for (Iterator<Map<String, Object>> iterator = new CombinationExpandingIterator<>(capabilityMultiValueMap); iterator.hasNext(); ) {
+            Map<String, Object> capabilityValuesMap = iterator.next();
+            if (canThereBeASelectorMatchForTheseParameters(capabilityValuesMap, matcher)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void validate(String selector) {
+        if (selector != null && !selector.isBlank()) {
+            parse(selector);
+        }
+    }
+
+    private static TrileanExpression<Map<String, Object>> parse(String selector) {
+        try {
             SelectorParser<Map<String, Object>> selectorParser = new SelectorParser<>();
             selectorParser.setPropertyExpressionFactory(value -> objectMap -> objectMap.getOrDefault(value, Trilean.UNKNOWN));
-            TrileanExpression<Map<String, Object>> matcher = selectorParser.parse(selector);
-            Map<String, Set<Object>> capabilityMultiValueMap = convertMapValuesToCollections(map);
-            for (String quadKeyIdentifier : quadKeyIdentifiers) {
-                if (capabilityMultiValueMap.containsKey(quadKeyIdentifier)) {
-                    Pattern quadKeyRegexPattern = Pattern.compile("(?:'[\\%\\,]*,)(?<quadKey>[0-3]+)(?:[\\%\\,]*')", Pattern.CASE_INSENSITIVE);
-                    Matcher regexMatcher = quadKeyRegexPattern.matcher(selector);
-                    Set<String> quadKeysUsedInSelector = new HashSet<>();
-                    while (regexMatcher.find()) {
-                        quadKeysUsedInSelector.add(regexMatcher.group("quadKey"));
-                    }
-                    capabilityMultiValueMap.put(quadKeyIdentifier, expandQuadKeyValuesToIncludeSubQuadrantKeys(
-                            capabilityMultiValueMap.get(quadKeyIdentifier), quadKeysUsedInSelector));
-                }
-            }
-            for (Iterator<Map<String, Object>> iterator = new CombinationExpandingIterator<>(capabilityMultiValueMap); iterator.hasNext(); ) {
-                Map<String, Object> capabilityValuesMap = iterator.next();
-                if (canThereBeASelectorMatchForTheseParameters(capabilityValuesMap, matcher)) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (JacksonException | ParseException e) {
-            throw new RuntimeException(e);
+            return selectorParser.parse(selector);
+        } catch (ParseException | TokenMgrError e) {
+            throw new InvalidSelectorException(String.format("Invalid selector \"%s\": %s", selector, e.getMessage()), e);
         }
     }
 
