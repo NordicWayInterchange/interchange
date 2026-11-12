@@ -19,9 +19,6 @@ const fetchMatchingCapabilities: (
     return capabilities;
   } else {
     const errorObj = await res.json();
-    if (errorObj?.errorCode && errorObj?.message) {
-      throw new Error(`${errorObj.errorCode}: ${errorObj.message}`);
-    }
     throw new Error(
       errorObj?.message ||
         (typeof errorObj === "string"

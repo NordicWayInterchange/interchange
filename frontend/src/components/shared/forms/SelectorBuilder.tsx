@@ -52,7 +52,7 @@ type Props = {
   publicationIdRow: string;
   dialogMessage: boolean;
   subscriptionConfirmationText: string;
-  selectorError?: string | null;
+  selectorError?: Error | null;
 };
 
 const MATCHING_CAP_LIMIT = 1;
@@ -169,8 +169,25 @@ const SelectorBuilder = (props: Props) => {
   const showSelectorError =
     Boolean(selectorError) && verifiedSelector === selector;
 
+  useEffect(() => {
+    if (selectorError) {
+      setFeedback({
+        feedback: true,
+        message: selectorError.message,
+        severity: "warning",
+      });
+    }
+  }, [selectorError]);
+
   const onSubmit: SubmitHandler<IFormInputs> = async () => {
-    if (showSelectorError) return;
+    if (showSelectorError && selectorError) {
+      setFeedback({
+        feedback: true,
+        message: selectorError.message,
+        severity: "warning",
+      });
+      return;
+    }
     if (matchingElements.length < MATCHING_CAP_LIMIT) {
       setFeedback({
         feedback: true,
@@ -647,7 +664,7 @@ or VmsPublication"
             {advancedMode && (
               <>
                 <Divider />{" "}
-                <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
                   <TextField
                     multiline
                     rows={4}
@@ -656,8 +673,6 @@ or VmsPublication"
                     label="Selector"
                     sx={{ marginRight: 1 }}
                     onChange={handleTextArea}
-                    error={showSelectorError}
-                    helperText={showSelectorError ? selectorError : ""}
                     slotProps={{
                       input: {
                         endAdornment: (
@@ -722,9 +737,7 @@ or VmsPublication"
                 color="buttonThemeColor"
                 variant="contained"
                 type="submit"
-                disabled={
-                  !!getFieldState("quadTree").error || showSelectorError
-                }
+                disabled={!!getFieldState("quadTree").error}
               >
                 Save {label}
               </StyledButton>
