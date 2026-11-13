@@ -29,8 +29,13 @@ spec:
           env:
             - name: POSTGRES_USER
               value: {{ .Values.postgres_user | quote }}
+            {{- if .Values.database.password_secret.enabled }}
+            - name: POSTGRES_PASSWORD_FILE
+              value: {{ printf "%s/password" (required "must provide .Values.database.password_secret.mount_path when database.password_secret.enabled is true" .Values.database.password_secret.mount_path) | quote }}
+            {{- else }}
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgres_password | quote }}
+            {{- end }}
             - name: POSTGRES_DB
               value: {{ .Values.database.postgres_db | quote }}
             - name: PGDATA
@@ -41,6 +46,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            {{- if .Values.database.password_secret.enabled }}
+            - name: database-password
+              mountPath: {{ required "must provide .Values.database.password_secret.mount_path when database.password_secret.enabled is true" .Values.database.password_secret.mount_path | quote }}
+              readOnly: true
+            {{- end }}
       volumes:
         - name: data
       {{- if .Values.database.persistence.enabled }}
@@ -49,4 +59,12 @@ spec:
       {{- else }}
           emptyDir: {}
       {{- end -}}
+      {{- if .Values.database.password_secret.enabled }}
+        - name: database-password
+          secret:
+            secretName: {{ required "must provide .Values.database.password_secret.secret_name when database.password_secret.enabled is true" .Values.database.password_secret.secret_name | quote }}
+            items:
+              - key: {{ required "must provide .Values.database.password_secret.secret_key when database.password_secret.enabled is true" .Values.database.password_secret.secret_key | quote }}
+                path: password
+      {{- end }}
   {{- end }}

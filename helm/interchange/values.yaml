@@ -15,6 +15,8 @@ self:                                                               # ------ Gen
 
 database:
   enabled: true # NOTE: Setting this to false removes all database resources including persistence, which might lead to data loss!
+  password_secret:
+    enabled: false
 
 qpid:
   enabled: true # NOTE: Setting this to false removes all qpid resources, including services and persistence!
