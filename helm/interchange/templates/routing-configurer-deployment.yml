@@ -38,23 +38,52 @@ spec:
               value: https://{{ .Release.Name }}-qpid-http
             - name: SERVER_NAME
               value: {{ .Values.external_name | quote }}
+            {{- if .Values.routing_configurer.internal_tls.enabled }}
+            - name: TRUST_STORE
+              value: /internal-routing-configurer-tls/{{ .Values.routing_configurer.internal_tls.trust_store }}
+            - name: TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "must provide .Values.routing_configurer.internal_tls.secret_name when routing_configurer.internal_tls.enabled is true" .Values.routing_configurer.internal_tls.secret_name }}
+                  key: {{ .Values.routing_configurer.internal_tls.trust_store_password_key }}
+            - name: KEY_STORE
+              value: /internal-routing-configurer-tls/{{ .Values.routing_configurer.internal_tls.key_store }}
+            - name: KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "must provide .Values.routing_configurer.internal_tls.secret_name when routing_configurer.internal_tls.enabled is true" .Values.routing_configurer.internal_tls.secret_name }}
+                  key: {{ .Values.routing_configurer.internal_tls.key_store_password_key }}
+            {{- else }}
             - name: TRUST_STORE
               value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
             - name: TRUST_STORE_PASSWORD
               value: {{ .Values.trust_store_password | quote }}
             - name: KEY_STORE
-              value: {{ .Values.self.secret_mount_path }}key_store.p12
+              value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
+            {{- end }}
             - name: LOG_LEVELS
               value: "{{- range .Values.routing_configurer.logging -}}
                  -Dlogging.level{{ .logger_name }}={{ .level }}{{ ` ` }}
                  {{- end }}"
           volumeMounts:
+            {{- if .Values.routing_configurer.internal_tls.enabled }}
+            - name: internal-routing-configurer-tls
+              mountPath: /internal-routing-configurer-tls
+              readOnly: true
+            {{- else }}
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}
+            {{- end }}
       volumes:
+        {{- if .Values.routing_configurer.internal_tls.enabled }}
+        - name: internal-routing-configurer-tls
+          secret:
+            secretName: {{ required "must provide .Values.routing_configurer.internal_tls.secret_name when routing_configurer.internal_tls.enabled is true" .Values.routing_configurer.internal_tls.secret_name }}
+        {{- else }}
         - name: secure
           secret:
             secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+        {{- end }}
   {{- end }}

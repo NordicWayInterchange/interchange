@@ -16,6 +16,39 @@ version is installed, and one needs to populate the broker from the database bef
 If you want to expose the application to the world, the IP's/ports for onboard-server, neighbour-server and qpid-secure
 should be exposed. How this is done depends on the deployment/cloud used.
 
+## Internal Qpid TLS
+
+Qpid's HTTPS management endpoint and routing-configurer can use separate TLS
+material from the node-wide TLS Secret. This is disabled by default and each
+side can be enabled independently for migration and testing:
+
+```yaml
+qpid:
+  internal_tls:
+    enabled: true
+    secret_name: qpid-internal-tls
+
+routing_configurer:
+  internal_tls:
+    enabled: true
+    secret_name: routing-configurer-internal-tls
+```
+
+When enabled, each setting references an externally managed Kubernetes Secret.
+The Qpid Secret must contain the configured `key_store` and `trust_store` files
+plus the configured password keys. The routing-configurer Secret has the same
+requirements. Default key names are documented in `values.yaml`.
+
+The Qpid internal truststore must trust the routing-configurer client
+certificate. The routing-configurer internal truststore must trust the Qpid
+server certificate. Qpid's internal server certificate must include
+`<release-name>-qpid-http` as a DNS subject alternative name because that is
+the hostname used by routing-configurer.
+
+With either switch disabled, that component keeps its existing TLS setup. This
+makes it possible to migrate one side at a time, provided the enabled side
+trusts the certificate still used by the other side.
+
 
 ## Interchange Portal
 The Interchange includes a simple portal implementation that uses both Auth0 and keycloak for authentication and letsencrypt for 

@@ -45,7 +45,7 @@ spec:
               containerPort: 443
           env:
             - name: KEY_STORE
-              value: {{ .Values.self.secret_mount_path }}key_store.p12
+              value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
             - name: TRUST_STORE
@@ -54,10 +54,27 @@ spec:
               value: {{ .Values.trust_store_password | quote }}
             - name: GROUPS_FILE
               value: /qpid-broker-j/work/groups
+            {{- if .Values.qpid.internal_tls.enabled }}
+            - name: INTERNAL_KEY_STORE
+              value: /internal-qpid-tls/{{ .Values.qpid.internal_tls.key_store }}
+            - name: INTERNAL_KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "must provide .Values.qpid.internal_tls.secret_name when qpid.internal_tls.enabled is true" .Values.qpid.internal_tls.secret_name }}
+                  key: {{ .Values.qpid.internal_tls.key_store_password_key }}
+            - name: INTERNAL_TRUST_STORE
+              value: /internal-qpid-tls/{{ .Values.qpid.internal_tls.trust_store }}
+            - name: INTERNAL_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "must provide .Values.qpid.internal_tls.secret_name when qpid.internal_tls.enabled is true" .Values.qpid.internal_tls.secret_name }}
+                  key: {{ .Values.qpid.internal_tls.trust_store_password_key }}
+            {{- else }}
             - name: INTERNAL_KEY_STORE
               value: {{ .Values.qpid.internal_keys_path }}internal_key_store.p12
             - name: INTERNAL_KEY_STORE_PASSWORD
               value: {{ .Values.internal_key_store_password | quote }}
+            {{- end }}
         {{- if .Values.qpid.java_mem }}
             - name: QPID_JAVA_MEM
               value: {{ .Values.qpid.java_mem }}
@@ -65,8 +82,14 @@ spec:
           volumeMounts:
             - name: secure
               mountPath: {{ .Values.self.secret_mount_path | quote }}
+            {{- if .Values.qpid.internal_tls.enabled }}
+            - name: internal-qpid-tls
+              mountPath: /internal-qpid-tls
+              readOnly: true
+            {{- else }}
             - name: internal-keys
               mountPath: {{ .Values.qpid.internal_keys_path | quote }}
+            {{- end }}
             - name: storage
               mountPath: /qpid-broker-j/work
             - name: config
@@ -85,9 +108,15 @@ spec:
         - name: secure
           secret:
             secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+        {{- if .Values.qpid.internal_tls.enabled }}
+        - name: internal-qpid-tls
+          secret:
+            secretName: {{ required "must provide .Values.qpid.internal_tls.secret_name when qpid.internal_tls.enabled is true" .Values.qpid.internal_tls.secret_name }}
+        {{- else }}
         - name: internal-keys
           secret:
             secretName: {{ required "must provide .Values.qpid.internal_secrets_name" .Values.qpid.internal_secrets_name }}
+        {{- end }}
         - name: storage
       {{- if .Values.qpid.persistence.enabled }}
           persistentVolumeClaim:
