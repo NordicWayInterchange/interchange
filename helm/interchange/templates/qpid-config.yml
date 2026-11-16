@@ -142,7 +142,7 @@ data:
           "bindingAddress": "*",
           "port": "443",
           "trustStores": [
-            "{{ if .Values.qpid.internal_tls.enabled }}internal{{ else }}default{{ end }}"],
+            "{{ if .Values.qpid.internal_secret.externally_managed }}internal{{ else }}default{{ end }}"],
           "keyStore": "internal",
           "needClientAuth": true,
           "wantClientAuth": false,
@@ -161,7 +161,7 @@ data:
           "storeUrl": "${TRUST_STORE}",
           "password": "${TRUST_STORE_PASSWORD}"
         }
-        {{- if .Values.qpid.internal_tls.enabled }},
+        {{- if .Values.qpid.internal_secret.externally_managed }},
         {
           "name": "internal",
           "type": "FileTrustStore",

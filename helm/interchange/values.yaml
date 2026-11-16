@@ -28,12 +28,12 @@ qpid:
     size: 10Gi
 
   internal_keys_path: /internal_keys/
-  internal_tls:
-    # Use an externally managed Secret for Qpid's internal HTTPS endpoint.
-    enabled: false
-    secret_name: ""
-    key_store: qpid-internal.p12
-    trust_store: qpid-internal-truststore.jks
+  internal_secrets_name: qpid-internal-secret
+  internal_key_store_name: internal_key_store.p12
+  internal_secret:
+    # When true, use an externally managed Secret for Qpid's internal HTTPS endpoint.
+    externally_managed: false
+    trust_store_name: internal_truststore.jks
     key_store_password_key: key_store_password
     trust_store_password_key: trust_store_password
 

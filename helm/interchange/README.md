@@ -19,14 +19,17 @@ should be exposed. How this is done depends on the deployment/cloud used.
 ## Internal Qpid TLS
 
 Qpid's HTTPS management endpoint and routing-configurer can use separate TLS
-material from the node-wide TLS Secret. This is disabled by default and each
-side can be enabled independently for migration and testing:
+material from the node-wide TLS Secret. Qpid can mount an externally managed
+internal Secret, while routing-configurer has a separate opt-in TLS switch.
+Each side can be enabled independently for migration and testing:
 
 ```yaml
 qpid:
-  internal_tls:
-    enabled: true
-    secret_name: qpid-internal-tls
+  internal_secrets_name: qpid-internal-tls
+  internal_key_store_name: qpid-server.p12
+  internal_secret:
+    externally_managed: true
+    trust_store_name: routing-configurer-ca.jks
 
 routing_configurer:
   internal_tls:
@@ -34,10 +37,14 @@ routing_configurer:
     secret_name: routing-configurer-internal-tls
 ```
 
-When enabled, each setting references an externally managed Kubernetes Secret.
-The Qpid Secret must contain the configured `key_store` and `trust_store` files
-plus the configured password keys. The routing-configurer Secret has the same
-requirements. Default key names are documented in `values.yaml`.
+When `qpid.internal_secret.externally_managed` is true,
+`qpid.internal_secrets_name` references an externally managed Kubernetes
+Secret. It must contain `qpid.internal_key_store_name`,
+`qpid.internal_secret.trust_store_name`, and the configured password keys.
+When false, the chart creates that Secret from the legacy `internal_keystore`
+value. The routing-configurer Secret must contain its configured keystore,
+truststore, and password keys. Default key names are documented in
+`values.yaml`.
 
 The Qpid internal truststore must trust the routing-configurer client
 certificate. The routing-configurer internal truststore must trust the Qpid
