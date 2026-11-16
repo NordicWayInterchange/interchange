@@ -160,6 +160,7 @@ data:
           "trustAnchorValidityEnforced": false,
           "storeUrl": "${TRUST_STORE}",
           "password": "${TRUST_STORE_PASSWORD}"
+        }
         {{- if .Values.qpid.internal_tls.enabled }},
         {
           "name": "internal",
@@ -168,8 +169,8 @@ data:
           "trustAnchorValidityEnforced": false,
           "storeUrl": "${INTERNAL_TRUST_STORE}",
           "password": "${INTERNAL_TRUST_STORE_PASSWORD}"
-        {{- end }}
         }
+        {{- end }}
       ],
       "virtualhostnodes": [
         {
