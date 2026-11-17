@@ -30,6 +30,8 @@
     "name" : "a-admin"
   },{
     "name" : "a-qpid"
+  },{
+    "name" : "a-routing-configurer"
   }],
     "clientRequests" : [ {
       "name" : "nap.a.internal.interchangedomain.com",
@@ -44,6 +46,11 @@
       "name" : "admin.a-admin.interchangedomain.com",
       "country" : "NO",
       "email" : "admin@a-admin.interchangedomain.com"
+    },
+    {
+      "name" : "a-routing.internal.interchangedomain.com",
+      "country" : "NO",
+      "email" : "routing@a-routing.internal.interchangedomain.com"
     }]
   }],
   "hostRequests" : [ ],
