@@ -240,9 +240,9 @@ services:
       - POSTGRES_PASSWORD=federation
       - BASE_URL=https://a-qpid
       - SERVER_NAME=a.interchangedomain.com
-      - TRUST_STORE=/keys/ca.interchangedomain.com.jks
+      - TRUST_STORE=/keys/ca.a.internal.interchangedomain.com.jks
       - TRUST_STORE_PASSWORD=password
-      - KEY_STORE=/keys/a.interchangedomain.com.p12
+      - KEY_STORE=/keys/a-routing.internal.interchangedomain.com.p12
       - KEY_STORE_PASSWORD=password
       - BROKER_EXTERNAL_NAME=a.qpid.interchangedomain.com
     networks:
