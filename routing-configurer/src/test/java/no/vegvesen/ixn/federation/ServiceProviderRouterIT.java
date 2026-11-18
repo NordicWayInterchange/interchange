@@ -1,9 +1,6 @@
 package no.vegvesen.ixn.federation;
 
-import jakarta.jms.JMSException;
 import jakarta.transaction.Transactional;
-import no.vegvesen.ixn.Sink;
-import no.vegvesen.ixn.Source;
 import no.vegvesen.ixn.docker.QpidContainer;
 import no.vegvesen.ixn.docker.QpidDockerBaseIT;
 import no.vegvesen.ixn.federation.model.*;
@@ -21,11 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.naming.NamingException;
-import javax.net.ssl.SSLContext;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
