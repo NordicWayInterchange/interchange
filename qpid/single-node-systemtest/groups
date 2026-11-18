@@ -1,5 +1,5 @@
 federated-interchanges.users=
-administrators.users=qpid-admin,a.interchangedomain.com
+administrators.users=qpid-admin,a.interchangedomain.com,a-routing.internal.interchangedomain.com
 service-providers.users=
 remote-service-providers.users=
 clients-private-channels.users=
