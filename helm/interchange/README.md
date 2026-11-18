@@ -56,6 +56,50 @@ With either switch disabled, that component keeps its existing TLS setup. This
 makes it possible to migrate one side at a time, provided the enabled side
 trusts the certificate still used by the other side.
 
+## Database password
+
+The PostgreSQL container can receive its password from an environment value,
+a Kubernetes Secret, or a Secrets Store CSI volume. Environment delivery is
+the default and continues to use the top-level `postgres_password` value:
+
+```yaml
+postgres_password: federation
+```
+
+To mount the password from a Kubernetes Secret, configure the Secret name and
+the key containing the password:
+
+```yaml
+database:
+  password:
+    source: secret
+    mount_path: /run/secrets/database
+    secret:
+      name: interchange-database-password
+      key: postgres-password
+```
+
+To mount the password through the Secrets Store CSI driver, reference an
+existing `SecretProviderClass` in the release namespace:
+
+```yaml
+database:
+  password:
+    source: csi
+    mount_path: /run/secrets/database
+    csi:
+      secret_provider_class: interchange-database-password
+```
+
+The CSI driver and its provider must already be installed. The referenced
+`SecretProviderClass` must expose the password as a file named `password`.
+Both mounted modes set PostgreSQL's `POSTGRES_PASSWORD_FILE` to
+`<mount_path>/password`.
+
+This setting applies only to the PostgreSQL container. The Interchange
+applications continue to receive their database password from the top-level
+`postgres_password` value.
+
 
 ## Interchange Portal
 The Interchange includes a simple portal implementation that uses both Auth0 and keycloak for authentication and letsencrypt for 

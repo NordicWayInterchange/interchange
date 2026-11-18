@@ -1,4 +1,12 @@
 {{- if .Values.database.enabled }}
+{{- $passwordSource := .Values.database.password.source | default "environment" }}
+{{- if not (has $passwordSource (list "environment" "secret" "csi")) }}
+{{- fail "database.password.source must be one of: environment, secret, csi" }}
+{{- end }}
+{{- $passwordMountPath := "" }}
+{{- if ne $passwordSource "environment" }}
+{{- $passwordMountPath = required "database.password.mount_path is required when database.password.source is secret or csi" .Values.database.password.mount_path }}
+{{- end }}
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
@@ -29,9 +37,9 @@ spec:
           env:
             - name: POSTGRES_USER
               value: {{ .Values.postgres_user | quote }}
-            {{- if .Values.database.password_secret.enabled }}
+            {{- if ne $passwordSource "environment" }}
             - name: POSTGRES_PASSWORD_FILE
-              value: {{ printf "%s/password" (required "must provide .Values.database.password_secret.mount_path when database.password_secret.enabled is true" .Values.database.password_secret.mount_path) | quote }}
+              value: {{ printf "%s/password" $passwordMountPath | quote }}
             {{- else }}
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgres_password | quote }}
@@ -46,9 +54,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
-            {{- if .Values.database.password_secret.enabled }}
+            {{- if ne $passwordSource "environment" }}
             - name: database-password
-              mountPath: {{ required "must provide .Values.database.password_secret.mount_path when database.password_secret.enabled is true" .Values.database.password_secret.mount_path | quote }}
+              mountPath: {{ $passwordMountPath | quote }}
               readOnly: true
             {{- end }}
       volumes:
@@ -58,13 +66,20 @@ spec:
             claimName: {{ .Release.Name }}-database
       {{- else }}
           emptyDir: {}
-      {{- end -}}
-      {{- if .Values.database.password_secret.enabled }}
+      {{- end }}
+      {{- if eq $passwordSource "secret" }}
         - name: database-password
           secret:
-            secretName: {{ required "must provide .Values.database.password_secret.secret_name when database.password_secret.enabled is true" .Values.database.password_secret.secret_name | quote }}
+            secretName: {{ required "database.password.secret.name is required when database.password.source is secret" .Values.database.password.secret.name | quote }}
             items:
-              - key: {{ required "must provide .Values.database.password_secret.secret_key when database.password_secret.enabled is true" .Values.database.password_secret.secret_key | quote }}
+              - key: {{ required "database.password.secret.key is required when database.password.source is secret" .Values.database.password.secret.key | quote }}
                 path: password
+      {{- else if eq $passwordSource "csi" }}
+        - name: database-password
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ required "database.password.csi.secret_provider_class is required when database.password.source is csi" .Values.database.password.csi.secret_provider_class | quote }}
       {{- end }}
   {{- end }}
