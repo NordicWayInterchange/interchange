@@ -16,13 +16,10 @@ self:                                                               # ------ Gen
 database:
   enabled: true # NOTE: Setting this to false removes all database resources including persistence, which might lead to data loss!
   password:
-    # Password source for the PostgreSQL container: environment, secret, or csi.
+    # Password source for the PostgreSQL container: environment or csi.
     source: environment
-    # Used when source is secret or csi. The password is mounted as "password".
+    # Used when source is csi. The password is mounted as "password".
     mount_path: /run/secrets/database
-    secret:
-      name: ""
-      key: ""
     csi:
       secret_provider_class: ""
 

@@ -58,25 +58,12 @@ trusts the certificate still used by the other side.
 
 ## Database password
 
-The PostgreSQL container can receive its password from an environment value,
-a Kubernetes Secret, or a Secrets Store CSI volume. Environment delivery is
-the default and continues to use the top-level `postgres_password` value:
+The PostgreSQL container can receive its password from an environment value or
+a Secrets Store CSI volume. Environment delivery is the default and continues
+to use the top-level `postgres_password` value:
 
 ```yaml
 postgres_password: federation
-```
-
-To mount the password from a Kubernetes Secret, configure the Secret name and
-the key containing the password:
-
-```yaml
-database:
-  password:
-    source: secret
-    mount_path: /run/secrets/database
-    secret:
-      name: interchange-database-password
-      key: postgres-password
 ```
 
 To mount the password through the Secrets Store CSI driver, reference an
@@ -93,8 +80,7 @@ database:
 
 The CSI driver and its provider must already be installed. The referenced
 `SecretProviderClass` must expose the password as a file named `password`.
-Both mounted modes set PostgreSQL's `POSTGRES_PASSWORD_FILE` to
-`<mount_path>/password`.
+CSI mode sets PostgreSQL's `POSTGRES_PASSWORD_FILE` to `<mount_path>/password`.
 
 This setting applies only to the PostgreSQL container. The Interchange
 applications continue to receive their database password from the top-level
