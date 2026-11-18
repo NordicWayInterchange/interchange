@@ -75,31 +75,48 @@ const CommonDrawer = ({item, open, handleMoreClose, handleDeletedItem, label }: 
               <StyledCard variant={"outlined"}>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Box>
-                    <ListItemText primary={"ID"} secondary={item.id} />
                     <ListItemText
-                      primary={"Capability matches"}
-                      secondary={item.capabilityMatches}
+                        primary={"Capability matches"}
+                        secondary={item.capabilityMatches}
                     />
                   </Box>
                   <Box>
                     <ListItemText
-                      primary={
-                        label == "Delivery"
-                          ? "Last updated"
-                          : "Last status change"
-                      }
-                      secondary={
-                        label == "Delivery"
-                          ? timeConverter(
-                              (item as ExtendedDelivery).lastUpdatedTimestamp,
-                            )
-                          : timeConverter(
-                              (item as ExtendedSubscription).lastStatusChange,
-                            )
-                      }
+                        primary={
+                          label == "Delivery"
+                              ? "Last updated"
+                              : "Last status change"
+                        }
+                        secondary={
+                          label == "Delivery"
+                              ? timeConverter(
+                                  (item as ExtendedDelivery).lastUpdatedTimestamp,
+                              )
+                              : timeConverter(
+                                  (item as ExtendedSubscription).lastStatusChange,
+                              )
+                        }
                     />
                   </Box>
                 </Box>
+
+                <FormControl fullWidth>
+                <TextField
+                    margin="normal"
+                    value={item.id || ""}
+                    label={label + " ID"}
+                    rows={4}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                            <InputAdornment position="end">
+                              <ContentCopy value={item.id} />
+                            </InputAdornment>
+                        ),
+                      },
+                    }}
+                />
+                </FormControl>
               </StyledCard>
             </ListItem>
             {item.endpoints.length > 0 && (
