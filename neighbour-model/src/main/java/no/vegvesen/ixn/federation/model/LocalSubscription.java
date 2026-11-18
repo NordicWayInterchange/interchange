@@ -23,7 +23,6 @@ public class LocalSubscription {
     @Enumerated(EnumType.STRING)
     private LocalSubscriptionStatus status = LocalSubscriptionStatus.REQUESTED;
 
-    @JoinColumn(name = "sel_id", foreignKey = @ForeignKey(name = "fk_locsub_sel"))
     @Column(columnDefinition="TEXT", nullable = false)
     private String selector;
 
