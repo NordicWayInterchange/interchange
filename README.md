@@ -81,6 +81,25 @@ Unit tests are run in the maven 'test' stage, and integration tests are run in t
 The profile "IT" separates the unit tests from the integration tests by ensuring the integration tests are run in the 'verify' stage. 
 The profile "IT" is defined in the top pom and is always activated.
 
+#### Running tests that use Mockito in IntelliJ
+Modules that depend on `spring-boot-starter-test` configure `maven-surefire-plugin`/`maven-failsafe-plugin` to load
+Mockito's `byte-buddy-agent` as a proper `-javaagent`, instead of letting it self-attach at runtime. This avoids the
+JVM warning:
+```
+WARNING: Mockito is currently self-attaching to enable the inline-mock-maker...
+WARNING: A Java agent has been loaded dynamically...
+```
+This fix only takes effect when tests are actually run **through Maven**. If you run a test class/method directly
+with IntelliJ's built-in JUnit runner (the green gutter icon), IntelliJ builds its own classpath and ignores the
+`argLine` configured in the poms, so the warning will still appear.
+
+To make IntelliJ delegate test execution to Maven (and pick up this configuration), enable:
+
+**Settings/Preferences → Build, Execution, Deployment → Build Tools → Maven → Runner → "Delegate IDE build/run actions to Maven"**
+
+This is a per-user IDE setting (stored in the gitignored `.idea/workspace.xml`) and cannot be shared via git, so each
+team member needs to enable it once locally.
+
 ### Run using Docker Compose
 
 We have created a few Docker Compose configs in the `demo` folder, with associated startup scripts.
