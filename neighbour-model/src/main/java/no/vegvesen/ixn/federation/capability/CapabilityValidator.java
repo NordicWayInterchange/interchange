@@ -17,6 +17,8 @@ public class CapabilityValidator {
 
     private static Pattern validCharacters = Pattern.compile("[A-Z0-9a-z._:-]*");
 
+    private static Pattern validCharactersWithSpace = Pattern.compile("[A-Z0-9a-z._: -]*");
+
     private static final Set<String> ISO_COUNTRIES = Set.of(Locale.getISOCountries());
 
     private static Pattern publisherIdRegex = Pattern.compile("[A-Z]{2}[0-9]{5}");
@@ -68,7 +70,8 @@ public class CapabilityValidator {
         Set<String> errorList = new HashSet<>();
         for (String property : mandatoryProperties) {
             String value = (String) applicationApi.getCommonProperties(applicationApi.getMessageType()).get(property);
-            Matcher validCharMatcher = validCharacters.matcher(value);
+            Pattern charactersPattern = property.equals("publisherName") ? validCharactersWithSpace : validCharacters;
+            Matcher validCharMatcher = charactersPattern.matcher(value);
 
             if (!validCharMatcher.matches() && !property.equals("quadTree") && !property.equals("causeCode")) {
                 errorList.add(String.format("%s contains illegal characters", property));
