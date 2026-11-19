@@ -1,6 +1,7 @@
 package no.vegvesen.ixn.napcore.model;
 
 import no.vegvesen.ixn.shared.capability.CapabilityApi;
+import no.vegvesen.ixn.shared.capability.DatexApplicationApi;
 import no.vegvesen.ixn.shared.capability.IvimApplicationApi;
 import no.vegvesen.ixn.shared.capability.MetadataApi;
 import org.junit.jupiter.api.Test;
@@ -56,8 +57,8 @@ public class CapabilityValidatorTest {
         CapabilityErrorCode secondExpectedEnum = CapabilityErrorCode.INVALID_PUBLICATION_ID_PREFIX;
         String secondMessage = validator.getLast().getMessage();
 
-        assertEquals(firstCode, firstExpectedEnum);
-        assertEquals(secondCode, secondExpectedEnum);
+        assertEquals(firstExpectedEnum, firstCode);
+        assertEquals(secondExpectedEnum, secondCode);
         assertEquals("'no' is not a valid country code", firstMessage);
         assertEquals("publicationId must start with '<publisherId>:'", secondMessage);
     }
@@ -75,5 +76,28 @@ public class CapabilityValidatorTest {
                 new MetadataApi()
         );
         assertThat(CapabilityValidator.napcoreCapabilityHasValidProperties(capability1)).isEmpty();
+    }
+
+    @Test
+    public void testDatexCapabilityWithSpaceInPublicationIdIsNotValid(){
+        CapabilityApi capability1 = new CapabilityApi(
+                new DatexApplicationApi(
+                        "NO00000",
+                        "NO00000: pub-1",
+                        "NO",
+                        "DATEX2:3.2",
+                        List.of("12001"),
+                        "SituationPublication",
+                        "publisher Name"
+                ),
+                new MetadataApi()
+        );
+        List<CapabilityErrorMessage> validator = CapabilityValidator.napcoreCapabilityHasValidProperties(capability1);
+        assertEquals(1, validator.size());
+        CapabilityErrorCode code = validator.getFirst().getCode();
+        CapabilityErrorCode expectedEnum = CapabilityErrorCode.ILLEGAL_CHARACTERS;
+        String message = validator.getFirst().getMessage();
+        assertEquals(expectedEnum, code);
+        assertEquals("publicationId contains illegal characters", message);
     }
 }
