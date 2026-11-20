@@ -1,4 +1,16 @@
 #!/bin/bash -eu
+set -euo pipefail
+
+
+VOLUME_NAME=single-node-systemtest-keys-volume
+
+cleanup() {
+  echo "Cleaning up docker environment..."
+  docker-compose -f single-node-systemtest.yml down --volumes
+  docker volume rm $VOLUME_NAME
+}
+
+trap cleanup EXIT INT TERM
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export BRANCH_TAG="${BRANCH//[^a-zA-Z_0-9]/_}"
@@ -8,7 +20,6 @@ docker build ../service-provider-client -t onboard_rest_client --build-arg JAR_V
 docker build ../napcore-rest-client -t napcore_rest_client --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../admin-frontend -t admin_frontend --build-arg JAR_VERSION=$JAR_VERSION
 docker build ../keys-generator -t keys-generator --build-arg JAR_VERSION=$JAR_VERSION
-VOLUME_NAME=single-node-systemtest-keys-volume
-VOL_EXISTS=$( docker volume ls --format '{{.Name}}' -f name=${VOLUME_NAME})
+VOL_EXISTS=$( docker volume ls --format '{{.Name}}' | grep -x "${VOLUME_NAME}" || true)
 [ -n "$VOL_EXISTS" ] || ./single-node-systemtest-keys.sh
 docker compose -f single-node-systemtest.yml build --build-arg JAR_VERSION=$JAR_VERSION && docker compose -f single-node-systemtest.yml up
