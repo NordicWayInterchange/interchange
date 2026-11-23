@@ -17,6 +17,10 @@
       "name" : "king_olav.a.interchangedomain.com",
       "country" : "NO",
       "email" : "kongen@slottet.no"
+    }, {
+      "name" : "a.interchangedomain.com.nap.king_olav@slottet.no",
+      "country" : "NO",
+      "email" : "kongen@slottet.no"
     }]
   }, {
   "name" : "ca.a.internal.interchangedomain.com",
