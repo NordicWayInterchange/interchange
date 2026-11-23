@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-@PropertySource("classpath:swagger-version.properties")
+@PropertySource("classpath:version.properties")
 @OpenAPIDefinition(info = @Info
         (title = "Onboard API",
                 version = "${swagger.version}",

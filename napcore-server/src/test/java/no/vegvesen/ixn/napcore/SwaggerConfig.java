@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:swagger-version.properties")
+@PropertySource("classpath:version.properties")
 @OpenAPIDefinition(info = @Info
         (title = "Napcore API",
                 version = "${swagger.version}",

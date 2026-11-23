@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-@PropertySource("classpath:swagger-version.properties")
+@PropertySource("classpath:version.properties")
 @OpenAPIDefinition(info = @Info(title = "Neighbour API",
         version = "${swagger.version}",
         license = @License(url = "https://github.com/NordicWayInterchange/interchange/blob/federation-master/license.md", name = "MIT License"),
