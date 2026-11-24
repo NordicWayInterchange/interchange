@@ -148,56 +148,40 @@ public class ServiceProviderRouter {
         for (PrivateChannel privateChannel : privateChannels) {
             String queueName = privateChannel.getEndpoint().getQueueName();
 
-            if (privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED)) {
+            if (privateChannel.getStatus().equals(PrivateChannelStatus.REQUESTED) || privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
                 Queue queue = delta.findByQueueName(queueName);
+                VirtualHostAccessController provider = qpidClient.getQpidAcl();
                 if (queue == null) {
                     queue = qpidClient.createNonDestructiveQueue(queueName);
                     delta.addQueue(queue);
+                    logger.info("Creating queue {}", queueName);
+                    provider.addExchangeWriteAccess(name, queueName);
+                    provider.addQueueReadAccess(name, queueName);
                 }
-                logger.info("Creating queue {}", queueName);
-                VirtualHostAccessController provider = qpidClient.getQpidAcl();
-                provider.addExchangeWriteAccess(name, queueName);
-                provider.addQueueReadAccess(name, queueName);
-                for (Peer peer : privateChannel.getPeers()) {
+
+                Set<Peer> activePeers = privateChannel.getPeers().stream()
+                        .filter(peer -> !peer.getStatus().equals(PeerStatus.TEAR_DOWN))
+                        .collect(Collectors.toSet());
+                for (Peer peer : activePeers) {
                     String peerName = peer.getName();
                     PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
                     if (peerMember == null) {
                         peerMember = qpidClient.addPrivateChannelMemberToGroup(peerName);
                         delta.addPrivateChannelUser(peerMember);
-                        logger.debug("Adding member {} to private channel group", peer.getName());
+                        logger.debug("Adding member {} to private channel group", peerName);
+                    }
+                    if (!provider.containsRule(VirtualHostAccessController.createQueueReadAccessRule(peerName, queueName))) {
+                        provider.addQueueReadAccess(peerName, queueName);
                     }
                     peer.setStatus(PeerStatus.CREATED);
-                    provider.addQueueReadAccess(peer.getName(), queueName);
                 }
                 qpidClient.postQpidAcl(provider);
                 privateChannel.setStatus(PrivateChannelStatus.CREATED);
-                logger.info("Creating private channel {} for client {}", queueName, name);
                 privateChannel.setLastUpdated(LocalDateTime.now());
                 privateChannelRepository.save(privateChannel);
-            }
-            if (privateChannel.getStatus().equals(PrivateChannelStatus.CREATED)) {
-                Set<Peer> requestedPeers = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.REQUESTED)).collect(Collectors.toSet());
-                if (!requestedPeers.isEmpty()) {
-                    VirtualHostAccessController provider = qpidClient.getQpidAcl();
-                    for (Peer peer : requestedPeers) {
-                        String peerName = peer.getName();
-                        PrivateChannelMember peerMember = delta.findByPrivateChannelUserName(peerName);
-                        if (peerMember == null) {
-                            peerMember = qpidClient.addPrivateChannelMemberToGroup(peerName);
-                            delta.addPrivateChannelUser(peerMember);
-                            logger.debug("Adding member {} to private channel group", peer.getName());
-                        }
-                        peer.setStatus(PeerStatus.CREATED);
-                        provider.addQueueReadAccess(peer.getName(), queueName);
-                        privateChannel.setLastUpdated(LocalDateTime.now());
-                        privateChannelRepository.save(privateChannel);
-                    }
-                    qpidClient.postQpidAcl(provider);
-                }
 
                 Set<Peer> peersToRemove = privateChannel.getPeers().stream().filter(peer -> peer.getStatus().equals(PeerStatus.TEAR_DOWN)).collect(Collectors.toSet());
                 if (!peersToRemove.isEmpty()) {
-                    VirtualHostAccessController provider = qpidClient.getQpidAcl();
                     for (Peer peer : peersToRemove) {
                         String peerName = peer.getName();
                         long channelsWithPeerAsPeer = privateChannelRepository.findAllByPeerNameAndStatus(peerName, PrivateChannelStatus.CREATED).size();
