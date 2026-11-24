@@ -19,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -27,6 +29,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,6 +57,27 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
 
     @Autowired
     WebApplicationContext context;
+
+    @Autowired
+    RequestMappingHandlerMapping handlerMapping;
+
+    @Test
+    public void exposesExpectedRequestMappings() {
+        Set<Mapping> mappings = handlerMapping.getHandlerMethods().entrySet().stream()
+                .filter(entry -> entry.getValue().getBeanType().equals(NeighbourRestController.class))
+                .flatMap(entry -> entry.getKey().getPatternValues().stream()
+                        .flatMap(path -> entry.getKey().getMethodsCondition().getMethods().stream()
+                                .map(method -> new Mapping(path, method))))
+                .collect(Collectors.toSet());
+
+        assertThat(mappings).containsExactlyInAnyOrder(
+                new Mapping("/subscriptions", RequestMethod.POST),
+                new Mapping("/{ixnName}/subscriptions", RequestMethod.GET),
+                new Mapping("/{ixnName}/subscriptions/{subscriptionId}", RequestMethod.GET),
+                new Mapping("/capabilities", RequestMethod.POST),
+                new Mapping("/{ixnName}/subscriptions/{subscriptionId}", RequestMethod.DELETE)
+        );
+    }
 
     @Test
     public void requestSubscriptionsDoesNotIncludeTimeStamp(){
@@ -110,6 +134,9 @@ public class NeighbourRestControllerIT extends PostgresContainerBase {
                     }
 
                 }));
+    }
+
+    private record Mapping(String path, RequestMethod method) {
     }
 
 }
