@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ServiceProviderService.class, NeighbourModelRepositoryConfig.class})
+@Transactional
 public class ServiceProviderServiceIT extends PostgresContainerBase {
 
     @Autowired
