@@ -431,6 +431,91 @@ public class ServiceProviderRouterIT extends QpidDockerBaseIT {
 	}
 
 	@Test
+	public void syncPrivateChannelsWhenPrivateChannelAndPeerAreCreatedInDbButNotInQpid() {
+		String spName = randomServiceProviderName();
+		String queueName = randomQueueName();
+		String peerName = randomPeerName();
+
+		ServiceProvider serviceProvider = new ServiceProvider(spName);
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(HOST_NAME, qpidContainer.getAmqpsPort(), queueName);
+		Peer peer = new Peer(UUID.randomUUID().toString(), peerName, PeerStatus.CREATED);
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer), PrivateChannelStatus.CREATED, "my-channel", endpoint, spName);
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(peer.getStatus()).isEqualTo(PeerStatus.CREATED);
+		assertThat(client.queueExists(queueName)).isTrue();
+		assertThat(client.getPrivateChannelGroupMember(spName)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(peerName)).isNotNull();
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createExchangeWriteAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(peerName, queueName))).isTrue();
+	}
+
+	@Test
+	public void syncPrivateChannelsWhenPrivateChannelIsCreatedAndInQpidButCreatedPeerIsNotInQpid() {
+		String spName = randomServiceProviderName();
+		String queueName = randomQueueName();
+		String peerName = randomPeerName();
+
+		ServiceProvider serviceProvider = new ServiceProvider(spName);
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(HOST_NAME, qpidContainer.getAmqpsPort(), queueName);
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(), PrivateChannelStatus.REQUESTED, "my-channel", endpoint, spName);
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(client.queueExists(queueName)).isTrue();
+
+		Peer peer = new Peer(UUID.randomUUID().toString(), peerName, PeerStatus.CREATED);
+		privateChannel.addPeer(peer);
+		privateChannelRepository.save(privateChannel);
+
+		assertThat(client.getPrivateChannelGroupMember(peerName)).isNull();
+		assertThat(client.getQpidAcl().containsRule(VirtualHostAccessController.createQueueReadAccessRule(peerName, queueName))).isFalse();
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(peer.getStatus()).isEqualTo(PeerStatus.CREATED);
+		assertThat(client.queueExists(queueName)).isTrue();
+		assertThat(client.getPrivateChannelGroupMember(spName)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(peerName)).isNotNull();
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createExchangeWriteAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(peerName, queueName))).isTrue();
+	}
+
+	@Test
+	public void syncPrivateChannelsWhenPrivateChannelIsCreatedInDbButNotInQpidAndPeerIsRequested() {
+		String spName = randomServiceProviderName();
+		String queueName = randomQueueName();
+		String peerName = randomPeerName();
+
+		ServiceProvider serviceProvider = new ServiceProvider(spName);
+		PrivateChannelEndpoint endpoint = new PrivateChannelEndpoint(HOST_NAME, qpidContainer.getAmqpsPort(), queueName);
+		Peer peer = new Peer(UUID.randomUUID().toString(), peerName, PeerStatus.REQUESTED);
+		PrivateChannel privateChannel = new PrivateChannel(Set.of(peer), PrivateChannelStatus.CREATED, "my-channel", endpoint, spName);
+		privateChannelRepository.save(privateChannel);
+
+		router.syncPrivateChannels(serviceProvider, client.getQpidDelta());
+
+		assertThat(privateChannel.getStatus()).isEqualTo(PrivateChannelStatus.CREATED);
+		assertThat(peer.getStatus()).isEqualTo(PeerStatus.CREATED);
+		assertThat(client.queueExists(queueName)).isTrue();
+		assertThat(client.getPrivateChannelGroupMember(spName)).isNotNull();
+		assertThat(client.getPrivateChannelGroupMember(peerName)).isNotNull();
+		VirtualHostAccessController acl = client.getQpidAcl();
+		assertThat(acl.containsRule(VirtualHostAccessController.createExchangeWriteAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(spName, queueName))).isTrue();
+		assertThat(acl.containsRule(VirtualHostAccessController.createQueueReadAccessRule(peerName, queueName))).isTrue();
+	}
+
+	@Test
 	public void subscriberToreDownWillBeRemovedFromSubscribeFederatedInterchangesGroup() {
 		String serviceProviderName = randomServiceProviderName();
 
