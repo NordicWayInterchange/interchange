@@ -30,7 +30,13 @@ spec:
         app: {{ .Chart.Name }}
         component: database
         release: {{ .Release.Name }}
+        {{ with .Values.database.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{ end }}
     spec:
+      {{ if .Values.database.serviceAccount.name }}
+      serviceAccountName: {{ .Values.database.serviceAccount.name | quote }}
+      {{ end }}
       containers:
         - name: postgres
           image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag}}"

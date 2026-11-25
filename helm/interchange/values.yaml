@@ -15,6 +15,14 @@ self:                                                               # ------ Gen
 
 database:
   enabled: true # NOTE: Setting this to false removes all database resources including persistence, which might lead to data loss!
+  serviceAccount:
+    # Create a Kubernetes ServiceAccount for the database pod.
+    create: false
+    # Required when create is true. When create is false, a non-empty name references an existing account.
+    name: ""
+    annotations: {}
+  # Additional labels for the database pod, such as the Azure Workload Identity opt-in label.
+  podLabels: {}
   password:
     # Password source for the PostgreSQL container: environment or csi.
     source: environment

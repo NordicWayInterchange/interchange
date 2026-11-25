@@ -86,6 +86,49 @@ This setting applies only to the PostgreSQL container. The Interchange
 applications continue to receive their database password from the top-level
 `postgres_password` value.
 
+### Azure Workload Identity for the database
+
+The database pod can use a dedicated Kubernetes ServiceAccount for access to
+Azure Key Vault through the Secrets Store CSI driver. This is opt-in; by
+default, the chart does not create or assign a ServiceAccount, preserving the
+existing behavior on Google Cloud and other Kubernetes installations.
+
+```yaml
+database:
+  password:
+    source: csi
+    mount_path: /run/secrets/database
+    csi:
+      secret_provider_class: interchange-database-password
+
+  serviceAccount:
+    create: true
+    name: interchange-database
+    annotations:
+      azure.workload.identity/client-id: "<managed-identity-client-id>"
+
+  podLabels:
+    azure.workload.identity/use: "true"
+```
+
+When `database.serviceAccount.create` is true, an explicit
+`database.serviceAccount.name` is required because the Azure federated identity
+credential is bound to that name. Set `create` to false and provide `name` to
+use an existing ServiceAccount. Leave both at their defaults to use the
+namespace's default ServiceAccount.
+
+The AKS cluster must have its OIDC issuer and Workload Identity enabled. The
+federated identity credential subject must match the release namespace and
+configured ServiceAccount name:
+
+```text
+system:serviceaccount:<namespace>:interchange-database
+```
+
+The CSI driver, Azure provider, and referenced `SecretProviderClass` must be
+installed separately. The managed identity also needs permission to read the
+configured Key Vault secret.
+
 
 ## Interchange Portal
 The Interchange includes a simple portal implementation that uses both Auth0 and keycloak for authentication and letsencrypt for 
