@@ -40,9 +40,9 @@ spec:
         app: {{ .Chart.Name }}
         component: qpid
         release: {{ .Release.Name }}
-        {{ with .Values.qpid.podLabels }}
+        {{- with .Values.qpid.podLabels }}
         {{- toYaml . | nindent 8 }}
-        {{ end }}
+        {{- end }}
     spec:
       {{- if .Values.qpid.serviceAccount.name }}
       serviceAccountName: {{ .Values.qpid.serviceAccount.name | quote }}
