@@ -10,7 +10,7 @@ self:                                                               # ------ Gen
   admin_name: "admin.itsinterchange.eu"
 
   trust_store: truststore.jks
-  key_store: keystore.p12
+  key_store: key_store.p12
   internal_tls_secret: true #if true, use internal "dev-no" secret. If false, use custom secret name.
 
 database:
