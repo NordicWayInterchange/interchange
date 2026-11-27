@@ -9,8 +9,10 @@ metadata:
     component: qpid
     release: {{ .Release.Name }}
 data:
+  {{- if ne (.Values.qpid.credentials.source | default "values") "secret" }}
   passwd: |
     {{ .Values.qpid.admin_user }}:{{ .Values.admin_password }}
+  {{- end }}
   groups: |
     service-providers.users=
     federated-interchanges.users=
@@ -35,7 +37,7 @@ data:
             {
               "name": "{{ .Values.qpid.admin_user }}",
               "type": "managed",
-              "password": "{{ .Values.admin_password | trim }}"
+              "password": "{{ if eq (.Values.qpid.credentials.source | default "values") "secret" }}${ADMIN_PASSWORD}{{ else }}{{ .Values.admin_password | trim }}{{ end }}"
             }]
         }
       ],

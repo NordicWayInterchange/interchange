@@ -1,0 +1,34 @@
+# Apply this file after example_values.yml. The referenced
+# SecretProviderClass and synchronized Kubernetes Secret resources must exist
+# in the release namespace.
+qpid:
+  serviceAccount:
+    create: true
+    name: interchange-qpid
+    annotations:
+      azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000000"
+
+  podLabels:
+    azure.workload.identity/use: "true"
+
+  tls:
+    source: csi
+    csi:
+      secret_provider_class: interchange-qpid-node-tls
+
+  credentials:
+    source: secret
+    secret_name: interchange-qpid-credentials
+    admin_password_key: admin_password
+    key_store_password_key: key_store_password
+    trust_store_password_key: trust_store_password
+
+  internal_secrets_name: interchange-qpid-internal-credentials
+  internal_secret:
+    externally_managed: true
+    source: csi
+    csi:
+      secret_provider_class: interchange-qpid-internal-tls
+    trust_store_name: internal_truststore.jks
+    key_store_password_key: key_store_password
+    trust_store_password_key: trust_store_password

@@ -56,6 +56,73 @@ With either switch disabled, that component keeps its existing TLS setup. This
 makes it possible to migrate one side at a time, provided the enabled side
 trusts the certificate still used by the other side.
 
+### Qpid secrets through the Secrets Store CSI driver
+
+Qpid can mount both its node TLS files and internal TLS files from existing
+`SecretProviderClass` resources. It can also read its administrator and TLS
+passwords from Kubernetes Secrets synchronized by the CSI driver. All settings
+are opt-in: the defaults continue to use Kubernetes Secret volumes and the
+top-level Helm password values.
+
+```yaml
+qpid:
+  serviceAccount:
+    create: true
+    name: interchange-qpid
+    annotations:
+      azure.workload.identity/client-id: "<managed-identity-client-id>"
+
+  podLabels:
+    azure.workload.identity/use: "true"
+
+  tls:
+    source: csi
+    csi:
+      secret_provider_class: interchange-qpid-node-tls
+
+  credentials:
+    source: secret
+    secret_name: interchange-qpid-credentials
+
+  internal_secrets_name: interchange-qpid-internal-credentials
+  internal_secret:
+    externally_managed: true
+    source: csi
+    csi:
+      secret_provider_class: interchange-qpid-internal-tls
+```
+
+The chart references existing `SecretProviderClass` resources in the release
+namespace; it does not create provider-specific resources. The node TLS class
+must mount files named according to `self.key_store` and `self.trust_store`.
+The internal TLS class must mount files named according to
+`qpid.internal_key_store_name` and `qpid.internal_secret.trust_store_name`.
+
+When `qpid.credentials.source` is `secret`, the Secret configured by
+`qpid.credentials.secret_name` must contain `admin_password`,
+`key_store_password`, and `trust_store_password` by default. The key names can
+be changed under `qpid.credentials`. In this mode the Qpid ConfigMap references
+`ADMIN_PASSWORD` instead of containing the administrator password.
+
+When `qpid.internal_secret.externally_managed` is true, the Secret configured
+by `qpid.internal_secrets_name` must contain the internal keystore and
+truststore password keys. These Secrets can be populated with `secretObjects`
+in either of the mounted `SecretProviderClass` resources. A synchronized Secret
+exists only while at least one pod mounts its associated class.
+
+For Azure Workload Identity, the AKS cluster must have its OIDC issuer and
+Workload Identity enabled. The federated identity credential subject must
+match the release namespace and configured ServiceAccount name:
+
+```text
+system:serviceaccount:<namespace>:interchange-qpid
+```
+
+The CSI driver, Azure provider, managed identity, Key Vault permissions, and
+referenced `SecretProviderClass` resources must be installed separately. See
+`example_with_azure_qpid_csi.yml` for a complete chart override and
+`CHART_TESTS.md` for rendering and cluster test steps.
+
 ## Database password
 
 The PostgreSQL container can receive its password from an environment value or

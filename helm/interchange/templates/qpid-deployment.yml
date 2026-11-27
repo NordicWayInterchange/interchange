@@ -1,4 +1,19 @@
 {{- if .Values.qpid.enabled }}
+{{- $tlsSource := .Values.qpid.tls.source | default "secret" }}
+{{- if not (has $tlsSource (list "secret" "csi")) }}
+{{- fail "qpid.tls.source must be one of: secret, csi" }}
+{{- end }}
+{{- $internalTlsSource := .Values.qpid.internal_secret.source | default "secret" }}
+{{- if not (has $internalTlsSource (list "secret" "csi")) }}
+{{- fail "qpid.internal_secret.source must be one of: secret, csi" }}
+{{- end }}
+{{- if and (eq $internalTlsSource "csi") (not .Values.qpid.internal_secret.externally_managed) }}
+{{- fail "qpid.internal_secret.externally_managed must be true when qpid.internal_secret.source is csi" }}
+{{- end }}
+{{- $credentialsSource := .Values.qpid.credentials.source | default "values" }}
+{{- if not (has $credentialsSource (list "values" "secret")) }}
+{{- fail "qpid.credentials.source must be one of: values, secret" }}
+{{- end }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -25,7 +40,13 @@ spec:
         app: {{ .Chart.Name }}
         component: qpid
         release: {{ .Release.Name }}
+        {{ with .Values.qpid.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{ end }}
     spec:
+      {{- if .Values.qpid.serviceAccount.name }}
+      serviceAccountName: {{ .Values.qpid.serviceAccount.name | quote }}
+      {{- end }}
       securityContext:
         runAsUser: 1001
         runAsGroup: 0
@@ -46,12 +67,33 @@ spec:
           env:
             - name: KEY_STORE
               value: {{ .Values.self.secret_mount_path }}{{ .Values.self.key_store }}
+            {{- if eq $credentialsSource "secret" }}
+            - name: KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "qpid.credentials.secret_name is required when qpid.credentials.source is secret" .Values.qpid.credentials.secret_name | quote }}
+                  key: {{ .Values.qpid.credentials.key_store_password_key | quote }}
+            {{- else }}
             - name: KEY_STORE_PASSWORD
               value: {{ .Values.key_store_password | quote }}
+            {{- end }}
             - name: TRUST_STORE
               value: {{ .Values.self.secret_mount_path }}{{ .Values.self.trust_store }}
+            {{- if eq $credentialsSource "secret" }}
+            - name: TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "qpid.credentials.secret_name is required when qpid.credentials.source is secret" .Values.qpid.credentials.secret_name | quote }}
+                  key: {{ .Values.qpid.credentials.trust_store_password_key | quote }}
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "qpid.credentials.secret_name is required when qpid.credentials.source is secret" .Values.qpid.credentials.secret_name | quote }}
+                  key: {{ .Values.qpid.credentials.admin_password_key | quote }}
+            {{- else }}
             - name: TRUST_STORE_PASSWORD
               value: {{ .Values.trust_store_password | quote }}
+            {{- end }}
             - name: GROUPS_FILE
               value: /qpid-broker-j/work/groups
             - name: INTERNAL_KEY_STORE
@@ -99,11 +141,27 @@ spec:
           configMap:
             name: {{ .Release.Name }}-qpid
         - name: secure
+          {{- if eq $tlsSource "csi" }}
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ required "qpid.tls.csi.secret_provider_class is required when qpid.tls.source is csi" .Values.qpid.tls.csi.secret_provider_class | quote }}
+          {{- else }}
           secret:
             secretName: {{ required "must provide .Values.self.tls_secret_name" .Values.self.tls_secret_name }}
+          {{- end }}
         - name: internal-keys
+          {{- if eq $internalTlsSource "csi" }}
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ required "qpid.internal_secret.csi.secret_provider_class is required when qpid.internal_secret.source is csi" .Values.qpid.internal_secret.csi.secret_provider_class | quote }}
+          {{- else }}
           secret:
             secretName: {{ required "must provide .Values.qpid.internal_secrets_name" .Values.qpid.internal_secrets_name }}
+          {{- end }}
         - name: storage
       {{- if .Values.qpid.persistence.enabled }}
           persistentVolumeClaim:
